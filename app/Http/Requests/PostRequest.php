@@ -31,6 +31,7 @@ class PostRequest extends FormRequest
             'published' => ['boolean'],
             'published_at' => ['nullable', 'date'],
             'slug' => ['nullable', 'string', 'max:255', 'unique:posts,slug,' . $this->post],
+            'tags' => ['array', 'nullable'],
         ];
     }
 

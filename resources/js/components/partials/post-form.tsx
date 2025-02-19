@@ -34,7 +34,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Loader2, ImageIcon } from "lucide-react";
+import { CalendarIcon, Loader2, ImageIcon, Car, X } from "lucide-react";
 import { Category } from "@/types/category";
 import { Post } from "@/types/post";
 import { toast } from "sonner";
@@ -50,7 +50,7 @@ interface PostFormProps {
 
 export function PostForm({ post, categories }: PostFormProps) {
     console.log(post?.featured_image);
-
+    const [inputValue, setInputValue] = React.useState<string>('');
     const form = useForm<any>({
         title: post?.title ?? '',
         excerpt: post?.excerpt ?? '',
@@ -58,7 +58,8 @@ export function PostForm({ post, categories }: PostFormProps) {
         featured_image: null as File | null,
         category_ids: post?.categories ?? [],
         published: post?.published ?? false,
-        published_at: post?.published_at ? new Date(post?.published_at) : null
+        published_at: post?.published_at ? new Date(post?.published_at) : null,
+        tags: post?.tags ?? [] as string[],
     });
 
     const [previewImage, setPreviewImage] = React.useState<string>(
@@ -81,7 +82,20 @@ export function PostForm({ post, categories }: PostFormProps) {
             });
         }
     };
-
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (inputValue.trim()) {
+                const newTags = [...form.data.tags, inputValue.trim()];
+                form.setData('tags', newTags);
+                setInputValue('');
+            }
+        }
+    };
+    const removeTag = (tagToRemove: string) => {
+        const newTags = form.data.tags.filter((tag: string) => tag !== tagToRemove);
+        form.setData('tags', newTags);
+    };
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid lg:grid-cols-3 gap-6">
@@ -253,7 +267,41 @@ export function PostForm({ post, categories }: PostFormProps) {
                             )}
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Tags <span className="text-xs text-muted-foreground">(Appuyez sur Entrée pour ajouter un tag...)</span></CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
 
+
+                            <div className="border rounded-lg p-2 flex flex-wrap gap-2">
+                                {form.data.tags.map((tag: string, index: number) => (
+                                    <span
+                                        key={index}
+                                        className="bg-primary/10 text-primary px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                                    >
+                                        {tag}
+                                        <button
+                                            onClick={() => removeTag(tag)}
+                                            type="button"
+                                            className="hover:bg-primary/20 rounded-full"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </span>
+                                ))}
+                                <Input
+                                    type="text"
+                                    value={inputValue}
+                                    onChange={(e) => setInputValue(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    className="border-0 flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
+                                    placeholder="Entrez le nom des différents intervenants   ou invités..."
+                                />
+                            </div>
+
+                        </CardContent>
+                    </Card>
                     <Card>
                         <CardHeader>
                             <CardTitle>Image à la une</CardTitle>

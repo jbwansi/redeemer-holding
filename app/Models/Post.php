@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Log;
@@ -22,16 +23,19 @@ class Post extends Model
         'published_at',
         'user_id',
         'viewed',
+        "tags"
     ];
 
     protected $casts = [
         'published' => 'boolean',
         'published_at' => 'datetime',
+        "tags" => "array"
     ];
 
-    public function user()
+
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function categories(): BelongsToMany

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class WebController extends Controller
@@ -20,6 +21,8 @@ class WebController extends Controller
 
     public function blogs()
     {
+        $blogs = Post::with(['categories', "user"])->latest()->get();
+        // dd($blogs);
         return inertia('frontend/blogs/index');
     }
 

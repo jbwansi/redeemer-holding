@@ -14,6 +14,7 @@ export interface Post {
     created_at: string;
     updated_at: string;
     categories: Category[];
+    tags: string[] | null;
 }
 
 // Pour le DataTable
@@ -24,7 +25,7 @@ export type PostColumns = {
     published: boolean;
     published_at: string;
     categories: string;
-}
+};
 
 export interface PostFormData {
     title: string;
