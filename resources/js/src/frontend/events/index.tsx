@@ -58,7 +58,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
     const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
 
     // Données d'exemple (à remplacer par les props)
-    const allCategories = categories || [
+    const allCategories = [
         { id: 1, name: 'Ateliers pratiques', count: 12, icon: '🛠️', color: 'from-red-500 to-orange-500' },
         { id: 2, name: 'Conférences', count: 8, icon: '🎤', color: 'from-purple-500 to-indigo-500' },
         { id: 3, name: 'Retraites', count: 5, icon: '🧘', color: 'from-emerald-500 to-teal-500' },
@@ -111,7 +111,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
         ]
     };
 
-    const allEvents = events || [
+    const allEvents = events?.data || [
         {
             id: 2,
             title: "Atelier : Les bases de la pleine conscience au quotidien",
@@ -291,7 +291,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
             event.tags.some((tag: any) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
 
         // Filtre par catégorie
-        const matchesCategory = !selectedCategory || event.category === selectedCategory;
+        const matchesCategory = !selectedCategory || event.category.name === selectedCategory;
 
         // Filtre par date
         const matchesDate = !selectedDate || new Date(event.date).toDateString() === new Date(selectedDate).toDateString();
@@ -506,8 +506,8 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                         key={category.id}
                                         onClick={() => handleCategorySelect(category.name)}
                                         className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
-                                                ? 'bg-red-600 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            ? 'bg-red-600 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                                             }`}
                                     >
                                         {category.icon} {category.name}
@@ -533,8 +533,8 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                 key={category.id}
                                                 onClick={() => handleCategorySelect(category.name)}
                                                 className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
-                                                        ? 'bg-red-600 text-white'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                    ? 'bg-red-600 text-white'
+                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                                                     }`}
                                             >
                                                 {category.icon} {category.name}
@@ -574,7 +574,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                             {/* Background image */}
                             <div className="absolute inset-0">
                                 <img
-                                    src={defaultFeaturedEvent.coverImage}
+                                    src={defaultFeaturedEvent.featured_image.original}
                                     alt={defaultFeaturedEvent.title}
                                     className="w-full h-full object-cover"
                                 />
@@ -598,12 +598,12 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                     <div className="flex flex-wrap gap-6 mb-8">
                                         <div className="flex items-center text-white/80">
                                             <Calendar className="w-5 h-5 mr-2" />
-                                            <span>{formatEventDate(defaultFeaturedEvent.date)}</span>
+                                            <span>{formatEventDate(defaultFeaturedEvent.start_date)} - {formatEventDate(defaultFeaturedEvent.end_date)}</span>
                                         </div>
 
                                         <div className="flex items-center text-white/80">
                                             <Clock className="w-5 h-5 mr-2" />
-                                            <span>{formatEventTime(defaultFeaturedEvent.date)} - {formatEventTime(defaultFeaturedEvent.endDate)}</span>
+                                            <span>{formatEventTime(defaultFeaturedEvent.start_date)} - {formatEventTime(defaultFeaturedEvent.end_date)}</span>
                                         </div>
 
                                         <div className="flex items-center text-white/80">
@@ -653,7 +653,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                     </div>
                                 </div>
 
-                                <div className="absolute bottom-8 right-8 flex -space-x-3">
+                                {/* <div className="absolute bottom-8 right-8 flex -space-x-3">
                                     {defaultFeaturedEvent.speakers.map((speaker: any, index: any) => (
                                         <div
                                             key={index}
@@ -667,7 +667,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                             />
                                         </div>
                                     ))}
-                                </div>
+                                </div> */}
                             </div>
                         </motion.div>
                     </div>
@@ -740,7 +740,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                 {filteredEvents.map((event: any, index: any) => (
                                     <motion.div
                                         key={event.id}
-                                        className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 hover:shadow-xl transition-shadow duration-300"
+                                        className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 hover:shadow-xl transition-shadow duration-300 max-h-80"
                                         initial={{ opacity: 0, y: 30 }}
                                         animate={isUpcomingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                                         transition={{ duration: 0.7, delay: 0.1 + (index * 0.05) }}
@@ -749,7 +749,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                             {/* Image */}
                                             <div className="md:w-1/3 relative overflow-hidden h-48 md:h-auto">
                                                 <img
-                                                    src={event.coverImage}
+                                                    src={event.featured_image.original}
                                                     alt={event.title}
                                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 />
@@ -758,7 +758,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                 {/* Category badge */}
                                                 <div className="absolute top-4 left-4">
                                                     <span className="px-3 py-1 bg-white/90 dark:bg-gray-900/90 text-red-600 text-sm font-medium rounded-full">
-                                                        {event.category}
+                                                        {event.category.name}
                                                     </span>
                                                 </div>
 
@@ -773,7 +773,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                 <div className="absolute bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-black to-transparent py-4 px-4">
                                                     <div className="flex items-center text-white">
                                                         <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
-                                                        <span className="text-sm">{formatEventDate(event.date, false)}</span>
+                                                        <span className="text-sm">{formatEventDate(event.start_date, false)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -784,12 +784,12 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                     <div className="hidden md:flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
                                                         <div className="flex items-center">
                                                             <Calendar className="w-4 h-4 mr-2" />
-                                                            <span>{formatEventDate(event.date)}</span>
+                                                            <span>{formatEventDate(event.start_date)} - {formatEventDate(event.end_date)} </span>
                                                         </div>
 
                                                         <div className="flex items-center">
                                                             <Clock className="w-4 h-4 mr-2" />
-                                                            <span>{formatEventTime(event.date)} - {formatEventTime(event.endDate)}</span>
+                                                            <span>{formatEventTime(event.start_date)} - {formatEventTime(event.end_date)}</span>
                                                         </div>
                                                     </div>
 
@@ -806,7 +806,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                     <div className="flex flex-wrap gap-4 mb-4">
                                                         <div className="flex items-center text-gray-500 dark:text-gray-400">
                                                             <MapPin className="w-4 h-4 mr-2" />
-                                                            <span>{event.isVirtual ? 'En ligne' : `${event.location.name}, ${event.location.city}`}</span>
+                                                            <span>{event.isVirtual ? 'En ligne' : `${event.location}`}</span>
                                                         </div>
 
                                                         <div className="flex items-center text-gray-500 dark:text-gray-400">
@@ -996,17 +996,17 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                                 onClick={() => day.hasEvents && handleDateSelect(day.date.toISOString())}
                                                                 disabled={!day.hasEvents}
                                                                 className={`relative h-10 w-full flex items-center justify-center rounded-md transition-colors duration-200 ${selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
-                                                                        ? 'bg-red-600 text-white'
-                                                                        : day.hasEvents
-                                                                            ? 'text-gray-900 dark:text-white hover:bg-red-100 dark:hover:bg-red-900/30'
-                                                                            : 'text-gray-500 dark:text-gray-400'
+                                                                    ? 'bg-red-600 text-white'
+                                                                    : day.hasEvents
+                                                                        ? 'text-gray-900 dark:text-white hover:bg-red-100 dark:hover:bg-red-900/30'
+                                                                        : 'text-gray-500 dark:text-gray-400'
                                                                     }`}
                                                             >
                                                                 <span>{day.day}</span>
                                                                 {day.hasEvents && (
                                                                     <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
-                                                                            ? 'bg-white'
-                                                                            : 'bg-red-600'
+                                                                        ? 'bg-white'
+                                                                        : 'bg-red-600'
                                                                         }`}></span>
                                                                 )}
                                                             </button>
@@ -1041,7 +1041,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                                             {event.title}
                                                                         </div>
                                                                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                            {formatEventTime(event.date)} - {event.category}
+                                                                            {formatEventTime(event.date)} - {event.category.name}
                                                                         </div>
                                                                     </div>
                                                                     <ChevronRight className="w-4 h-4 text-gray-400" />
