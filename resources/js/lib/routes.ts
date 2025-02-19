@@ -119,11 +119,11 @@ export const dataRoutes = {
                 },
                 {
                     title: "Ajouter un utilisateur",
-                    url: "",
+                    url: route('users.create'),
                 },
                 {
                     title: "Blocklist",
-                    url: "",
+                    url: route('users.blocked'),
                 },
             ],
         },

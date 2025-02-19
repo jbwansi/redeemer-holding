@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { route } from 'ziggy-js';
 
 interface User {
     id: number;
