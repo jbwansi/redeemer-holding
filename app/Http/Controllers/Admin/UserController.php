@@ -27,8 +27,8 @@ class UserController extends Controller
             ->when($request->input('role') && $request->input('role') !== 'all', function ($query) use ($request) {
                 $query->where('role', $request->input('role'));
             })
-            ->when($request->input('status') && $request->input('status') !== 'all', function ($query) use ($request) {
-                $query->where('status', $request->input('status'));
+            ->when($request->input('is_active') && $request->input('is_active') !== 'all', function ($query) use ($request) {
+                $query->where('is_active', $request->input('is_active'));
             })
             ->when($request->input('verified'), function ($query) use ($request) {
                 if ($request->input('verified') === 'verified') {
@@ -50,8 +50,8 @@ class UserController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'user_type' => $user->user_type,
-                    'status' => $user->status,
+                    'role' => $user->role,
+                    'status' => $user->is_active,
                     'email_verified_at' => $user->email_verified_at,
                     'created_at' => $user->created_at,
                 ];
@@ -74,8 +74,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
-            'user_type' => ['required', Rule::in(['admin', 'editor', 'user'])],
-            'status' => ['required', Rule::in(['active', 'inactive', 'banned'])],
+            'role' => ['required', Rule::in(['admin', 'editor', 'user'])],
+            'is_active' => ['required', Rule::in([1, 0])],
         ]);
 
         $plainPassword = $request->password;
@@ -84,8 +84,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($plainPassword),
-            'user_type' => $request->user_type,
-            'status' => $request->status,
+            'role' => $request->role,
+            'is_active' => $request->status,
         ]);
 
         // Envoyer la notification de bienvenue avec les identifiants
@@ -102,8 +102,8 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'user_type' => $user->user_type,
-                'status' => $user->status,
+                'role' => $user->role,
+                'is_active' => $user->status,
             ],
         ]);
     }
@@ -113,8 +113,8 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'user_type' => ['required', Rule::in(['admin', 'editor', 'user'])],
-            'status' => ['required', Rule::in(['active', 'inactive', 'banned'])],
+            'role' => ['required', Rule::in(['admin', 'editor', 'user'])],
+            'is_active' => ['required'],
             'password' => $request->filled('password') ? ['confirmed', Password::defaults()] : '',
         ]);
 
@@ -122,8 +122,8 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->filled('password') ? Hash::make($request->password) : null,
-            'user_type' => $request->user_type,
-            'status' => $request->status,
+            'role' => $request->role,
+            'is_active' => $request->is_active,
         ]));
 
         return redirect()->route('users.index')
@@ -165,8 +165,8 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'user_type' => $user->user_type,
-                'status' => $user->status,
+                'role' => $user->role,
+                'is_active' => $user->is_active,
                 'email_verified_at' => $user->email_verified_at,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
@@ -209,9 +209,9 @@ class UserController extends Controller
     public function blockedUsers(Request $request)
     {
         $query = User::query()
-            ->whereIn('status', ['banned', 'inactive'])
-            ->when($request->input('status') && $request->input('status') !== 'all', function ($query) use ($request) {
-                $query->where('status', $request->input('status'));
+            ->where('is_active', 0)
+            ->when($request->input('is_active') && $request->input('is_active') !== 'all', function ($query) use ($request) {
+                $query->where('is_active', $request->input('is_active'));
             })
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -227,30 +227,30 @@ class UserController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'user_type' => $user->user_type,
-                    'status' => $user->status,
+                    'role' => $user->role,
+                    'is_active' => $user->is_active,
                     'created_at' => $user->created_at,
                 ];
             });
 
         return inertia('baceknd/users/blocked', [
             'blockedUsers' => $blockedUsers,
-            'filters' => $request->only(['status', 'search']),
+            'filters' => $request->only(['is_active', 'search']),
         ]);
     }
 
     public function reactivateUser(User $user)
     {
         // Vérifier si l'utilisateur est actuellement inactif ou banni
-        if (!in_array($user->status, ['inactive', 'banned'])) {
+        if (!in_array($user->is_active, [0])) {
             return back()->with('error', 'Cet utilisateur est déjà actif.');
         }
 
         // Sauvegarder l'ancien statut pour l'historique
-        $oldStatus = $user->status;
+        $oldStatus = $user->is_active;
 
         // Réactiver l'utilisateur
-        $user->status = 'active';
+        $user->is_active = 1;
         $user->save();
 
         // Enregistrer l'action dans l'historique
@@ -282,8 +282,8 @@ class UserController extends Controller
         //     });
         // }
 
-        // if ($request->user_type && $request->user_type !== 'all') {
-        //     $query->where('user_type', $request->user_type);
+        // if ($request->role && $request->role !== 'all') {
+        //     $query->where('role', $request->role);
         // }
 
         // if ($request->status && $request->status !== 'all') {
@@ -326,7 +326,7 @@ class UserController extends Controller
         //             $user->id,
         //             $user->name,
         //             $user->email,
-        //             $this->translateUserType($user->user_type),
+        //             $this->translateUserType($user->role),
         //             $this->translateStatus($user->status),
         //             $user->email_verified_at ? 'Oui' : 'Non',
         //             $user->created_at->format('d/m/Y H:i'),

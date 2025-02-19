@@ -115,7 +115,7 @@ export const dataRoutes = {
             items: [
                 {
                     title: "Liste des utilisateurs",
-                    url: "",
+                    url: route('users.index'),
                 },
                 {
                     title: "Ajouter un utilisateur",
