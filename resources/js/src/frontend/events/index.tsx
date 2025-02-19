@@ -473,28 +473,17 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                     <div className="flex items-center gap-4">
                                         <div className="bg-black/30 p-3 rounded-lg">
                                             <div className="text-sm text-white/70 mb-1">Prix</div>
-                                            <div className="text-2xl font-bold text-white">{defaultFeaturedEvent.price}€</div>
-                                            {defaultFeaturedEvent.earlyBirdPrice && (
-                                                <div className="text-sm text-white/70">
-                                                    Prix early bird : <span className="text-green-400 font-medium">{defaultFeaturedEvent.earlyBirdPrice}€</span>
-                                                </div>
-                                            )}
+                                            <div className="text-2xl font-bold text-white">{defaultFeaturedEvent.price} CHF</div>
                                         </div>
 
                                         <Link
-                                            href={`/evenements/${defaultFeaturedEvent.id}`}
+                                            href={`/evenements/${defaultFeaturedEvent.slug}`}
                                             className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300 flex items-center"
                                         >
                                             <span>Réserver ma place</span>
                                             <ArrowRight className="ml-2 w-5 h-5" />
                                         </Link>
 
-                                        <Link
-                                            href={`/evenements/${defaultFeaturedEvent.id}`}
-                                            className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-lg font-medium transition-colors duration-300"
-                                        >
-                                            <span>Plus d'informations</span>
-                                        </Link>
                                     </div>
                                 </div>
 
@@ -657,12 +646,12 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                         <div className="flex items-center text-gray-500 dark:text-gray-400">
                                                             <Users className="w-4 h-4 mr-2" />
                                                             <span>
-                                                                {event.availableSeats <= 5 ? (
+                                                                {event.max_participants <= 5 ? (
                                                                     <span className="text-red-600 dark:text-red-400 font-medium">
-                                                                        Plus que {event.availableSeats} place{event.availableSeats > 1 ? 's' : ''}
+                                                                        Plus que {event.max_participants} place{event.max_participants > 1 ? 's' : ''}
                                                                     </span>
                                                                 ) : (
-                                                                    <span>{event.availableSeats} places disponibles</span>
+                                                                    <span>{event.max_participants} places disponibles</span>
                                                                 )}
                                                             </span>
                                                         </div>
@@ -683,7 +672,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                 <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
                                                     <div className="flex items-baseline">
                                                         <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                                                            {event.price === 0 ? 'Gratuit' : `${event.price}€`}
+                                                            {event.price === 0 ? 'Gratuit' : `${event.price} CHF`}
                                                         </span>
                                                         {event.earlyBirdPrice && (
                                                             <span className="ml-2 text-sm text-green-600 dark:text-green-400">
