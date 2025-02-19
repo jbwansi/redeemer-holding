@@ -35,5 +35,8 @@ class WebController extends Controller
     {
         return inertia('frontend/blogs/show');
     }
-
+    public function events()
+    {
+        return inertia('frontend/events/index');
+    }
 }

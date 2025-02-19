@@ -31,7 +31,7 @@ Route::get('formations/{slug}', [WebController::class, 'formation_detail'])->nam
 Route::get('blogs', [WebController::class, 'blogs'])->name('blogs');
 Route::get('blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.details');
 
-Route::get('evenements', [WebController::class, 'evenements'])->name('evenements');
+Route::get('evenements', [WebController::class, 'events'])->name('evenements');
 Route::get('evenements/{slug}', [WebController::class, 'evenement_detail'])->name('evenements.details');
 
 
@@ -145,6 +145,5 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('/pages/trash', 'trash')->name('pages.trash');
             Route::get('/pages/{page}', 'show')->name('pages.show');
         });
-
     });
 });
