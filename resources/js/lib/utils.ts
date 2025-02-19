@@ -48,3 +48,16 @@ export function formatCurrency(
         maximumFractionDigits: 2,
     }).format(amount);
 }
+
+
+export const isDateInPast = (date: Date) => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    return compareDate < now;
+};
+
+export const isEndDateBeforeStartDate = (startDate: Date, endDate: Date) => {
+    return new Date(endDate) <= new Date(startDate);
+};

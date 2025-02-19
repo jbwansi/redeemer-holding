@@ -58,15 +58,15 @@ export const dataRoutes = {
             items: [
                 {
                     title: "Liste des évènements",
-                    url: "",
+                    url: route("events.index"),
                 },
                 {
                     title: "Ajouter un évènement",
-                    url: "",
+                    url: route("events.create"),
                 },
                 {
                     title: "Categories",
-                    url: "",
+                    url: route('event-categories.index'),
                 },
                 {
                     title: "Ventes",

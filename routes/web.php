@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EventCategoryController;
+use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ServiceRequestController;
@@ -102,6 +104,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('config/database/clean', 'database_clean')->name('config.database_clean');
             Route::post('config/database/{table}/truncate', 'truncate')->name('database.truncate');
             Route::post('config/database/{table}/optimize', 'optimize')->name('database.optimize');
+        });
+
+        Route::resource('event-categories', EventCategoryController::class);
+        Route::controller(EventController::class)->group(function () {
+            Route::get('events', 'index')->name('events.index');
+            Route::get('events/create', 'create')->name('events.create');
+            Route::post('events', 'store')->name('events.store');
+            Route::get('events/{event}/edit', 'edit')->name('events.edit');
+            Route::post('events/{event}', 'update')->name('events.update');
+            Route::delete('events/{event}', 'destroy')->name('events.destroy');
+            Route::get('events/trash', 'trash')->name('events.trash');
+            Route::get('events/{event}', 'show')->name('events.show');
         });
 
     });
