@@ -510,15 +510,16 @@ const ServicesPage = ({services}: any) => {
                                 </p>
 
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <Link
-                                        href="/contact"
+                                    <a
+                                        href="https://calendly.com/jbernard-wansi/entretien-de-valeurs?back=1&month=2025-02"
+                                        target='_blank'
                                         className="px-8 py-4 bg-white text-[#DA2E29] rounded-lg font-medium text-lg hover:bg-gray-100 transition-colors duration-300 inline-flex items-center justify-center shadow-xl shadow-rose-600/20"
                                     >
                                         <Calendar className="mr-2 w-5 h-5" />
                                         <span>Réserver ma séance gratuite</span>
-                                    </Link>
+                                    </a>
                                     <Link
-                                        href="/about"
+                                        href={route('about')}
                                         className="px-8 py-4 bg-transparent border-2 border-white/80 text-white rounded-lg font-medium text-lg hover:bg-white/10 transition-colors duration-300 inline-flex items-center justify-center"
                                     >
                                         <span>En savoir plus sur moi</span>

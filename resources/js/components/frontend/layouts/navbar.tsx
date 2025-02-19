@@ -43,11 +43,11 @@ const Navbar = () => {
 
     // Nav items
     const navItems = [
-        { name: 'Accueil', href: '/', delay: 0 },
+        { name: 'Accueil', href: route('home'), delay: 0 },
         { name: 'Services', href: route('services'), delay: 0.1 },
-        { name: 'Formations', href: '/formations', delay: 0.1 },
+        { name: 'Formations', href: route('formations'), delay: 0.1 },
         { name: 'Événements', href: '/evenements', delay: 0.2 },
-        { name: 'Blog', href: '/blog', delay: 0.3 },
+        { name: 'Blog', href: route('blogs'), delay: 0.3 },
         { name: 'À propos', href: route('about'), delay: 0.4 },
         { name: 'Contact', href: route("contact"), delay: 0.5 },
     ];

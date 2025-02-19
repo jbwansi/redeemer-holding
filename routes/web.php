@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ServiceRequestController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
+use App\Http\Controllers\Frontend\WebController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AppController::class, 'index'])->name('home');
@@ -19,6 +20,12 @@ Route::get('/services', [AppController::class, 'services'])->name('services');
 Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
 Route::get('/services-requests/{slug}', [AppController::class, 'service_request'])->name('services.requests');
 Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->name('service-requests.store');
+
+Route::get('formations', [WebController::class, 'formations'])->name('formations');
+Route::get('formations/{slug}', [WebController::class, 'formation_detail'])->name('formations.details');
+
+Route::get('blogs', [WebController::class, 'blogs'])->name('blogs');
+Route::get('blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.details');
 
 Route::get('terms', [AppController::class, 'terms'])->name('terms.show');
 Route::get('policy', [AppController::class, 'policy'])->name('policy.show');
