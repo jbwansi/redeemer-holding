@@ -296,7 +296,7 @@ export function PostForm({ post, categories }: PostFormProps) {
                                     onChange={(e) => setInputValue(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     className="border-0 flex-1 focus-visible:ring-0 focus-visible:ring-offset-0 w-full"
-                                    placeholder="Entrez le nom des différents intervenants   ou invités..."
+                                    placeholder="Entrez les tags ici..."
                                 />
                             </div>
 

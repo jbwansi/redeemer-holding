@@ -22,7 +22,7 @@ class WebController extends Controller
     public function blogs()
     {
         $blogs = Post::with(['categories', "user"])->latest()->get();
-        // dd($blogs);
+        dd($blogs);
         return inertia('frontend/blogs/index');
     }
 
