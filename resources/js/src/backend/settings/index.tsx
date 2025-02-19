@@ -27,6 +27,7 @@ const Settings = () => {
 
     const { data, setData, post, processing, errors } = useForm<any>({
         app_name: settings?.app_name || '',
+        calendly_link: settings?.calendly_link || '',
         app_description: settings?.app_description || '',
         company_name: settings?.company_name || '',
         company_address: settings?.company_address || '',
@@ -112,12 +113,22 @@ const Settings = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <div>
+                            <div>
                                 <Label className='text-base font-semibold'>Nom de l'application</Label>
                                 <Input
                                     value={data.app_name}
                                     onChange={e => setData('app_name', e.target.value)}
                                     className="mt-2 h-12 px-4 rounded-xl bg-white/50 dark:bg-slate-900"
                                 />
+                            </div>
+                            <div className='mt-3'>
+                                <Label className='text-base font-semibold'>Lien Calendly</Label>
+                                <Input
+                                    value={data.calendly_link}
+                                    onChange={e => setData('calendly_link', e.target.value)}
+                                    className="mt-2 h-12 px-4 rounded-xl bg-white/50 dark:bg-slate-900"
+                                />
+                            </div>
                             </div>
 
                             <div className="md:col-span-2">
