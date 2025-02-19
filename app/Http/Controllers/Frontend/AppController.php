@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SendMailContact;
 use App\Models\Service;
 use App\Models\ServiceRequest;
 use App\Models\User;
@@ -10,6 +11,7 @@ use App\Notifications\NewServiceRequestNotification;
 use App\Notifications\ServiceRequestConfirmationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 
 class AppController extends Controller
@@ -83,6 +85,16 @@ class AppController extends Controller
             return back()->with('error', 'Une erreur est survenue lors de votre demande.');
         }
 
+
+    }
+
+    public function send_contact(Request $request)
+    {
+        if($request->email) {
+            Mail::to(get_setting("contact_email"))->send(new SendMailContact($request->name, $request->email, $request->subject, $request->message));
+            return back()->with('success', "Votre message a été envoyé avec succès!");
+        }
+        return back()->with('error', "Une erreur s'est produite lors de l'envoi du message.");
 
     }
 }
