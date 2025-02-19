@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import IconComponent from '@/components/ui/icon';
 
-const ServicesPage = () => {
+const ServicesPage = ({services}: any) => {
     // Références pour animations au scroll
     const containerRef = useRef<HTMLDivElement>(null);
     const heroRef = useRef<HTMLDivElement>(null);
@@ -115,93 +116,6 @@ const ServicesPage = () => {
         }
     ];
 
-    // Processus de coaching
-    const coachingProcess = [
-        {
-            step: 1,
-            title: "Découverte",
-            description: "Séance initiale pour comprendre vos objectifs et définir vos attentes",
-            icon: <span className="text-xl">👋</span>
-        },
-        {
-            step: 2,
-            title: "Analyse",
-            description: "Évaluation approfondie de votre situation et identification des obstacles",
-            icon: <span className="text-xl">🔍</span>
-        },
-        {
-            step: 3,
-            title: "Stratégie",
-            description: "Élaboration d'un plan d'action personnalisé adapté à vos besoins",
-            icon: <span className="text-xl">📝</span>
-        },
-        {
-            step: 4,
-            title: "Action",
-            description: "Mise en œuvre des techniques et suivi régulier de vos progrès",
-            icon: <span className="text-xl">🚀</span>
-        },
-        {
-            step: 5,
-            title: "Évolution",
-            description: "Ajustement continu et célébration des victoires, petites et grandes",
-            icon: <span className="text-xl">🌱</span>
-        }
-    ];
-
-    // Forfaits
-    const pricingPlans = [
-        {
-            name: "Essentiel",
-            price: "250€",
-            period: "par session",
-            description: "Coaching ponctuel pour des besoins spécifiques",
-            features: [
-                "Session individuelle de 60 minutes",
-                "Bilan personnalisé post-session",
-                "Accès aux ressources de base",
-                "Support par email pendant 1 semaine"
-            ],
-            cta: "Choisir ce forfait",
-            popular: false,
-            color: "bg-white dark:bg-gray-800"
-        },
-        {
-            name: "Transformation",
-            price: "1 200€",
-            period: "forfait 3 mois",
-            description: "Programme complet pour une transformation durable",
-            features: [
-                "6 sessions individuelles de 60 minutes",
-                "Accès illimité par messagerie",
-                "Évaluations et bilans réguliers",
-                "Ressources et outils premium",
-                "Plan d'action personnalisé",
-                "Garantie satisfaction ou remboursement"
-            ],
-            cta: "Commencer ma transformation",
-            popular: true,
-            color: "bg-gradient-to-br from-[#DA2E29]/5 to-rose-600/5 dark:from-[#DA2E29]/10 dark:to-rose-600/10"
-        },
-        {
-            name: "Excellence",
-            price: "4 500€",
-            period: "forfait 6 mois",
-            description: "Accompagnement intensif pour des résultats exceptionnels",
-            features: [
-                "12 sessions individuelles de 60 minutes",
-                "2 sessions d'urgence de 30 minutes",
-                "Accès illimité par messagerie et téléphone",
-                "Suivi hebdomadaire de vos progrès",
-                "Accès à tous les ateliers de groupe",
-                "Plan d'action personnalisé avancé",
-                "Ressources exclusives"
-            ],
-            cta: "Réserver un appel de découverte",
-            popular: false,
-            color: "bg-white dark:bg-gray-800"
-        }
-    ];
 
     // FAQ
     const faqs = [
@@ -291,7 +205,7 @@ const ServicesPage = () => {
 
                         {/* Featured service cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                            {coreServices.map((service, index) => (
+                            {services.map((service: any, index: any) => (
                                 <motion.div
                                     key={index}
                                     className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700/30 transition-all duration-300 hover:shadow-2xl group"
@@ -304,22 +218,22 @@ const ServicesPage = () => {
 
                                     <div className="p-6 md:p-8">
                                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/80 flex items-center justify-center text-[#DA2E29] mb-6">
-                                            {service.icon}
+                                            <IconComponent name={service.icon} />
                                         </div>
 
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                                            {service.title}
+                                            {service.name}
                                         </h2>
 
                                         <p className="text-gray-600 dark:text-gray-300 mb-6">
-                                            {service.description}
+                                            {service.excerpt}
                                         </p>
 
                                         <Link
-                                            href={service.href}
+                                            href={route('services.details', service?.slug)}
                                             className="inline-flex items-center text-[#DA2E29] font-medium hover:underline group-hover:translate-x-1 transition-transform duration-300"
                                         >
-                                            {service.cta}
+                                            En savoir plus sur ce service
                                             <ChevronRight className="ml-1 w-4 h-4" />
                                         </Link>
                                     </div>

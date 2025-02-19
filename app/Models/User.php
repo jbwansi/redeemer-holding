@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'bio',
+        'profile_photo_path'
     ];
 
     /**
@@ -44,5 +47,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getProfilePhotoPathAttribute()
+    {
+        return 'https://www.gravatar.com/avatar/' . md5(strtolower($this->email)) . '?d=mp';
     }
 }

@@ -86,21 +86,21 @@ export function NavUser({
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
-                                <Link href="" className="flex items-center gap-2 w-full">
+                                <Link href={route('profile.account')} className="flex items-center gap-2 w-full">
                                     <BadgeCheck className="size-4" />
                                     Mon compte
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                                <Link href="" className="flex items-center gap-2 w-full">
+                                <Link href={route('profile.security')} className="flex items-center gap-2 w-full">
                                     <Lock className="size-4" />
                                     Sécurité
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                                <Link href="" className="flex items-center gap-2 w-full">
+                                <Link href={route('profile.activities')} className="flex items-center gap-2 w-full">
                                     <Bell className="size-4" />
-                                    Notifications
+                                    Activités
                                 </Link>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>

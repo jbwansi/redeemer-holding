@@ -16,6 +16,9 @@ Route::get('/', [AppController::class, 'index'])->name('home');
 Route::get('/contact', [AppController::class, 'contact'])->name('contact');
 Route::get('/about-me', [AppController::class, 'about'])->name('about');
 Route::get('/services', [AppController::class, 'services'])->name('services');
+Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
+Route::get('/services-requests/{slug}', [AppController::class, 'service_request'])->name('services.requests');
+Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->name('service-requests.store');
 
 Route::get('terms', [AppController::class, 'terms'])->name('terms.show');
 Route::get('policy', [AppController::class, 'policy'])->name('policy.show');

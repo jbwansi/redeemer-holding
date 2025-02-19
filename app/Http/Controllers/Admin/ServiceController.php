@@ -74,7 +74,7 @@ class ServiceController extends Controller
 
             $service->update([
                 ...$validated,
-                'slug' => rand(1000, 9999) . '-' . Str::slug($validated['name']),
+                // 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['name']),
             ]);
             return redirect()->route('services.index')->with('success', 'Service updated successfully');
         } catch (\Exception $e) {
