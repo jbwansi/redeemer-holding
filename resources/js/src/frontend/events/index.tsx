@@ -23,6 +23,8 @@ import { Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 
 const EventsPage = ({ events, categories, featuredEvent }: any) => {
+    console.log(events);
+
     // États
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
@@ -503,11 +505,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                     <button
                                         key={category.id}
                                         onClick={() => handleCategorySelect(category.name)}
-                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                            selectedCategory === category.name
+                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
                                                 ? 'bg-red-600 text-white'
                                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                        }`}
+                                            }`}
                                     >
                                         {category.icon} {category.name}
                                     </button>
@@ -531,11 +532,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                             <button
                                                 key={category.id}
                                                 onClick={() => handleCategorySelect(category.name)}
-                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                                    selectedCategory === category.name
+                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
                                                         ? 'bg-red-600 text-white'
                                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 {category.icon} {category.name}
                                             </button>
@@ -995,21 +995,19 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                                 key={`${monthData.month}-${day.day}`}
                                                                 onClick={() => day.hasEvents && handleDateSelect(day.date.toISOString())}
                                                                 disabled={!day.hasEvents}
-                                                                className={`relative h-10 w-full flex items-center justify-center rounded-md transition-colors duration-200 ${
-                                                                    selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
+                                                                className={`relative h-10 w-full flex items-center justify-center rounded-md transition-colors duration-200 ${selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
                                                                         ? 'bg-red-600 text-white'
                                                                         : day.hasEvents
                                                                             ? 'text-gray-900 dark:text-white hover:bg-red-100 dark:hover:bg-red-900/30'
                                                                             : 'text-gray-500 dark:text-gray-400'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <span>{day.day}</span>
                                                                 {day.hasEvents && (
-                                                                    <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${
-                                                                        selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
+                                                                    <span className={`absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full ${selectedDate && new Date(selectedDate).toDateString() === day.date.toDateString()
                                                                             ? 'bg-white'
                                                                             : 'bg-red-600'
-                                                                    }`}></span>
+                                                                        }`}></span>
                                                                 )}
                                                             </button>
                                                         );
@@ -1019,40 +1017,40 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                         </div>
 
                                         {selectedDate &&
-                                         new Date(selectedDate).getMonth() === monthData.month &&
-                                         new Date(selectedDate).getFullYear() === monthData.year && (
-                                            <div className="p-4 border-t border-gray-100 dark:border-gray-700">
-                                                <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-                                                    Événements du {new Date(selectedDate).getDate()} {monthNames[monthData.month]}
-                                                </h4>
+                                            new Date(selectedDate).getMonth() === monthData.month &&
+                                            new Date(selectedDate).getFullYear() === monthData.year && (
+                                                <div className="p-4 border-t border-gray-100 dark:border-gray-700">
+                                                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">
+                                                        Événements du {new Date(selectedDate).getDate()} {monthNames[monthData.month]}
+                                                    </h4>
 
-                                                <div className="space-y-2">
-                                                    {allEvents
-                                                        .filter((event: any) => new Date(event.date).toDateString() === new Date(selectedDate).toDateString())
-                                                        .map((event: any) => (
-                                                            <Link
-                                                                key={event.id}
-                                                                href={`/evenements/${event.id}`}
-                                                                className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
-                                                            >
-                                                                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                                                                    <CalendarCheck className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                                                                </div>
-                                                                <div className="flex-grow">
-                                                                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                                                        {event.title}
+                                                    <div className="space-y-2">
+                                                        {allEvents
+                                                            .filter((event: any) => new Date(event.date).toDateString() === new Date(selectedDate).toDateString())
+                                                            .map((event: any) => (
+                                                                <Link
+                                                                    key={event.id}
+                                                                    href={`/evenements/${event.id}`}
+                                                                    className="flex items-center p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200"
+                                                                >
+                                                                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                                                                        <CalendarCheck className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                                                                     </div>
-                                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                                        {formatEventTime(event.date)} - {event.category}
+                                                                    <div className="flex-grow">
+                                                                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                                                            {event.title}
+                                                                        </div>
+                                                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                                            {formatEventTime(event.date)} - {event.category}
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <ChevronRight className="w-4 h-4 text-gray-400" />
-                                                            </Link>
-                                                        ))
-                                                    }
+                                                                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                                                                </Link>
+                                                            ))
+                                                        }
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
                                     </motion.div>
                                 );
                             })}
@@ -1137,7 +1135,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                 {!subscribedToNewsletter && (
                                     <div className="lg:w-1/2 w-full">
                                         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-xl">
-                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                                                 Inscrivez-vous à notre newsletter
                                             </h3>
 
