@@ -36,3 +36,34 @@ export interface PostFormData {
     published_at: string | null;
     featured_image: File | null;
 }
+export interface AuthorProps {
+    name: string;
+    avatar: string;
+}
+
+export interface PostImageUrls {
+    large: string;
+    banner: string;
+    medium: string;
+    original: string;
+    thumbnail: string;
+}
+
+export interface PostProps {
+    id: number;
+    title: string;
+    excerpt: string;
+    publishedAt: string;
+    readTime: string;
+    category: string;
+    coverImage: PostImageUrls;
+    author: AuthorProps;
+    tags: string[];
+}
+
+export interface PostResponse {
+    data: PostProps[];
+}
+export interface SinglePostResponse {
+    data: PostProps;
+}
