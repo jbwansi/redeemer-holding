@@ -27,8 +27,11 @@ class WebController extends Controller
 
     public function blogs()
     {
-        $blogs = Post::with(['categories', "user"])->latest()->get();
-        return inertia('frontend/blogs/index');
+
+        $posts = new PostCollection(Post::with(['user', 'categories'])->published()->latest()->get());
+        $featuredPost = PostResource::make(Post::with(['user', 'categories'])->published()->latest()->first());
+        $categories = Category::orderBy('name')->withCount('posts')->get();
+        return inertia('frontend/blogs/index', ['posts' => $posts, 'categories' => $categories, 'featuredPost' => $featuredPost]);
     }
 
     public function blog_detail($slug)
