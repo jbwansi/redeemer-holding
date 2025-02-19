@@ -47,7 +47,7 @@ export const dataRoutes = {
     navMain: [
         {
             title: "Tableau de bord",
-            url: "#",
+            url: route('dashboard'),
             icon: LayoutDashboard,
             isActive: true,
         },
