@@ -18,11 +18,13 @@ import {
 } from "@/components/ui/sheet";
 
 import { useTheme } from "@/components/theme-provider";
+import { useSettings } from '@/hooks/use-settings';
 
 const Navbar = () => {
     const [searchActive, setSearchActive] = useState(false);
     const { theme, setTheme } = useTheme();
     const { scrollY } = useScroll();
+     const { settings, isLoading, isError, error } = useSettings();
 
     const { auth } = usePage().props as any
 
@@ -294,6 +296,7 @@ const Navbar = () => {
                     </div>
 
                     {/* Notifications with enhanced indicator */}
+                    <a href={settings?.calendly_link} target='_blank'>
                     <motion.button
                         variants={buttonHoverEffect}
                         initial="rest"
@@ -308,6 +311,7 @@ const Navbar = () => {
                             className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-br from-[#DA2E29] to-rose-600 rounded-full ring-2 ring-white dark:ring-gray-900"
                         ></motion.span>
                     </motion.button>
+                    </a>
 
                     {/* Theme Toggle with enhanced transition */}
                     <motion.button
