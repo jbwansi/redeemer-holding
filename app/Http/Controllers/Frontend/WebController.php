@@ -30,4 +30,5 @@ class WebController extends Controller
     {
         return inertia('frontend/blogs/show');
     }
+
 }

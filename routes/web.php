@@ -31,6 +31,10 @@ Route::get('formations/{slug}', [WebController::class, 'formation_detail'])->nam
 Route::get('blogs', [WebController::class, 'blogs'])->name('blogs');
 Route::get('blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.details');
 
+Route::get('evenements', [WebController::class, 'evenements'])->name('evenements');
+Route::get('evenements/{slug}', [WebController::class, 'evenement_detail'])->name('evenements.details');
+
+
 Route::get('terms', [AppController::class, 'terms'])->name('terms.show');
 Route::get('policy', [AppController::class, 'policy'])->name('policy.show');
 
