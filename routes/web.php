@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ServiceRequestController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
 use App\Http\Controllers\Frontend\WebController;
@@ -116,6 +117,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::delete('events/{event}', 'destroy')->name('events.destroy');
             Route::get('events/trash', 'trash')->name('events.trash');
             Route::get('events/{event}', 'show')->name('events.show');
+        });
+
+        Route::controller(UserController::class)->group(function () {
+            Route::resource('users', UserController::class);
+            Route::post('users/{user}/verification/resend', 'resendVerification')->name('users.verification.resend');
+            Route::patch('users/{user}/status', [AccountController::class, 'updateStatus'])->name('users.status.update');
+            Route::patch('users/{user}/role', [AccountController::class, 'updateRole'])->name('users.role.update');
+            // Ajout de la nouvelle route pour les utilisateurs bloqués
+            Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
+            Route::patch('users/{user}/reactivate', 'reactivateUser')->name('users.reactivate');
+            Route::post('/users/export', 'export')->name('users.export');
         });
 
     });
