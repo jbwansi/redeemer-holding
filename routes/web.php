@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventCategoryController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ServiceRequestController;
@@ -128,6 +129,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
             Route::patch('users/{user}/reactivate', 'reactivateUser')->name('users.reactivate');
             Route::post('/users/export', 'export')->name('users.export');
+        });
+
+        Route::controller(PageController::class)->group(function () {
+            Route::get('/pages', 'index')->name('pages.index');
+            Route::get('/pages/create', 'create')->name('pages.create');
+            Route::post('/pages', 'store')->name('pages.store');
+            Route::get('/pages/{page}/edit', 'edit')->name('pages.edit');
+            Route::put('/pages/{page}', 'update')->name('pages.update');
+            Route::delete('/pages/{page}', 'destroy')->name('pages.destroy');
+            Route::get('/pages/trash', 'trash')->name('pages.trash');
+            Route::get('/pages/{page}', 'show')->name('pages.show');
         });
 
     });

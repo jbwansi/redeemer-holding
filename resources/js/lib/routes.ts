@@ -134,7 +134,7 @@ export const dataRoutes = {
         },
         {
             title: "Page statique",
-            url: "",
+            url: route("pages.index"),
             icon: LucideBookOpen,
         },
         {
