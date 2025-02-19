@@ -18,9 +18,18 @@ import {
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
-
-const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
+import { Category } from '@/types/category';
+import { PostProps, PostResponse, SinglePostResponse } from '@/types/post';
+interface Props {
+    posts: PostResponse;
+    categories: any;
+    tags: any;
+    featuredPost: SinglePostResponse;
+}
+const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
     // États pour les filtres
+    console.log(featuredPost);
+
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedTag, setSelectedTag] = useState(null);
@@ -51,11 +60,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
 
     // Données d'exemple (à remplacer par les props)
     const allCategories = categories || [
-        { id: 1, name: 'Développement personnel', count: 12, icon: '🧠', color: 'from-red-500 to-orange-500' },
-        { id: 2, name: 'Productivité', count: 8, icon: '⏱️', color: 'from-purple-500 to-indigo-500' },
-        { id: 3, name: 'Bien-être', count: 10, icon: '🧘', color: 'from-emerald-500 to-teal-500' },
-        { id: 4, name: 'Leadership', count: 6, icon: '👑', color: 'from-amber-500 to-yellow-500' },
-        { id: 5, name: 'Communication', count: 9, icon: '💬', color: 'from-blue-500 to-cyan-500' }
+        { id: 1, name: 'Développement personnel', posts_count: 12, icon: '🧠', color: 'from-red-500 to-orange-500' },
+        { id: 2, name: 'Productivité', posts_count: 8, icon: '⏱️', color: 'from-purple-500 to-indigo-500' },
+        { id: 3, name: 'Bien-être', posts_count: 10, icon: '🧘', color: 'from-emerald-500 to-teal-500' },
+        { id: 4, name: 'Leadership', posts_count: 6, icon: '👑', color: 'from-amber-500 to-yellow-500' },
+        { id: 5, name: 'Communication', posts_count: 9, icon: '💬', color: 'from-blue-500 to-cyan-500' }
     ];
 
     const allTags = tags || [
@@ -67,7 +76,9 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
         id: 1,
         title: "7 habitudes qui transformeront votre quotidien en 30 jours",
         excerpt: "Découvrez les techniques scientifiquement prouvées pour créer des habitudes durables et transformer votre vie progressivement et sans effort.",
-        coverImage: "/assets/images/coaching-session.jpg",
+        coverImage: {
+            original: "/assets/images/coaching-session.jpg"
+        },
         category: "Développement personnel",
         author: {
             name: "Jean Bernard",
@@ -78,14 +89,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
         tags: ["Habitudes", "Productivité", "Transformation"]
     };
 
-    const featuredPostData = featuredPost || defaultFeaturedPost;
+    const featuredPostData = featuredPost?.data || defaultFeaturedPost;
 
-    const allPosts = posts || [
+    const allPosts = posts?.data || [
         {
             id: 2,
             title: "Comment maîtriser l'art de la visualisation pour atteindre vos objectifs",
             excerpt: "La visualisation est une technique puissante utilisée par les athlètes d'élite et les entrepreneurs à succès. Voici comment l'intégrer efficacement dans votre quotidien.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/coaching-session.jpg" },
             category: "Développement personnel",
             author: {
                 name: "Jean Bernard",
@@ -99,7 +110,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
             id: 3,
             title: "5 techniques de respiration pour réduire le stress instantanément",
             excerpt: "Les exercices de respiration sont un moyen simple mais efficace de calmer votre système nerveux. Découvrez les techniques utilisées par les experts en méditation.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/coaching-session.jpg" },
             category: "Bien-être",
             author: {
                 name: "Claire Martin",
@@ -113,7 +124,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
             id: 4,
             title: "Le guide complet de la méthode Pomodoro pour optimiser votre concentration",
             excerpt: "La technique Pomodoro est une méthode de gestion du temps qui peut révolutionner votre productivité. Découvrez comment l'appliquer efficacement.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/services-bg.jpg" },
             category: "Productivité",
             author: {
                 name: "Thomas Dubois",
@@ -127,7 +138,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
             id: 5,
             title: "Développer son intelligence émotionnelle : le guide pratique",
             excerpt: "L'intelligence émotionnelle est désormais reconnue comme une compétence essentielle. Voici des exercices concrets pour la développer au quotidien.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/services-bg.jpg" },
             category: "Développement personnel",
             author: {
                 name: "Sophie Moreau",
@@ -141,7 +152,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
             id: 6,
             title: "Comment construire une routine matinale qui booste votre journée",
             excerpt: "Les premières heures de la journée déterminent souvent son déroulement. Découvrez comment créer une routine matinale énergisante et productive.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/services-bg.jpg" },
             category: "Productivité",
             author: {
                 name: "Jean Bernard",
@@ -155,7 +166,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
             id: 7,
             title: "Le pouvoir transformateur du journal personnel : guide de démarrage",
             excerpt: "Tenir un journal est une pratique ancestrale aux multiples bienfaits. Découvrez comment commencer efficacement et transformer cette habitude en outil puissant.",
-            coverImage: "/assets/images/services-bg.jpg",
+            coverImage: { original: "/assets/images/services-bg.jpg" },
             category: "Développement personnel",
             author: {
                 name: "Marie Laurent",
@@ -206,11 +217,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
     };
 
     // Gestion des filtres
-    const handleCategorySelect = (categoryName) => {
+    const handleCategorySelect = (categoryName: any) => {
         setSelectedCategory(selectedCategory === categoryName ? null : categoryName);
     };
 
-    const handleTagSelect = (tagName) => {
+    const handleTagSelect = (tagName: any) => {
         setSelectedTag(selectedTag === tagName ? null : tagName);
     };
 
@@ -320,15 +331,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                     </button>
                                 ) : null}
 
-                                {allCategories.slice(0, 5).map(category => (
+                                {allCategories.slice(0, 5).map((category: any) => (
                                     <button
                                         key={category.id}
                                         onClick={() => handleCategorySelect(category.name)}
-                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                            selectedCategory === category.name
-                                                ? 'bg-red-600 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
+                                            ? 'bg-red-600 text-white'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                            }`}
                                     >
                                         {category.icon} {category.name}
                                     </button>
@@ -336,15 +346,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                             </div>
 
                             <div className="flex flex-wrap justify-center gap-2">
-                                {allTags.slice(0, 9).map(tag => (
+                                {allTags.slice(0, 9).map((tag: any) => (
                                     <button
                                         key={tag}
                                         onClick={() => handleTagSelect(tag)}
-                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                            selectedTag === tag
-                                                ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/50'
-                                                : 'bg-transparent border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400'
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedTag === tag
+                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/50'
+                                            : 'bg-transparent border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400'
+                                            }`}
                                     >
                                         # {tag}
                                     </button>
@@ -364,15 +373,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                 <div className="mb-4">
                                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Catégories</h3>
                                     <div className="flex flex-wrap gap-2">
-                                        {allCategories.map(category => (
+                                        {allCategories.map((category: any) => (
                                             <button
                                                 key={category.id}
                                                 onClick={() => handleCategorySelect(category.name)}
-                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                                    selectedCategory === category.name
-                                                        ? 'bg-red-600 text-white'
-                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                }`}
+                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedCategory === category.name
+                                                    ? 'bg-red-600 text-white'
+                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                    }`}
                                             >
                                                 {category.icon} {category.name}
                                             </button>
@@ -383,15 +391,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                 <div>
                                     <h3 className="font-medium text-gray-900 dark:text-white mb-2">Tags populaires</h3>
                                     <div className="flex flex-wrap gap-2">
-                                        {allTags.map(tag => (
+                                        {allTags.map((tag: any) => (
                                             <button
                                                 key={tag}
                                                 onClick={() => handleTagSelect(tag)}
-                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                                                    selectedTag === tag
-                                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/50'
-                                                        : 'bg-transparent border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400'
-                                                }`}
+                                                className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${selectedTag === tag
+                                                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800/50'
+                                                    : 'bg-transparent border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-red-300 dark:hover:border-red-700 hover:text-red-600 dark:hover:text-red-400'
+                                                    }`}
                                             >
                                                 # {tag}
                                             </button>
@@ -430,7 +437,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                             {/* Background image */}
                             <div className="absolute inset-0">
                                 <img
-                                    src={featuredPostData.coverImage}
+                                    src={featuredPostData?.coverImage?.original ?? "/assets/images/coaching-session.jpg"}
                                     alt={featuredPostData.title}
                                     className="w-full h-full object-cover"
                                 />
@@ -453,11 +460,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                 <div className="flex flex-wrap gap-6 items-center mb-8">
                                     <div className="flex items-center">
                                         <img
-                                            src={featuredPostData.author.avatar}
-                                            alt={featuredPostData.author.name}
+                                            src={featuredPostData?.author.avatar}
+                                            alt={featuredPostData?.author?.name}
                                             className="w-10 h-10 rounded-full object-cover mr-3 border-2 border-white/50"
                                         />
-                                        <span className="text-white">{featuredPostData.author.name}</span>
+                                        <span className="text-white">{featuredPostData?.author?.name}</span>
                                     </div>
 
                                     <div className="flex items-center text-white/80">
@@ -472,7 +479,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                 </div>
 
                                 <div className="flex gap-2 flex-wrap mb-8">
-                                    {featuredPostData.tags.map(tag => (
+                                    {featuredPostData.tags.map((tag: any) => (
                                         <span key={tag} className="px-3 py-1 bg-white/20 text-white rounded-full text-sm">
                                             #{tag}
                                         </span>
@@ -566,7 +573,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                         {/* Image container with overlay */}
                                         <div className="relative overflow-hidden h-52">
                                             <img
-                                                src={post.coverImage}
+                                                src={post.coverImage.original ?? "/images/placeholder.jpg"}
                                                 alt={post.title}
                                                 className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
                                             />
@@ -678,7 +685,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                         </motion.div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                            {allCategories.map((category, index) => (
+                            {allCategories.map((category: any, index: number) => (
                                 <motion.div
                                     key={category.id}
                                     className="relative group"
@@ -702,7 +709,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: any) => {
                                                     </h3>
 
                                                     <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                                        {category.count} article{category.count > 1 ? 's' : ''}
+                                                        {category.posts_count} article{category.posts_count > 1 ? 's' : ''}
                                                     </p>
 
                                                     <span className="mt-auto text-red-600 font-medium flex items-center group-hover:underline">

@@ -69,6 +69,7 @@ class EventController extends Controller
             'is_featured' => 'boolean',
             'tags' => 'nullable|array',
         ]);
+
         if ($validated['is_featured'] == true) {
             Event::where('is_featured', true)->update(['is_featured' => false]);
         }
@@ -79,8 +80,9 @@ class EventController extends Controller
                 'user_id' => Auth::id(),
                 'slug' => rand(1000, 9999) . '-' . Str::slug($request->title),
                 'published_at' => $request->is_published ? now() : null,
-
+                "featured_image" => null
             ]);
+
 
             if ($request->hasFile('featured_image')) {
                 $images = $this->imageService->uploadImage(
@@ -95,7 +97,7 @@ class EventController extends Controller
             return redirect()->route('events.index')->with('success', 'Event created');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error creating event');
+            return back()->with('error', 'Error creating event' . $e->getMessage());
         }
     }
 
