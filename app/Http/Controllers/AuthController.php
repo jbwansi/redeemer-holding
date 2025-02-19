@@ -21,13 +21,11 @@ class AuthController extends Controller
     }
 
 
-    public function login(LoginRequest $request): RedirectResponse
+    public function login(LoginRequest $request)
     {
         $this->authService->authenticate($request);
 
-        return redirect()->intended(
-            route('dashboard')
-        );
+        return redirect()->route('dashboard');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -35,7 +33,6 @@ class AuthController extends Controller
         $this->authService->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
 
         return redirect()->route('login');
     }

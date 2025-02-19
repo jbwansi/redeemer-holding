@@ -22,14 +22,6 @@ interface Props {
 
 const MainLayout = ({ children, title }: MainLayoutProps) => {
     const { flash } = usePage() as any;
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {
-                staleTime: 1000 * 60 * 5,
-                retry: 1,
-            },
-        },
-    });
 
     useEffect(() => {
         // Gérer les messages de succès
@@ -43,28 +35,35 @@ const MainLayout = ({ children, title }: MainLayoutProps) => {
         }
     }, [flash])
 
-
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                staleTime: 1000 * 60 * 5,
+                retry: 1,
+            },
+        },
+    });
 
     return (
         <QueryClientProvider client={queryClient}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <SidebarProvider>
-                <AppSidebar />
-                <main className="w-full pb-24">
-                    <Navbar title='' />
-                    <div className="container mx-auto px-4 py-3">
-                        <h1 className="text-xl font-bold mb-4">
-                            {document.title.split(' - ')[0]}
-                        </h1>
-                        <Breadcrumb />
-                        <div className="py-5">
-                            {children}
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <SidebarProvider>
+                    <AppSidebar />
+                    <main className="w-full pb-24">
+                        <Navbar title='' />
+                        <div className="container mx-auto px-4 py-3">
+                            <h1 className="text-xl font-bold mb-4">
+                                {document.title.split(' - ')[0]}
+                            </h1>
+                            <Breadcrumb />
+                            <div className="py-5">
+                                {children}
+                            </div>
                         </div>
-                    </div>
-                </main>
-            </SidebarProvider>
-            <Toaster />
-        </ThemeProvider>
+                    </main>
+                </SidebarProvider>
+                <Toaster />
+            </ThemeProvider>
         </QueryClientProvider>
     )
 }

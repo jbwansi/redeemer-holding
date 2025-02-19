@@ -64,87 +64,86 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
             Route::get('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'show'])->name('service-requests.show');
             Route::put('/service-requests/{serviceRequest}/update-status', [ServiceRequestController::class, 'updateStatus'])->name('service-requests.update-status');
             Route::delete('/service-requests/{serviceRequest}', [ServiceRequestController::class, 'destroy'])->name('service-requests.destroy');
+
+            Route::controller(PostController::class)->group(function () {
+                Route::get('posts', 'index')->name('posts.index');
+                Route::get('posts/create', 'create')->name('posts.create');
+                Route::post('posts/store', 'store')->name('posts.store');
+                Route::get('posts/{post}/edit', 'edit')->name('posts.edit');
+                Route::post('posts/{post}/update', 'update')->name('posts.update');
+                Route::delete('posts/{post}/delete', 'destroy')->name('posts.destroy');
+                Route::get('posts/trash', 'trash')->name('posts.trash');
+            });
+
+            Route::resource('categories', CategoryController::class);
+
+            Route::controller(AccountController::class)->group(function () {
+                Route::get('/profile', 'account')->name('profile.account');
+                Route::post('/profile/update', 'updateProfile')->name('profile.update');
+                Route::post('/profile/sessions/{session}/terminate', 'terminateSession')->name('profile.terminate-session');
+                Route::post('/profile/sessions/terminate-others', 'terminateOtherSessions')->name('profile.terminate-other-sessions');
+                Route::get('/profile/security', 'security')->name('profile.security');
+                Route::get('/profile/activities', 'activities')->name('profile.activities');
+                Route::post('/profile/password', 'updatePassword')->name('profile.password.update');
+            });
+
+            Route::controller(SettingController::class)->group(function () {
+                Route::get('settings', 'index')->name('settings');
+                Route::get('settings/smtp', 'smtp')->name('settings.smtp');
+                Route::get('settings/pusher', 'pusher')->name('settings.pusher');
+                Route::get('settings/security', 'security')->name('settings.security');
+                Route::get('settings/api', 'api')->name('settings.api');
+                Route::get('settings/payment', 'payment')->name('settings.payment');
+                Route::get('settings/socials', 'socials')->name('settings.socials');
+                Route::post('settings/update', 'update')->name('settings.update');
+                Route::get('settings/fetch', 'fetch')->name('settings.fetch');
+                Route::post('settings/smtp/test', 'test_send_email')->name('settings.smtp.test');
+            });
+
+            Route::controller(ConfigController::class)->group(function () {
+                Route::get('config/system', 'system')->name('config.system');
+                Route::post('config/system/execute', 'system_execute')->name('system.execute');
+                Route::get('config/changelog', 'changelog')->name('config.changelog');
+                Route::get('config/activation', 'activation')->name('config.activation');
+                Route::get('config/social-login', 'social_login')->name('config.social_login');
+                Route::get('config/database/clean', 'database_clean')->name('config.database_clean');
+                Route::post('config/database/{table}/truncate', 'truncate')->name('database.truncate');
+                Route::post('config/database/{table}/optimize', 'optimize')->name('database.optimize');
+            });
+
+            Route::resource('event-categories', EventCategoryController::class);
+            Route::controller(EventController::class)->group(function () {
+                Route::get('events', 'index')->name('events.index');
+                Route::get('events/create', 'create')->name('events.create');
+                Route::post('events', 'store')->name('events.store');
+                Route::get('events/{event}/edit', 'edit')->name('events.edit');
+                Route::post('events/{event}', 'update')->name('events.update');
+                Route::delete('events/{event}', 'destroy')->name('events.destroy');
+                Route::get('events/trash', 'trash')->name('events.trash');
+                Route::get('events/{event}', 'show')->name('events.show');
+            });
+
+            Route::controller(UserController::class)->group(function () {
+                Route::resource('users', UserController::class);
+                Route::post('users/{user}/verification/resend', 'resendVerification')->name('users.verification.resend');
+                Route::patch('users/{user}/status', [AccountController::class, 'updateStatus'])->name('users.status.update');
+                Route::patch('users/{user}/role', [AccountController::class, 'updateRole'])->name('users.role.update');
+                // Ajout de la nouvelle route pour les utilisateurs bloqués
+                Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
+                Route::patch('users/{user}/reactivate', 'reactivateUser')->name('users.reactivate');
+                Route::post('/users/export', 'export')->name('users.export');
+            });
+
+            Route::controller(PageController::class)->group(function () {
+                Route::get('/pages', 'index')->name('pages.index');
+                Route::get('/pages/create', 'create')->name('pages.create');
+                Route::post('/pages', 'store')->name('pages.store');
+                Route::get('/pages/{page}/edit', 'edit')->name('pages.edit');
+                Route::put('/pages/{page}', 'update')->name('pages.update');
+                Route::delete('/pages/{page}', 'destroy')->name('pages.destroy');
+                Route::get('/pages/trash', 'trash')->name('pages.trash');
+                Route::get('/pages/{page}', 'show')->name('pages.show');
+            });
         });
-
-        Route::controller(PostController::class)->group(function () {
-            Route::get('posts', 'index')->name('posts.index');
-            Route::get('posts/create', 'create')->name('posts.create');
-            Route::post('posts/store', 'store')->name('posts.store');
-            Route::get('posts/{post}/edit', 'edit')->name('posts.edit');
-            Route::post('posts/{post}/update', 'update')->name('posts.update');
-            Route::delete('posts/{post}/delete', 'destroy')->name('posts.destroy');
-            Route::get('posts/trash', 'trash')->name('posts.trash');
-        });
-
-        Route::resource('categories', CategoryController::class);
-
-        Route::controller(AccountController::class)->group(function () {
-            Route::get('/profile', 'account')->name('profile.account');
-            Route::post('/profile/update', 'updateProfile')->name('profile.update');
-            Route::post('/profile/sessions/{session}/terminate', 'terminateSession')->name('profile.terminate-session');
-            Route::post('/profile/sessions/terminate-others', 'terminateOtherSessions')->name('profile.terminate-other-sessions');
-            Route::get('/profile/security', 'security')->name('profile.security');
-            Route::get('/profile/activities', 'activities')->name('profile.activities');
-            Route::post('/profile/password', 'updatePassword')->name('profile.password.update');
-        });
-
-        Route::controller(SettingController::class)->group(function () {
-            Route::get('settings', 'index')->name('settings');
-            Route::get('settings/smtp', 'smtp')->name('settings.smtp');
-            Route::get('settings/pusher', 'pusher')->name('settings.pusher');
-            Route::get('settings/security', 'security')->name('settings.security');
-            Route::get('settings/api', 'api')->name('settings.api');
-            Route::get('settings/payment', 'payment')->name('settings.payment');
-            Route::get('settings/socials', 'socials')->name('settings.socials');
-            Route::post('settings/update', 'update')->name('settings.update');
-            Route::get('settings/fetch', 'fetch')->name('settings.fetch');
-            Route::post('settings/smtp/test', 'test_send_email')->name('settings.smtp.test');
-        });
-
-        Route::controller(ConfigController::class)->group(function () {
-            Route::get('config/system', 'system')->name('config.system');
-            Route::post('config/system/execute', 'system_execute')->name('system.execute');
-            Route::get('config/changelog', 'changelog')->name('config.changelog');
-            Route::get('config/activation', 'activation')->name('config.activation');
-            Route::get('config/social-login', 'social_login')->name('config.social_login');
-            Route::get('config/database/clean', 'database_clean')->name('config.database_clean');
-            Route::post('config/database/{table}/truncate', 'truncate')->name('database.truncate');
-            Route::post('config/database/{table}/optimize', 'optimize')->name('database.optimize');
-        });
-
-        Route::resource('event-categories', EventCategoryController::class);
-        Route::controller(EventController::class)->group(function () {
-            Route::get('events', 'index')->name('events.index');
-            Route::get('events/create', 'create')->name('events.create');
-            Route::post('events', 'store')->name('events.store');
-            Route::get('events/{event}/edit', 'edit')->name('events.edit');
-            Route::post('events/{event}', 'update')->name('events.update');
-            Route::delete('events/{event}', 'destroy')->name('events.destroy');
-            Route::get('events/trash', 'trash')->name('events.trash');
-            Route::get('events/{event}', 'show')->name('events.show');
-        });
-
-        Route::controller(UserController::class)->group(function () {
-            Route::resource('users', UserController::class);
-            Route::post('users/{user}/verification/resend', 'resendVerification')->name('users.verification.resend');
-            Route::patch('users/{user}/status', [AccountController::class, 'updateStatus'])->name('users.status.update');
-            Route::patch('users/{user}/role', [AccountController::class, 'updateRole'])->name('users.role.update');
-            // Ajout de la nouvelle route pour les utilisateurs bloqués
-            Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
-            Route::patch('users/{user}/reactivate', 'reactivateUser')->name('users.reactivate');
-            Route::post('/users/export', 'export')->name('users.export');
-        });
-
-        Route::controller(PageController::class)->group(function () {
-            Route::get('/pages', 'index')->name('pages.index');
-            Route::get('/pages/create', 'create')->name('pages.create');
-            Route::post('/pages', 'store')->name('pages.store');
-            Route::get('/pages/{page}/edit', 'edit')->name('pages.edit');
-            Route::put('/pages/{page}', 'update')->name('pages.update');
-            Route::delete('/pages/{page}', 'destroy')->name('pages.destroy');
-            Route::get('/pages/trash', 'trash')->name('pages.trash');
-            Route::get('/pages/{page}', 'show')->name('pages.show');
-        });
-
     });
 });

@@ -24,7 +24,7 @@ const Navbar = () => {
     const [searchActive, setSearchActive] = useState(false);
     const { theme, setTheme } = useTheme();
     const { scrollY } = useScroll();
-     const { settings, isLoading, isError, error } = useSettings();
+    const { settings, isLoading, isError, error } = useSettings();
 
     const { auth } = usePage().props as any
 
@@ -297,20 +297,20 @@ const Navbar = () => {
 
                     {/* Notifications with enhanced indicator */}
                     <a href={settings?.calendly_link} target='_blank'>
-                    <motion.button
-                        variants={buttonHoverEffect}
-                        initial="rest"
-                        whileHover="hover"
-                        whileTap="tap"
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700/90 transition-colors duration-300 backdrop-blur-sm relative"
-                    >
-                        <Calendar1 className="w-[18px] h-[18px]" />
-                        <motion.span
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-br from-[#DA2E29] to-rose-600 rounded-full ring-2 ring-white dark:ring-gray-900"
-                        ></motion.span>
-                    </motion.button>
+                        <motion.button
+                            variants={buttonHoverEffect}
+                            initial="rest"
+                            whileHover="hover"
+                            whileTap="tap"
+                            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700/90 transition-colors duration-300 backdrop-blur-sm relative"
+                        >
+                            <Calendar1 className="w-[18px] h-[18px]" />
+                            <motion.span
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-br from-[#DA2E29] to-rose-600 rounded-full ring-2 ring-white dark:ring-gray-900"
+                            ></motion.span>
+                        </motion.button>
                     </a>
 
                     {/* Theme Toggle with enhanced transition */}

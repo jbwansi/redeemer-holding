@@ -6,7 +6,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function FrontLayout({ children }: any) {
 
-
     const queryClient = new QueryClient({
         defaultOptions: {
             queries: {
@@ -15,7 +14,6 @@ function FrontLayout({ children }: any) {
             },
         },
     });
-
 
     return (
         <QueryClientProvider client={queryClient}>
