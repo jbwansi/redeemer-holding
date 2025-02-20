@@ -201,7 +201,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                         {/* Back link */}
                         <div className="mb-8">
                             <Link
-                                href="/blog"
+                                href={route('blogs')}
                                 className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
                             >
                                 <ChevronLeft className="mr-1 w-5 h-5" />

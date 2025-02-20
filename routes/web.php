@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
+use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\WebController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,20 @@ Route::get('blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.d
 
 Route::get('evenements', [WebController::class, 'events'])->name('evenements');
 Route::get('evenements/{slug}', [WebController::class, 'evenement_detail'])->name('evenements.details');
+Route::post('/evenements/{slug}/inscription', [WebController::class, 'register'])->name('events.register');
+Route::get('/evenements/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation'])->name('events.registration.confirmation');
+
+// Routes pour le paiement (Stripe)
+Route::get('/evenements/{slug}/paiement/{participant_id}', [PaymentController::class, 'showPaymentForm'])->name('events.payment');
+Route::post('/evenements/{slug}/paiement/{participant_id}/process', [PaymentController::class, 'processPayment'])->name('events.payment.process');
+Route::get('/evenements/paiement/succes', [PaymentController::class, 'handleSuccess'])->name('events.payment.success');
+Route::get('/evenements/paiement/annulation', [PaymentController::class, 'handleCancellation'])->name('events.payment.cancel');
+
+// Route pour le webhook Stripe
+Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
+
+// Route pour annuler une inscription
+Route::delete('/evenements/{slug}/inscription/{participant_id}', [EventController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
 
 Route::get('terms', [AppController::class, 'terms'])->name('terms.show');
@@ -122,6 +137,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::delete('events/{event}', 'destroy')->name('events.destroy');
                 Route::get('events/trash', 'trash')->name('events.trash');
                 Route::get('events/{event}', 'show')->name('events.show');
+                // Route::get("events/")
             });
 
             Route::controller(UserController::class)->group(function () {

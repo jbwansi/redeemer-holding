@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 import { ArrowRight, CheckCircle, Clock, Brain, Zap } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 
 const Hero = () => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -167,6 +168,7 @@ const Hero = () => {
                         </motion.div>
 
                         {/* CTA Button */}
+                        <Link href={route('formations')}>
                         <motion.div variants={itemVariants}>
                             <motion.button
                                 className="px-8 py-4 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium text-lg flex items-center justify-center group shadow-lg shadow-[#DA2E29]/20"
@@ -175,10 +177,11 @@ const Hero = () => {
                                 whileHover="hover"
                                 whileTap="tap"
                             >
-                                <span>Découvrir les 3 étapes</span>
+                                <span>Découvrir mes formations</span>
                                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                             </motion.button>
                         </motion.div>
+                        </Link>
                     </motion.div>
 
                     {/* Coach Image Container - 5 columns */}

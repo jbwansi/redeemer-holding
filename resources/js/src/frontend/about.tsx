@@ -49,10 +49,10 @@ const AboutPage = () => {
 
     // Statistiques impressionnantes
     const stats = [
-        { value: "10+", label: "Années d'expérience" },
-        { value: "1,500+", label: "Clients accompagnés" },
+        { value: "150+", label: "Heures de coaching" },
+        { value: "30+", label: "Clients accompagnés" },
         { value: "98%", label: "Taux de satisfaction" },
-        { value: "25+", label: "Pays" }
+        { value: "25+", label: "Recommandations" }
     ];
 
     // Étapes clés du parcours professionnel
@@ -216,13 +216,13 @@ const AboutPage = () => {
 
                                 <div className="space-y-4 text-gray-600 dark:text-gray-300">
                                     <p>
-                                        Je me suis lancé dans l'aventure du coaching de vie après une carrière de 15 ans dans le monde de l'entreprise, où j'ai occupé des postes de direction dans plusieurs multinationales. Cette expérience m'a permis de comprendre les défis auxquels font face les professionnels à tous les niveaux.
+                                        Je m’appelle Jean-Bernard Wansi. Je suis Ingénieur de formation, avec plusieurs années d’expériences dans le développement des logiciels. En cours de mon développement personnel, j’ai découvert ma nouvelle passion qui était d’accompagner les personnes à découvrir aussi leur passion et de les mettre en valeur.
                                     </p>
                                     <p>
-                                        C'est en traversant moi-même une période de questionnement profond que j'ai découvert les principes qui guident aujourd'hui ma méthode. J'ai réalisé que la véritable productivité ne peut exister sans un alignement avec nos valeurs profondes et une vision claire de nos objectifs de vie.
+                                        Raison pour laquelle je suis me formé comme coach, formateur et conférencier certifié à la John Maxwell Team Francais depuis 2020 en vu d’offrir du coaching, de la formation et du conseil à toutes ses personnes qui veulent voir leur vie progresser.
                                     </p>
                                     <p>
-                                        Après des années de formation et de pratique, j'ai développé une approche unique qui combine des techniques éprouvées de développement personnel avec les dernières avancées en neurosciences et en psychologie positive.
+                                        Dans ce même cadre, j’aide des individus à développer la confiance en eux afin de passer à l’action.
                                     </p>
                                     <p>
                                         Aujourd'hui, ma mission est d'aider chaque personne à découvrir son potentiel inexploité et à créer une vie qui correspond véritablement à ses aspirations les plus profondes.

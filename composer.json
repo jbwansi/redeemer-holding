@@ -12,6 +12,7 @@
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "stevebauman/location": "^7.4",
+        "stripe/stripe-php": "^16.5",
         "tightenco/ziggy": "^2.5"
     },
     "require-dev": {

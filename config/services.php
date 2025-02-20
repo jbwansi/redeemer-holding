@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'currency' => env('STRIPE_CURRENCY', 'chf'),
+        'api_version' => env('STRIPE_API_VERSION', '2022-11-15'),
+    ],
+
 ];

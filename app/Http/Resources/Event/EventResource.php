@@ -17,10 +17,6 @@ class EventResource extends JsonResource
     public function toArray(Request $request): array
     {
 
-        // Récupérer la première image comme coverImage
-        $coverImage = !empty($this->featured_image)
-            ? asset('storage/' . $this->featured_image[0])
-            : asset('storage/events/default.webp');
 
         return [
             'id' => $this->id,
@@ -29,7 +25,7 @@ class EventResource extends JsonResource
             'date' => $this->start_date->toISOString(),
             'endDate' => $this->end_date->toISOString(),
             'location' => $this->location,
-            'coverImage' => $coverImage,
+            'coverImage' => $this->featured_image,
             'category' => $this->category ? $this->category->name : null,
             'isFeatured' => $this->is_featured,
             'price' => (float) $this->price,

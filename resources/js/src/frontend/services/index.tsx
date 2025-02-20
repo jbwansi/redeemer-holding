@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
     ChevronRight,
@@ -10,28 +10,30 @@ import {
     Zap,
     CheckCircle,
     ArrowRight,
-    Clock
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import IconComponent from '@/components/ui/icon';
+import { fetchSettings } from '@/api/settings';
 
 const ServicesPage = ({services}: any) => {
+    const [settings, setSettings] = useState<any>();
+     useEffect(() => {
+            fetchSettings().then((res: any) => {
+                setSettings(res)
+            })
+
+        }, [])
     // Références pour animations au scroll
     const containerRef = useRef<HTMLDivElement>(null);
     const heroRef = useRef<HTMLDivElement>(null);
     const featuredRef = useRef<HTMLDivElement>(null);
     const offeringsRef = useRef<HTMLDivElement>(null);
-    const processRef = useRef<HTMLDivElement>(null);
-    const pricingRef = useRef<HTMLDivElement>(null);
     const faqRef = useRef<HTMLDivElement>(null);
-
     // Détection de visibilité pour animations
     const isHeroInView = useInView(heroRef, { once: false, amount: 0.3 });
     const isFeaturedInView = useInView(featuredRef, { once: false, amount: 0.3 });
     const isOfferingsInView = useInView(offeringsRef, { once: false, amount: 0.3 });
-    const isProcessInView = useInView(processRef, { once: false, amount: 0.3 });
-    const isPricingInView = useInView(pricingRef, { once: false, amount: 0.3 });
     const isFaqInView = useInView(faqRef, { once: false, amount: 0.3 });
 
     // Animation parallax
@@ -218,7 +220,7 @@ const ServicesPage = ({services}: any) => {
 
                                     <div className="p-6 md:p-8">
                                         <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/80 flex items-center justify-center text-[#DA2E29] mb-6">
-                                            <IconComponent name={service.icon} />
+                                            <IconComponent name={service.icon} color="red" />
                                         </div>
 
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
@@ -345,14 +347,7 @@ const ServicesPage = ({services}: any) => {
                                     variants={itemVariants}
                                 >
                                     <Link
-                                        href="/services/coaching-individuel"
-                                        className="px-6 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium inline-flex items-center justify-center transition-colors duration-300"
-                                    >
-                                        <span>Découvrir en détail</span>
-                                        <ArrowRight className="ml-2 w-4 h-4" />
-                                    </Link>
-                                    <Link
-                                        href="/contact"
+                                        href={route('contact')}
                                         className="px-6 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-medium inline-flex items-center justify-center transition-colors duration-300"
                                     >
                                         <span>Prendre rendez-vous</span>
@@ -432,7 +427,7 @@ const ServicesPage = ({services}: any) => {
                             transition={{ duration: 0.6, delay: 0.5 }}
                         >
                             <Link
-                                href="/contact"
+                                href={route('contact')}
                                 className="inline-flex items-center text-[#DA2E29] hover:text-[#c02824] font-medium"
                             >
                                 <span>Besoin d'une approche sur mesure? Contactez-moi</span>
@@ -511,7 +506,7 @@ const ServicesPage = ({services}: any) => {
 
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <a
-                                        href="https://calendly.com/jbernard-wansi/entretien-de-valeurs?back=1&month=2025-02"
+                                        href={settings?.calendly_link}
                                         target='_blank'
                                         className="px-8 py-4 bg-white text-[#DA2E29] rounded-lg font-medium text-lg hover:bg-gray-100 transition-colors duration-300 inline-flex items-center justify-center shadow-xl shadow-rose-600/20"
                                     >

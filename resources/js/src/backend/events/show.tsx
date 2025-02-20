@@ -72,7 +72,7 @@ const ShowEvent = ({ event }: any) => {
                     <Card>
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
-                                <span className="text-2xl font-bold">{parseInt(displayedEvent.price).toLocaleString()} FCFA</span>
+                                <span className="text-2xl font-bold">{parseInt(displayedEvent.price).toLocaleString()} CHF</span>
                                 <Badge variant="secondary" className="text-base px-4 py-1">
                                     {displayedEvent.is_published ? 'Publié' : 'Brouillon'}
                                 </Badge>
