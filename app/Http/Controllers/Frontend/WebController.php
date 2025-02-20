@@ -34,10 +34,11 @@ class WebController extends Controller
         //recuperer toutes les tags des posts
         $tags = [];
         foreach ($posts as $post) {
-            foreach ($post->tags as $tag) {
+            foreach ($post->tags ?? [] as $tag) {
                 array_push($tags, $tag);
             }
         }
+
         return inertia('frontend/blogs/index', ['tags' => $tags, 'posts' => $posts, 'categories' => $categories, 'featuredPost' => $featuredPost]);
     }
 
