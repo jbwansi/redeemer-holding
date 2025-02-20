@@ -10,10 +10,13 @@ import {
     Phone,
     MapPin,
     ArrowUpRight,
-    ChevronRight
+    ChevronRight,
+    Twitter
 } from 'lucide-react';
+import { useSettings } from '@/hooks/use-settings';
 
 const Footer = () => {
+    const { settings, isLoading, isError, error } = useSettings();
     // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -64,10 +67,10 @@ const Footer = () => {
 
     // Social media links
     const socialLinks = [
-        { icon: <Facebook size={18} />, href: "https://facebook.com", label: "Facebook" },
-        { icon: <Instagram size={18} />, href: "https://instagram.com", label: "Instagram" },
-        { icon: <Linkedin size={18} />, href: "https://linkedin.com", label: "LinkedIn" },
-        { icon: <Youtube size={18} />, href: "https://youtube.com", label: "YouTube" },
+        { icon: <Facebook size={18} />, href: settings?.facebook_url, label: "Facebook" },
+        { icon: <Instagram size={18} />, href: settings?.instagram_url, label: "Instagram" },
+        { icon: <Linkedin size={18} />, href: settings?.instagram_url, label: "LinkedIn" },
+        { icon: <Twitter size={18} />, href: settings?.twitter_url, label: "Twitter" },
     ];
 
     // Contact information

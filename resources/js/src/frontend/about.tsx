@@ -90,19 +90,19 @@ const AboutPage = () => {
             content: "J'ai découvert non seulement comment être plus productif, mais aussi comment vivre une vie plus équilibrée et épanouissante. Cette approche a vraiment fait la différence.",
             author: "Marie Dupont",
             position: "Entrepreneure",
-            image: "/assets/images/testimonials/person1.jpg"
+            image: "https://media.istockphoto.com/id/507457774/photo/beautiful-young-woman.jpg?s=170667a&w=0&k=20&c=wQlHiq9OTQ2fwko1T8xw7g99sByp1I3gwVTvlkOxypQ="
         },
         {
             content: "Les méthodes enseignées sont non seulement efficaces, mais adaptées à chaque personne. J'ai pu atteindre mes objectifs tout en restant fidèle à mes valeurs.",
             author: "Thomas Laurent",
             position: "Directeur Marketing",
-            image: "/assets/images/testimonials/person2.jpg"
+            image: "https://img.freepik.com/free-photo/expressive-bearded-man-wearing-shirt_273609-5894.jpg"
         },
         {
             content: "Ce coaching a transformé ma façon d'aborder les défis. J'ai gagné en confiance et en clarté, ce qui a eu un impact positif sur tous les aspects de ma vie.",
             author: "Sofia Martinez",
             position: "Médecin",
-            image: "/assets/images/testimonials/person3.jpg"
+            image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZmlsJTIwZGUlMjBmZW1tZXxlbnwwfHwwfHx8MA%3D%3D"
         }
     ];
 
