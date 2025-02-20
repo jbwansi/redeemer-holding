@@ -31,7 +31,14 @@ class WebController extends Controller
         $posts = new PostCollection(Post::with(['user', 'categories'])->published()->latest()->get());
         $featuredPost = PostResource::make(Post::with(['user', 'categories'])->published()->latest()->first());
         $categories = Category::orderBy('name')->withCount('posts')->get();
-        return inertia('frontend/blogs/index', ['posts' => $posts, 'categories' => $categories, 'featuredPost' => $featuredPost]);
+        //recuperer toutes les tags des posts
+        $tags = [];
+        foreach ($posts as $post) {
+            foreach ($post->tags as $tag) {
+                array_push($tags, $tag);
+            }
+        }
+        return inertia('frontend/blogs/index', ['tags' => $tags, 'posts' => $posts, 'categories' => $categories, 'featuredPost' => $featuredPost]);
     }
 
     public function blog_detail($slug)
