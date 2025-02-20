@@ -43,7 +43,7 @@ Route::get('/evenements/{slug}/paiement/{participant_id}', [PaymentController::c
 Route::post('/evenements/{slug}/paiement/{participant_id}/process', [PaymentController::class, 'processPayment'])->name('events.payment.process');
 Route::get('/evenements/paiement/succes', [PaymentController::class, 'handleSuccess'])->name('events.payment.success');
 Route::get('/evenements/paiement/annulation', [PaymentController::class, 'handleCancellation'])->name('events.payment.cancel');
-
+Route::get('/evenements/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice'])->name('evenements.facture.download');
 // Route pour le webhook Stripe
 Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 
@@ -51,14 +51,19 @@ Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 Route::delete('/evenements/{slug}/inscription/{participant_id}', [EventController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
 
-Route::get('terms', [AppController::class, 'terms'])->name('terms.show');
-Route::get('policy', [AppController::class, 'policy'])->name('policy.show');
+Route::get('termes-et-conditions', [AppController::class, 'terms'])->name('terms.show');
+Route::get('politique-de-confidentialite', [AppController::class, 'policy'])->name('policy.show');
+Route::get('politique-des-cookies', [AppController::class, 'cookies'])->name('cookies.show');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('login', [AuthController::class, 'show_auth'])->name("login");
     Route::post('login', [AuthController::class, 'login'])->name("login");
     Route::get('password/request', [AuthController::class, 'password_request'])->name('password.request');
 });
+
+
+
+Route::get('settings/fetch', [SettingController::class, 'fetch'])->name('settings.fetch');
 
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -112,7 +117,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::get('settings/payment', 'payment')->name('settings.payment');
                 Route::get('settings/socials', 'socials')->name('settings.socials');
                 Route::post('settings/update', 'update')->name('settings.update');
-                Route::get('settings/fetch', 'fetch')->name('settings.fetch');
+
                 Route::post('settings/smtp/test', 'test_send_email')->name('settings.smtp.test');
             });
 
@@ -137,7 +142,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::delete('events/{event}', 'destroy')->name('events.destroy');
                 Route::get('events/trash', 'trash')->name('events.trash');
                 Route::get('events/{event}', 'show')->name('events.show');
-                // Route::get("events/")
+                Route::get('/events/participants/{slug}', [EventController::class, 'participants'])
+                    ->name('events.participants');
+                Route::get('/events/{slug}/participants/{participant}', [EventController::class, 'showParticipant'])
+                    ->name('events.participants.show');
+                Route::get('/events/{slug}/facture/{reference}', [EventController::class, 'downloadInvoice'])
+                    ->name('events.participants.invoice');
             });
 
             Route::controller(UserController::class)->group(function () {

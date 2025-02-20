@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { MapPin, Calendar, Clock, Users, Share2, Heart } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Link } from '@inertiajs/react';
 
 const ShowEvent = ({ event }: any) => {
     const sampleEvent = {
@@ -25,7 +26,7 @@ const ShowEvent = ({ event }: any) => {
     console.log(event);
 
     return (
-        <div className="max-w-7xl mx-auto p-6">
+        <div className=" mx-auto p-6">
             <div className="grid lg:grid-cols-3 gap-8">
                 {/* Image et Infos Principales */}
                 <div className="lg:col-span-2 space-y-6">
@@ -78,8 +79,15 @@ const ShowEvent = ({ event }: any) => {
                                 </Badge>
                             </div>
 
-                            <Button className="w-full" size="lg">
-                                Réserver maintenant
+                            <Button
+                                className="w-full"
+                                size="lg"
+                                variant={displayedEvent.is_full ? "outline" : "default"}
+                                asChild
+                            >
+                                <Link href={route('events.participants', event.slug)}>
+                                    Voir les inscrits ({displayedEvent.participant_count} / {displayedEvent.max_participants})
+                                </Link>
                             </Button>
 
                             <hr className="border-muted" />

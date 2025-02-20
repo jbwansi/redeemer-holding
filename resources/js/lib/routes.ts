@@ -68,10 +68,6 @@ export const dataRoutes = {
                     title: "Categories",
                     url: route('event-categories.index'),
                 },
-                {
-                    title: "Ventes",
-                    url: "#",
-                },
             ],
         },
         {

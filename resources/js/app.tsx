@@ -19,7 +19,7 @@ interface PageComponent extends Page<PageProps> {
 }
 
 createInertiaApp({
-    title: (title: string) => `${title || "Tableau de bord"} - Redeemer Holding`,
+    title: (title: string) => `${title || "Transformer des vies, une personne à la fois"} - Redeemer Holding`,
     resolve: (name: string) => resolvePageComponent<PageComponent>(
         `./src/${name}.tsx`,
         import.meta.glob<PageComponent>('./src/**/*.tsx')

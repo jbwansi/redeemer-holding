@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventParticipant;
+use App\Notifications\InvoiceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -137,7 +138,7 @@ class PaymentController extends Controller
     {
         $sessionId = $request->get('session_id');
 
-        if (!$sessionId) {
+        if (!$sessionId || $sessionId === '{CHECKOUT_SESSION_ID}') {
             Log::alert("Session annulé");
             return redirect()->route('evenements')->with('error', "Session de paiement invalide.");
         }
@@ -153,7 +154,8 @@ class PaymentController extends Controller
 
             // Récupérer le participant
             $participantId = $session->client_reference_id;
-            $participant = EventParticipant::findOrFail($participantId);
+            $participant = EventParticipant::with('event')->findOrFail($participantId);
+            $event = $participant->event;
 
             // Mettre à jour le statut du participant
             $participant->update([
@@ -165,6 +167,20 @@ class PaymentController extends Controller
 
             // Envoyer un email de confirmation
             // ... logique d'envoi d'email
+            // Préparer les données de la facture
+            $invoiceData = [
+                'event' => $event,
+                'registration' => $participant,
+                'subtotal' => $event->price * $participant->qty,
+                'serviceFee' => $event->price * $participant->qty * 0.05,
+                'total' => $event->price * $participant->qty * 1.05,
+                'date' => $participant->payment_date ?? $participant->created_at,
+                'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($participant->id, 6, '0', STR_PAD_LEFT)
+            ];
+
+            // Envoyer l'email avec la facture
+            $participant->notify(new InvoiceNotification($event, $participant, $invoiceData));
+
 
             // Rediriger vers la page de confirmation
             return redirect()->route('events.registration.confirmation', [
@@ -177,7 +193,6 @@ class PaymentController extends Controller
                 'session_id' => $sessionId
             ]);
 
-            Log::alert("Erreur de payement");
             return redirect()->route('evenements')->with('error', "Une erreur s'est produite lors de la vérification du paiement. Veuillez nous contacter si vous avez été débité.");
         }
     }

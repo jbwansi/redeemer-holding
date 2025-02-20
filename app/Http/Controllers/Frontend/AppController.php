@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Notification;
 class AppController extends Controller
 {
     public function index() {
-        return inertia("frontend/home");
+        $services = Service::where('status', 1)->get();
+        return inertia("frontend/home", ['services' => $services]);
     }
 
     public function contact()
@@ -96,5 +97,17 @@ class AppController extends Controller
         }
         return back()->with('error', "Une erreur s'est produite lors de l'envoi du message.");
 
+    }
+
+    public function terms() {
+        return inertia("frontend/policies/terms");
+    }
+
+    public function policy() {
+        return inertia("frontend/policies/policy");
+    }
+
+    public function cookies() {
+        return inertia("frontend/policies/cookies");
     }
 }

@@ -28,6 +28,7 @@ import {
 import { Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import EventJoin from '@/components/frontend/events/event-join';
+import { Button } from '@/components/ui/button';
 
 // Composant pour les avis/témoignages
 const ReviewCard = ({ review }: any) => (
@@ -323,11 +324,10 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                         <div className="flex overflow-x-auto hide-scrollbar">
                             <button
                                 onClick={() => setActiveTab('description')}
-                                className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                                    activeTab === 'description'
-                                        ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                }`}
+                                className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'description'
+                                    ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    }`}
                             >
                                 Description
                             </button>
@@ -335,11 +335,10 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                             {!isEventPassed && (
                                 <button
                                     onClick={() => setActiveTab('inscription')}
-                                    className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                                        activeTab === 'inscription'
-                                            ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }`}
+                                    className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'inscription'
+                                        ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        }`}
                                 >
                                     Inscription
                                 </button>
@@ -348,11 +347,10 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                             {isEventPassed && event.reviews && event.reviews.length > 0 && (
                                 <button
                                     onClick={() => setActiveTab('temoignages')}
-                                    className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                                        activeTab === 'temoignages'
-                                            ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                                    }`}
+                                    className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'temoignages'
+                                        ? 'text-red-600 dark:text-red-400 border-b-2 border-red-600 dark:border-red-400'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        }`}
                                 >
                                     Témoignages
                                 </button>
@@ -404,85 +402,25 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                                     </motion.div>
                                 )}
 
-                                {/* Tab: Programme */}
-                                {activeTab === 'programme' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={isDetailsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                        transition={{ duration: 0.6 }}
-                                    >
-                                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Programme détaillé</h2>
-
-                                        {event.schedule && event.schedule.map((day, dayIndex) => (
-                                            <div key={dayIndex} className="mb-8">
-                                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                                                    {day.date && formatEventDate(day.date)} - {day.title}
-                                                </h3>
-
-                                                <div className="relative">
-                                                    {/* Timeline verticale */}
-                                                    <div className="absolute top-0 left-6 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
-
-                                                    <div className="space-y-6">
-                                                        {day.sessions.map((session, sessionIndex) => (
-                                                            <div key={sessionIndex} className="flex">
-                                                                {/* Indicateur de temps avec bulle */}
-                                                                <div className="relative flex-shrink-0 w-12">
-                                                                    <div className="absolute top-1 left-4 w-4 h-4 rounded-full bg-red-600 dark:bg-red-500 ring-4 ring-white dark:ring-gray-800"></div>
-                                                                    <span className="block text-sm font-medium text-gray-500 dark:text-gray-400">
-                                                                        {session.time}
-                                                                    </span>
-                                                                </div>
-
-                                                                {/* Contenu de la session */}
-                                                                <div className="ml-6 pb-8">
-                                                                    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700/30">
-                                                                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                                            {session.title}
-                                                                        </h4>
-                                                                        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">
-                                                                            {session.description}
-                                                                        </p>
-
-                                                                        {session.speaker && (
-                                                                            <div className="flex items-center mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                                                                                <div className="w-8 h-8 rounded-full overflow-hidden mr-2">
-                                                                                    <img
-                                                                                        src={session.speaker.avatar}
-                                                                                        alt={session.speaker.name}
-                                                                                        className="w-full h-full object-cover"
-                                                                                    />
-                                                                                </div>
-                                                                                <div>
-                                                                                    <span className="block text-sm font-medium text-gray-900 dark:text-white">
-                                                                                        {session.speaker.name}
-                                                                                    </span>
-                                                                                    <span className="block text-xs text-gray-500 dark:text-gray-400">
-                                                                                        {session.speaker.title}
-                                                                                    </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        {!event.schedule && (
-                                            <p className="text-gray-600 dark:text-gray-400">
-                                                Le programme détaillé de cet événement sera communiqué prochainement.
-                                            </p>
-                                        )}
-                                    </motion.div>
-                                )}
-
                                 {/* Tab: Inscription (conditionnellement affiché) */}
                                 {activeTab === 'inscription' && !isEventPassed && (
-                                   <EventJoin event={event} auth={null} />
+                                    <>
+                                        {event.available_seats > 0 ? (
+                                            <EventJoin event={event} auth={null} />
+                                        ) : (
+                                            <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-8 text-center">
+                                                <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <Users className="w-8 h-8 text-red-600 dark:text-red-400" />
+                                                </div>
+                                                <h3 className="text-xl font-bold text-red-900 dark:text-red-300 mb-2">
+                                                    Événement complet
+                                                </h3>
+                                                <p className="text-red-700 dark:text-red-400 mb-6">
+                                                    Désolé, toutes les places pour cet événement ont été réservées.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
 
                                 {/* Tab: Témoignages (conditionnellement affiché) */}
@@ -523,7 +461,7 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                                 <div className="sticky top-28">
                                     {/* Carte d'information */}
                                     <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 mb-6">
-                                    <div className="p-6">
+                                        <div className="p-6">
                                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Informations clés</h3>
 
                                             <div className="space-y-4">

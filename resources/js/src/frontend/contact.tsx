@@ -80,7 +80,7 @@ const ContactPage = () => {
             icon: <MapPin size={20} />,
             title: 'Adresse',
             value: settings?.company_address,
-            description: '75008 Paris, France',
+            description: 'Suisse',
             href: `https://maps.google.com/?q=${settings?.company_address}`
         }
     ];

@@ -197,6 +197,8 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                             id="price"
                                             min="0"
                                             step="0.01"
+                                            readOnly={event.is_published}
+                                            disabled={event.is_published}
                                             value={data.price}
                                             onChange={e => setData('price', e.target.value)}
                                             className="h-12"
@@ -205,6 +207,7 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                             CHF
                                         </span>
                                     </div>
+                                    {event.is_published && <div className='text-xs italic'>Impossible de modifier le prix car l'évènement est déjà publié</div>}
                                     {errors.price && <p className="text-red-500 text-sm mt-2">{errors.price}</p>}
                                 </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
-import { Calendar, Clock, MapPin, Users, CheckCircle, Printer, Download, ArrowLeft, Share2, CalendarDays, Mail } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, CheckCircle, Printer, Download, ArrowLeft, Share2, CalendarDays, Mail, FileText } from 'lucide-react';
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils';
 import QRCode from 'react-qr-code';
 
@@ -52,7 +52,7 @@ const PaymentConfirmationPage = ({ event, registration }: any) => {
                     {/* Actions rapides */}
                     <div className="flex flex-wrap gap-3 mb-8 print:hidden">
                         <Link
-                            href={route('evenements.show', event.slug)}
+                            href={route('evenements.details', event.slug)}
                             className="inline-flex items-center bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors duration-200"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -76,6 +76,18 @@ const PaymentConfirmationPage = ({ event, registration }: any) => {
                             <CalendarDays className="w-4 h-4 mr-2" />
                             <span>Ajouter au calendrier</span>
                         </a>
+                        {!isEventFree && (
+                            <button
+                                onClick={() => window.location.href = route('evenements.facture.download', {
+                                    slug: event.slug,
+                                    reference: registration.reference
+                                })}
+                                className="inline-flex items-center bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-4 py-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors duration-200"
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                <span>Télécharger la facture</span>
+                            </button>
+                        )}
                     </div>
 
                     {/* Billet */}
@@ -278,6 +290,18 @@ const PaymentConfirmationPage = ({ event, registration }: any) => {
                                 <Share2 className="w-5 h-5 mr-3" />
                                 <span>Partager le billet</span>
                             </button>
+                            {!isEventFree && (
+                                <button
+                                    onClick={() => window.location.href = route('evenements.facture.download', {
+                                        slug: event.slug,
+                                        reference: registration.reference
+                                    })}
+                                    className="flex items-center justify-center px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors duration-200"
+                                >
+                                    <FileText className="w-5 h-5 mr-3" />
+                                    <span>Télécharger la facture</span>
+                                </button>
+                            )}
                         </div>
 
                         {/* Bouton d'annulation */}

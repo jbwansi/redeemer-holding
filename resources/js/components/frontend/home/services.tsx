@@ -1,29 +1,14 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { UserRound, MessageCircle, UsersRound } from 'lucide-react';
+import { UserRound, MessageCircle, UsersRound, ChevronRight } from 'lucide-react';
+import IconComponent from '@/components/ui/icon';
+import { Link } from '@inertiajs/react';
 
-const Services = () => {
+const Services = ({ services }: any) => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(sectionRef, { once: false, amount: 0.2 });
-
-    // Services data with more premium naming
-    const services = [
-        {
-            icon: <UserRound strokeWidth={1.5} />,
-            title: "Coaching",
-            description: "Le coaching individuel que je propose est conçu pour vous aider à atteindre vos objectifs personnels et professionnels de manière efficace et durable."
-        },
-        {
-            icon: <MessageCircle strokeWidth={1.5} />,
-            title: "Consultation",
-            description: "Ma consultation vous offre une oreille attentive et des conseils personnalisés pour vous aider à atteindre vos objectifs avec confiance."
-        },
-        {
-            icon: <UsersRound strokeWidth={1.5} />,
-            title: "Formation",
-            description: "Les sessions de coaching en groupe vous offrent un espace de partage et de soutien pour travailler ensemble vers vos objectifs."
-        }
-    ];
+    const heroRef = useRef<HTMLDivElement>(null);
+    const isHeroInView = useInView(heroRef, { once: false, amount: 0.3 });
 
     // Animation variants
     const containerVariants = {
@@ -37,20 +22,6 @@ const Services = () => {
         }
     };
 
-    const itemVariants = {
-        hidden: {
-            y: 20,
-            opacity: 0
-        },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: {
-                duration: 0.7,
-                ease: [0.25, 0.1, 0.25, 1]
-            }
-        }
-    };
 
     return (
         <section className="py-24 relative overflow-hidden">
@@ -90,46 +61,37 @@ const Services = () => {
                     animate={isInView ? "visible" : "hidden"}
                     className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12"
                 >
-                    {services.map((service, index) => (
+                    {services.map((service: any, index: any) => (
                         <motion.div
                             key={index}
-                            variants={itemVariants}
-                            className="group relative"
+                            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700/30 transition-all duration-300 hover:shadow-2xl group"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 30 }}
+                            transition={{ duration: 0.7, delay: 0.2 + (index * 0.1) }}
                         >
-                            {/* Service card with glass morphism effect */}
-                            <div className="relative h-full bg-white/70 dark:bg-gray-800/40 backdrop-blur-md rounded-2xl p-8 overflow-hidden border border-gray-100 dark:border-gray-800/50 transition-all duration-500 hover:shadow-xl hover:shadow-gray-200/20 dark:hover:shadow-black/10">
-                                {/* Subtle gradient accent */}
-                                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#DA2E29] to-rose-500 opacity-70"></div>
+                            {/* Top gradient accent */}
+                            <div className={`h-1.5 bg-gradient-to-r ${service.color}`}></div>
 
-                                {/* Content container */}
-                                <div className="relative z-10">
-                                    {/* Icon with animated background */}
-                                    <div className="relative mb-8 inline-block">
-                                        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700/30 flex items-center justify-center text-[#DA2E29]">
-                                            {service.icon}
-                                        </div>
-                                        <motion.div
-                                            className="absolute -inset-3 rounded-full bg-[#DA2E29]/5 scale-0 group-hover:scale-100 opacity-0 group-hover:opacity-100"
-                                            transition={{ duration: 0.4 }}
-                                        />
-                                    </div>
-
-                                    {/* Title with animated underline */}
-                                    <div className="mb-4 inline-block relative">
-                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            {service.title}
-                                        </h3>
-                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#DA2E29]/80 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                                    </div>
-
-                                    {/* Description */}
-                                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                                        {service.description}
-                                    </p>
+                            <div className="p-6 md:p-8">
+                                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/80 flex items-center justify-center text-[#DA2E29] mb-6">
+                                    <IconComponent name={service.icon} color="red" />
                                 </div>
 
-                                {/* Decorative elements */}
-                                <div className="absolute bottom-0 right-0 w-24 h-24 rounded-tl-3xl bg-gradient-to-tl from-[#DA2E29]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+                                    {service.name}
+                                </h2>
+
+                                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                                    {service.excerpt}
+                                </p>
+
+                                <Link
+                                    href={route('services.details', service?.slug)}
+                                    className="inline-flex items-center text-[#DA2E29] font-medium hover:underline group-hover:translate-x-1 transition-transform duration-300"
+                                >
+                                    En savoir plus sur ce service
+                                    <ChevronRight className="ml-1 w-4 h-4" />
+                                </Link>
                             </div>
                         </motion.div>
                     ))}

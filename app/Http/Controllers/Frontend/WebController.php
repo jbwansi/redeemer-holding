@@ -12,6 +12,7 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventParticipant;
 use App\Models\Post;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -67,6 +68,7 @@ class WebController extends Controller
     public function evenement_detail($slug)
     {
         $event = Event::with(['category'])->published()->where('slug', $slug)->first();
+        $event->incrementViews();
         return inertia('frontend/events/show', ['event' => $event]);
     }
 
@@ -163,7 +165,6 @@ class WebController extends Controller
                 'slug' => $event->slug,
                 'participant_id' => $participant->id
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -265,7 +266,6 @@ class WebController extends Controller
 
             return redirect()->route('evenements.details', $slug)
                 ->with('success', 'Votre inscription a été annulée avec succès.');
-
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -279,5 +279,52 @@ class WebController extends Controller
                 'general' => "Une erreur s'est produite lors de l'annulation. Veuillez réessayer."
             ]);
         }
+    }
+
+    /**
+     * Télécharger la facture
+     */
+    public function downloadInvoice($slug, $reference)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $registration = EventParticipant::where('reference', $reference)
+            ->where('event_id', $event->id)
+            ->where('status', 'completed')  // S'assurer que l'inscription est payée
+            ->firstOrFail();
+
+        // Vérifier que c'est un événement payant
+        if ($event->price <= 0) {
+            abort(404);
+        }
+
+        // Vérifier les autorisations
+        if (auth()->check()) {
+            if ($registration->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+                abort(403);
+            }
+        } elseif (!session()->has('temp_participant_' . $registration->id)) {
+            abort(403);
+        }
+
+        // Générer la facture
+        $data = [
+            'event' => $event,
+            'registration' => $registration,
+            'subtotal' => $event->price * $registration->qty,
+            'serviceFee' => $event->price * $registration->qty * 0.05,
+            'total' => $event->price * $registration->qty * 1.05,
+            'date' => $registration->payment_date ?? $registration->created_at,
+            'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
+        ];
+
+        // Générer le PDF
+        $pdf = Pdf::loadView('pdf.event', $data);
+
+        // Options supplémentaires pour le PDF
+        $pdf->setPaper('a4');
+        $pdf->setWarnings(false);
+
+        // Télécharger avec un nom de fichier formaté
+        return $pdf->download('facture_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
     }
 }

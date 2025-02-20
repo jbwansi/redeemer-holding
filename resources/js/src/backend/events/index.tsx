@@ -110,7 +110,7 @@ const EventCard: React.FC<{ event: Event; onEdit: (event: Event) => void; onView
                     {event.is_featured && <div className="absolute top-2 left-2 flex gap-1">
                         <Badge
                             variant={'default'}
-                            className="text-xs text-light"
+                            className="text-xs text-red-500 bg-white"
                         >
                             Vedette
                         </Badge>

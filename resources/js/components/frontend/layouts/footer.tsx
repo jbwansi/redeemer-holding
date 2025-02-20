@@ -54,10 +54,10 @@ const Footer = () => {
             title: "À propos",
             links: [
                 { name: "Mon parcours", href: "/a-propos" },
-                { name: "Témoignages", href: "/temoignages" },
-                { name: "Blog", href: "/blog" },
-                { name: "FAQ", href: "/faq" },
-                { name: "Mentions légales", href: "/mentions-legales" },
+                { name: "Services", href: "/services" },
+                { name: "Blog", href: "/blogs" },
+                { name: "Formations", href: "/formations" },
+                { name: "Politique des cookies", href: route('cookies.show') },
             ],
         },
     ];
@@ -72,11 +72,11 @@ const Footer = () => {
 
     // Contact information
     const contactInfo = [
-        { icon: <Mail size={16} />, content: "contact@redeemer-holding.com" },
-        { icon: <Phone size={16} />, content: "+33 1 23 45 67 89" },
+        { icon: <Mail size={16} />, content: "jb.wansi@redeemerholding.com" },
+        { icon: <Phone size={16} />, content: "+41 76 582 11 09" },
         {
             icon: <MapPin size={16} />,
-            content: "75 Avenue des Champs-Élysées, 75008 Paris, France"
+            content: "Avenue Jean-Marie-Musy 5 1700 Fribourg"
         },
     ];
 
@@ -224,13 +224,13 @@ const Footer = () => {
                         © {currentYear} Redeemer Holding. Tous droits réservés.
                     </div>
                     <div className="flex space-x-6 mt-4 md:mt-0">
-                        <Link href="/politique-confidentialite" className="hover:text-[#DA2E29] transition-colors duration-200">
+                        <Link href={route('policy.show')} className="hover:text-[#DA2E29] transition-colors duration-200">
                             Politique de confidentialité
                         </Link>
-                        <Link href="/conditions-utilisation" className="hover:text-[#DA2E29] transition-colors duration-200">
+                        <Link href={route('terms.show')} className="hover:text-[#DA2E29] transition-colors duration-200">
                             Conditions d'utilisation
                         </Link>
-                        <Link href="/cookies" className="hover:text-[#DA2E29] transition-colors duration-200">
+                        <Link href={route('cookies.show')} className="hover:text-[#DA2E29] transition-colors duration-200">
                             Cookies
                         </Link>
                     </div>

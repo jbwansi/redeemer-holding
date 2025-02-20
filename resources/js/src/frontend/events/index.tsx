@@ -13,7 +13,7 @@ import {
     History,
     CheckCircle
 } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import EventCard from '@/components/frontend/events/event-card';
 
@@ -114,13 +114,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
         return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Vérifier si un événement est passé
-    const isEventPassed = (endDate: string) => {
-        return new Date(endDate) < currentDate;
-    };
-
     return (
-        <FrontLayout>
+        <>
+        <Head title='Evènements' />
+            <FrontLayout>
             <main ref={containerRef} className="min-h-screen bg-white dark:bg-gray-950 pt-32 pb-20 overflow-hidden">
                 {/* Hero Section */}
                 <section ref={heroRef} className="relative pb-16">
@@ -600,6 +597,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                 )}
             </main>
         </FrontLayout>
+        </>
     );
 };
 

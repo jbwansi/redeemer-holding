@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventCategory;
+use App\Models\EventParticipant;
 use App\Services\ImageService;
+use Barryvdh\DomPDF\Facade\Pdf;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -190,12 +193,156 @@ class EventController extends Controller
     }
     public function show($slug)
     {
-        $event = Event::where('slug', $slug)
-            ->with('category')
-            ->firstOrFail();
+        $event = Event::with(['category', 'participants' => function ($query) {
+            $query->where('status', '!=', 'cancelled')
+                ->select('id', 'event_id', 'name', 'status', 'qty', 'created_at');
+        }])->where('slug', $slug)->firstOrFail();
+
+        // Ajouter l'information pour déterminer quel bouton afficher
+        $event->participant_count = $event->participants->sum('qty');
+        $event->is_full = $event->max_participants !== null && $event->participant_count >= $event->max_participants;
 
         return inertia('backend/events/show', [
-            'event' => $event
+            'event' => $event,
+            'canRegister' => !$event->is_full && $event->is_published && new DateTime($event->end_date) > new DateTime(),
         ]);
+    }
+
+    public function participants($slug)
+    {
+        $event = Event::with(['participants' => function ($query) {
+            $query->with(['user'])
+                ->orderBy('created_at', 'desc');
+        }])->where('slug', $slug)->firstOrFail();
+
+        $participants = $event->participants()
+            ->when(request('search'), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('reference', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->through(function ($participant) {
+                return [
+                    'id' => $participant->id,
+                    'name' => $participant->name,
+                    'email' => $participant->email,
+                    'phone' => $participant->phone,
+                    'reference' => $participant->reference,
+                    'qty' => $participant->qty,
+                    'status' => $participant->status,
+                    'created_at' => $participant->created_at,
+                    'payment_date' => $participant->payment_date,
+                    'payment_amount' => $participant->payment_amount,
+                ];
+            });
+
+        $event->participant_count = $event->participants->sum('qty');
+
+        return inertia('backend/events/participants', [
+            'event' => $event,
+            'participants' => $participants->items(),
+            'meta' => [
+                'total' => $participants->total(),
+                'per_page' => $participants->perPage(),
+                'current_page' => $participants->currentPage(),
+                'last_page' => $participants->lastPage(),
+                'from' => $participants->firstItem(),
+                'to' => $participants->lastItem(),
+                'links' => $participants->linkCollection()->toArray()
+            ]
+        ]);
+    }
+
+    /**
+     * Télécharger la facture d'un participant
+     */
+    public function downloadInvoice($slug, $reference)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $registration = EventParticipant::where('reference', $reference)
+            ->where('event_id', $event->id)
+            ->where('status', 'completed')
+            ->firstOrFail();
+
+        // Préparer les données pour la facture
+        $data = [
+            'event' => $event,
+            'registration' => $registration,
+            'subtotal' => $event->price * $registration->qty,
+            'serviceFee' => $event->price * $registration->qty * 0.05,
+            'total' => $event->price * $registration->qty * 1.05,
+            'date' => $registration->payment_date ?? $registration->created_at,
+            'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
+        ];
+
+        // Générer le PDF
+        $pdf = Pdf::loadView('pdf.event', $data);
+
+        // Télécharger avec un nom formaté
+        return $pdf->download('facture_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Afficher les détails d'un participant
+     */
+    public function showParticipant($slug, $participantId)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+        $participant = EventParticipant::with(['event'])->findOrFail($participantId);
+
+        if ($participant->event_id !== $event->id) {
+            abort(404);
+        }
+
+        // Calculer les montants
+        $subtotal = $event->price * $participant->qty;
+        $serviceFee = $event->price > 0 ? $subtotal * 0.05 : 0;
+        $total = $subtotal + $serviceFee;
+
+        return inertia('backend/events/participant-details', [
+            'event' => $event,
+            'participant' => array_merge($participant->toArray(), [
+                'subtotal' => $subtotal,
+                'serviceFee' => $serviceFee,
+                'total' => $total,
+                'formattedCreatedAt' => $participant->created_at->format('d/m/Y H:i'),
+                'formattedPaymentDate' => $participant->payment_date ?
+                    (new \DateTime($participant->payment_date))->format('d/m/Y H:i') : null,
+                'statusLabel' => $this->getStatusLabel($participant->status),
+                'canBeCancelled' => $this->canBeCancelled($participant, $event),
+            ])
+        ]);
+    }
+
+    /**
+     * Obtenir le libellé du statut
+     */
+    private function getStatusLabel($status)
+    {
+        return [
+            'pending' => 'En attente',
+            'completed' => 'Payé',
+            'cancelled' => 'Annulé',
+            'in_progress' => 'En cours'
+        ][$status] ?? $status;
+    }
+
+    /**
+     * Vérifier si l'inscription peut être annulée
+     */
+    private function canBeCancelled($participant, $event)
+    {
+        if ($participant->status === 'cancelled') {
+            return false;
+        }
+
+        $cancellationDeadline = (new \DateTime($event->start_date))
+            ->modify('-24 hours');
+
+        return now() <= $cancellationDeadline;
     }
 }

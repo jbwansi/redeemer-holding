@@ -2,16 +2,15 @@ import Hero from '@/components/frontend/home/hero'
 import Services from '@/components/frontend/home/services'
 import CalendlyCTA from '@/components/frontend/layouts/calendly-cta'
 import FrontLayout from '@/components/frontend/layouts/front-layout'
-import AdvancedGallery from '@/components/frontend/vertical-gallery'
 import { Head } from '@inertiajs/react'
 import React from 'react'
 
-function Home() {
+function Home( { services}: any) {
     return (
         <FrontLayout>
             <Head title='Accueil' />
             <Hero/>
-            <Services/>
+            <Services services={services} />
             <CalendlyCTA/>
         </FrontLayout>
     )

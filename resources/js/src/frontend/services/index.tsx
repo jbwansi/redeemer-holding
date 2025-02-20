@@ -11,7 +11,7 @@ import {
     CheckCircle,
     ArrowRight,
 } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import IconComponent from '@/components/ui/icon';
 import { fetchSettings } from '@/api/settings';
@@ -161,6 +161,8 @@ const ServicesPage = ({services}: any) => {
     };
 
     return (
+       <>
+        <Head title='Services' />
         <FrontLayout>
             <main ref={containerRef} className="min-h-screen bg-white dark:bg-gray-950 pt-32 pb-20 overflow-hidden">
                 {/* Hero Section */}
@@ -526,6 +528,7 @@ const ServicesPage = ({services}: any) => {
                 </section>
             </main>
         </FrontLayout>
+       </>
     );
 };
 

@@ -16,7 +16,7 @@ import {
     Filter,
     X
 } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { Category } from '@/types/category';
 import { PostProps, PostResponse, SinglePostResponse } from '@/types/post';
@@ -195,26 +195,6 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
         return matchesSearch && matchesCategory && matchesTag;
     });
 
-    // Animation variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.1,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-        },
-    };
 
     // Gestion des filtres
     const handleCategorySelect = (categoryName: any) => {
@@ -232,7 +212,9 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
     };
 
     return (
-        <FrontLayout>
+        <>
+        <Head title='Blogs' />
+            <FrontLayout>
             <main ref={containerRef} className="min-h-screen bg-white dark:bg-gray-950 pt-32 pb-20 overflow-hidden">
                 {/* Hero Section */}
                 <section ref={heroRef} className="relative pb-16">
@@ -830,6 +812,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
 
             </main>
         </FrontLayout>
+        </>
     );
 };
 
