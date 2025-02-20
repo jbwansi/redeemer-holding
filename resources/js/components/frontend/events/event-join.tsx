@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useForm } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { AlertCircle, Ticket, X, Check } from 'lucide-react';
 
 const EventJoin = ({ event, auth }: any) => {
@@ -234,13 +234,13 @@ const EventJoin = ({ event, auth }: any) => {
 
                         <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
                             En réservant, vous acceptez nos{' '}
-                            <a href="#" className="text-red-600 dark:text-red-400 hover:underline">
+                            <Link href={route('terms.show')} className="text-red-600 dark:text-red-400 hover:underline">
                                 conditions générales
-                            </a>{' '}
+                            </Link>{' '}
                             et notre{' '}
-                            <a href="#" className="text-red-600 dark:text-red-400 hover:underline">
+                            <Link href={route('policy.show')} className="text-red-600 dark:text-red-400 hover:underline">
                                 politique de confidentialité
-                            </a>.
+                            </Link>.
                         </p>
                     </div>
                 </form>
