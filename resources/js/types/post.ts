@@ -51,12 +51,15 @@ export interface PostImageUrls {
 
 export interface PostProps {
     id: number;
+    slug: string;
+    views: number;
     title: string;
     excerpt: string;
     publishedAt: string;
     readTime: string;
     category: string;
     coverImage: PostImageUrls;
+    content: string;
     author: AuthorProps;
     tags: string[];
 }

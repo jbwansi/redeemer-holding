@@ -22,8 +22,13 @@ import { Link } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import { SinglePostResponse } from '@/types/post';
 
-const BlogPostDetail = ({ post, relatedPosts }: any) => {
+interface Props {
+    post: SinglePostResponse;
+    relatedPosts: any;
+}
+const BlogPostDetail = ({ post, relatedPosts }: Props) => {
     // États
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
@@ -60,7 +65,7 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
     });
 
     // Données d'exemple pour l'article (à remplacer par les props)
-    const postData = post || {
+    const postData = post?.data || {
         id: 1,
         title: "7 habitudes qui transformeront votre quotidien en 30 jours",
         excerpt: "Découvrez les techniques scientifiquement prouvées pour créer des habitudes durables et transformer votre vie progressivement et sans effort.",
@@ -152,7 +157,7 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
         const headingObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    setActiveHeading(entry.target.getAttribute('id'));
+                    setActiveHeading(entry.target.getAttribute('id') || '');
                 }
             });
         }, observerOptions);
@@ -235,30 +240,30 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
                                 </div>
                                 <div className="flex items-center">
                                     <Clock className="w-4 h-4 mr-2" />
-                                    <span>{postData.readingTime}</span>
+                                    <span>{postData?.readTime}</span>
                                 </div>
                                 <div className="flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
-                                    <span>{postData.viewCount.toLocaleString()} lectures</span>
+                                    <span>{postData.views} lectures</span>
                                 </div>
                             </div>
 
                             {/* Author info */}
                             <div className="flex items-center justify-center">
                                 <img
-                                    src={postData.authorAvatar}
-                                    alt={postData.authorName}
+                                    src={postData?.author.avatar}
+                                    alt={postData?.author.name}
                                     className="w-12 h-12 rounded-full object-cover border-2 border-red-100 dark:border-red-900/30"
                                 />
                                 <div className="ml-4 text-left">
                                     <div className="text-gray-900 dark:text-white font-medium">
-                                        {postData.authorName}
+                                        {postData.author.name}
                                     </div>
                                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        {postData.authorRole}
+                                        {postData.author?.name}
                                     </div>
                                 </div>
                             </div>
@@ -275,7 +280,7 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
                         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-xl">
                                 <img
-                                    src={postData.coverImage}
+                                    src={postData.coverImage.original}
                                     alt={postData.title}
                                     className="w-full h-full object-cover"
                                 />
@@ -311,8 +316,8 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
                                         <button
                                             onClick={handleBookmark}
                                             className={`p-2 rounded-full ${isBookmarked
-                                                    ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-                                                    : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                                                ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+                                                : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
                                                 } hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200`}
                                         >
                                             <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : 'fill-none'}`} />
@@ -354,21 +359,21 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
                                     <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                                         <div className="flex-shrink-0">
                                             <img
-                                                src={postData.authorAvatar}
-                                                alt={postData.authorName}
+                                                src={postData?.author.avatar}
+                                                alt={postData?.author.name}
                                                 className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md"
                                             />
                                         </div>
                                         <div>
                                             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                                                {postData.authorName}
+                                                {postData?.author.name}
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                                {postData.authorBio}
+                                                {postData.excerpt}
                                             </p>
                                             <div className="flex space-x-3">
                                                 <Link
-                                                    href={`/auteurs/${postData.authorName.toLowerCase().replace(/\s+/g, '-')}`}
+                                                    href={`/auteurs/${postData.author.name}`}
                                                     className="text-red-600 dark:text-red-400 font-medium hover:underline"
                                                 >
                                                     Voir tous ses articles
@@ -397,12 +402,12 @@ const BlogPostDetail = ({ post, relatedPosts }: any) => {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            document.getElementById('comments').scrollIntoView({ behavior: 'smooth' });
+
                                         }}
                                         className="flex items-center text-gray-500 dark:text-gray-400"
                                     >
                                         <MessageCircle className="w-6 h-6" />
-                                        <span className="ml-1">{postData.commentCount}</span>
+                                        <span className="ml-1">{10}</span>
                                     </button>
                                     <button
                                         onClick={handleBookmark}

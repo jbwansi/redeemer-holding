@@ -28,8 +28,10 @@ class PostResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'slug' => $this->slug,
             'title' => $this->title,
             'excerpt' => $this->excerpt,
+            'content' => $this->content,
             'coverImage' => $coverImage,
             'category' => $category ? $category->name : null,
             'author' => [
@@ -38,7 +40,8 @@ class PostResource extends JsonResource
             ],
             'publishedAt' => Carbon::parse($this->published_at)->locale('fr')->isoFormat('D MMMM YYYY'),
             'readTime' => $readTimeMinutes . " min de lecture",
-            'tags' => $this->tags ?? []
+            'tags' => $this->tags ?? [],
+            "views" => $this->views
         ];
     }
 }

@@ -487,7 +487,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                 </div>
 
                                 <Link
-                                    href={`/blogs/${featuredPostData.slug}`}
+                                    href={route('blogs.details', featuredPostData.slug)}
                                     className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300"
                                 >
                                     <span>Lire l'article</span>
@@ -636,7 +636,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                                 </div>
 
                                                 <Link
-                                                    href={`/blog/${post?.slug}`}
+                                                    href={`/blogs/${post?.slug}`}
                                                     className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                                 >
                                                     <ArrowRight className="w-5 h-5" />

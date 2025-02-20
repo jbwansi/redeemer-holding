@@ -36,7 +36,10 @@ class WebController extends Controller
 
     public function blog_detail($slug)
     {
-        return inertia('frontend/blogs/show');
+
+        $blog = PostResource::make(Post::with(['user', 'categories'])->published()->where('slug', $slug)->first());
+
+        return inertia('frontend/blogs/show', ['post' => $blog]);
     }
     public function events()
     {
