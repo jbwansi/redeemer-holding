@@ -8,7 +8,8 @@ import {
     Moon,
     ChevronRight,
     LogIn,
-    Calendar1
+    Calendar1,
+    User
 } from 'lucide-react';
 
 import {
@@ -19,6 +20,7 @@ import {
 
 import { useTheme } from "@/components/theme-provider";
 import { useSettings } from '@/hooks/use-settings';
+import { route } from 'ziggy-js';
 
 const Navbar = () => {
     const [searchActive, setSearchActive] = useState(false);
@@ -337,7 +339,7 @@ const Navbar = () => {
                     </motion.button>
 
                     {/* Login Icon Button (replacing profile) */}
-                    <Link href={auth?.user ? route('login') : route('dashboard')}>
+                    <Link href={!auth?.user ? route('login') : route('dashboard.client.profile')}>
                         <motion.div
                             variants={buttonHoverEffect}
                             initial="rest"
@@ -345,7 +347,7 @@ const Navbar = () => {
                             whileTap="tap"
                             className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-[#DA2E29] to-rose-600 text-white shadow-md shadow-rose-600/10 dark:shadow-rose-900/20"
                         >
-                            <LogIn className="w-[18px] h-[18px]" />
+                            {auth?.user ? <User className="w-[18px] h-[18px]" /> : <LogIn className="w-[18px] h-[18px]" />}
                         </motion.div>
                     </Link>
 
@@ -435,7 +437,7 @@ const Navbar = () => {
                                             </button>
 
                                             <Link
-                                                href={auth?.user ? route('login') : route('dashboard')}
+                                                href={auth?.user ? route('login') : route('dashboard.client.profile')}
                                                 className="flex items-center space-x-2 text-[#DA2E29] font-medium group"
                                             >
                                                 <span>Connexion</span>

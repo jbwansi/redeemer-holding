@@ -75,6 +75,7 @@ Route::get('politique-des-cookies', [AppController::class, 'cookies'])->name('co
 Route::middleware(['guest'])->group(function () {
     Route::get('login', [AuthController::class, 'show_auth'])->name("login");
     Route::post('login', [AuthController::class, 'login'])->name("login");
+    Route::post('register', [AuthController::class, 'register'])->name("register");
     Route::get('password/request', [AuthController::class, 'password_request'])->name('password.request');
 });
 
@@ -206,5 +207,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                     ->name('formations.participants.invoice');
             });
         });
+    });
+});
+Route::middleware('auth')->group(function () {
+    Route::controller(App\Http\Controllers\Frontend\DashboardController::class)->group(function () {
+        Route::get('dashboard-client/profile', 'index')->name('dashboard.client.profile');
     });
 });

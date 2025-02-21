@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
 import { InputField } from '@/components/frontend/auth/input-field';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import { route } from 'ziggy-js';
 
 const AuthPage = () => {
     const [activeTab, setActiveTab] = useState('login');
@@ -121,7 +122,7 @@ const AuthPage = () => {
 const LoginForm = ({ setActiveTab }: any) => {
     const [showPassword, setShowPassword] = useState(false);
 
-    const { data, setData, post:loginPost, processing, errors:loginErrors, reset } = useForm({
+    const { data, setData, post: loginPost, processing, errors: loginErrors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
@@ -281,7 +282,7 @@ const RegisterForm = ({ setActiveTab }: any) => {
                     name="name"
                     type="text"
                     value={data.name}
-                    onChange={e => setData('name', e.target.value)}
+                    onChange={(e: any) => setData('name', e.target.value)}
                     required
                     autoComplete="name"
                     placeholder="Nom complet"
@@ -363,7 +364,7 @@ const RegisterForm = ({ setActiveTab }: any) => {
                 <div className="pt-2">
                     <button
                         type="submit"
-                        disabled={processing}
+                        disabled={processing || !data.terms}
                         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#DA2E29] hover:bg-[#c02824] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DA2E29] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
                         {processing ? (
