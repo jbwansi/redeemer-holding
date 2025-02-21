@@ -14,6 +14,7 @@ const TabSystem = () => {
         name: auth.user.name,
         email: auth.user.email,
         phone: auth.user.phone,
+        bio: auth.user.bio,
     });
 
     const handleSubmit = (e: any) => {
@@ -35,7 +36,7 @@ const TabSystem = () => {
                 <div className="mx-auto max-w-screen-2xl">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {/* Section informations personnelles */}
-                        <div className="border rounded-lg p-4 sm:p-6 bg-white dark:bg-gray-800 shadow-sm">
+                        <div className="border rounded-lg p-4 sm:p-6 bg-white dark:bg-gray-900 shadow-sm">
                             <h2 className="text-lg sm:text-xl font-semibold">
                                 Information personnelle
                             </h2>
@@ -88,7 +89,18 @@ const TabSystem = () => {
                                         <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                                     )}
                                 </div>
+                                {/* biographie */}
+                                <div>
+                                    <label htmlFor="bio" className="block mb-2 font-semibold">Biographie</label>
+                                    <textarea
+                                        id="bio"
+                                        placeholder='Votre biographie'
+                                        value={data.bio}
+                                        onChange={e => setData('bio', e.target.value)}
 
+                                        className="flex h-24 w-full rounded-xl border border-input bg-transparent px-3 py-1 text-xl shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                    ></textarea>
+                                </div>
                                 <div className="flex justify-end">
                                     <Button
                                         type="submit"

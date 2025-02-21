@@ -1,15 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
-    ChevronRight,
+
     Calendar,
-    User,
+
     Clock,
     Share2,
-    Facebook,
-    Twitter,
-    Linkedin,
-    Mail,
+
     Link as LinkIcon,
     MessageCircle,
     Heart,
@@ -22,13 +19,15 @@ import { Link } from '@inertiajs/react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
-import { SinglePostResponse } from '@/types/post';
+import { PostResponse, SinglePostResponse } from '@/types/post';
 
 interface Props {
     post: SinglePostResponse;
-    relatedPosts: any;
+    relatedPosts: PostResponse;
 }
 const BlogPostDetail = ({ post, relatedPosts }: Props) => {
+    console.log("relatedPosts", relatedPosts);
+
     // États
     const [isBookmarked, setIsBookmarked] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
@@ -43,13 +42,12 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
     const contentRef = useRef(null);
     const commentsRef = useRef(null);
     const relatedRef = useRef(null);
-    const tocRef = useRef(null);
-    const shareRef = useRef(null);
+
 
     // Détection de visibilité pour animations
     const isHeroInView = useInView(heroRef, { once: false, amount: 0.3 });
     const isContentInView = useInView(contentRef, { once: false, amount: 0.1 });
-    const isCommentsInView = useInView(commentsRef, { once: false, amount: 0.3 });
+
     const isRelatedInView = useInView(relatedRef, { once: false, amount: 0.3 });
 
     // Animation parallax
@@ -86,7 +84,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
     };
 
     // Données d'exemple pour les articles liés (à remplacer par les props)
-    const relatedPostsData = relatedPosts || [
+    const relatedPostsData = relatedPosts?.data || [
         {
             id: 8,
             title: "Comment établir une routine matinale qui transforme votre journée",
@@ -138,12 +136,6 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
         });
     };
 
-    const formatRelativeDate = (dateString: any) => {
-        return formatDistanceToNow(new Date(dateString), {
-            addSuffix: true,
-            locale: fr
-        });
-    };
 
     // Gestion de l'observation des en-têtes pour la table des matières
     useEffect(() => {
@@ -262,9 +254,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                                     <div className="text-gray-900 dark:text-white font-medium">
                                         {postData.author.name}
                                     </div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                        {postData.author?.name}
-                                    </div>
+
                                 </div>
                             </div>
                         </motion.div>
@@ -278,7 +268,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                         transition={{ duration: 0.7, delay: 0.2 }}
                     >
                         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="aspect-w-16 aspect-h-9 rounded-2xl overflow-hidden shadow-xl">
+                            <div className="aspect-w-16 aspect-h-9 h-[400px] rounded-2xl overflow-hidden shadow-xl">
                                 <img
                                     src={postData.coverImage.original}
                                     alt={postData.title}
@@ -302,36 +292,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                                 animate={isContentInView ? { opacity: 1 } : { opacity: 0 }}
                                 transition={{ duration: 0.7 }}
                             >
-                                {/* Article actions - Desktop */}
-                                <div className="hidden lg:flex justify-end mb-8">
-                                    <div className="flex items-center space-x-4">
-                                        <button
-                                            onClick={handleLike}
-                                            className={`flex items-center space-x-1 ${isLiked ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
-                                                } hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200`}
-                                        >
-                                            <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : 'fill-none'}`} />
-                                            <span>{likeCount}</span>
-                                        </button>
-                                        <button
-                                            onClick={handleBookmark}
-                                            className={`p-2 rounded-full ${isBookmarked
-                                                ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-                                                : 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
-                                                } hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200`}
-                                        >
-                                            <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : 'fill-none'}`} />
-                                        </button>
-                                        <button
-                                            onClick={handleShare}
-                                            className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
-                                        >
-                                            <Share2 className="w-5 h-5" />
-                                        </button>
-                                    </div>
-                                </div>
 
-                                {/* Article content */}
                                 <article className="prose prose-lg dark:prose-invert prose-red max-w-none mb-10">
                                     <div dangerouslySetInnerHTML={{ __html: postData.content }} />
                                 </article>
@@ -369,15 +330,10 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                                                 {postData?.author.name}
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-300 mb-4">
-                                                {postData.excerpt}
+                                                {postData?.author.bio}
                                             </p>
                                             <div className="flex space-x-3">
-                                                <Link
-                                                    href={`/auteurs/${postData.author.name}`}
-                                                    className="text-red-600 dark:text-red-400 font-medium hover:underline"
-                                                >
-                                                    Voir tous ses articles
-                                                </Link>
+
                                                 <span className="text-gray-300 dark:text-gray-700">|</span>
                                                 <Link
                                                     href="/contact"
@@ -447,7 +403,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                         </motion.div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {relatedPostsData.map((post: any, index: any) => (
+                            {relatedPostsData?.map((post: any, index: any) => (
                                 <motion.article
                                     key={post.id}
                                     className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 flex flex-col h-full group"
@@ -458,7 +414,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                                     {/* Image container with overlay */}
                                     <div className="relative overflow-hidden h-48">
                                         <img
-                                            src={post.coverImage}
+                                            src={post.coverImage.original}
                                             alt={post.title}
                                             className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
                                         />
@@ -506,7 +462,7 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
                                             </div>
 
                                             <Link
-                                                href={`/blog/${post.id}`}
+                                                href={`/blog/${post.slug}`}
                                                 className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                                             >
                                                 <ArrowRight className="w-5 h-5" />

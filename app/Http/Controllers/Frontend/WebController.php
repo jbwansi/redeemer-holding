@@ -14,6 +14,7 @@ use App\Models\EventParticipant;
 use App\Models\Post;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -51,8 +52,15 @@ class WebController extends Controller
     {
 
         $blog = PostResource::make(Post::with(['user', 'categories'])->published()->where('slug', $slug)->first());
-
-        return inertia('frontend/blogs/show', ['post' => $blog]);
+        $relatedPosts = Post::with(['user', 'categories'])->published()->whereHas('categories', function ($query) use ($blog) {
+            $query->where('category_id', $blog->categories->first()->id);
+        });
+        $cacheKey = "viewed_page_{$blog->id}_" . request()->ip();
+        if (!Cache::has($cacheKey)) {
+            $blog->increment('views');
+            Cache::put($cacheKey, true, now()->addHours(1));
+        }
+        return inertia('frontend/blogs/show', ['post' => $blog, 'relatedPosts' => new PostCollection($relatedPosts->get())]);
     }
 
 

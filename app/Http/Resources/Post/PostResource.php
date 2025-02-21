@@ -36,9 +36,10 @@ class PostResource extends JsonResource
             'category' => $category ? $category->name : null,
             'author' => [
                 'name' => $this->user->name,
-                'avatar' => $this->user->avatar ?? "/assets/images/avatar.jpg"
+                'avatar' => $this->user->avatar ?? "/assets/images/avatar.jpg",
+                "bio" => $this->user->bio ?? "Pas de biographie",
             ],
-            'publishedAt' => Carbon::parse($this->published_at)->locale('fr')->isoFormat('D MMMM YYYY'),
+            'publishedAt' => $this->created_at,
             'readTime' => $readTimeMinutes . " min de lecture",
             'tags' => $this->tags ?? [],
             "views" => $this->views
