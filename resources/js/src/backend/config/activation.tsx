@@ -21,7 +21,9 @@ import {
     Calendar,
     CircleDollarSign,
     Store,
-    HeartHandshake
+    HeartHandshake,
+    BookOpen,
+    Home
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
@@ -94,16 +96,16 @@ const Activation = () => {
 
     const modules = [
         {
-            title: "Radio & Streaming",
-            description: "Modules liés à la diffusion et au streaming",
-            icon: <Music2 className="h-5 w-5" />,
+            title: "Prinpal",
+            description: "Modules principaux de l'application.",
+            icon: <Home className="h-5 w-5" />,
             features: [
                 {
                     name: "Formations",
                     description: "Module principal des formations",
                     enabled: data.enable_radio,
                     key: "enable_radio",
-                    icon: <Radio className="h-4 w-4" />
+                    icon: <BookOpen className="h-4 w-4" />
                 },
                 {
                     name: "Services",
