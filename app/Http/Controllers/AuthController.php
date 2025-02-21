@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Services\AuthenticationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +28,13 @@ class AuthController extends Controller
 
         return redirect()->route('dashboard');
     }
+    public function register(RegisterRequest $request)
+    {
+        $user = $this->authService->register($request);
 
+        return redirect()->route('dashboard')
+            ->with('success', 'Compte créé avec succès!');
+    }
     public function logout(Request $request): RedirectResponse
     {
         $this->authService->logout();
