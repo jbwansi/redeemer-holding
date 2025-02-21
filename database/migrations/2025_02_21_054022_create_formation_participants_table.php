@@ -32,7 +32,7 @@ return new class extends Migration
 
 
             $table->string('refund_id')->nullable();
-            $table->decimal('refund_amount', 10, 2);
+            $table->decimal('refund_amount', 10, 2)->nullable();
             $table->timestamp('refund_date')->nullable();
 
 
