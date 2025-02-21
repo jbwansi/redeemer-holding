@@ -47,7 +47,7 @@ const FormationPaymentPage = ({ formation, participant, subtotal, serviceFee, to
                     <div className="mb-8">
                         <Link
                             href={route('formations.details', formation.slug)}
-                            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-4 transition-colors duration-200"
+                            className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 mb-4 transition-colors duration-200"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2" />
                             <span>Retour à la formation</span>
@@ -178,14 +178,14 @@ const FormationPaymentPage = ({ formation, participant, subtotal, serviceFee, to
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                                                <p className="text-blue-700 dark:text-blue-300 text-sm mb-2">
+                                            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+                                                <p className="text-red-700 dark:text-red-300 text-sm mb-2">
                                                     Veuillez compléter votre inscription dans:
                                                 </p>
                                                 <CountdownTimer
                                                     expiryTimestamp={expirationTime}
                                                     onExpire={handleTimerExpired}
-                                                    className="text-2xl font-mono font-bold text-blue-800 dark:text-blue-200"
+                                                    className="text-2xl font-mono font-bold text-red-800 dark:text-red-200"
                                                 />
                                             </div>
                                         )}
@@ -224,7 +224,7 @@ const FormationPaymentPage = ({ formation, participant, subtotal, serviceFee, to
                                                 disabled={isRedirecting}
                                                 className={`w-full py-4 rounded-lg font-medium text-center transition-colors duration-300 flex items-center justify-center ${isRedirecting
                                                         ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                        : 'bg-red-600 hover:bg-red-700 text-white'
                                                     }`}
                                             >
                                                 {isRedirecting ? (
@@ -245,11 +245,11 @@ const FormationPaymentPage = ({ formation, participant, subtotal, serviceFee, to
 
                                             <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
                                                 En procédant au paiement, vous acceptez nos{' '}
-                                                <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                <a href="#" className="text-red-600 dark:text-red-400 hover:underline">
                                                     conditions générales
                                                 </a>{' '}
                                                 et notre{' '}
-                                                <a href="#" className="text-blue-600 dark:text-blue-400 hover:underline">
+                                                <a href="#" className="text-red-600 dark:text-red-400 hover:underline">
                                                     politique de confidentialité
                                                 </a>.
                                             </p>

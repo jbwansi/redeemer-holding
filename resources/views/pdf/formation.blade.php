@@ -67,7 +67,7 @@
         }
 
         .section-title {
-            color: #2563eb;
+            color: #eb2525;
             font-size: 15px;
             font-weight: bold;
             margin: 0 0 8px 0;
@@ -91,7 +91,7 @@
         .formation-details h3 {
             margin: 0 0 8px 0;
             font-size: 15px;
-            color: #1e40af;
+            color: #af1e1e;
         }
 
         table {

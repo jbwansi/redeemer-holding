@@ -63,7 +63,7 @@ const FormationConfirmationPage = ({ formation, registration }: any) => {
 
                         <button
                             onClick={handlePrint}
-                            className="inline-flex items-center bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200"
+                            className="inline-flex items-center bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 px-4 py-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
                         >
                             <Printer className="w-4 h-4 mr-2" />
                             <span>Imprimer la confirmation</span>
@@ -96,7 +96,7 @@ const FormationConfirmationPage = ({ formation, registration }: any) => {
                     {/* Certificat d'inscription */}
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 mb-8 relative print:shadow-none print:border-0">
                         {/* En-tête */}
-                        <div className="bg-blue-600 text-white px-6 py-4 print:bg-white print:text-black">
+                        <div className="bg-red-600 text-white px-6 py-4 print:bg-white print:text-black">
                             <div className="flex justify-between items-center">
                                 <h2 className="text-xl font-bold">Certificat d'inscription</h2>
                                 <div className="text-sm">REF: {registration.reference}</div>
@@ -215,23 +215,23 @@ const FormationConfirmationPage = ({ formation, registration }: any) => {
                                 <h4 className="font-medium text-gray-900 dark:text-white mb-4">
                                     Accès à la formation
                                 </h4>
-                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                                <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
                                     <ul className="space-y-3">
                                         <li className="flex items-start">
-                                            <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
-                                            <span className="text-blue-700 dark:text-blue-300">
+                                            <BookOpen className="w-5 h-5 text-red-600 dark:text-red-400 mr-3 mt-0.5" />
+                                            <span className="text-red-700 dark:text-red-300">
                                                 Connectez-vous à votre espace apprenant pour accéder au contenu de la formation
                                             </span>
                                         </li>
                                         <li className="flex items-start">
-                                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
-                                            <span className="text-blue-700 dark:text-blue-300">
+                                            <Calendar className="w-5 h-5 text-red-600 dark:text-red-400 mr-3 mt-0.5" />
+                                            <span className="text-red-700 dark:text-red-300">
                                                 La formation débute le {formatDate(formation.start_date)}
                                             </span>
                                         </li>
                                         <li className="flex items-start">
-                                            <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400 mr-3 mt-0.5" />
-                                            <span className="text-blue-700 dark:text-blue-300">
+                                            <Mail className="w-5 h-5 text-red-600 dark:text-red-400 mr-3 mt-0.5" />
+                                            <span className="text-red-700 dark:text-red-300">
                                                 Vous recevrez un email avec les instructions détaillées avant le début de la formation
                                             </span>
                                         </li>
@@ -248,12 +248,12 @@ const FormationConfirmationPage = ({ formation, registration }: any) => {
                         </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <Link
+                            {/* <Link
                                 href="/dashboard/formations"
-                                className="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+                                className="flex items-center justify-center px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200">
                                 <BookOpen className="w-5 h-5 mr-3" />
                                 <span>Accéder à mon espace formation</span>
-                            </Link>
+                            </Link> */}
 
                             <button
                                 onClick={handlePrint}

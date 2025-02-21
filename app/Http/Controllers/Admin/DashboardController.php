@@ -3,12 +3,388 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
+use App\Models\EventParticipant;
+use App\Models\Formation;
+use App\Models\FormationParticipant;
+use App\Models\Post;
+use App\Models\Service;
+use App\Models\ServiceRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return inertia("backend/index");
+        // Calculer les statistiques
+        $stats = [
+            'events' => [
+                'active' => Event::where('end_date', '>=', now())->count(),
+                'total' => Event::count(),
+                'trend' => $this->calculateTrend('events'),
+            ],
+            'trainings' => [
+                'active' => Formation::where('is_published', true)->count(),
+                'total' => Formation::count(),
+                'trend' => $this->calculateTrend('trainings'),
+            ],
+            'services' => [
+                'active' => Service::where('status', true)->count(),
+                'total' => Service::count(),
+                'trend' => $this->calculateTrend('services'),
+            ],
+            'posts' => [
+                'published' => Post::where('published', true)->count(),
+                'total' => Post::count(),
+                'trend' => $this->calculateTrend('posts'),
+            ],
+            'users' => [
+                'total' => User::count(),
+                'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
+                'trend' => $this->calculateTrend('users'),
+            ],
+            'revenue' => [
+                'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
+                'last_month' => $this->calculateRevenue(
+                    now()->subMonth()->startOfMonth(),
+                    now()->subMonth()->endOfMonth()
+                ),
+                'trend' => $this->calculateRevenueTrend(),
+            ],
+            'monthly_revenue' => $this->getMonthlyRevenue(),
+            'revenue_distribution' => $this->getRevenueDistribution(),
+            'activity_by_type' => $this->getActivityByType(),
+            'top_content' => $this->getTopContent(),
+        ];
+
+        return inertia("backend/index", [
+            'stats' => $stats
+        ]);
+    }
+
+    private function calculateTrend($type)
+    {
+        // Calcul basique du trend : comparer ce mois avec le mois dernier
+        $currentMonth = match ($type) {
+            'events' => Event::whereMonth('created_at', now()->month)->count(),
+            'trainings' => Formation::whereMonth('created_at', now()->month)->count(),
+            'services' => Service::whereMonth('created_at', now()->month)->count(),
+            'posts' => Post::whereMonth('created_at', now()->month)->count(),
+            'users' => User::whereMonth('created_at', now()->month)->count(),
+        };
+
+        $lastMonth = match ($type) {
+            'events' => Event::whereMonth('created_at', now()->subMonth()->month)->count(),
+            'trainings' => Formation::whereMonth('created_at', now()->subMonth()->month)->count(),
+            'services' => Service::whereMonth('created_at', now()->subMonth()->month)->count(),
+            'posts' => Post::whereMonth('created_at', now()->subMonth()->month)->count(),
+            'users' => User::whereMonth('created_at', now()->subMonth()->month)->count(),
+        };
+
+        if ($lastMonth == 0) return 100;
+        return round((($currentMonth - $lastMonth) / $lastMonth) * 100, 1);
+    }
+
+    private function calculateRevenue($start, $end)
+    {
+        return EventParticipant::where('status', 'completed')
+            ->whereBetween('payment_date', [$start, $end])
+            ->sum('payment_amount');
+    }
+
+    private function calculateRevenueTrend()
+    {
+        $currentRevenue = $this->calculateRevenue(
+            now()->startOfMonth(),
+            now()
+        );
+
+        $lastRevenue = $this->calculateRevenue(
+            now()->subMonth()->startOfMonth(),
+            now()->subMonth()->endOfMonth()
+        );
+
+        if ($lastRevenue == 0) return 100;
+        return round((($currentRevenue - $lastRevenue) / $lastRevenue) * 100, 1);
+    }
+
+    private function getMonthlyRevenue()
+    {
+        $months = collect();
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $months->push([
+                'month' => $date->format('M Y'),
+                'amount' => $this->calculateRevenue(
+                    $date->startOfMonth(),
+                    $date->endOfMonth()
+                )
+            ]);
+        }
+        return $months;
+    }
+
+    private function getRevenueDistribution()
+    {
+        return [
+            ['name' => 'Événements', 'value' => EventParticipant::where('status', 'completed')->sum('payment_amount')],
+            ['name' => 'Formations', 'value' => FormationParticipant::where('status', 'completed')->sum('payment_amount')],
+            ['name' => 'Services', 'value' => ServiceRequest::where('status', 'completed')->sum('views')],
+        ];
+    }
+
+    private function getActivityByType()
+    {
+        return [
+            ['name' => 'Événements', 'value' => Event::where('end_date', '>=', now())->count()],
+            ['name' => 'Formations', 'value' => Formation::where('is_published', true)->count()],
+            ['name' => 'Services', 'value' => Service::where('status', true)->count()],
+            ['name' => 'Articles', 'value' => Post::where('published', true)->count()],
+        ];
+    }
+
+    private function getTopContent()
+    {
+        $content = collect();
+
+        // Ajouter les événements
+        Event::orderBy('views', 'desc')
+            ->limit(3)
+            ->get()
+            ->each(function ($event) use ($content) {
+                $content->push([
+                    'title' => $event->title,
+                    'type' => 'Événement',
+                    'views' => $event->views,
+                    'trend' => $this->calculateViewsTrend($event)
+                ]);
+            });
+
+        // Ajouter les formations
+        Formation::orderBy('views', 'desc')
+            ->limit(3)
+            ->get()
+            ->each(function ($training) use ($content) {
+                $content->push([
+                    'title' => $training->title,
+                    'type' => 'Formation',
+                    'views' => $training->views,
+                    'trend' => $this->calculateViewsTrend($training)
+                ]);
+            });
+
+        // Ajouter les articles
+        Post::orderBy('views', 'desc')
+            ->limit(3)
+            ->get()
+            ->each(function ($post) use ($content) {
+                $content->push([
+                    'title' => $post->title,
+                    'type' => 'Article',
+                    'views' => $post->views,
+                    'trend' => $this->calculateViewsTrend($post)
+                ]);
+            });
+
+        return $content->sortByDesc('views')->take(5)->values();
+    }
+
+
+    private function calculateViewsTrend($model)
+    {
+        // $viewsLastMonth = $model->view_logs()
+        //     ->whereMonth('created_at', now()->subMonth()->month)
+        //     ->count();
+
+        // $viewsThisMonth = $model->view_logs()
+        //     ->whereMonth('created_at', now()->month)
+        //     ->count();
+
+        // if ($viewsLastMonth == 0) return 100;
+        // return round((($viewsThisMonth - $viewsLastMonth) / $viewsLastMonth) * 100, 1);
+        return 0;
+    }
+
+    // Méthode pour les statistiques de paiement
+    private function getPaymentStats()
+    {
+        return [
+            'today' => [
+                'count' => EventParticipant::whereDate('created_at', today())->count(),
+                'amount' => EventParticipant::whereDate('created_at', today())
+                    ->where('status', 'completed')
+                    ->sum('payment_amount')
+            ],
+            'this_week' => [
+                'count' => EventParticipant::whereBetween('created_at', [now()->startOfWeek(), now()])->count(),
+                'amount' => EventParticipant::whereBetween('created_at', [now()->startOfWeek(), now()])
+                    ->where('status', 'completed')
+                    ->sum('payment_amount')
+            ],
+            'this_month' => [
+                'count' => EventParticipant::whereMonth('created_at', now()->month)->count(),
+                'amount' => EventParticipant::whereMonth('created_at', now()->month)
+                    ->where('status', 'completed')
+                    ->sum('payment_amount')
+            ]
+        ];
+    }
+
+    // Méthode pour obtenir les statistiques des services
+    private function getServiceStats()
+    {
+        return [
+            'active' => Service::where('is_active', true)->count(),
+            'total_bookings' => ServiceRequest::count(),
+            'revenue' => ServiceRequest::where('status', 'completed')->sum('amount'),
+            'popular' => Service::withCount('bookings')
+                ->orderBy('bookings_count', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function ($service) {
+                    return [
+                        'name' => $service->name,
+                        'bookings' => $service->bookings_count,
+                        'revenue' => $service->bookings()->where('status', 'completed')->sum('amount')
+                    ];
+                })
+        ];
+    }
+
+    // Méthode pour obtenir les statistiques des formations
+    private function getTrainingStats()
+    {
+        return [
+            'active' => Formation::where('is_published', true)->count(),
+            'total_participants' => FormationParticipant::count(),
+            'revenue' => FormationParticipant::where('status', 'completed')->sum('amount'),
+            'popular' => Formation::withCount('participants')
+                ->orderBy('participants_count', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function ($training) {
+                    return [
+                        'name' => $training->title,
+                        'participants' => $training->participants_count,
+                        'revenue' => $training->participants()->where('status', 'completed')->sum('amount')
+                    ];
+                })
+        ];
+    }
+
+    // Méthode pour obtenir les statistiques des blogs
+    private function getBlogStats()
+    {
+        return [
+            'published' => Post::where('is_published', true)->count(),
+            'total_views' => Post::sum('views'),
+            'comments' => 0,
+            'popular' => Post::orderBy('views', 'desc')
+                ->take(5)
+                ->get()
+                ->map(function ($post) {
+                    return [
+                        'title' => $post->title,
+                        'views' => $post->views,
+                        'comments' => $post->comments()->count(),
+                        'trend' => $this->calculateViewsTrend($post)
+                    ];
+                })
+        ];
+    }
+
+    // Méthode pour obtenir les utilisateurs récents
+    private function getRecentUsers()
+    {
+        return User::latest()
+            ->take(5)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'registered' => $user->created_at->diffForHumans(),
+                    'participations' => EventParticipant::where('user_id', $user->id)->count()
+                ];
+            });
+    }
+
+    // Méthode pour obtenir les activités récentes
+    private function getRecentActivities()
+    {
+        $activities = collect();
+
+        // Ajouter les inscriptions aux événements
+        EventParticipant::with('event')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->each(function ($participant) use ($activities) {
+                $activities->push([
+                    'type' => 'event_registration',
+                    'title' => "Inscription à {$participant->event->title}",
+                    'user' => $participant->name,
+                    'date' => $participant->created_at,
+                    'status' => $participant->status
+                ]);
+            });
+
+        // Ajouter les inscriptions aux formations
+        FormationParticipant::with('training')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->each(function ($participant) use ($activities) {
+                $activities->push([
+                    'type' => 'training_registration',
+                    'title' => "Inscription à {$participant->training->title}",
+                    'user' => $participant->name,
+                    'date' => $participant->created_at,
+                    'status' => $participant->status
+                ]);
+            });
+
+        // Ajouter les réservations de services
+        ServiceRequest::with('service')
+            ->latest()
+            ->take(5)
+            ->get()
+            ->each(function ($booking) use ($activities) {
+                $activities->push([
+                    'type' => 'service_booking',
+                    'title' => "Réservation de {$booking->service->name}",
+                    'user' => $booking->name,
+                    'date' => $booking->created_at,
+                    'status' => $booking->status
+                ]);
+            });
+
+        return $activities->sortByDesc('date')->take(10)->values();
+    }
+
+    public function getStats()
+    {
+        return response()->json([
+            'general' => [
+                'total_users' => User::count(),
+                'total_events' => Event::count(),
+                'total_trainings' => Formation::count(),
+                'total_services' => Service::count(),
+                'total_posts' => Post::count(),
+                'total_revenue' => EventParticipant::where('status', 'completed')->sum('payment_amount') +
+                    FormationParticipant::where('status', 'completed')->sum('amount') +
+                    ServiceRequest::where('status', 'completed')->sum('amount')
+            ],
+            'payments' => $this->getPaymentStats(),
+            'services' => $this->getServiceStats(),
+            'trainings' => $this->getTrainingStats(),
+            'blog' => $this->getBlogStats(),
+            'recent_users' => $this->getRecentUsers(),
+            'recent_activities' => $this->getRecentActivities(),
+            'monthly_revenue' => $this->getMonthlyRevenue(),
+            'revenue_distribution' => $this->getRevenueDistribution(),
+            'activity_by_type' => $this->getActivityByType()
+        ]);
     }
 }
