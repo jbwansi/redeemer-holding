@@ -196,14 +196,6 @@ const DashboardEventCard = ({ event }: { event: Event }) => {
                                 Détails
                             </Link>
 
-                            {!isPast && !event.is_full && (
-                                <Link
-                                    href={`${route('evenements.details', event.slug)}#registration`}
-                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 flex items-center"
-                                >
-                                    <span>Réserver</span>
-                                </Link>
-                            )}
                         </div>
                     </div>
                 </div>

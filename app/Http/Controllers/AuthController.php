@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Services\AuthenticationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -22,18 +23,26 @@ class AuthController extends Controller
     }
 
 
+
     public function login(LoginRequest $request)
     {
         $this->authService->authenticate($request);
 
-        return redirect()->route('dashboard');
+
+        if (Auth::user()->role == 'admin') {
+            return redirect()->route('dashboard');
+        } else {
+            return redirect()->route('dashboard.client.profile');
+        }
     }
     public function register(RegisterRequest $request)
     {
         $user = $this->authService->register($request);
-
-        return redirect()->route('dashboard')
-            ->with('success', 'Compte créé avec succès!');
+        if (Auth::user()->role == 'admin') {
+            return redirect()->route('dashboard');
+        } else {
+            return redirect()->route('dashboard.client.profile');
+        }
     }
     public function logout(Request $request): RedirectResponse
     {

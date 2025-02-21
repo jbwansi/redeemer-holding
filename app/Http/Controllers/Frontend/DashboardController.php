@@ -81,7 +81,7 @@ class DashboardController extends Controller
     public function event()
     {
         $userId = Auth::user()->id;
-        $events = Event::with(['participants' => function ($query) {
+        $events = Event::with(["category", 'participants' => function ($query) {
             $query->with('user')->orderBy('created_at', 'desc');
         }])->whereHas('participants', function ($query) use ($userId) {
             $query->where('user_id', $userId);
