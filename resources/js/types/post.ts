@@ -39,6 +39,7 @@ export interface PostFormData {
 export interface AuthorProps {
     name: string;
     avatar: string;
+    bio: string;
 }
 
 export interface PostImageUrls {
@@ -61,6 +62,7 @@ export interface PostProps {
     coverImage: PostImageUrls;
     content: string;
     author: AuthorProps;
+
     tags: string[];
 }
 

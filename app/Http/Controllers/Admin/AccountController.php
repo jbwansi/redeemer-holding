@@ -99,12 +99,13 @@ class AccountController extends Controller
 
     public function updateProfile(Request $request)
     {
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . Auth::id()],
-            'phone' => ['string']
+            'phone' => ['string', 'nullable'],
+            'bio' => ['string', 'nullable'],
         ]);
-
         $user = Auth::user();
         $user->update($validated);
 
