@@ -6,6 +6,7 @@ import { route } from 'ziggy-js';
 const FormationCard = ({ formation }: any) => {
     const isPast = new Date(formation.end_date) < new Date();
     const isOngoing = formation.is_ongoing;
+    console.log(formation);
 
     const formatFormationDate = (dateString: any, includeYear = true) => {
         const date = new Date(dateString);
@@ -62,7 +63,7 @@ const FormationCard = ({ formation }: any) => {
     };
 
     return (
-        <div className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 hover:shadow-xl transition-shadow duration-300 max-h-80">
+        <div className="z-10 group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 hover:shadow-xl transition-shadow duration-300 max-h-80">
             <div className="flex flex-col md:flex-row h-full">
                 {/* Image */}
                 <div className="md:w-1/3 relative overflow-hidden h-48 md:h-auto">
