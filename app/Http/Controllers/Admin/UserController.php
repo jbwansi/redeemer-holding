@@ -233,7 +233,7 @@ class UserController extends Controller
                 ];
             });
 
-        return inertia('baceknd/users/blocked', [
+        return inertia('backend/users/blocked', [
             'blockedUsers' => $blockedUsers,
             'filters' => $request->only(['is_active', 'search']),
         ]);
