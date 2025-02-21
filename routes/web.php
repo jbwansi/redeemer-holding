@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
+use App\Http\Controllers\Frontend\FormationPaymentController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\WebController;
 use Illuminate\Support\Facades\Route;
@@ -51,6 +52,21 @@ Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 // Route pour annuler une inscription
 Route::delete('/evenements/{slug}/inscription/{participant_id}', [EventController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
+// Routes pour le paiement des formations (Stripe)
+Route::get('/formations/{slug}/paiement/{participant_id}', [FormationPaymentController::class, 'showPaymentForm'])->name('formations.payment');
+Route::post('/formations/{slug}/paiement/{participant_id}/process', [FormationPaymentController::class, 'processPayment'])->name('formations.payment.process');
+Route::get('/formations/paiement/succes', [FormationPaymentController::class, 'handleSuccess'])->name('formations.payment.success');
+Route::get('/formations/paiement/annulation', [FormationPaymentController::class, 'handleCancellation'])->name('formations.payment.cancel');
+Route::get('/formations/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
+//formation 
+Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->name('events.register');
+Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('events.registration.confirmation');
+
+// Route pour le webhook Stripe des formations
+Route::post('/stripe/webhook/formations', [FormationPaymentController::class, 'handleWebhook']);
+
+// Route pour annuler une inscription à une formation
+Route::delete('/formations/{slug}/inscription/{participant_id}', [FormationController::class, 'cancelRegistration'])->name('formations.registration.cancel');
 
 Route::get('termes-et-conditions', [AppController::class, 'terms'])->name('terms.show');
 Route::get('politique-de-confidentialite', [AppController::class, 'policy'])->name('policy.show');

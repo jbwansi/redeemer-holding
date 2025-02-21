@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Event\EventResource;
+use App\Http\Resources\Formation\FormationCollection;
 use App\Http\Resources\Post\PostCollection;
 use App\Http\Resources\Post\PostResource;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventParticipant;
+use App\Models\Formation;
+use App\Models\FormationParticipant;
 use App\Models\Post;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -20,15 +23,8 @@ use Illuminate\Support\Str;
 
 class WebController extends Controller
 {
-    public function formations()
-    {
-        return inertia('frontend/formations/index');
-    }
 
-    public function formation_detail($slug)
-    {
-        return inertia('frontend/formations/show');
-    }
+
 
 
     public function blogs()
@@ -334,5 +330,246 @@ class WebController extends Controller
 
         // Télécharger avec un nom de fichier formaté
         return $pdf->download('facture_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
+    }
+    //Formation
+    public function formations()
+    {
+        $formations = new FormationCollection(Formation::published()->get());
+        $featuredFormation = Formation::where('is_featured', true)->published()->first();
+
+        return inertia('frontend/formations/index', [
+            'formations' => $formations,
+            'featuredFormation' => $featuredFormation
+        ]);
+    }
+
+    public function formation_detail($slug)
+    {
+        $formation = Formation::published()->where('slug', $slug)->firstOrFail();
+        $formation->incrementViews();
+
+        return inertia('frontend/formations/show', ['formation' => $formation]);
+    }
+
+    /**
+     * Traiter l'inscription à une formation
+     */
+    public function register_formation(Request $request, $slug)
+    {
+        $formation = Formation::where('slug', $slug)
+            ->published()
+            ->firstOrFail();
+
+        if (now() > $formation->end_date) {
+            return back()->withErrors([
+                'general' => "Cette formation est déjà terminée."
+            ]);
+        }
+
+        $formation->append(['available_seats', 'is_full']);
+
+        if ($formation->is_full) {
+            return back()->withErrors([
+                'general' => "Désolé, cette formation est complète."
+            ]);
+        }
+
+        $maxPlaces = $formation->max_participants === null ? 10 : min($formation->available_seats, 10);
+
+        $validated = $request->validate([
+            'name' => auth()->check() ? 'nullable|string|max:255' : 'required|string|max:255',
+            'email' => auth()->check() ? 'nullable|email|max:255' : 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'qty' => "required|integer|min:1|max:{$maxPlaces}"
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $freshFormation = Formation::where('slug', $slug)->firstOrFail();
+            $freshFormation->append(['available_seats']);
+
+            if ($validated['qty'] > $freshFormation->available_seats && $freshFormation->max_participants !== null) {
+                DB::rollBack();
+                return back()->withErrors([
+                    'qty' => "Il ne reste que {$freshFormation->available_seats} place(s) disponible(s)."
+                ]);
+            }
+
+            $reference = 'FORM-' . strtoupper(Str::random(8));
+            $participant = new FormationParticipant([
+                'user_id' => auth()->id(),
+                'name' => $validated['name'] ?? auth()->user()->name,
+                'email' => $validated['email'] ?? auth()->user()->email,
+                'phone' => $validated['phone'],
+                'qty' => $validated['qty'],
+                'status' => FormationParticipant::STATUS_PENDING,
+                'reference' => $reference
+            ]);
+
+            $formation->participants()->save($participant);
+
+            if (!auth()->check()) {
+                session()->put('temp_participant_' . $participant->id, true);
+            }
+
+            DB::commit();
+
+            if ($formation->price <= 0) {
+                $participant->update([
+                    'status' => FormationParticipant::STATUS_COMPLETED
+                ]);
+
+                return redirect()->route('formations.registration.confirmation', [
+                    'slug' => $formation->slug,
+                    'participant_id' => $participant->id
+                ]);
+            }
+
+            return redirect()->route('formations.payment', [
+                'slug' => $formation->slug,
+                'participant_id' => $participant->id
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            logger()->error('Erreur lors de l\'inscription à la formation:', [
+                'message' => $e->getMessage(),
+                'formation_id' => $formation->id,
+                'user_id' => auth()->id(),
+                'data' => $validated
+            ]);
+
+            return back()->withErrors([
+                'general' => "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
+            ]);
+        }
+    }
+
+    /**
+     * Afficher la page de confirmation d'inscription
+     */
+    public function showConfirmation_formation($slug, $participant_id)
+    {
+        $formation = Formation::where('slug', $slug)->published()->firstOrFail();
+        $participant = FormationParticipant::findOrFail($participant_id);
+
+        if ($participant->formation_id !== $formation->id) {
+            abort(404);
+        }
+
+        if (auth()->check()) {
+            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+                abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
+            }
+        } elseif (!session()->has('temp_participant_' . $participant_id)) {
+            abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
+        }
+
+        $participant->load('formation');
+
+        return inertia('frontend/formations/registration-confirmation', [
+            'formation' => $formation,
+            'registration' => $participant,
+            'total' => $formation->price * $participant->qty
+        ]);
+    }
+
+    /**
+     * Annuler une inscription
+     */
+    public function cancelRegistration_formation(Request $request, $slug, $participant_id)
+    {
+        $formation = Formation::where('slug', $slug)->firstOrFail();
+        $participant = FormationParticipant::findOrFail($participant_id);
+
+        if ($participant->formation_id !== $formation->id) {
+            abort(404);
+        }
+
+        if (auth()->check()) {
+            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+                abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
+            }
+        } elseif (!session()->has('temp_participant_' . $participant_id)) {
+            abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
+        }
+
+        $cancellationDeadline = (new \DateTime($formation->start_date))->modify('-24 hours');
+        if (now() > $cancellationDeadline && !auth()->user()?->hasRole('admin')) {
+            return back()->withErrors([
+                'general' => "Les annulations ne sont plus possibles moins de 24h avant le début de la formation."
+            ]);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $participant->update([
+                'status' => FormationParticipant::STATUS_CANCELLED,
+                'cancelled_at' => now()
+            ]);
+
+            if ($participant->status === FormationParticipant::STATUS_COMPLETED && $formation->price > 0 && $participant->payment_id) {
+                // Logique de remboursement via Stripe à implémenter
+            }
+
+            DB::commit();
+
+            return redirect()->route('formations.details', $slug)
+                ->with('success', 'Votre inscription a été annulée avec succès.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            logger()->error('Erreur lors de l\'annulation de l\'inscription à la formation:', [
+                'message' => $e->getMessage(),
+                'formation_id' => $formation->id,
+                'participant_id' => $participant->id
+            ]);
+
+            return back()->withErrors([
+                'general' => "Une erreur s'est produite lors de l'annulation. Veuillez réessayer."
+            ]);
+        }
+    }
+
+    /**
+     * Télécharger la facture
+     */
+    public function downloadInvoice_formation($slug, $reference)
+    {
+        $formation = Formation::where('slug', $slug)->firstOrFail();
+        $registration = FormationParticipant::where('reference', $reference)
+            ->where('formation_id', $formation->id)
+            ->where('status', 'completed')
+            ->firstOrFail();
+
+        if ($formation->price <= 0) {
+            abort(404);
+        }
+
+        if (auth()->check()) {
+            if ($registration->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+                abort(403);
+            }
+        } elseif (!session()->has('temp_participant_' . $registration->id)) {
+            abort(403);
+        }
+
+        $data = [
+            'formation' => $formation,
+            'registration' => $registration,
+            'subtotal' => $formation->price * $registration->qty,
+            'serviceFee' => $formation->price * $registration->qty * 0.05,
+            'total' => $formation->price * $registration->qty * 1.05,
+            'date' => $registration->payment_date ?? $registration->created_at,
+            'invoice_number' => 'FORM-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
+        ];
+
+        $pdf = Pdf::loadView('pdf.formation', $data);
+        $pdf->setPaper('a4');
+        $pdf->setWarnings(false);
+
+        return $pdf->download('facture_formation_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
     }
 }
