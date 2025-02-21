@@ -1,4 +1,19 @@
-import { BookType, CalendarDays, Frame, GalleryVerticalEnd, LayoutDashboard, LucideBookOpen, Mail, MonitorCog, Package, PieChart, Settings, Users } from "lucide-react";
+import {
+    BookType,
+    CalendarDays,
+    Frame,
+    GalleryVerticalEnd,
+    GraduationCap,
+    LayoutDashboard,
+    LucideBookOpen,
+    Mail,
+    MonitorCog,
+    Package,
+    PieChart,
+    School,
+    Settings,
+    Users,
+} from "lucide-react";
 
 // Types pour les mappings
 type LabelMappingType = {
@@ -47,9 +62,24 @@ export const dataRoutes = {
     navMain: [
         {
             title: "Tableau de bord",
-            url: route('dashboard'),
+            url: route("dashboard"),
             icon: LayoutDashboard,
             isActive: true,
+        },
+        {
+            title: "Formations",
+            url: "#",
+            icon: GraduationCap,
+            items: [
+                {
+                    title: "Liste des formations",
+                    url: route("formations.index"),
+                },
+                {
+                    title: "Ajouter un formation",
+                    url: route("formations.create"),
+                },
+            ],
         },
         {
             title: "Evènements",
@@ -66,7 +96,7 @@ export const dataRoutes = {
                 },
                 {
                     title: "Categories",
-                    url: route('event-categories.index'),
+                    url: route("event-categories.index"),
                 },
             ],
         },
@@ -77,11 +107,11 @@ export const dataRoutes = {
             items: [
                 {
                     title: "Demande de service",
-                    url: route('service-requests.index'),
+                    url: route("service-requests.index"),
                 },
                 {
                     title: "Liste des  services",
-                    url: route('services.index'),
+                    url: route("services.index"),
                 },
             ],
         },
@@ -111,15 +141,15 @@ export const dataRoutes = {
             items: [
                 {
                     title: "Liste des utilisateurs",
-                    url: route('users.index'),
+                    url: route("users.index"),
                 },
                 {
                     title: "Ajouter un utilisateur",
-                    url: route('users.create'),
+                    url: route("users.create"),
                 },
                 {
                     title: "Blocklist",
-                    url: route('users.blocked'),
+                    url: route("users.blocked"),
                 },
             ],
         },
