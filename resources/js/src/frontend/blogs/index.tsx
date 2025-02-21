@@ -20,6 +20,7 @@ import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { Category } from '@/types/category';
 import { PostProps, PostResponse, SinglePostResponse } from '@/types/post';
+import { formatDate } from '@/lib/utils';
 interface Props {
     posts: PostResponse;
     categories: any;
@@ -451,7 +452,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
 
                                     <div className="flex items-center text-white/80">
                                         <Calendar className="w-4 h-4 mr-2" />
-                                        <span>{featuredPostData.publishedAt}</span>
+                                        <span>{formatDate(featuredPostData.publishedAt)}</span>
                                     </div>
 
                                     <div className="flex items-center text-white/80">
@@ -612,7 +613,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                                             {post.author.name}
                                                         </span>
                                                         <span className="text-gray-500 dark:text-gray-400">
-                                                            {post.publishedAt}
+                                                            {formatDate(post.publishedAt)}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -630,7 +631,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                             </div>
                         )}
 
-                        {filteredPosts.length > 0 && (
+                        {/* {filteredPosts.length > 0 && (
                             <motion.div
                                 className="mt-12 text-center"
                                 initial={{ opacity: 0, y: 20 }}
@@ -645,7 +646,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                     <ChevronRight className="ml-2 w-5 h-5" />
                                 </Link>
                             </motion.div>
-                        )}
+                        )} */}
                     </div>
                 </section>
 

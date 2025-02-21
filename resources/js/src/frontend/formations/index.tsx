@@ -337,7 +337,7 @@ const FormationsPage = ({ formations, featuredFormation }: any) => {
                                     <motion.h2
                                         className="text-2xl font-bold mb-6 flex items-center gap-2"
                                         initial={{ opacity: 0, y: 20 }}
-                                        animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                        animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 20 }}
                                         transition={{ duration: 0.6 }}
                                     >
                                         <History className="w-6 h-6" />
@@ -359,7 +359,7 @@ const FormationsPage = ({ formations, featuredFormation }: any) => {
                                                 <motion.div
                                                     key={formation.id}
                                                     initial={{ opacity: 0, y: 20 }}
-                                                    animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                                    animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 20 }}
                                                     transition={{ duration: 0.5, delay: index * 0.1 }}
                                                 >
                                                     <div className="relative">

@@ -8,7 +8,7 @@ import React from 'react'
 function Home( { services}: any) {
     return (
         <FrontLayout>
-            <Head title='Accueil' />
+            <Head title='La vie que vous méritez à portée de main' />
             <Hero/>
             <Services services={services} />
             <CalendlyCTA/>
