@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+
+use Illuminate\Validation\Rules\Password;
+
 use Stevebauman\Location\Facades\Location;
 
 class AccountController extends Controller
@@ -140,10 +142,11 @@ class AccountController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'current_password'],
-            'password' => ['required', 'confirmed', Password::defaults()],
+            'password' => ['required', 'confirmed', Password::min(8)],
         ], [
             'current_password.current_password' => 'Le mot de passe actuel est incorrect.',
         ]);
+
 
         $user = Auth::user();
         $user->update([

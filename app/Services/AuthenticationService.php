@@ -7,6 +7,8 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
 
 class AuthenticationService
 {
@@ -31,7 +33,7 @@ class AuthenticationService
 
             // Création de l'utilisateur
             $user = User::create($userData);
-
+            Mail::to($user->email)->send(new WelcomeMail($user));
             // Connexion automatique
             Auth::login($user);
 

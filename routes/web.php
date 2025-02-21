@@ -210,13 +210,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     });
 });
 Route::middleware('auth')->group(function () {
-    Route::controller(App\Http\Controllers\Frontend\DashboardController::class)->group(function () {
-        Route::middleware(['active'])->group(function () {
+    Route::middleware(['active'])->group(function () {
+        Route::controller(App\Http\Controllers\Frontend\DashboardController::class)->group(function () {
+
             Route::get("/logout", [AuthController::class, "logout"])->name("logout");
+
+
             Route::get('dashboard-client/profile', 'index')->name('dashboard.client.profile');
             Route::get('dashboard-client/formations', 'formation')->name('dashboard.client.formations');
             Route::get('dashboard-client/events', 'event')->name('dashboard.client.events');
             Route::get('dashboard-client/account', 'account')->name('dashboard.client.account');
         });
+        Route::post('/profile/password', [AccountController::class, 'updatePassword'])->name('profile.password.update');
+        Route::post('/profile/update', [AccountController::class, 'updateProfile'])->name('profile.update');
     });
 });

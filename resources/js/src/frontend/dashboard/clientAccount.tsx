@@ -35,7 +35,7 @@ const AccountPage = () => {
 
     const handlePasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        postPassword(route('password.update'));
+        postPassword(route('profile.password.update'));
     };
 
     return (
