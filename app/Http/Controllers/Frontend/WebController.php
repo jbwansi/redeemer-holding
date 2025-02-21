@@ -16,10 +16,13 @@ use App\Models\Formation;
 use App\Models\FormationParticipant;
 use App\Models\Post;
 use Barryvdh\DomPDF\Facade\Pdf;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class WebController extends Controller
 {
@@ -354,87 +357,181 @@ class WebController extends Controller
     /**
      * Traiter l'inscription à une formation
      */
+    // public function register_formation(Request $request, $slug)
+    // {
+    //     Log::info('Test de log Laravel');
+
+    //     $formation = Formation::where('slug', $slug)
+    //         ->published()
+    //         ->firstOrFail();
+
+    //     if (now() > $formation->end_date) {
+    //         return back()->withErrors([
+    //             'general' => "Cette formation est déjà terminée."
+    //         ]);
+    //     }
+
+    //     $formation->append(['available_seats', 'is_full']);
+
+    //     if ($formation->is_full) {
+    //         return back()->withErrors([
+    //             'general' => "Désolé, cette formation est complète."
+    //         ]);
+    //     }
+
+    //     $maxPlaces = $formation->max_participants === null ? 10 : min($formation->available_seats, 10);
+
+    //     $validated = $request->validate([
+    //         'name' => auth()->check() ? 'nullable|string|max:255' : 'required|string|max:255',
+    //         'email' => auth()->check() ? 'nullable|email|max:255' : 'required|email|max:255',
+    //         'phone' => 'nullable|string|max:20',
+    //         'qty' => "required|integer|min:1|max:{$maxPlaces}"
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $freshFormation = Formation::where('slug', $slug)->firstOrFail();
+    //         $freshFormation->append(['available_seats']);
+
+    //         if ($validated['qty'] > $freshFormation->available_seats && $freshFormation->max_participants !== null) {
+    //             DB::rollBack();
+    //             return back()->withErrors([
+    //                 'qty' => "Il ne reste que {$freshFormation->available_seats} place(s) disponible(s)."
+    //             ]);
+    //         }
+
+    //         $reference = 'FORM-' . strtoupper(Str::random(8));
+    //         $participant = new FormationParticipant([
+    //             'user_id' => auth()->id(),
+    //             'name' => $validated['name'] ?? auth()->user()->name,
+    //             'email' => $validated['email'] ?? auth()->user()->email,
+    //             'phone' => $validated['phone'],
+    //             'qty' => $validated['qty'],
+    //             'status' => FormationParticipant::STATUS_PENDING,
+    //             'reference' => $reference
+    //         ]);
+
+    //         $formation->participants()->save($participant);
+
+    //         if (!auth()->check()) {
+    //             session()->put('temp_participant_' . $participant->id, true);
+    //         }
+
+    //         DB::commit();
+
+    //         if ($formation->price <= 0) {
+    //             $participant->update([
+    //                 'status' => FormationParticipant::STATUS_COMPLETED
+    //             ]);
+
+    //             return redirect()->route('formations.registration.confirmation', [
+    //                 'slug' => $formation->slug,
+    //                 'participant_id' => $participant->id
+    //             ]);
+    //         }
+
+    //         return redirect()->route('formations.payment', [
+    //             'slug' => $formation->slug,
+    //             'participant_id' => $participant->id
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+
+    //         logger()->error('Erreur lors de l\'inscription à la formation:', [
+    //             'message' => $e->getMessage(),
+    //             'formation_id' => $formation->id,
+    //             'user_id' => auth()->id(),
+    //             'data' => $validated
+    //         ]);
+
+    //         return back()->withErrors([
+    //             'general' => "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
+    //         ]);
+    //     }
+    // }
     public function register_formation(Request $request, $slug)
     {
+        Log::info('Début de l\'inscription à la formation', ['slug' => $slug]);
+
+        // 1. Récupération et vérification de la formation
         $formation = Formation::where('slug', $slug)
             ->published()
             ->firstOrFail();
 
+        // 2. Vérifications préliminaires
         if (now() > $formation->end_date) {
-            return back()->withErrors([
-                'general' => "Cette formation est déjà terminée."
-            ]);
+            return back()->withErrors(['general' => "Cette formation est déjà terminée."]);
         }
 
-        $formation->append(['available_seats', 'is_full']);
+        $formation->loadCount('participants'); // Charge le compte des participants
+        $availableSeats = $formation->max_participants
+            ? $formation->max_participants - $formation->participants_count
+            : PHP_INT_MAX;
 
-        if ($formation->is_full) {
-            return back()->withErrors([
-                'general' => "Désolé, cette formation est complète."
-            ]);
+        if ($availableSeats <= 0) {
+            return back()->withErrors(['general' => "Désolé, cette formation est complète."]);
         }
 
-        $maxPlaces = $formation->max_participants === null ? 10 : min($formation->available_seats, 10);
+        // 3. Validation
+        $maxPlaces = $formation->max_participants === null ? 10 : min($availableSeats, 10);
 
-        $validated = $request->validate([
-            'name' => auth()->check() ? 'nullable|string|max:255' : 'required|string|max:255',
-            'email' => auth()->check() ? 'nullable|email|max:255' : 'required|email|max:255',
+        $validationRules = [
+            'qty' => "required|integer|min:1|max:{$maxPlaces}",
             'phone' => 'nullable|string|max:20',
-            'qty' => "required|integer|min:1|max:{$maxPlaces}"
-        ]);
+        ];
 
+        if (!auth()->check()) {
+            $validationRules['name'] = 'required|string|max:255';
+            $validationRules['email'] = 'required|email|max:255';
+        }
+
+        $validated = $request->validate($validationRules);
+
+        // 4. Transaction
         try {
-            DB::beginTransaction();
+            return DB::transaction(function () use ($formation, $validated, $availableSeats) {
+                // Revérification du nombre de places
+                if ($validated['qty'] > $availableSeats && $formation->max_participants !== null) {
+                    return back()->withErrors([
+                        'qty' => "Il ne reste que {$availableSeats} place(s) disponible(s)."
+                    ]);
+                }
 
-            $freshFormation = Formation::where('slug', $slug)->firstOrFail();
-            $freshFormation->append(['available_seats']);
+                // Création du participant
+                $participant = new FormationParticipant();
+                $participant->formation_id = $formation->id; // Ajout explicite
+                $participant->user_id = auth()->id();
+                $participant->name = $validated['name'] ?? auth()->user()->name;
+                $participant->email = $validated['email'] ?? auth()->user()->email;
+                $participant->phone = $validated['phone'];
+                $participant->qty = $validated['qty'];
+                $participant->status = FormationParticipant::STATUS_PENDING;
+                $participant->reference = 'FORM-' . strtoupper(Str::random(8));
+                $participant->save();
 
-            if ($validated['qty'] > $freshFormation->available_seats && $freshFormation->max_participants !== null) {
-                DB::rollBack();
-                return back()->withErrors([
-                    'qty' => "Il ne reste que {$freshFormation->available_seats} place(s) disponible(s)."
-                ]);
-            }
+                // Session pour utilisateur non connecté
+                if (!auth()->check()) {
+                    session()->put('temp_participant_' . $participant->id, true);
+                }
 
-            $reference = 'FORM-' . strtoupper(Str::random(8));
-            $participant = new FormationParticipant([
-                'user_id' => auth()->id(),
-                'name' => $validated['name'] ?? auth()->user()->name,
-                'email' => $validated['email'] ?? auth()->user()->email,
-                'phone' => $validated['phone'],
-                'qty' => $validated['qty'],
-                'status' => FormationParticipant::STATUS_PENDING,
-                'reference' => $reference
-            ]);
+                // Redirection selon le prix
+                if ($formation->price <= 0) {
+                    $participant->update(['status' => FormationParticipant::STATUS_COMPLETED]);
+                    return redirect()->route('formations.registration.confirmation', [
+                        'slug' => $formation->slug,
+                        'participant_id' => $participant->id
+                    ]);
+                }
 
-            $formation->participants()->save($participant);
-
-            if (!auth()->check()) {
-                session()->put('temp_participant_' . $participant->id, true);
-            }
-
-            DB::commit();
-
-            if ($formation->price <= 0) {
-                $participant->update([
-                    'status' => FormationParticipant::STATUS_COMPLETED
-                ]);
-
-                return redirect()->route('formations.registration.confirmation', [
+                return redirect()->route('formations.payment', [
                     'slug' => $formation->slug,
                     'participant_id' => $participant->id
                 ]);
-            }
-
-            return redirect()->route('formations.payment', [
-                'slug' => $formation->slug,
-                'participant_id' => $participant->id
-            ]);
+            });
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            logger()->error('Erreur lors de l\'inscription à la formation:', [
-                'message' => $e->getMessage(),
+            Log::error('Erreur lors de l\'inscription à la formation', [
+                'error' => $e->getMessage(),
                 'formation_id' => $formation->id,
                 'user_id' => auth()->id(),
                 'data' => $validated
@@ -445,7 +542,6 @@ class WebController extends Controller
             ]);
         }
     }
-
     /**
      * Afficher la page de confirmation d'inscription
      */

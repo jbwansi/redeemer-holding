@@ -59,8 +59,8 @@ Route::get('/formations/paiement/succes', [FormationPaymentController::class, 'h
 Route::get('/formations/paiement/annulation', [FormationPaymentController::class, 'handleCancellation'])->name('formations.payment.cancel');
 Route::get('/formations/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
 //formation 
-Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->name('events.register');
-Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('events.registration.confirmation');
+Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->name('formations.register');
+Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('formations.registration.confirmation');
 
 // Route pour le webhook Stripe des formations
 Route::post('/stripe/webhook/formations', [FormationPaymentController::class, 'handleWebhook']);
