@@ -178,7 +178,7 @@
     <div class="container">
         <div class="brand-header">
             <div class="logo">
-                <img src="{{ asset('assets/images/logo.webp') }}" alt="Redeemer Holding" width="100">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Redeemer Holding" width="140">
             </div>
         </div>
 

@@ -9,9 +9,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 
-class InvoiceNotification extends Notification implements ShouldQueue
+class InvoiceNotification extends Notification
 {
-    use Queueable;
+    // use Queueable;
 
     protected $event;
     protected $registration;
@@ -32,7 +32,7 @@ class InvoiceNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         // Générer le PDF
-        $pdf = Pdf::loadView('pdf.invoice', $this->invoice);
+        $pdf = Pdf::loadView('pdf.event', $this->invoice);
 
         return (new MailMessage)
             ->subject('Votre facture pour ' . $this->event->title)
