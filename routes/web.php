@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventCategoryController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\FormationController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ServiceController;
@@ -170,6 +171,23 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::delete('/pages/{page}', 'destroy')->name('pages.destroy');
                 Route::get('/pages/trash', 'trash')->name('pages.trash');
                 Route::get('/pages/{page}', 'show')->name('pages.show');
+            });
+            //formations
+            Route::controller(FormationController::class)->group(function () {
+                Route::get('/formations', 'index')->name('formations.index');
+                Route::get('/formations/create', 'create')->name('formations.create');
+                Route::post('/formations', 'store')->name('formations.store');
+                Route::get('/formations/{formation}/edit', 'edit')->name('formations.edit');
+                Route::put('/formations/{formation}', 'update')->name('formations.update');
+                Route::delete('/formations/{formation}', 'destroy')->name('formations.destroy');
+                Route::get('/formations/trash', 'trash')->name('formations.trash');
+                Route::get('/formations/{formation}', 'show')->name('formations.show');
+                Route::get('/formations/participants/{slug}', [FormationController::class, 'participants'])
+                    ->name('formations.participants');
+                Route::get('/formations/{slug}/participants/{participant}', [FormationController::class, 'showParticipant'])
+                    ->name('formations.participants.show');
+                Route::get('/formations/{slug}/facture/{reference}', [FormationController::class, 'downloadInvoice'])
+                    ->name('formations.participants.invoice');
             });
         });
     });
