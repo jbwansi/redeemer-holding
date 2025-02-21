@@ -58,8 +58,7 @@ class DashboardController extends Controller
             'CountPastEvents' => $CountPastEvents,
         ];
 
-        // Debug pour voir le résultat
-        dd($data);
+
 
         return inertia('frontend/dashboard/index', $data);
     }
