@@ -51,7 +51,7 @@ class UserController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
-                    'status' => $user->is_active,
+                    'is_active' => $user->is_active,
                     'email_verified_at' => $user->email_verified_at,
                     'created_at' => $user->created_at,
                 ];
@@ -59,7 +59,7 @@ class UserController extends Controller
 
         return inertia('backend/users/index', [
             'users' => $users,
-            'filters' => $request->only(['search', 'role', 'status', 'verified']),
+            'filters' => $request->only(['search', 'role', 'is_active', 'verified']),
         ]);
     }
 
@@ -74,8 +74,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
-            'role' => ['required', Rule::in(['admin', 'editor', 'user'])],
-            'is_active' => ['required', Rule::in([1, 0])],
+            'role' => ['required', Rule::in(['admin', 'coach', 'client'])],
+            'is_active' => ['required'],
         ]);
 
         $plainPassword = $request->password;
@@ -103,7 +103,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->role,
-                'is_active' => $user->status,
+                'is_active' => $user->is_active,
             ],
         ]);
     }
@@ -113,18 +113,19 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', Rule::in(['admin', 'editor', 'user'])],
+            'role' => "required|in:admin,coach,client",
             'is_active' => ['required'],
             'password' => $request->filled('password') ? ['confirmed', Password::defaults()] : '',
         ]);
 
-        $user->update(array_filter([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->filled('password') ? Hash::make($request->password) : null,
-            'role' => $request->role,
-            'is_active' => $request->is_active,
-        ]));
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->role = $request->role;
+        $user->is_active =  $request->is_active == 'inactive' ? 0 : 1;
+        if($request->password) {
+            $user->password = Hash::make($request->password);
+        }
+        $user->save();
 
         return redirect()->route('users.index')
             ->with('success', 'Utilisateur mis à jour avec succès.');

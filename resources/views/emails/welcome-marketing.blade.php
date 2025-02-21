@@ -24,8 +24,8 @@
         .email-header {
             padding: 40px 20px;
             text-align: center;
-            background: #0e0e0e;
-            background-color: #0e0e0e;
+            background: #ffffff;
+            background-color: #ffffff;
         }
 
         .logo {
@@ -44,7 +44,7 @@
 
         /* Bannière de bienvenue */
         .welcome-banner {
-            background-color: #ED4C25;
+            background-color: #ed2525;
             padding: 40px 20px;
             text-align: center;
             color: #ffffff;
@@ -64,7 +64,7 @@
         /* Zone des identifiants */
         .credentials-section {
             background-color: #F8F8F8;
-            border-left: 4px solid #ED4C25;
+            border-left: 4px solid #ed2525;
             padding: 20px;
             margin: 30px 0;
         }
@@ -83,7 +83,7 @@
         }
 
         .cta-button {
-            background-color: #ED4C25;
+            background-color: #ed2525;
             color: #ffffff;
             padding: 15px 30px;
             text-decoration: none;
@@ -117,7 +117,7 @@
             position: absolute;
             left: 0;
             top: 0;
-            background-color: #ED4C25;
+            background-color: #ed2525;
             color: #ffffff;
             width: 28px;
             height: 28px;
@@ -192,7 +192,7 @@
                     <!-- En-tête -->
                     <tr>
                         <td class="email-header">
-                            <img src="{{ asset('assets/images/logo-white.webp') }}" alt="{{ $appName }}" class="logo">
+                            <img src="{{ asset('assets/images/logo.png') }}" alt="{{ $appName }}" class="logo">
                         </td>
                     </tr>
 
@@ -216,7 +216,7 @@
                                         <p>Bonjour {{ $user->name }},</p>
 
                                         <div class="credentials-section">
-                                            <h3 style="color: #ED4C25;">📝 Vos identifiants de connexion</h3>
+                                            <h3 style="color: #ed2525;">📝 Vos identifiants de connexion</h3>
                                             <div class="credential-item">
                                                 <strong>Email:</strong> {{ $user->email }}
                                             </div>
@@ -235,7 +235,7 @@
                                         @foreach($features as $feature)
                                         <div class="feature-item">
                                             <span class="feature-icon">{{ $feature['icon'] }}</span>
-                                            <h4 style="color: #ED4C25;">{{ $feature['title'] }}</h4>
+                                            <h4 style="color: #ed2525;">{{ $feature['title'] }}</h4>
                                             <p>{{ $feature['description'] }}</p>
                                         </div>
                                         @endforeach
@@ -245,7 +245,7 @@
                                             <h3 style="color: #333333;">🤝 Besoin d'aide ?</h3>
                                             <p>Notre équipe support est disponible pour vous accompagner</p>
                                             <div class="button-wrapper">
-                                                <a href="mailto:support@example.com" class="cta-button">
+                                                <a href="mailto:{{ get_setting("support_email") }}" class="cta-button">
                                                     Contacter le support
                                                 </a>
                                             </div>
@@ -259,14 +259,14 @@
                                 <tr>
                                     <td class="email-footer">
                                         <div class="social-links">
-                                            <a href="#" class="social-link">LinkedIn</a>
-                                            <a href="#" class="social-link">Twitter</a>
-                                            <a href="#" class="social-link">Facebook</a>
+                                            <a href={{ get_seeting('linkedin_url') }} class="social-link">LinkedIn</a>
+                                            <a href={{ get_seeting('twitter_url') }} class="social-link">Twitter</a>
+                                            <a href={{ get_seeting('facebook_url') }} class="social-link">Facebook</a>
                                         </div>
                                         <div class="footer-links">
-                                            <a href="#">Mentions légales</a>
-                                            <a href="#">Politique de confidentialité</a>
-                                            <a href="#">Centre d'aide</a>
+                                            <a href={{ route('cookies.show') }}>Politiques des cookies</a>
+                                            <a href={{ route('policy.show') }}>Politique de confidentialité</a>
+                                            <a href={{ route('terms.show') }}>Conditions d'utilisation</a>
                                         </div>
                                         <p class="footer-text">
                                             © {{ date('Y') }} {{ $appName }}. Tous droits réservés.<br>

@@ -20,8 +20,8 @@ interface User {
     id: number;
     name: string;
     email: string;
-    user_type: string;
-    status: string;
+    role: string;
+    is_active: string;
 }
 
 interface Props {
@@ -30,14 +30,13 @@ interface Props {
 
 const roleOptions = [
     { id: 'admin', name: 'Administrateur', value: 'admin' },
-    { id: 'editor', name: 'Éditeur', value: 'editor' },
-    { id: 'user', name: 'Utilisateur', value: 'user' },
+    { id: 'coach', name: 'Éditeur', value: 'coach' },
+    { id: 'client', name: 'Utilisateur', value: 'client' },
 ];
 
 const statusOptions = [
-    { id: 'active', name: 'Actif', value: 'active' },
-    { id: 'inactive', name: 'Inactif', value: 'inactive' },
-    { id: 'banned', name: 'Banni', value: 'banned' },
+    { id: 'active', name: 'Actif', value: 1 },
+    { id: 'inactive', name: 'Inactif', value: 0 },
 ];
 
 export default function Edit({ user }: Props) {
@@ -46,8 +45,8 @@ export default function Edit({ user }: Props) {
         email: user.email,
         password: '',
         password_confirmation: '',
-        user_type: user.user_type,
-        status: user.status,
+        role: user.role,
+        is_active: user.is_active,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -168,10 +167,10 @@ export default function Edit({ user }: Props) {
                                                     Rôle
                                                 </label>
                                                 <Select
-                                                    value={data.user_type}
-                                                    onValueChange={(value) => setData('user_type', value)}
+                                                    value={data.role}
+                                                    onValueChange={(value) => setData('role', value)}
                                                 >
-                                                    <SelectTrigger className={errors.user_type ? 'border-red-500' : ''}>
+                                                    <SelectTrigger className={errors.role ? 'border-red-500' : ''}>
                                                         <SelectValue placeholder="Sélectionnez un rôle" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -185,8 +184,8 @@ export default function Edit({ user }: Props) {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                                {errors.user_type && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.user_type}</p>
+                                                {errors.role && (
+                                                    <p className="text-sm text-red-500 mt-1">{errors.role}</p>
                                                 )}
                                             </div>
 
@@ -195,10 +194,10 @@ export default function Edit({ user }: Props) {
                                                     Statut
                                                 </label>
                                                 <Select
-                                                    value={data.status}
-                                                    onValueChange={(value) => setData('status', value)}
+                                                    value={data.is_active}
+                                                    onValueChange={(value) => setData('is_active', value)}
                                                 >
-                                                    <SelectTrigger className={errors.status ? 'border-red-500' : ''}>
+                                                    <SelectTrigger className={errors.is_active ? 'border-red-500' : ''}>
                                                         <SelectValue placeholder="Sélectionnez un statut" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -212,8 +211,8 @@ export default function Edit({ user }: Props) {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                                {errors.status && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.status}</p>
+                                                {errors.is_active && (
+                                                    <p className="text-sm text-red-500 mt-1">{errors.is_active}</p>
                                                 )}
                                             </div>
                                         </div>

@@ -19,14 +19,13 @@ import { useState } from 'react';
 
 const roleOptions = [
     { id: 'admin', name: 'Administrateur', value: 'admin' },
-    { id: 'editor', name: 'Éditeur', value: 'editor' },
-    { id: 'user', name: 'Utilisateur', value: 'user' },
+    { id: 'coach', name: 'Éditeur', value: 'coach' },
+    { id: 'client', name: 'Utilisateur', value: 'client' },
 ];
 
 const statusOptions = [
-    { id: 'active', name: 'Actif', value: 'active' },
-    { id: 'inactive', name: 'Inactif', value: 'inactive' },
-    { id: 'banned', name: 'Banni', value: 'banned' },
+    { id: 'active', name: 'Actif', value: 1 },
+    { id: 'inactive', name: 'Inactif', value: 0 },
 ];
 
 export default function Create() {
@@ -35,8 +34,8 @@ export default function Create() {
         email: '',
         password: '',
         password_confirmation: '',
-        user_type: 'user',
-        status: 'active',
+        role: 'client',
+        is_active: 1,
     });
 
     const [copied, setCopied] = useState(false);
@@ -229,10 +228,10 @@ export default function Create() {
                                                     Rôle
                                                 </label>
                                                 <Select
-                                                    value={data.user_type}
-                                                    onValueChange={(value) => setData('user_type', value)}
+                                                    value={data.role}
+                                                    onValueChange={(value) => setData('role', value)}
                                                 >
-                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.user_type ? 'border-red-500' : ''}`}>
+                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.role ? 'border-red-500' : ''}`}>
                                                         <SelectValue placeholder="Sélectionnez un rôle" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -246,8 +245,8 @@ export default function Create() {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                                {errors.user_type && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.user_type}</p>
+                                                {errors.role && (
+                                                    <p className="text-sm text-red-500 mt-1">{errors.role}</p>
                                                 )}
                                             </div>
 
@@ -256,10 +255,10 @@ export default function Create() {
                                                     Statut
                                                 </label>
                                                 <Select
-                                                    value={data.status}
-                                                    onValueChange={(value) => setData('status', value)}
+                                                    value={data.is_active}
+                                                    onValueChange={(value) => setData('is_active', value)}
                                                 >
-                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.status ? 'border-red-500' : ''}`}>
+                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.is_active ? 'border-red-500' : ''}`}>
                                                         <SelectValue placeholder="Sélectionnez un statut" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -273,8 +272,8 @@ export default function Create() {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                                {errors.status && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.status}</p>
+                                                {errors.is_active && (
+                                                    <p className="text-sm text-red-500 mt-1">{errors.is_active}</p>
                                                 )}
                                             </div>
                                         </div>

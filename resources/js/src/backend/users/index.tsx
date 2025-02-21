@@ -54,8 +54,8 @@ interface User {
     id: number;
     name: string;
     email: string;
-    role: 'admin' | 'user' | 'editor';
-    status: 1 | 0;
+    role: 'admin' | 'client' | 'coach';
+    is_active: 1 | 0;
     email_verified_at: string | null;
     created_at: string;
 }
@@ -80,7 +80,7 @@ interface Props {
     filters: {
         search?: string;
         role?: string;
-        status?: string;
+        is_active?: string;
         verified?: string;
     };
 }
@@ -88,14 +88,14 @@ interface Props {
 const roleOptions = [
     { id: 'all', name: 'Tous les rôles', value: 'all' },
     { id: 'admin', name: 'Administrateur', value: 'admin' },
-    { id: 'editor', name: 'Éditeur', value: 'editor' },
+    { id: 'coach', name: 'Éditeur', value: 'coach' },
     { id: 'user', name: 'Utilisateur', value: 'user' },
 ];
 
 const statusOptions = [
     { id: 'all', name: 'Tous les statuts', value: 'all' },
-    { id: 1, name: 'Actif', value: '1' },
-    { id: 0, name: 'Inactif', value: '0' },
+    { id: 1, name: 'Actif', value: 1 },
+    { id: 0, name: 'Inactif', value: 0 },
 ];
 
 const verifiedOptions = [
@@ -107,7 +107,7 @@ const verifiedOptions = [
 export default function Index({ users, filters }: Props) {
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [selectedrole, setSelectedrole] = useState(filters.role || 'all');
-    const [selectedStatus, setSelectedStatus] = useState(filters.status || 'all');
+    const [selectedStatus, setSelectedStatus] = useState(filters.is_active || 'all');
     const [selectedVerified, setSelectedVerified] = useState(filters.verified || 'all');
     const [sortField, setSortField] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -161,33 +161,25 @@ export default function Index({ users, filters }: Props) {
     const getroleBadge = (role: User['role']) => {
         const styles = {
             admin: 'bg-purple-100 text-purple-800',
-            editor: 'bg-blue-100 text-blue-800',
-            user: 'bg-gray-100 text-gray-800',
+            coach: 'bg-blue-100 text-blue-800',
+            client: 'bg-gray-100 text-gray-800',
         };
 
         const labels = {
             admin: 'Administrateur',
-            editor: 'Éditeur',
-            user: 'Utilisateur',
+            coach: 'Éditeur',
+            client: 'Utilisateur',
         };
 
         return <Badge className={styles[role]}>{labels[role]}</Badge>;
     };
 
-    const getStatusBadge = (status: User['status']) => {
-        const styles = {
-            active: 'bg-green-100 text-green-800',
-            inactive: 'bg-yellow-100 text-yellow-800',
-            banned: 'bg-red-100 text-red-800',
-        };
-
-        const labels = {
-            active: 'Actif',
-            inactive: 'Inactif',
-            banned: 'Banni',
-        };
-
-        return <Badge className={styles[status]}>{labels[status]}</Badge>;
+    const getStatusBadge = (status: User['is_active']) => {
+        return status === 1 ? (
+            <Badge className="bg-green-100 text-green-800">Actif</Badge>
+        ) : (
+            <Badge className="bg-yellow-100 text-yellow-800">Inactif</Badge>
+        );
     };
 
     const handleExport = () => {
@@ -197,7 +189,7 @@ export default function Index({ users, filters }: Props) {
             {
                 search: searchQuery,
                 role: selectedrole,
-                status: selectedStatus,
+                is_active: selectedStatus,
                 verified: selectedVerified,
                 sort: sortField,
                 direction: sortDirection,
@@ -313,7 +305,7 @@ export default function Index({ users, filters }: Props) {
                                             value={selectedStatus}
                                             onValueChange={(value) => {
                                                 setSelectedStatus(value);
-                                                updateFilters({ status: value });
+                                                updateFilters({ is_active: value });
                                             }}
                                         >
                                             <SelectTrigger className="w-full md:w-[180px]">
@@ -422,7 +414,7 @@ export default function Index({ users, filters }: Props) {
                                                             {getroleBadge(user.role)}
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell>{getStatusBadge(user.status)}</TableCell>
+                                                    <TableCell>{getStatusBadge(user.is_active)}</TableCell>
                                                     <TableCell>
                                                         {user.email_verified_at ? (
                                                             <Badge className="bg-green-100 text-green-800">
@@ -462,12 +454,12 @@ export default function Index({ users, filters }: Props) {
                                                                 <DropdownMenuSeparator />
                                                                 {
                                                                     user.role != "admin" && <DropdownMenuItem
-                                                                    onClick={() => handleDelete(user)}
-                                                                    className="text-destructive focus:text-destructive cursor-pointer"
-                                                                >
-                                                                    <Trash2 className="h-4 w-4 mr-2" />
-                                                                    Supprimer
-                                                                </DropdownMenuItem>
+                                                                        onClick={() => handleDelete(user)}
+                                                                        className="text-destructive focus:text-destructive cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4 mr-2" />
+                                                                        Supprimer
+                                                                    </DropdownMenuItem>
                                                                 }
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
