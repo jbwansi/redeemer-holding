@@ -48,9 +48,9 @@ export const ROUTE_MAPPING: RouteMappingType = {
 
 export const dataRoutes = {
     user: {
-        name: "Carlos Alognon",
-        email: "m@example.com",
-        avatar: "https://avatars.githubusercontent.com/u/911",
+        name: "Redeemer Holding",
+        email: "jb.wansi@hotmail.com",
+        avatar: "",
     },
     teams: [
         {
