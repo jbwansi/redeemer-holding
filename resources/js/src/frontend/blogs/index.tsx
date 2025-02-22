@@ -73,7 +73,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
     ];
 
 
-    const featuredPostData = featuredPost?.data;
+    const featuredPostData = featuredPost?.data as any;
 
     const allPosts = posts?.data;
 
@@ -367,13 +367,16 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                     ))}
                                 </div>
 
-                                <Link
+                                {
+                                    featuredPostData?.slug && <Link
                                     href={route('blogs.details', featuredPostData?.slug)}
                                     className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300"
                                 >
                                     <span>Lire l'article</span>
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </Link>
+                                }
+
                             </div>
                         </motion.div>
                     </div>
