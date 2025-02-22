@@ -305,7 +305,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
 
                     {/* Featured Post Section */}
                     {
-                        featuredPostData && <section ref={featuredRef} className="py-12 relative overflow-hidden">
+                        featuredPostData?.title && <section ref={featuredRef} className="py-12 relative overflow-hidden">
                             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                                 <motion.div
                                     className="rounded-2xl overflow-hidden relative"
