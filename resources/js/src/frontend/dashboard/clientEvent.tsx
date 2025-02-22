@@ -184,7 +184,7 @@ const DashboardEventCard = ({ event }: { event: Event }) => {
                     <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
                         <div className="flex items-baseline">
                             <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                                {event.price === 0 ? 'Gratuit' : `${event.price} CHF`}
+                                {event.price == 0 ? 'GRATUIT' : `${event.price} CHF`}
                             </span>
                         </div>
 

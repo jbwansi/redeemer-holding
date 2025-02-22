@@ -259,9 +259,9 @@
                                 <tr>
                                     <td class="email-footer">
                                         <div class="social-links">
-                                            <a href={{ get_seeting('linkedin_url') }} class="social-link">LinkedIn</a>
-                                            <a href={{ get_seeting('twitter_url') }} class="social-link">Twitter</a>
-                                            <a href={{ get_seeting('facebook_url') }} class="social-link">Facebook</a>
+                                            <a href={{ get_setting('linkedin_url') }} class="social-link">LinkedIn</a>
+                                            <a href={{ get_setting('twitter_url') }} class="social-link">Twitter</a>
+                                            <a href={{ get_setting('facebook_url') }} class="social-link">Facebook</a>
                                         </div>
                                         <div class="footer-links">
                                             <a href={{ route('cookies.show') }}>Politiques des cookies</a>

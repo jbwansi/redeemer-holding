@@ -65,7 +65,7 @@ class WebController extends Controller
 
     public function events()
     {
-        $events = new EventCollection(Event::with(['category'])->published()->get());
+        $events = new EventCollection(Event::with(['category'])->published()->latest()->get());
 
         $categories = EventCategory::orderBy('name')->withCount('events')->get();
         $featuredEvent = Event::with(['category'])->where('is_featured', true)->published()->first();

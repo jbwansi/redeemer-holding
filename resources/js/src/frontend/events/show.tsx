@@ -238,7 +238,7 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                                         <div className="bg-black/30 px-4 py-3 rounded-lg">
                                             <div className="text-xs text-white/70 mb-1">Prix</div>
                                             <div className="text-xl font-bold text-white">
-                                                {event.price === 0 ? 'Gratuit' : `${event.price} CHF`}
+                                                {event.price == 0 ? 'GRATUIT' : `${event.price} CHF`}
                                             </div>
                                         </div>
 
@@ -538,8 +538,8 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
                                                     <div>
                                                         <h4 className="font-medium text-gray-900 dark:text-white mb-1">Prix</h4>
                                                         <p className="text-gray-600 dark:text-gray-300">
-                                                            {event.price === 0 ? (
-                                                                'Gratuit'
+                                                            {event.price == 0 ? (
+                                                                'GRATUIT'
                                                             ) : (
                                                                 `À partir de ${event.price} CHF`
                                                             )}
@@ -805,7 +805,7 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
 
                                             <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
                                                 <div className="font-bold text-lg text-gray-900 dark:text-white">
-                                                    {relatedEvent.price === 0 ? 'Gratuit' : `${relatedEvent.price} CHF`}
+                                                    {relatedEvent.price === 0 ? 'GRATUIT' : `${relatedEvent.price} CHF`}
                                                 </div>
 
                                                 <Link
