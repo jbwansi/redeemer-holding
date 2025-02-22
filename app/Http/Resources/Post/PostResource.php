@@ -17,14 +17,14 @@ class PostResource extends JsonResource
     {
 
         // Calculer le temps de lecture (environ 200 mots par minute)
-        $wordCount = str_word_count(strip_tags($this->content));
+        $wordCount = str_word_count(strip_tags($this?->content));
         $readTimeMinutes = ceil($wordCount / 200);
 
         // Récupérer la première image comme coverImage
-        $coverImage = $this->featured_image ?? null;
+        $coverImage = $this?->featured_image ?? null;
 
         // Récupérer la première catégorie
-        $category = $this->categories->first();
+        $category = $this?->categories?->first();
 
         return [
             'id' => $this->id,
