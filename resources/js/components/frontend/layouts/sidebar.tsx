@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Menu, LogOut, ChevronRight } from 'lucide-react';
+import { ChevronLeft, Menu, LogOut, ChevronRight, LayoutDashboard } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
@@ -21,6 +21,7 @@ export interface SidebarProps {
     onToggle: () => void;
     onPageChange: (pageId: string) => void;
     onLogout: () => void;
+    userRole: string
 }
 
 
@@ -39,7 +40,8 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     href,
     isActive,
     onClick,
-    showText
+    showText,
+
 }) => (
     <Link
         href={href}
@@ -68,7 +70,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     userName,
     onToggle,
     onPageChange,
-    onLogout
+    onLogout,
+    userRole
 }) => {
     return (
         <>
@@ -112,6 +115,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                                 showText={isOpen}
                             />
                         ))}
+                        {userRole == "admin" && <Link
+                            href={route('dashboard')}
+                            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300`}
+                        >
+                            <span className="flex-shrink-0"><LayoutDashboard /></span>
+
+
+                            <span className="font-medium">Administration</span>
+                        </Link>}
                     </nav>
 
                     {/* Footer */}

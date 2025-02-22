@@ -68,6 +68,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                             activePage={activePage}
                             isOpen={isSidebarOpen}
                             userName={auth.user.name}
+                            userRole={auth.user.role}
                             onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
                             onPageChange={setActivePage}
                             onLogout={handleLogout}
