@@ -15,28 +15,50 @@ class PostResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // Vérifier si le contenu existe avant de calculer le temps de lecture
-        $content = $this->content ?? '';
+        // Si la ressource est null, retourner un tableau avec des valeurs par défaut
+        if (is_null($this->resource)) {
+            return [
+                'id' => null,
+                'slug' => null,
+                'title' => null,
+                'excerpt' => null,
+                'content' => null,
+                'coverImage' => null,
+                'category' => null,
+                'author' => [
+                    'name' => 'Anonyme',
+                    'avatar' => "/assets/images/avatar.jpg",
+                    "bio" => "Pas de biographie",
+                ],
+                'publishedAt' => null,
+                'readTime' => "0 min de lecture",
+                'tags' => [],
+                "views" => 0
+            ];
+        }
+
+        // Si la ressource existe, calculer le temps de lecture
+        $content = $this->resource->content ?? '';
         $wordCount = str_word_count(strip_tags($content));
         $readTimeMinutes = ceil($wordCount / 200);
 
         return [
-            'id' => $this->id ?? null,
-            'slug' => $this->slug ?? null,
-            'title' => $this->title ?? null,
-            'excerpt' => $this->excerpt ?? null,
+            'id' => $this->resource->id,
+            'slug' => $this->resource->slug,
+            'title' => $this->resource->title,
+            'excerpt' => $this->resource->excerpt,
             'content' => $content,
-            'coverImage' => $this->featured_image ?? null,
-            'category' => $this->categories?->first()?->name ?? null,
+            'coverImage' => $this->resource->featured_image,
+            'category' => $this->resource->categories?->first()?->name,
             'author' => [
-                'name' => $this->user?->name ?? 'Anonyme',
-                'avatar' => $this->user?->avatar ?? "/assets/images/avatar.jpg",
-                "bio" => $this->user?->bio ?? "Pas de biographie",
+                'name' => $this->resource->user?->name ?? 'Anonyme',
+                'avatar' => $this->resource->user?->avatar ?? "/assets/images/avatar.jpg",
+                "bio" => $this->resource->user?->bio ?? "Pas de biographie",
             ],
-            'publishedAt' => $this->created_at ?? null,
+            'publishedAt' => $this->resource->created_at,
             'readTime' => $readTimeMinutes . " min de lecture",
-            'tags' => $this->tags ?? [],
-            "views" => $this->views ?? 0
+            'tags' => $this->resource->tags ?? [],
+            "views" => $this->resource->views ?? 0
         ];
     }
 }
