@@ -49,7 +49,6 @@ interface PostFormProps {
 }
 
 export function PostForm({ post, categories }: PostFormProps) {
-    console.log(post?.featured_image);
     const [inputValue, setInputValue] = React.useState<string>('');
     const form = useForm<any>({
         title: post?.title ?? '',

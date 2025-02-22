@@ -23,7 +23,6 @@ const ShowEvent = ({ event }: any) => {
     };
 
     const displayedEvent = event || sampleEvent;
-    console.log(event);
 
     return (
         <div className=" mx-auto p-6">

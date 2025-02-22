@@ -293,7 +293,7 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                                         </button>
 
                                         <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
-                                            En soumettant ce formulaire, vous acceptez notre <a href="/politique-confidentialite" className="underline hover:text-[#DA2E29]">politique de confidentialité</a>.
+                                            En soumettant ce formulaire, vous acceptez notre <a href={route('policy.show')} className="underline hover:text-[#DA2E29]">politique de confidentialité</a>.
                                         </p>
                                     </motion.div>
                                 </motion.form>

@@ -182,7 +182,6 @@ export default function Index({ pages, filters, pageActives, businessSettings }:
     const [sortDirection, setSortDirection] = useState(filters.direction || 'desc');
     const [activeTab, setActiveTab] = useState("liste");
 
-    console.log(businessSettings);
 
     const debouncedSearch = useCallback(
         debounce((value: string) => {

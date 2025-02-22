@@ -67,7 +67,6 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log(data);
         post(route('events.update', event.id))
     }
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

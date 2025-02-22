@@ -29,7 +29,6 @@ interface Props {
 }
 const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
     // États pour les filtres
-    console.log(featuredPost);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);

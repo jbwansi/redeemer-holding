@@ -6,7 +6,6 @@ import { route } from 'ziggy-js';
 const FormationCard = ({ formation }: any) => {
     const isPast = new Date(formation.end_date) < new Date();
     const isOngoing = formation.is_ongoing;
-    console.log(formation);
 
     const formatFormationDate = (dateString: any, includeYear = true) => {
         const date = new Date(dateString);

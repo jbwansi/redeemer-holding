@@ -19,7 +19,6 @@ interface CreatePostProps extends PageProps {
 }
 
 const Create = ({ categories }: CreatePostProps) => {
-    console.log(categories);
 
     return (
         <div className="px-5 py-2 space-y-6">

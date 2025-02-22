@@ -67,7 +67,6 @@ const FormationsPage = ({ formations, featuredFormation }: any) => {
         },
         [[], []]
     ) || [[], []];
-    console.log("upcomingFormations", upcomingFormations);
 
     // Filtrage des formations
     const filterFormations = (formationsToFilter: any) => {

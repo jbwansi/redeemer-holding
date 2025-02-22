@@ -175,7 +175,6 @@ const FormationCard: React.FC<{ formation: Formation; onEdit: (formation: Format
 };
 
 export default function FormationsIndex({ formations }: Props) {
-    console.log("formations", formations);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('all');

@@ -19,7 +19,6 @@ import { useSettings } from '@/hooks/use-settings'
 
 const Smtp = () => {
     const { settings, isLoading, isError } = useSettings();
-    console.log(settings);
 
     const { data, setData, post, processing } = useForm<any>({
         sender_name: settings?.sender_name || '',

@@ -3,67 +3,94 @@ import { Link, usePage } from '@inertiajs/react';
 import { ChevronRight, Home } from 'lucide-react';
 import { LABEL_MAPPING, ROUTE_MAPPING } from '@/lib/routes';
 
-// Type pour un segment de breadcrumb
 interface BreadcrumbSegment {
     label: string;
     path: string;
 }
 
-
 const Breadcrumb: React.FC = () => {
     const { url } = usePage();
 
-    // Nettoyer l'URL des query params
-    const cleanUrl: string = url.split('?')[0];
+    // Nettoyer l'URL et retirer le trailing slash
+    const cleanUrl = url.split('?')[0].replace(/\/$/, '');
 
-    // Diviser l'URL en segments
-    const segments: string[] = cleanUrl.split('/').filter((segment: string): boolean => segment !== '');
+    // Créer un tableau de segments uniquement avec les parties valides
+    const segments = cleanUrl.split('/').filter(segment => segment.length > 0);
+
+    // Fonction pour vérifier si une route existe
+    const routeExists = (routeName: string): boolean => {
+        try {
+            route(routeName);
+            return true;
+        } catch {
+            return false;
+        }
+    };
 
     // Fonction pour obtenir le label d'un segment
-    const getSegmentLabel = (segment: string, fullPath: string): string => {
+    const getSegmentLabel = (segment: string): string => {
         // Vérifier d'abord dans le mapping
-        if (segment in LABEL_MAPPING) {
-            return LABEL_MAPPING[segment];
+        const mappedLabel = LABEL_MAPPING[segment];
+        if (mappedLabel) {
+            return mappedLabel;
         }
 
-        // Si c'est un ID numérique, garder le format original
+        // Si c'est un ID numérique
         if (/^\d+$/.test(segment)) {
             return `#${segment}`;
         }
 
-        // Sinon, formater le segment
+        // Formater le segment en titre
         return segment
             .split('-')
-            .map((word: string): string => word.charAt(0).toUpperCase() + word.slice(1))
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
     };
 
     // Fonction pour obtenir l'URL d'un segment
-    const getSegmentUrl = (segments: string[], index: number): string => {
-        const path: string = segments.slice(0, index + 1).join('/');
+    const getSegmentUrl = (currentSegments: string[]): string => {
+        const path = currentSegments.join('/');
 
         // Vérifier si une route nommée existe pour ce chemin
-        if (path in ROUTE_MAPPING) {
-            try {
-                return route(ROUTE_MAPPING[path]);
-            } catch (e) {
-                console.warn(`Route "${ROUTE_MAPPING[path]}" non trouvée`);
-                return '/' + path;
-            }
+        const routeName = ROUTE_MAPPING[path];
+        if (routeName && routeExists(routeName)) {
+            return route(routeName);
         }
 
-        // Sinon retourner le chemin simple
+        // Fallback sur le chemin direct
         return '/' + path;
     };
 
     // Construire les segments du breadcrumb
-    const breadcrumbSegments: BreadcrumbSegment[] = segments.map((segment: string, index: number): BreadcrumbSegment => {
-        const path: string = segments.slice(0, index + 1).join('/');
-        return {
-            label: getSegmentLabel(segment, path),
-            path: getSegmentUrl(segments, index)
-        };
-    });
+    const breadcrumbSegments: BreadcrumbSegment[] = segments.reduce((acc: BreadcrumbSegment[], segment: string, index: number) => {
+        const currentSegments = segments.slice(0, index + 1);
+        const path = getSegmentUrl(currentSegments);
+
+        // Ne pas ajouter les segments qui correspondent à des routes invalides
+        if (path) {
+            acc.push({
+                label: getSegmentLabel(segment),
+                path: path
+            });
+        }
+
+        return acc;
+    }, []);
+
+    // Si aucun segment valide n'est trouvé, retourner uniquement le dashboard
+    if (breadcrumbSegments.length === 0) {
+        return (
+            <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <Link
+                    href={route('dashboard')}
+                    className="flex items-center hover:text-gray-900 dark:hover:text-white"
+                >
+                    <Home size={16} className="mr-1" />
+                    {LABEL_MAPPING['dashboard']}
+                </Link>
+            </nav>
+        );
+    }
 
     return (
         <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300 mb-4">
@@ -75,15 +102,16 @@ const Breadcrumb: React.FC = () => {
                 {LABEL_MAPPING['dashboard']}
             </Link>
 
-            {breadcrumbSegments.map((segment: BreadcrumbSegment, index: number) => (
-                <React.Fragment key={segment.path}>
+            {breadcrumbSegments.map((segment, index) => (
+                <React.Fragment key={`${segment.path}-${index}`}>
                     <ChevronRight size={16} />
                     <Link
                         href={segment.path}
-                        className={`hover:text-gray-900 dark:hover:text-white ${index === breadcrumbSegments.length - 1
+                        className={`hover:text-gray-900 dark:hover:text-white ${
+                            index === breadcrumbSegments.length - 1
                                 ? 'font-semibold text-gray-900 dark:text-white'
                                 : ''
-                            }`}
+                        }`}
                     >
                         {segment.label}
                     </Link>

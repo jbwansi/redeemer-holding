@@ -11,7 +11,6 @@ function FrontLayout({ children }: any) {
     const { flash } = usePage() as any;
 
     useEffect(() => {
-        console.log(flash);
 
         // Gérer les messages de succès
         if (flash?.success) {
