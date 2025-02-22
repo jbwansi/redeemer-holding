@@ -73,7 +73,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
     ];
 
 
-    const featuredPostData = featuredPost?.data as any;
+    const featuredPostData = featuredPost?.data || null;
 
     const allPosts = posts?.data;
 
