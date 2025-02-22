@@ -118,10 +118,12 @@ class UserController extends Controller
             'password' => $request->filled('password') ? ['confirmed', Password::defaults()] : '',
         ]);
 
+        // dd($request->all());
+
         $user->name = $request->name;
         $user->email = $request->email;
         $user->role = $request->role;
-        $user->is_active =  $request->is_active == 'inactive' ? 0 : 1;
+        $user->is_active =  intval($request->is_active);
         if($request->password) {
             $user->password = Hash::make($request->password);
         }

@@ -27,6 +27,7 @@ const Navbar = () => {
     const { theme, setTheme } = useTheme();
     const { scrollY } = useScroll();
     const { settings, isLoading, isError, error } = useSettings();
+    const [hasRendered, setHasRendered] = useState(false);
 
     const { auth } = usePage().props as any
 
@@ -61,12 +62,16 @@ const Navbar = () => {
         setSearchActive(!searchActive);
     };
 
-    // Navbar appearance animations
+    useEffect(() => {
+        setHasRendered(true);
+    }, []);
+
+    // Navbar appearance animations - Only animate on first render
     const navVariants = {
-        initial: {
-            opacity: 0,
-            y: -20,
-        },
+        initial: (custom) => ({
+            opacity: custom ? 1 : 0,
+            y: custom ? 0 : -20,
+        }),
         animate: {
             opacity: 1,
             y: 0,
@@ -78,12 +83,12 @@ const Navbar = () => {
         }
     };
 
-    // Child item animations
+    // Child item animations - Only animate on first render
     const itemVariants = {
-        initial: {
-            y: -20,
-            opacity: 0
-        },
+        initial: (custom) => ({
+            y: custom ? 0 : -20,
+            opacity: custom ? 1 : 0
+        }),
         animate: {
             y: 0,
             opacity: 1,
@@ -129,8 +134,6 @@ const Navbar = () => {
         />
     );
 
-
-
     // Active link tracker
     const [activePath, setActivePath] = useState('/');
 
@@ -143,11 +146,15 @@ const Navbar = () => {
         const isActive = activePath === href;
 
         return (
-            <motion.div className="relative h-full flex items-center" variants={itemVariants}>
+            <motion.div
+                className="relative h-full flex items-center"
+                variants={itemVariants}
+                custom={hasRendered}
+            >
                 <Link
                     href={href}
                     className={`relative h-full flex items-center px-4 text-base font-medium transition-colors duration-300
-            ${isActive ?
+                        ${isActive ?
                             'text-[#DA2E29] dark:text-[#DA2E29]' :
                             'text-gray-700 dark:text-gray-200 hover:text-[#DA2E29] dark:hover:text-[#DA2E29]'
                         }`}
@@ -219,6 +226,7 @@ const Navbar = () => {
             initial="initial"
             animate="animate"
             variants={navVariants}
+            custom={hasRendered}
             style={{
                 height: smoothHeight,
                 backgroundColor: smoothBackground,
@@ -297,7 +305,7 @@ const Navbar = () => {
                         </AnimatePresence>
                     </div>
 
-                    {/* Notifications with enhanced indicator */}
+                    {/* Calendly Link */}
                     <a href={settings?.calendly_link} target='_blank'>
                         <motion.button
                             variants={buttonHoverEffect}
@@ -338,7 +346,7 @@ const Navbar = () => {
                         </AnimatePresence>
                     </motion.button>
 
-                    {/* Login Icon Button (replacing profile) */}
+                    {/* Login/Profile Button */}
                     <Link href={!auth?.user ? route('login') : route('dashboard.client.profile')}>
                         <motion.div
                             variants={buttonHoverEffect}
@@ -351,7 +359,7 @@ const Navbar = () => {
                         </motion.div>
                     </Link>
 
-                    {/* Mobile menu button with refined hamburger */}
+                    {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
@@ -405,7 +413,7 @@ const Navbar = () => {
                                                     >
                                                         <motion.span
                                                             className={`text-xl font-medium transition-all duration-300
-                                ${activePath === item.href ?
+                                                                ${activePath === item.href ?
                                                                     'text-[#DA2E29]' :
                                                                     'text-gray-800 dark:text-gray-200 group-hover:text-[#DA2E29] group-hover:translate-x-1'
                                                                 }`}

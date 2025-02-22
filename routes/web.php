@@ -58,7 +58,7 @@ Route::post('/formations/{slug}/paiement/{participant_id}/process', [FormationPa
 Route::get('/formations/paiement/succes', [FormationPaymentController::class, 'handleSuccess'])->name('formations.payment.success');
 Route::get('/formations/paiement/annulation', [FormationPaymentController::class, 'handleCancellation'])->name('formations.payment.cancel');
 Route::get('/formations/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
-//formation 
+//formation
 Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->name('formations.register');
 Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('formations.registration.confirmation');
 
@@ -209,6 +209,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         });
     });
 });
+
+Route::get('/account/inactive', [AccountController::class, 'inactive'])->name('account.inactive');
+
 Route::middleware('auth')->group(function () {
     Route::middleware(['active'])->group(function () {
         Route::controller(App\Http\Controllers\Frontend\DashboardController::class)->group(function () {

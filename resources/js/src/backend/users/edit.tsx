@@ -16,12 +16,14 @@ import {
 } from "@/components/ui/select";
 import { ChevronLeft, Loader2 } from 'lucide-react';
 
+type UserStatus = "1" | "0";
+
 interface User {
     id: number;
     name: string;
     email: string;
     role: string;
-    is_active: string;
+    is_active: UserStatus;
 }
 
 interface Props {
@@ -35,9 +37,9 @@ const roleOptions = [
 ];
 
 const statusOptions = [
-    { id: 'active', name: 'Actif', value: 1 },
-    { id: 'inactive', name: 'Inactif', value: 0 },
-];
+    { id: 'active', name: 'Actif', value: "1" as UserStatus },
+    { id: 'inactive', name: 'Inactif', value: "0" as UserStatus },
+] as const;
 
 export default function Edit({ user }: Props) {
     const { data, setData, patch, processing, errors } = useForm({
@@ -46,7 +48,7 @@ export default function Edit({ user }: Props) {
         password: '',
         password_confirmation: '',
         role: user.role,
-        is_active: user.is_active,
+        is_active: String(user.is_active) as UserStatus,
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -195,7 +197,7 @@ export default function Edit({ user }: Props) {
                                                 </label>
                                                 <Select
                                                     value={data.is_active}
-                                                    onValueChange={(value) => setData('is_active', value)}
+                                                    onValueChange={(value: UserStatus) => setData('is_active', value)}
                                                 >
                                                     <SelectTrigger className={errors.is_active ? 'border-red-500' : ''}>
                                                         <SelectValue placeholder="Sélectionnez un statut" />

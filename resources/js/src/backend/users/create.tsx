@@ -17,19 +17,31 @@ import {
 import { ChevronLeft, Loader2, RefreshCw, Copy, Check, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
+type UserRole = 'admin' | 'coach' | 'client';
+type UserStatus = 0 | 1;
+
+interface FormData {
+    name: string;
+    email: string;
+    password: string;
+    password_confirmation: string;
+    role: UserRole;
+    is_active: UserStatus;
+}
+
 const roleOptions = [
-    { id: 'admin', name: 'Administrateur', value: 'admin' },
-    { id: 'coach', name: 'Éditeur', value: 'coach' },
-    { id: 'client', name: 'Utilisateur', value: 'client' },
-];
+    { id: 'admin', name: 'Administrateur', value: 'admin' as UserRole },
+    { id: 'coach', name: 'Éditeur', value: 'coach' as UserRole },
+    { id: 'client', name: 'Utilisateur', value: 'client' as UserRole },
+] as const;
 
 const statusOptions = [
-    { id: 'active', name: 'Actif', value: 1 },
-    { id: 'inactive', name: 'Inactif', value: 0 },
-];
+    { id: 'active', name: 'Actif', value: 1 as UserStatus },
+    { id: 'inactive', name: 'Inactif', value: 0 as UserStatus },
+] as const;
 
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors } = useForm<any>({
         name: '',
         email: '',
         password: '',
@@ -46,21 +58,18 @@ export default function Create() {
         const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
         let password = '';
 
-        // S'assurer d'avoir au moins un caractère de chaque catégorie
-        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]; // Majuscule
-        password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]; // Minuscule
-        password += '0123456789'[Math.floor(Math.random() * 10)]; // Chiffre
-        password += '!@#$%^&*()_+'[Math.floor(Math.random() * 12)]; // Caractère spécial
+        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+        password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+        password += '0123456789'[Math.floor(Math.random() * 10)];
+        password += '!@#$%^&*()_+'[Math.floor(Math.random() * 12)];
 
-        // Compléter avec des caractères aléatoires
         for (let i = 4; i < length; i++) {
             password += charset[Math.floor(Math.random() * charset.length)];
         }
 
-        // Mélanger le mot de passe
         password = password.split('').sort(() => Math.random() - 0.5).join('');
 
-        setData(data => ({
+        setData((data: any) => ({
             ...data,
             password: password,
             password_confirmation: password
@@ -83,7 +92,6 @@ export default function Create() {
             <Head title="Créer un utilisateur" />
 
             <div className="flex flex-col min-h-screen bg-background">
-                {/* Header */}
                 <div className="border-b">
                     <div className="flex h-16 items-center mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex flex-1 items-center">
@@ -109,7 +117,6 @@ export default function Create() {
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="flex-1 py-6">
                     <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
                         <Card>
@@ -229,7 +236,7 @@ export default function Create() {
                                                 </label>
                                                 <Select
                                                     value={data.role}
-                                                    onValueChange={(value) => setData('role', value)}
+                                                    onValueChange={(value: UserRole) => setData('role', value)}
                                                 >
                                                     <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.role ? 'border-red-500' : ''}`}>
                                                         <SelectValue placeholder="Sélectionnez un rôle" />
@@ -255,8 +262,8 @@ export default function Create() {
                                                     Statut
                                                 </label>
                                                 <Select
-                                                    value={data.is_active}
-                                                    onValueChange={(value) => setData('is_active', value)}
+                                                    value={String(data.is_active) as "0" | "1"}
+                                                    onValueChange={(value) => setData('is_active', Number(value) as UserStatus)}
                                                 >
                                                     <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.is_active ? 'border-red-500' : ''}`}>
                                                         <SelectValue placeholder="Sélectionnez un statut" />
@@ -265,7 +272,7 @@ export default function Create() {
                                                         {statusOptions.map((option) => (
                                                             <SelectItem
                                                                 key={option.id}
-                                                                value={option.value}
+                                                                value={String(option.value)}
                                                             >
                                                                 {option.name}
                                                             </SelectItem>
