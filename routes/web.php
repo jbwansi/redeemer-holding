@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\ActivityReminderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ConfigController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -28,6 +29,7 @@ Route::get('/services', [AppController::class, 'services'])->name('services');
 Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
 Route::get('/services-requests/{slug}', [AppController::class, 'service_request'])->name('services.requests');
 Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->name('service-requests.store');
+Route::post('/reminders/send', [ActivityReminderController::class, 'send'])->name('reminders.send');
 
 Route::get('formations', [WebController::class, 'formations'])->name('formations');
 Route::get('formations/{slug}', [WebController::class, 'formation_detail'])->name('formations.details');
