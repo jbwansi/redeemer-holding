@@ -15,34 +15,28 @@ class PostResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-
-        // Calculer le temps de lecture (environ 200 mots par minute)
-        $wordCount = str_word_count(strip_tags($this?->content));
+        // Vérifier si le contenu existe avant de calculer le temps de lecture
+        $content = $this->content ?? '';
+        $wordCount = str_word_count(strip_tags($content));
         $readTimeMinutes = ceil($wordCount / 200);
 
-        // Récupérer la première image comme coverImage
-        $coverImage = $this?->featured_image ?? null;
-
-        // Récupérer la première catégorie
-        $category = $this?->categories?->first();
-
         return [
-            'id' => $this->id,
-            'slug' => $this->slug,
-            'title' => $this->title,
-            'excerpt' => $this->excerpt,
-            'content' => $this->content,
-            'coverImage' => $coverImage,
-            'category' => $category ? $category->name : null,
+            'id' => $this->id ?? null,
+            'slug' => $this->slug ?? null,
+            'title' => $this->title ?? null,
+            'excerpt' => $this->excerpt ?? null,
+            'content' => $content,
+            'coverImage' => $this->featured_image ?? null,
+            'category' => $this->categories?->first()?->name ?? null,
             'author' => [
-                'name' => $this->user->name,
-                'avatar' => $this->user->avatar ?? "/assets/images/avatar.jpg",
-                "bio" => $this->user->bio ?? "Pas de biographie",
+                'name' => $this->user?->name ?? 'Anonyme',
+                'avatar' => $this->user?->avatar ?? "/assets/images/avatar.jpg",
+                "bio" => $this->user?->bio ?? "Pas de biographie",
             ],
-            'publishedAt' => $this->created_at,
+            'publishedAt' => $this->created_at ?? null,
             'readTime' => $readTimeMinutes . " min de lecture",
             'tags' => $this->tags ?? [],
-            "views" => $this->views
+            "views" => $this->views ?? 0
         ];
     }
 }
