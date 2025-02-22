@@ -1,10 +1,13 @@
 import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Calendar, ArrowRight, CheckCircle, Clock, LucideIcon } from 'lucide-react';
+import { useSettings } from '@/hooks/use-settings';
 
 const CalendlyCTA = () => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(sectionRef, { once: false, amount: 0.2 });
+
+    const { settings } = useSettings();
 
     // Benefits of the free session
     const benefits: { icon: LucideIcon; text: string }[] = [
@@ -145,7 +148,7 @@ const CalendlyCTA = () => {
                             {/* CTA Button */}
                             <motion.div variants={itemVariants}>
                                 <a
-                                    href="https://calendly.com/votre-lien"
+                                    href={settings?.calendly_link}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
