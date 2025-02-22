@@ -19,6 +19,7 @@ use App\Http\Controllers\Frontend\AppController;
 use App\Http\Controllers\Frontend\FormationPaymentController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\WebController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AppController::class, 'index'])->name('home');
@@ -81,7 +82,10 @@ Route::middleware(['guest'])->group(function () {
     Route::get('password/request', [AuthController::class, 'password_request'])->name('password.request');
 });
 
-
+Route::get("/reminders/send/cron", function () {
+    Artisan::call("reminders:send");
+    Artisan::call("queue:work");
+});
 
 Route::get('settings/fetch', [SettingController::class, 'fetch'])->name('settings.fetch');
 
