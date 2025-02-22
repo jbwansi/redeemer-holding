@@ -72,111 +72,10 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
         'Résilience', 'Psychologie positive', 'Confiance', 'Intelligence émotionnelle'
     ];
 
-    const defaultFeaturedPost = {
-        id: 1,
-        title: "7 habitudes qui transformeront votre quotidien en 30 jours",
-        excerpt: "Découvrez les techniques scientifiquement prouvées pour créer des habitudes durables et transformer votre vie progressivement et sans effort.",
-        coverImage: {
-            original: "/assets/images/coaching-session.jpg"
-        },
-        category: "Développement personnel",
-        author: {
-            name: "Jean Bernard",
-            avatar: "/assets/images/avatar.jpg"
-        },
-        publishedAt: "12 février 2025",
-        readTime: "8 min de lecture",
-        tags: ["Habitudes", "Productivité", "Transformation"]
-    };
 
-    const featuredPostData = featuredPost?.data || defaultFeaturedPost;
+    const featuredPostData = featuredPost?.data;
 
-    const allPosts = posts?.data || [
-        {
-            id: 2,
-            title: "Comment maîtriser l'art de la visualisation pour atteindre vos objectifs",
-            excerpt: "La visualisation est une technique puissante utilisée par les athlètes d'élite et les entrepreneurs à succès. Voici comment l'intégrer efficacement dans votre quotidien.",
-            coverImage: { original: "/assets/images/coaching-session.jpg" },
-            category: "Développement personnel",
-            author: {
-                name: "Jean Bernard",
-                avatar: "/assets/images/avatar.jpg"
-            },
-            publishedAt: "5 février 2025",
-            readTime: "6 min de lecture",
-            tags: ["Visualisation", "Objectifs", "Psychologie positive"]
-        },
-        {
-            id: 3,
-            title: "5 techniques de respiration pour réduire le stress instantanément",
-            excerpt: "Les exercices de respiration sont un moyen simple mais efficace de calmer votre système nerveux. Découvrez les techniques utilisées par les experts en méditation.",
-            coverImage: { original: "/assets/images/coaching-session.jpg" },
-            category: "Bien-être",
-            author: {
-                name: "Claire Martin",
-                avatar: "/assets/images/authors/claire.jpg"
-            },
-            publishedAt: "28 janvier 2025",
-            readTime: "5 min de lecture",
-            tags: ["Respiration", "Anti-stress", "Mindfulness"]
-        },
-        {
-            id: 4,
-            title: "Le guide complet de la méthode Pomodoro pour optimiser votre concentration",
-            excerpt: "La technique Pomodoro est une méthode de gestion du temps qui peut révolutionner votre productivité. Découvrez comment l'appliquer efficacement.",
-            coverImage: { original: "/assets/images/services-bg.jpg" },
-            category: "Productivité",
-            author: {
-                name: "Thomas Dubois",
-                avatar: "/assets/images/authors/thomas.jpg"
-            },
-            publishedAt: "20 janvier 2025",
-            readTime: "7 min de lecture",
-            tags: ["Pomodoro", "Concentration", "Gestion du temps"]
-        },
-        {
-            id: 5,
-            title: "Développer son intelligence émotionnelle : le guide pratique",
-            excerpt: "L'intelligence émotionnelle est désormais reconnue comme une compétence essentielle. Voici des exercices concrets pour la développer au quotidien.",
-            coverImage: { original: "/assets/images/services-bg.jpg" },
-            category: "Développement personnel",
-            author: {
-                name: "Sophie Moreau",
-                avatar: "/assets/images/authors/sophie.jpg"
-            },
-            publishedAt: "12 janvier 2025",
-            readTime: "9 min de lecture",
-            tags: ["Intelligence émotionnelle", "Empathie", "Communication"]
-        },
-        {
-            id: 6,
-            title: "Comment construire une routine matinale qui booste votre journée",
-            excerpt: "Les premières heures de la journée déterminent souvent son déroulement. Découvrez comment créer une routine matinale énergisante et productive.",
-            coverImage: { original: "/assets/images/services-bg.jpg" },
-            category: "Productivité",
-            author: {
-                name: "Jean Bernard",
-                avatar: "/assets/images/avatar.jpg"
-            },
-            publishedAt: "5 janvier 2025",
-            readTime: "7 min de lecture",
-            tags: ["Routine matinale", "Habitudes", "Énergie"]
-        },
-        {
-            id: 7,
-            title: "Le pouvoir transformateur du journal personnel : guide de démarrage",
-            excerpt: "Tenir un journal est une pratique ancestrale aux multiples bienfaits. Découvrez comment commencer efficacement et transformer cette habitude en outil puissant.",
-            coverImage: { original: "/assets/images/services-bg.jpg" },
-            category: "Développement personnel",
-            author: {
-                name: "Marie Laurent",
-                avatar: "/assets/images/authors/marie.jpg"
-            },
-            publishedAt: "28 décembre 2024",
-            readTime: "6 min de lecture",
-            tags: ["Journal personnel", "Réflexion", "Clarté mentale"]
-        }
-    ];
+    const allPosts = posts?.data;
 
     // Filtrage des articles
     const filteredPosts = allPosts.filter(post => {
@@ -469,7 +368,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                                 </div>
 
                                 <Link
-                                    href={route('blogs.details', featuredPostData.slug)}
+                                    href={route('blogs.details', featuredPostData?.slug)}
                                     className="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300"
                                 >
                                     <span>Lire l'article</span>
