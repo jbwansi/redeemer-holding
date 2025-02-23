@@ -376,7 +376,7 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
 
                                         <div className="prose prose-lg max-w-none text-gray-600 dark:text-gray-300 mb-8">
                                             <p>{event.description}</p>
-                                            <p>{event.long_description}</p>
+                                            <p dangerouslySetInnerHTML={{ __html: event.content }}></p>
                                         </div>
 
                                         {event.highlights && event.highlights.length > 0 && (
