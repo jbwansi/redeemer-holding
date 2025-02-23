@@ -223,7 +223,7 @@ const Settings = () => {
                                         <SelectItem value="Europe/Paris">Europe/Paris</SelectItem>
                                         <SelectItem value="UTC">UTC</SelectItem>
                                         <SelectItem value="Africa/Casablanca">Africa/Casablanca</SelectItem>
-                                        <SelectItem value="Africa/Dakar">Africa/Dakar</SelectItem>
+                                        <SelectItem value="Europe/Zurich">Europe/Zurich</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -240,7 +240,6 @@ const Settings = () => {
                                     <SelectContent>
                                         <SelectItem value="fr">Français</SelectItem>
                                         <SelectItem value="en">English</SelectItem>
-                                        <SelectItem value="es">Español</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
