@@ -16,7 +16,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ config('app.name') }} - Transformation personnelle par les valeurs">
     <meta property="og:description" content="{{ config('app.description') }}">
-    <meta property="og:image" content="{{ asset('assets/images/og-image.jpg') }}">
+    <meta property="og:image" content="{{ asset('assets/images/logo.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta name="twitter:card" content="summary_large_image">
 
@@ -27,16 +27,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- Favicons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/images/favicon-16x16.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/logo.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('assets/images/logo.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/images/logo.png') }}">
 
     <!-- PWA -->
     <meta name="theme-color" content="#ffffff">
     <meta name="application-name" content="{{ config('app.name') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <link rel="manifest" href="/manifest.json">
+    {{-- <link rel="manifest" href="/manifest.json"> --}}
 
     <!-- Vite et Inertia -->
     @routes()
