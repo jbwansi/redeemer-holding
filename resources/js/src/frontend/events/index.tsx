@@ -355,7 +355,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
 
                                                 <div className="flex items-center text-white/80">
                                                     <Users className="w-5 h-5 mr-2" />
-                                                    <span>Places : {validFeaturedEvent.availableSeats}/{validFeaturedEvent.max_participants}</span>
+                                                    <span>Places : {validFeaturedEvent.available_seats}/{validFeaturedEvent.max_participants}</span>
                                                 </div>
                                             </div>
 
@@ -371,7 +371,7 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                                 <div className="bg-black/30 p-3 rounded-lg">
                                                     <div className="text-sm text-white/70 mb-1">Prix</div>
                                                     {
-                                                        validFeaturedEvent.price === 0 ? <div className="text-2xl font-bold text-white">GRATUIT</div>
+                                                        validFeaturedEvent.price == 0 ? <div className="text-2xl font-bold text-white">GRATUIT</div>
                                                             : <div className="text-2xl font-bold text-white">{validFeaturedEvent.price} CHF</div>
                                                     }
 
