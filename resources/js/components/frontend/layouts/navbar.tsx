@@ -250,7 +250,7 @@ const Navbar = () => {
                                 initial={false}
                             />
                             <img
-                                src='/assets/images/logo.png'
+                                src={`${theme === 'dark' ? '/assets/images/logo-dark.png' : '/assets/images/logo.png'}`}
                                 className='w-32 md:w-32 relative z-10 transition-all duration-300 group-hover:brightness-105'
                                 alt="Redeemer Holding Logo"
                             />
@@ -391,7 +391,8 @@ const Navbar = () => {
                                     <div className="p-6 border-b border-gray-100 dark:border-gray-800/80">
                                         <div className="flex items-center">
                                             <img
-                                                src='/assets/images/logo.png'
+                                                src={`${theme === 'dark' ? '/assets/images/logo-dark.png' : '/assets/images/logo.png'}`}
+
                                                 className='w-28 h-auto'
                                                 alt="Redeemer Holding Logo"
                                             />

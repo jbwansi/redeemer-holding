@@ -32,7 +32,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         alt="Logo light mode"
                     />
                     <img
-                        src="/assets/images/logo.png"
+                        src="/assets/images/logo-dark.png"
                         className="w-32 h-auto hidden dark:block"
                         alt="Logo dark mode"
                     />
