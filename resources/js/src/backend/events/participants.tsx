@@ -61,7 +61,7 @@ const EventParticipants = ({ event, participants, meta }) => {
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Retour
                     </Button>
-                    <Button variant="outline" onClick={() => window.location.href = route('admin.events.participants.export', event.slug)}>
+                    <Button variant="outline" onClick={() => window.location.href = route('events.participants.export', event.slug)}>
                         <Download className="h-4 w-4 mr-2" />
                         Exporter
                     </Button>

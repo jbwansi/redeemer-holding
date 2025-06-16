@@ -51,5 +51,4 @@ class CategoryController extends Controller
         $category->delete();
         return redirect()->back()->with('success', 'Catégorie supprimée avec succès');
     }
-
 }

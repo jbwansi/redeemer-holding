@@ -60,7 +60,7 @@ const CategoriesIndex: React.FC<any> = ({ categories }) => {
 
     const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        createForm.post('/categories', {
+        createForm.post('/dashboard/categories', {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 createForm.reset();
@@ -82,7 +82,7 @@ const CategoriesIndex: React.FC<any> = ({ categories }) => {
         e.preventDefault();
         if (!selectedCategory) return;
 
-        editForm.put(route('categories.update',selectedCategory.id), {
+        editForm.put(route('categories.update', selectedCategory.id), {
             onSuccess: () => {
                 setIsEditOpen(false);
                 editForm.reset();
@@ -98,7 +98,7 @@ const CategoriesIndex: React.FC<any> = ({ categories }) => {
     const handleDelete = () => {
         if (!selectedCategory) return;
 
-        router.delete(route('categories.destroy',selectedCategory.id), {
+        router.delete(route('categories.destroy', selectedCategory.id), {
             onSuccess: () => {
                 setIsDeleteOpen(false);
                 setSelectedCategory(null);

@@ -8,6 +8,8 @@ use App\Http\Resources\Event\EventResource;
 use App\Http\Resources\Formation\FormationCollection;
 use App\Http\Resources\Post\PostCollection;
 use App\Http\Resources\Post\PostResource;
+use App\Mail\AdminEventNotificationMail;
+use App\Mail\EventConfirmationMail;
 use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventCategory;
@@ -15,6 +17,7 @@ use App\Models\EventParticipant;
 use App\Models\Formation;
 use App\Models\FormationParticipant;
 use App\Models\Post;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Http\Request;
@@ -23,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WebController extends Controller
 {
@@ -159,6 +163,7 @@ class WebController extends Controller
                 ]);
 
                 // Envoyer un email de confirmation
+                $this->sendConfirmationEmails($event, $participant);
                 // ... logique d'envoi d'email
                 // dd("bug");
                 return redirect()->route('events.registration.confirmation', [
@@ -185,6 +190,29 @@ class WebController extends Controller
 
             return back()->withErrors([
                 'general' => "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
+            ]);
+        }
+    }
+    private function sendConfirmationEmails(Event $event, EventParticipant $participant)
+    {
+        try {
+            // 1. Email au participant
+            Mail::to($participant->email, $participant->name)
+                ->send(new EventConfirmationMail($event, $participant));
+
+            // 2. Email admin en dur temporairement
+            $adminEmail = 'admin@redeemerholding.com'; // Remplacez par votre email
+            Mail::to($adminEmail)
+                ->send(new AdminEventNotificationMail($event, $participant));
+
+            Log::info('Emails envoyés avec succès', [
+                'participant' => $participant->email,
+                'admin' => $adminEmail
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Erreur envoi emails:', [
+                'message' => $e->getMessage(),
+                'participant_email' => $participant->email
             ]);
         }
     }
