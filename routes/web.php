@@ -201,7 +201,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::get('/formations/create', 'create')->name('formations.create');
                 Route::post('/formations', 'store')->name('formations.store');
                 Route::get('/formations/{formation}/edit', 'edit')->name('formations.edit');
-                Route::put('/formations/{formation}', 'update')->name('formations.update');
+                Route::post('/formations/{formation}', 'update')->name('formations.update');
                 Route::delete('/formations/{formation}', 'destroy')->name('formations.destroy');
                 Route::get('/formations/trash', 'trash')->name('formations.trash');
                 Route::get('/formations/{formation}', 'show')->name('formations.show');

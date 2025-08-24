@@ -226,7 +226,7 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                         <div className="bg-black/30 px-4 py-3 rounded-lg">
                                             <div className="text-xs text-white/70 mb-1">Prix</div>
                                             <div className="text-xl font-bold text-white">
-                                                {formation.price === 0 ? 'Gratuit' : `${formation.price} CHF`}
+                                                {formation.price == 0 ? 'Gratuit' : `${formation.price} CHF`}
                                             </div>
                                         </div>
 
@@ -297,8 +297,8 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                             <button
                                 onClick={() => setActiveTab('description')}
                                 className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'description'
-                                        ? 'text-primary border-b-2 border-primary'
-                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                    ? 'text-primary border-b-2 border-primary'
+                                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                     }`}
                             >
                                 Description
@@ -308,8 +308,8 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                 <button
                                     onClick={() => setActiveTab('inscription')}
                                     className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'inscription'
-                                            ? 'text-primary border-b-2 border-primary'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        ? 'text-primary border-b-2 border-primary'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                         }`}
                                 >
                                     Inscription
@@ -320,8 +320,8 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                 <button
                                     onClick={() => setActiveTab('temoignages')}
                                     className={`px-6 py-4 font-medium text-sm transition-colors duration-200 whitespace-nowrap ${activeTab === 'temoignages'
-                                            ? 'text-primary border-b-2 border-primary'
-                                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                                        ? 'text-primary border-b-2 border-primary'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                                         }`}
                                 >
                                     Témoignages
@@ -486,7 +486,7 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                                     <div>
                                                         <h4 className="font-medium text-gray-900 dark:text-white mb-1">Prix</h4>
                                                         <p className="text-gray-600 dark:text-gray-300">
-                                                            {formation.price === 0 ? 'Gratuit' : `${formation.price} CHF`}
+                                                            {formation.price == 0 ? 'Gratuit' : `${formation.price} CHF`}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -640,7 +640,7 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
 
                                             <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
                                                 <div className="font-bold text-lg text-gray-900 dark:text-white">
-                                                    {relatedFormation.price === 0 ? 'Gratuit' : `${relatedFormation.price} CHF`}
+                                                    {relatedFormation.price == 0 ? 'Gratuit' : `${relatedFormation.price} CHF`}
                                                 </div>
 
                                                 <Link

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MapPin, Users, ImagePlus, Loader2, X } from 'lucide-react'
+import { MapPin, Users, ImagePlus, Loader2, X, Link } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarIcon, Clock } from 'lucide-react'
@@ -16,6 +16,7 @@ import { cn, isDateInPast, isEndDateBeforeStartDate } from '@/lib/utils'
 import { useForm } from '@inertiajs/react'
 import QuillEditor from '@/components/ui/quill-editor'
 import { route } from 'ziggy-js';
+
 const CreateFormation = () => {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
@@ -26,6 +27,7 @@ const CreateFormation = () => {
         end_date: new Date().toISOString(),
         price: '0',
         max_participants: '0',
+        meeting_link: '', // Nouveau champ ajouté
         featured_image: null as File | null,
         is_published: false as boolean,
         tags: [] as string[],
@@ -172,6 +174,26 @@ const CreateFormation = () => {
                                     </div>
                                     {errors.max_participants && <p className='text-red-500 text-sm mt-2'>{errors.max_participants}</p>}
                                 </div>
+                            </div>
+
+                            {/* Nouveau champ pour le lien de meeting */}
+                            <div className="space-y-2">
+                                <Label htmlFor="meeting_link">Lien de meeting</Label>
+                                <div className="relative">
+                                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                                    <Input
+                                        id="meeting_link"
+                                        type="url"
+                                        placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                                        value={data.meeting_link}
+                                        onChange={e => setData('meeting_link', e.target.value)}
+                                        className="h-12 pl-11"
+                                    />
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                    Lien optionnel pour les réunions en ligne (Google Meet, Zoom, etc.)
+                                </p>
+                                {errors.meeting_link && <p className='text-red-500 text-sm mt-2'>{errors.meeting_link}</p>}
                             </div>
 
                             <div className="space-y-2">

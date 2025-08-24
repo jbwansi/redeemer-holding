@@ -2,8 +2,8 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, Share2, Heart, GraduationCap } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { MapPin, Calendar, Clock, Users, Share2, Heart, GraduationCap, Link } from 'lucide-react'; // Ajout de Link
+import { Link as InertiaLink } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 interface Formation {
@@ -15,6 +15,7 @@ interface Formation {
     end_date: string;
     price: string;
     max_participants: string;
+    meeting_link: string; // Nouveau champ ajouté
     featured_image: {
         large: string;
     };
@@ -102,10 +103,30 @@ const ShowFormation = ({ formation }: { formation: Formation }) => {
                                 variant={formation.is_full ? "outline" : "default"}
                                 asChild
                             >
-                                <Link href={route('formations.participants', formation.slug)}>
+                                <InertiaLink href={route('formations.participants', formation.slug)}>
                                     Voir les inscrits ({formation.participant_count || 0} / {formation.max_participants})
-                                </Link>
+                                </InertiaLink>
                             </Button>
+
+                            {/* Bouton pour rejoindre le meeting si le lien existe */}
+                            {formation.meeting_link && (
+                                <Button
+                                    className="w-full"
+                                    size="lg"
+                                    variant="outline"
+                                    asChild
+                                >
+                                    <a
+                                        href={formation.meeting_link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center justify-center gap-2"
+                                    >
+                                        <Link className="h-4 w-4" />
+                                        Rejoindre le meeting
+                                    </a>
+                                </Button>
+                            )}
 
                             <hr className="border-muted" />
 
@@ -158,6 +179,24 @@ const ShowFormation = ({ formation }: { formation: Formation }) => {
                                         </p>
                                     </div>
                                 </div>
+
+                                {/* Affichage du lien de meeting s'il existe */}
+                                {formation.meeting_link && (
+                                    <div className="flex items-start gap-3">
+                                        <Link className="h-5 w-5 text-muted-foreground mt-1" />
+                                        <div>
+                                            <p className="font-medium">Lien de meeting</p>
+                                            <a
+                                                href={formation.meeting_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-muted-foreground hover:text-primary underline break-all"
+                                            >
+                                                {formation.meeting_link}
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

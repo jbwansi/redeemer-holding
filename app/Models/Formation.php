@@ -29,6 +29,7 @@ class Formation extends Model
         'is_featured',
         'published_at',
         'tags',
+        'meeting_link',
     ];
 
     protected $casts = [

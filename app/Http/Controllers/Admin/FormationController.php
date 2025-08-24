@@ -63,6 +63,7 @@ class FormationController extends Controller
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'tags' => 'nullable|array',
+            'meeting_link' => 'nullable|string',
         ]);
 
         if ($validated['is_featured'] == true) {
@@ -111,6 +112,8 @@ class FormationController extends Controller
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'tags' => 'nullable|array',
+            'meeting_link' => 'nullable|string',
+
         ]);
 
         if ($validated['is_featured'] == true) {

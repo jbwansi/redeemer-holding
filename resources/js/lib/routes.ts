@@ -76,7 +76,7 @@ export const dataRoutes = {
                     url: route("formations.index"),
                 },
                 {
-                    title: "Ajouter un formation",
+                    title: "Ajouter une formation",
                     url: route("formations.create"),
                 },
             ],
