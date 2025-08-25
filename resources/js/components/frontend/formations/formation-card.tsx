@@ -53,12 +53,7 @@ const FormationCard = ({ formation }: any) => {
             );
         }
 
-        return (
-            <div className="flex items-center text-gray-500 dark:text-gray-400">
-                <Users className="w-4 h-4 mr-2" />
-                <span>{formation.available_seats} places disponibles</span>
-            </div>
-        );
+        return null;
     };
 
     return (

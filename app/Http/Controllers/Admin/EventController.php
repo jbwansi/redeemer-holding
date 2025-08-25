@@ -80,6 +80,11 @@ class EventController extends Controller
         }
         DB::beginTransaction();
         try {
+            $startDate = Carbon::parse($validated['start_date'])->setTimezone(config('app.timezone'));
+            $endDate = Carbon::parse($validated['end_date'])->setTimezone(config('app.timezone'));
+
+            $validated['start_date'] = $startDate;
+            $validated['end_date'] = $endDate;
             $event = Event::create([
                 ...$validated,
                 'user_id' => Auth::id(),
@@ -146,13 +151,11 @@ class EventController extends Controller
             } else {
                 unset($validated['featured_image']);
             }
-            Log::info("validated", $validated);
             $startDate = Carbon::parse($validated['start_date'])->setTimezone(config('app.timezone'));
             $endDate = Carbon::parse($validated['end_date'])->setTimezone(config('app.timezone'));
 
             $validated['start_date'] = $startDate;
             $validated['end_date'] = $endDate;
-            Log::info("validated 2", $validated);
             $event->update([
                 ...$validated,
                 'published_at' => $request->is_published ? now() : null,

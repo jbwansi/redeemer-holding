@@ -230,10 +230,7 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                             </div>
                                         </div>
 
-                                        <div className="bg-black/30 px-4 py-3 rounded-lg">
-                                            <div className="text-xs text-white/70 mb-1">Places disponibles</div>
-                                            <div className="text-xl font-bold text-white">{formation.available_seats}/{formation.max_participants}</div>
-                                        </div>
+
 
                                         <div className="flex space-x-2 self-end">
                                             <button
@@ -468,16 +465,22 @@ const FormationDetailPage = ({ formation, relatedFormations }: any) => {
                                                 </div>
 
                                                 <div className="flex">
-                                                    <Users className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-3 flex-shrink-0" />
                                                     <div>
-                                                        <h4 className="font-medium text-gray-900 dark:text-white mb-1">Participants</h4>
-                                                        <p className="text-gray-600 dark:text-gray-300">
-                                                            {isFormationPassed ? (
-                                                                `${formation.participant_count} participant${formation.participant_count > 1 ? 's' : ''}`
-                                                            ) : (
-                                                                `${formation.max_participants - formation.available_seats}/${formation.max_participants} places réservées`
-                                                            )}
-                                                        </p>
+
+
+                                                        {/* Avertissement pour moins de 5 places */}
+                                                        {!isFormationPassed && formation.available_seats > 0 && formation.available_seats <= 5 && (
+                                                            <p className="text-amber-600 dark:text-amber-400 text-sm font-medium mt-1">
+                                                                Plus que {formation.available_seats} place{formation.available_seats > 1 ? 's' : ''} disponible{formation.available_seats > 1 ? 's' : ''} !
+                                                            </p>
+                                                        )}
+
+                                                        {/* Avertissement pour plus de places disponibles */}
+                                                        {!isFormationPassed && formation.available_seats === 0 && (
+                                                            <p className="text-red-600 dark:text-red-400 text-sm font-medium mt-1">
+                                                                Complet - Plus de places disponibles
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
 
