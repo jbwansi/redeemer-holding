@@ -805,7 +805,7 @@ const EventDetailPage = ({ event, relatedEvents }: any) => {
 
                                             <div className="flex justify-between items-center pt-4 border-t border-gray-100 dark:border-gray-700">
                                                 <div className="font-bold text-lg text-gray-900 dark:text-white">
-                                                    {relatedEvent.price === 0 ? 'GRATUIT' : `${relatedEvent.price} CHF`}
+                                                    {relatedEvent.price == 0 ? 'GRATUIT' : `${relatedEvent.price} CHF`}
                                                 </div>
 
                                                 <Link

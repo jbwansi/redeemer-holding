@@ -12,6 +12,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
@@ -144,7 +145,7 @@ class EventController extends Controller
             } else {
                 unset($validated['featured_image']);
             }
-
+            Log::info($validated);
             $event->update([
                 ...$validated,
                 'published_at' => $request->is_published ? now() : null,
