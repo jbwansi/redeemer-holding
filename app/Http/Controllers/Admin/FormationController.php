@@ -7,6 +7,7 @@ use App\Models\Formation;
 use App\Models\FormationParticipant;
 use App\Services\ImageService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -72,6 +73,11 @@ class FormationController extends Controller
 
         DB::beginTransaction();
         try {
+            $startDate = Carbon::parse($validated['start_date'])->setTimezone(config('app.timezone'));
+            $endDate = Carbon::parse($validated['end_date'])->setTimezone(config('app.timezone'));
+
+            $validated['start_date'] = $startDate;
+            $validated['end_date'] = $endDate;
             $formation = Formation::create([
                 ...$validated,
                 'user_id' => Auth::id(),
@@ -135,7 +141,11 @@ class FormationController extends Controller
             } else {
                 unset($validated['featured_image']);
             }
+            $startDate = Carbon::parse($validated['start_date'])->setTimezone(config('app.timezone'));
+            $endDate = Carbon::parse($validated['end_date'])->setTimezone(config('app.timezone'));
 
+            $validated['start_date'] = $startDate;
+            $validated['end_date'] = $endDate;
             $formation->update([
                 ...$validated,
                 'published_at' => $request->is_published ? now() : null,
