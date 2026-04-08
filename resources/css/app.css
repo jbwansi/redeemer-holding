@@ -89,3 +89,32 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .dashboard-content h1,
+  .dashboard-content h2,
+  .dashboard-content h3,
+  .dashboard-content h4 {
+    @apply tracking-tight text-slate-900 dark:text-slate-100;
+  }
+
+  .dashboard-content h2 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+
+  .dashboard-content h3 {
+    @apply text-lg md:text-xl font-semibold;
+  }
+
+  .dashboard-content p {
+    @apply text-slate-600 dark:text-slate-300;
+  }
+
+  .dashboard-content button {
+    @apply transition-all duration-200;
+  }
+
+  .dashboard-content .primary-action {
+    @apply inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-red-500/25 hover:from-red-700 hover:to-rose-700;
+  }
+}

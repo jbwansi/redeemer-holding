@@ -170,13 +170,31 @@
             </div>
         </div>
         <div class="header">
-            <h1>Rappel : Votre événement commence demain</h1>
+            <h1>
+                Rappel :
+                @if (($daysBefore ?? 1) <= 1)
+                    Votre formation commence demain
+                @else
+                    Votre formation commence dans {{ $daysBefore }} jours
+                @endif
+            </h1>
         </div>
 
         <div class="content">
             <p>Bonjour {{ $participant->name }},</p>
 
-            <p>Nous vous rappelons que l'événement "{{ $participant->formation->title }}" commence demain.</p>
+            @if (!empty($customMessage))
+                <p>{{ $customMessage }}</p>
+            @else
+                <p>
+                    Nous vous rappelons que la formation "{{ $participant->formation->title }}"
+                    @if (($daysBefore ?? 1) <= 1)
+                        commence demain.
+                    @else
+                        commence dans {{ $daysBefore }} jours.
+                    @endif
+                </p>
+            @endif
 
             <div class="details">
                 <h3>Détails de l'événement :</h3>
@@ -196,6 +214,17 @@
                     <li>Votre numéro de référence</li>
                 </ul>
             </div>
+
+            @php
+                $resolvedZoomLink = $participant->formation->meeting_link ?? ($zoomLink ?? null);
+            @endphp
+            @if (!empty($resolvedZoomLink))
+                <div class="instructions">
+                    <h3>Lien Zoom / Meeting</h3>
+                    <p>Rejoignez la session en ligne avec ce lien :</p>
+                    <p><a href="{{ $resolvedZoomLink }}" target="_blank" rel="noopener noreferrer">{{ $resolvedZoomLink }}</a></p>
+                </div>
+            @endif
         </div>
 
         <div class="footer">

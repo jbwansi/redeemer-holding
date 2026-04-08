@@ -1,9 +1,13 @@
 import {
     BookType,
     CalendarDays,
+    MessageSquare,
+    MessageCircle,
     Frame,
     GalleryVerticalEnd,
     GraduationCap,
+    Home,
+    Info,
     LayoutDashboard,
     LucideBookOpen,
     Mail,
@@ -27,6 +31,10 @@ type RouteMappingType = {
 // Mapping des labels en français
 export const LABEL_MAPPING: LabelMappingType = {
     dashboard: "Tableau de bord",
+    accueil: "Accueil",
+    "contact-page": "Contact",
+    chatbot: "Chatbot",
+    "a-propos": "A propos",
     "profile.account": "Mon compte",
     "profile.security": "Sécurité",
     "profile.activities": "Activités",
@@ -94,11 +102,12 @@ export const dataRoutes = {
                     title: "Ajouter un évènement",
                     url: route("events.create"),
                 },
-                {
-                    title: "Categories",
-                    url: route("event-categories.index"),
-                },
             ],
+        },
+        {
+            title: "Catégories",
+            url: route("categories.index"),
+            icon: School,
         },
         {
             title: "Services",
@@ -128,10 +137,6 @@ export const dataRoutes = {
                     title: "Ajouter un article",
                     url: route("posts.create"),
                 },
-                {
-                    title: "Catégories",
-                    url: route("categories.index"),
-                },
             ],
         },
         {
@@ -155,7 +160,32 @@ export const dataRoutes = {
         },
         {
             title: "Newsletters",
-            url: "",
+            url: route("newsletters.index"),
+            icon: Mail,
+        },
+        {
+            title: "A propos",
+            url: route("about.edit"),
+            icon: Info,
+        },
+        {
+            title: "Accueil",
+            url: route("home.edit"),
+            icon: Home,
+        },
+        {
+            title: "Contact",
+            url: route("contact-page.edit"),
+            icon: MessageSquare,
+        },
+        {
+            title: "Chatbot",
+            url: route("chatbot.edit"),
+            icon: MessageCircle,
+        },
+        {
+            title: "Leads chatbot",
+            url: route("chatbot-leads.index"),
             icon: Mail,
         },
         {

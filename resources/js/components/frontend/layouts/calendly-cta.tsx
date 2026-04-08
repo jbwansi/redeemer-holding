@@ -1,29 +1,24 @@
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Calendar, ArrowRight, CheckCircle, Clock, LucideIcon } from 'lucide-react';
+import { Calendar, ArrowRight, CheckCircle, Clock, ChevronLeft, ChevronRight, LucideIcon } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 
-const CalendlyCTA = () => {
+const CalendlyCTA = ({ benefits: benefitsProp }: { benefits?: string[] } = {}) => {
     const sectionRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(sectionRef, { once: false, amount: 0.2 });
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
     const { settings } = useSettings();
+    const bookingHref = settings?.calendly_link || route('contact');
 
-    // Benefits of the free session
-    const benefits: { icon: LucideIcon; text: string }[] = [
-        {
-            icon: CheckCircle,
-            text: "Identifiez vos blocages actuels et opportunités inexploitées"
-        },
-        {
-            icon: CheckCircle,
-            text: "Découvrez les 3 étapes clés pour transformer votre productivité"
-        },
-        {
-            icon: CheckCircle,
-            text: "Repartez avec un plan d'action personnalisé et applicable immédiatement"
-        }
+    const defaultBenefits = [
+        "Identifiez vos blocages actuels et opportunités inexploitées",
+        "Découvrez les 3 étapes clés pour transformer votre productivité",
+        "Repartez avec un plan d'action personnalisé et applicable immédiatement",
     ];
+    const benefitTexts = benefitsProp && benefitsProp.length > 0 ? benefitsProp : defaultBenefits;
+    const benefits: { icon: LucideIcon; text: string }[] = benefitTexts.map(text => ({ icon: CheckCircle, text }));
 
     // Animation variants
     const containerVariants = {
@@ -57,6 +52,53 @@ const CalendlyCTA = () => {
             transition: { duration: 0.3, ease: 'easeOut' }
         },
         tap: { scale: 0.98 }
+    };
+
+    const monthLabel = useMemo(
+        () => new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentMonth),
+        [currentMonth]
+    );
+
+    const days = useMemo(() => {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        // Monday-first index: 0..6
+        const startsOn = (firstDay.getDay() + 6) % 7;
+        const items: Array<{ date: Date | null }> = [];
+
+        for (let i = 0; i < startsOn; i++) {
+            items.push({ date: null });
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            items.push({ date: new Date(year, month, day) });
+        }
+
+        return items;
+    }, [currentMonth]);
+
+    const isSameDay = (a: Date | null, b: Date | null) => {
+        if (!a || !b) return false;
+        return (
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+        );
+    };
+
+    const selectedDateLabel = selectedDate
+        ? new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(selectedDate)
+        : null;
+
+    const goPrevMonth = () => {
+        setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    };
+
+    const goNextMonth = () => {
+        setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
     };
 
     return (
@@ -148,7 +190,7 @@ const CalendlyCTA = () => {
                             {/* CTA Button */}
                             <motion.div variants={itemVariants}>
                                 <a
-                                    href={settings?.calendly_link}
+                                    href={bookingHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -160,7 +202,7 @@ const CalendlyCTA = () => {
                                         className="px-8 py-4 bg-[#DA2E29] text-white rounded-lg font-medium text-lg flex items-center justify-center group shadow-lg shadow-[#DA2E29]/20"
                                     >
                                         <Calendar className="w-5 h-5 mr-2" />
-                                        <span>Réserver ma session gratuite</span>
+                                        <span>{settings?.calendly_link ? 'Réserver ma session gratuite' : 'Configurer mon rendez-vous'}</span>
                                         <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                                     </motion.button>
                                 </a>
@@ -188,28 +230,61 @@ const CalendlyCTA = () => {
                                         {/* Calendar illustration */}
                                         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 relative z-10">
                                             <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
-                                                <div className="font-medium text-gray-900 dark:text-white">Avril 2025</div>
+                                                <div className="font-medium text-gray-900 dark:text-white capitalize">{monthLabel}</div>
                                                 <div className="flex space-x-2">
-                                                    <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={goPrevMonth}
+                                                        className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
+                                                        aria-label="Mois précédent"
+                                                    >
                                                         <ChevronLeft size={16} className="text-gray-500 dark:text-gray-400" />
-                                                    </div>
-                                                    <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={goNextMonth}
+                                                        className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600"
+                                                        aria-label="Mois suivant"
+                                                    >
                                                         <ChevronRight size={16} className="text-gray-500 dark:text-gray-400" />
-                                                    </div>
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-7 gap-2 text-center text-xs">
                                                 {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((day, i) => (
                                                     <div key={i} className="text-gray-500 dark:text-gray-400 font-medium py-1">{day}</div>
                                                 ))}
-                                                {Array.from({ length: 30 }, (_, i) => (
-                                                    <div key={i} className={`py-1 rounded-full ${i === 14 || i === 21 ? 'bg-[#DA2E29] text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200'}`}>
-                                                        {i + 1}
-                                                    </div>
-                                                ))}
+                                                {days.map((item, i) => {
+                                                    if (!item.date) {
+                                                        return <div key={`empty-${i}`} className="py-1" />;
+                                                    }
+
+                                                    const isToday = isSameDay(item.date, new Date());
+                                                    const isSelected = isSameDay(item.date, selectedDate);
+
+                                                    return (
+                                                        <button
+                                                            key={item.date.toISOString()}
+                                                            type="button"
+                                                            onClick={() => setSelectedDate(item.date)}
+                                                            className={[
+                                                                'py-1 rounded-full transition-colors',
+                                                                isSelected
+                                                                    ? 'bg-[#DA2E29] text-white'
+                                                                    : isToday
+                                                                        ? 'bg-[#DA2E29]/15 text-[#DA2E29]'
+                                                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200'
+                                                            ].join(' ')}
+                                                        >
+                                                            {item.date.getDate()}
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                             <div className="mt-4 p-3 bg-[#DA2E29]/10 dark:bg-[#DA2E29]/20 rounded-lg text-sm text-[#DA2E29] font-medium text-center">
-                                                Session stratégique (30 min)
+                                                {selectedDateLabel
+                                                    ? `Créneau demandé: ${selectedDateLabel}`
+                                                    : 'Session stratégique (30 min)'}
                                             </div>
                                         </div>
                                     </div>
@@ -250,41 +325,5 @@ const CalendlyCTA = () => {
         </section>
     );
 };
-
-// Import the ChevronLeft icon for the calendar illustration
-const ChevronLeft = ({ size, className }: any) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="m15 18-6-6 6-6" />
-    </svg>
-);
-
-// Import the ChevronRight icon for the calendar illustration
-const ChevronRight = ({ size, className }: any) => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className={className}
-    >
-        <path d="m9 18 6-6-6-6" />
-    </svg>
-);
 
 export default CalendlyCTA;

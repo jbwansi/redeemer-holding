@@ -21,7 +21,7 @@ interface Props {
 }
 
 const MainLayout = ({ children, title }: MainLayoutProps) => {
-    const { flash } = usePage() as any;
+    const { flash, app } = usePage() as any;
 
     useEffect(() => {
         // Gérer les messages de succès
@@ -47,6 +47,11 @@ const MainLayout = ({ children, title }: MainLayoutProps) => {
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                {app?.is_test_env && (
+                    <div className="sticky top-0 z-[70] bg-amber-500 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-900">
+                        Environnement de test - Donnees non contractuelles
+                    </div>
+                )}
                 <SidebarProvider>
                     <AppSidebar />
                     <main className="w-full pb-24">

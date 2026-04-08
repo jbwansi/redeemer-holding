@@ -1,9 +1,59 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
-import { ArrowRight, CheckCircle, Clock, Brain, Zap } from 'lucide-react';
+import { ArrowRight, Clock, Brain, Zap, LucideIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { Link } from '@inertiajs/react';
 
-const Hero = () => {
+const ICON_MAP: Record<string, LucideIcon> = {
+    Clock: LucideIcons.Clock,
+    Brain: LucideIcons.Brain,
+    Zap: LucideIcons.Zap,
+    Target: LucideIcons.Target,
+    TrendingUp: LucideIcons.TrendingUp,
+    Star: LucideIcons.Star,
+    Heart: LucideIcons.Heart,
+    Shield: LucideIcons.Shield,
+    Award: LucideIcons.Award,
+    CheckCircle: LucideIcons.CheckCircle,
+    BookOpen: LucideIcons.BookOpen,
+    Users: LucideIcons.Users,
+    Lightbulb: LucideIcons.Lightbulb,
+    Rocket: LucideIcons.Rocket,
+};
+
+interface HeroStep { icon: string; title: string; description: string }
+interface HeroTestimonial { content: string; author: string; position: string }
+interface HeroStat { value: string; label: string }
+
+interface HeroMeta {
+    hero_badge?: string
+    hero_title_line1?: string
+    hero_title_line2?: string
+    hero_subtitle?: string
+    hero_cta_text?: string
+    hero_cta_url?: string
+    hero_steps?: HeroStep[]
+    hero_testimonial?: HeroTestimonial
+    hero_stats?: HeroStat[]
+    hero_image?: string
+}
+
+const defaultSteps: HeroStep[] = [
+    { icon: 'Clock',  title: 'Révélez votre potentiel',     description: 'Découvrez vos forces cachées et définissez votre vision personnelle' },
+    { icon: 'Brain',  title: 'Transformez vos habitudes',   description: 'Développez des routines quotidiennes soutenues par la science' },
+    { icon: 'Zap',    title: 'Optimisez votre productivité', description: 'Atteignez vos objectifs avec mon système éprouvé' },
+];
+const defaultTestimonial: HeroTestimonial = {
+    content:  "Cette méthode a complètement transformé ma productivité et ma vision de la vie.",
+    author:   "Marie L.",
+    position: "Entrepreneure",
+};
+const defaultStats: HeroStat[] = [
+    { value: '97%', label: 'Satisfaction' },
+    { value: '3k+', label: 'Vies transformées' },
+];
+
+const Hero = ({ meta }: { meta?: HeroMeta }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const imageRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLDivElement>(null);
@@ -19,24 +69,16 @@ const Hero = () => {
     const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '5%']);
     const textY = useTransform(scrollYProgress, [0, 1], ['0%', '10%']);
 
-    // Three steps mentioned in the description
-    const steps = [
-        {
-            icon: <Clock className="w-5 h-5 text-[#DA2E29]" />,
-            title: "Révélez votre potentiel",
-            description: "Découvrez vos forces cachées et définissez votre vision personnelle"
-        },
-        {
-            icon: <Brain className="w-5 h-5 text-[#DA2E29]" />,
-            title: "Transformez vos habitudes",
-            description: "Développez des routines quotidiennes soutenues par la science"
-        },
-        {
-            icon: <Zap className="w-5 h-5 text-[#DA2E29]" />,
-            title: "Optimisez votre productivité",
-            description: "Atteignez vos objectifs avec mon système éprouvé"
-        }
-    ];
+    const steps       = meta?.hero_steps?.length     ? meta.hero_steps       : defaultSteps;
+    const testimonial = meta?.hero_testimonial        ? meta.hero_testimonial : defaultTestimonial;
+    const stats       = meta?.hero_stats?.length      ? meta.hero_stats       : defaultStats;
+    const badge       = meta?.hero_badge              ?? 'Coaching de vie';
+    const titleLine1  = meta?.hero_title_line1        ?? 'La vie que vous méritez';
+    const titleLine2  = meta?.hero_title_line2        ?? 'à portée de main !';
+    const subtitle    = meta?.hero_subtitle           ?? "Bienvenue sur le chemin de la transformation par les valeurs. Je vous aide à découvrir votre véritable potentiel et à vivre une vie épanouie.";
+    const ctaText     = meta?.hero_cta_text           ?? 'Découvrir mes formations';
+    const ctaUrl      = meta?.hero_cta_url            ?? route('formations');
+    const heroImage   = meta?.hero_image              ?? '/assets/images/portrait.jpg';
 
     // Animation variants
     const containerVariants = {
@@ -123,7 +165,7 @@ const Hero = () => {
                                 className="inline-block py-1 px-4 text-sm font-medium bg-[#DA2E29]/10 dark:bg-[#DA2E29]/20 text-[#DA2E29] rounded-full mb-4"
                                 whileHover={{ scale: 1.05 }}
                             >
-                                Coaching de vie
+                                {badge}
                             </motion.span>
                         </motion.div>
 
@@ -131,16 +173,15 @@ const Hero = () => {
                             className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-4"
                             variants={itemVariants}
                         >
-                            <span className="block">La vie que vous méritez</span>
-                            <span className="text-[#DA2E29]">à portée de main !</span>
+                            <span className="block">{titleLine1}</span>
+                            <span className="text-[#DA2E29]">{titleLine2}</span>
                         </motion.h1>
 
                         <motion.p
                             className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8"
                             variants={itemVariants}
                         >
-                            Bienvenue sur le chemin de la transformation par les valeurs.
-                            Je vous aide à découvrir votre véritable potentiel et à vivre une vie épanouie.
+                            {subtitle}
                         </motion.p>
 
                         {/* Three steps */}
@@ -159,7 +200,7 @@ const Hero = () => {
                                     whileHover={{ y: -5, transition: { duration: 0.2 } }}
                                 >
                                     <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#DA2E29]/10 mb-4">
-                                        {step.icon}
+                                        {React.createElement(ICON_MAP[step.icon] ?? LucideIcons.CheckCircle, { className: "w-5 h-5 text-[#DA2E29]" })}
                                     </div>
                                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{step.title}</h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">{step.description}</p>
@@ -168,7 +209,7 @@ const Hero = () => {
                         </motion.div>
 
                         {/* CTA Button */}
-                        <Link href={route('formations')}>
+                        <Link href={ctaUrl}>
                         <motion.div variants={itemVariants}>
                             <motion.button
                                 className="px-8 py-4 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium text-lg flex items-center justify-center group shadow-lg shadow-[#DA2E29]/20"
@@ -177,7 +218,7 @@ const Hero = () => {
                                 whileHover="hover"
                                 whileTap="tap"
                             >
-                                <span>Découvrir mes formations</span>
+                                    <span>{ctaText}</span>
                                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                             </motion.button>
                         </motion.div>
@@ -197,9 +238,13 @@ const Hero = () => {
                             {/* Main coach image */}
                             <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl shadow-gray-900/10 dark:shadow-black/20 border border-gray-100 dark:border-gray-800">
                                 <img
-                                    src="/assets/images/portrait.jpg"
+                                    src={heroImage}
                                     alt="Coach de vie professionnel"
                                     className="w-full h-[700px] object-cover rounded-2xl"
+                                    loading="eager"
+                                    fetchPriority="high"
+                                    decoding="async"
+                                    sizes="(min-width: 1024px) 42vw, 100vw"
                                 />
 
                                 {/* Highlight effect */}
@@ -228,10 +273,10 @@ const Hero = () => {
                                     </div>
                                     <div>
                                         <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                                            "Cette méthode a complètement transformé ma productivité et ma vision de la vie."
+                                            "{testimonial.content}"
                                         </p>
                                         <p className="text-xs font-medium text-gray-900 dark:text-white mt-2">
-                                            Marie L. • Entrepreneure
+                                            {testimonial.author} • {testimonial.position}
                                         </p>
                                         <div className="flex mt-1">
                                             {[...Array(5)].map((_, i) => (
@@ -253,15 +298,15 @@ const Hero = () => {
                                 whileHover={{ y: -5, boxShadow: '0 15px 30px rgba(0,0,0,0.1)' }}
                             >
                                 <div className="flex items-center space-x-2">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-[#DA2E29]">97%</div>
-                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Satisfaction</div>
-                                    </div>
-                                    <div className="h-10 w-px bg-gray-200 dark:bg-gray-700"></div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-[#DA2E29]">3k+</div>
-                                        <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Vies transformées</div>
-                                    </div>
+                                    {stats.map((s, i) => (
+                                        <React.Fragment key={i}>
+                                            {i > 0 && <div className="h-10 w-px bg-gray-200 dark:bg-gray-700"></div>}
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-[#DA2E29]">{s.value}</div>
+                                                <div className="text-xs font-medium text-gray-600 dark:text-gray-400">{s.label}</div>
+                                            </div>
+                                        </React.Fragment>
+                                    ))}
                                 </div>
                             </motion.div>
                         </div>

@@ -94,6 +94,64 @@ class AccountController extends Controller
         return inertia('backend/account/notifications');
     }
 
+    public function notificationsFeed(Request $request)
+    {
+        $user = Auth::user();
+
+        $items = $user->unreadNotifications()
+            ->latest()
+            ->limit(8)
+            ->get()
+            ->map(function ($notification) {
+                $data = (array) ($notification->data ?? []);
+
+                $url = $data['url'] ?? null;
+                if (!$url && isset($data['service_request_id'])) {
+                    $url = route('service-requests.show', $data['service_request_id']);
+                }
+
+                return [
+                    'id' => $notification->id,
+                    'title' => $data['title'] ?? 'Notification',
+                    'message' => $data['message'] ?? 'Vous avez une nouvelle notification.',
+                    'type' => $data['type'] ?? 'info',
+                    'url' => $url,
+                    'created_at' => optional($notification->created_at)?->diffForHumans(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'unread_count' => $user->unreadNotifications()->count(),
+            'items' => $items,
+        ]);
+    }
+
+    public function markNotificationAsRead(Request $request, string $notification)
+    {
+        $user = Auth::user();
+        $item = $user->notifications()->where('id', $notification)->firstOrFail();
+
+        if (!$item->read_at) {
+            $item->markAsRead();
+        }
+
+        $redirectTo = $request->input('redirect_to');
+        if (is_string($redirectTo) && $redirectTo !== '') {
+            return redirect($redirectTo);
+        }
+
+        return back();
+    }
+
+    public function markAllNotificationsAsRead()
+    {
+        $user = Auth::user();
+        $user?->unreadNotifications?->markAsRead();
+
+        return back();
+    }
+
     public function integrations()
     {
         return inertia('backend/account/integrations');

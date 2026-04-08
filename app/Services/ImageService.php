@@ -20,19 +20,40 @@ class ImageService
             'original' => $fullPath
         ];
 
+        // Fallback: when no image engine is available, keep only original file.
+        if (!$this->canProcessImages()) {
+            foreach (array_keys($sizes) as $size) {
+                $images[$size] = $fullPath;
+            }
+
+            return $images;
+        }
+
         // Générer les différentes tailles
-        foreach ($sizes as $size => $dimensions) {
-            $resizedImage = Image::make($file)
-                ->fit($dimensions['width'], $dimensions['height'])
-                ->encode($file->getClientOriginalExtension(), 90);
+        try {
+            foreach ($sizes as $size => $dimensions) {
+                $resizedImage = Image::make($file)
+                    ->fit($dimensions['width'], $dimensions['height'])
+                    ->encode($file->getClientOriginalExtension(), 90);
 
-            $resizedPath = $path . '/' . $size . '_' . $filename;
-            Storage::disk('public')->put($resizedPath, $resizedImage);
+                $resizedPath = $path . '/' . $size . '_' . $filename;
+                Storage::disk('public')->put($resizedPath, $resizedImage);
 
-            $images[$size] = $resizedPath;
+                $images[$size] = $resizedPath;
+            }
+        } catch (\Throwable $e) {
+            // Do not block entity creation if the server cannot resize images.
+            foreach (array_keys($sizes) as $size) {
+                $images[$size] = $fullPath;
+            }
         }
 
         return $images;
+    }
+
+    private function canProcessImages(): bool
+    {
+        return extension_loaded('gd') || extension_loaded('imagick');
     }
 
     public function deleteImages(array $paths): void

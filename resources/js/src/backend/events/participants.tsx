@@ -19,9 +19,21 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import DOMPurify from 'dompurify';
+import { route } from 'ziggy-js';
 
 const EventParticipants = ({ event, participants, meta }) => {
     const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredParticipants = participants.filter((participant) => {
+        const q = searchTerm.trim().toLowerCase();
+        if (!q) return true;
+        return (
+            participant.name.toLowerCase().includes(q) ||
+            participant.email.toLowerCase().includes(q) ||
+            participant.reference.toLowerCase().includes(q)
+        );
+    });
 
     const statusColors = {
         completed: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -45,38 +57,37 @@ const EventParticipants = ({ event, participants, meta }) => {
     };
 
     return (
-        <div className="container mx-auto p-6">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold mb-2">
-                        Participants à {event.title}
-                    </h1>
-                    <div className="text-sm text-muted-foreground">
-                        {event.participant_count} participant{event.participant_count > 1 ? 's' : ''} / {event.max_participants} places disponibles
+        <div className="p-6 space-y-6">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-[#7f1d1d] px-6 py-7 text-white shadow-xl">
+                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+                <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Participants Événement</h1>
+                        <p className="mt-2 text-white/80">
+                            {event.title} • {event.participant_count} participant{event.participant_count > 1 ? 's' : ''}
+                        </p>
                     </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" onClick={() => window.history.back()}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Retour
-                    </Button>
-                    <Button variant="outline" onClick={() => window.location.href = route('events.participants.export', event.slug)}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Exporter
-                    </Button>
+                    <div className="flex items-center gap-3">
+                        <Button variant="outline" className="rounded-xl bg-white/10 border-white/25 text-white hover:bg-white/20" onClick={() => window.history.back()}>
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Retour
+                        </Button>
+                        <Button variant="outline" className="rounded-xl bg-white text-slate-900 hover:bg-slate-100" onClick={() => window.location.href = route('events.participants.export', event.slug)}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Exporter
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <Card>
+                <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{event.participant_count}</div>
                         <div className="text-sm text-muted-foreground">Total participants</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">
                             {participants.filter(p => p.status === 'completed').length}
@@ -84,7 +95,7 @@ const EventParticipants = ({ event, participants, meta }) => {
                         <div className="text-sm text-muted-foreground">Inscriptions confirmées</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">
                             {participants.filter(p => p.status === 'pending').length}
@@ -92,7 +103,7 @@ const EventParticipants = ({ event, participants, meta }) => {
                         <div className="text-sm text-muted-foreground">En attente de paiement</div>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
                     <CardContent className="pt-6">
                         <div className="text-2xl font-bold">
                             {event.max_participants - event.participant_count}
@@ -102,19 +113,21 @@ const EventParticipants = ({ event, participants, meta }) => {
                 </Card>
             </div>
 
-            {/* Search and Filters */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="w-1/3">
+            <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70">
+                <div className="w-full md:w-1/3">
                     <Input
                         placeholder="Rechercher un participant..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
+                        className="rounded-xl"
                     />
+                </div>
+                <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                    {filteredParticipants.length} résultat{filteredParticipants.length > 1 ? 's' : ''}
                 </div>
             </div>
 
-            {/* Participants Table */}
-            <Card>
+            <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70">
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
@@ -127,7 +140,7 @@ const EventParticipants = ({ event, participants, meta }) => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {participants.map((participant) => (
+                            {filteredParticipants.map((participant) => (
                                 <TableRow key={participant.id}>
                                     <TableCell>
                                         <div className="font-medium">{participant.name}</div>
@@ -203,6 +216,13 @@ const EventParticipants = ({ event, participants, meta }) => {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {filteredParticipants.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-10 text-slate-500">
+                                        Aucun participant trouvé.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
@@ -221,7 +241,7 @@ const EventParticipants = ({ event, participants, meta }) => {
                                 variant={link.active ? "default" : "outline"}
                                 disabled={!link.url}
                                 onClick={() => window.location.href = link.url}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.label || '') }}
                             />
                         ))}
                     </div>

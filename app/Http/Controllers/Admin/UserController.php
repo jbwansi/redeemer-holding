@@ -44,18 +44,7 @@ class UserController extends Controller
             });
 
         $users = $query->paginate(10)
-            ->withQueryString()
-            ->through(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'is_active' => $user->is_active,
-                    'email_verified_at' => $user->email_verified_at,
-                    'created_at' => $user->created_at,
-                ];
-            });
+            ->appends($request->query());
 
         return inertia('backend/users/index', [
             'users' => $users,
@@ -225,16 +214,7 @@ class UserController extends Controller
 
         $blockedUsers = $query->latest()
             ->paginate(10)
-            ->through(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role,
-                    'is_active' => $user->is_active,
-                    'created_at' => $user->created_at,
-                ];
-            });
+            ->appends($request->query());
 
         return inertia('backend/users/blocked', [
             'blockedUsers' => $blockedUsers,
@@ -273,74 +253,182 @@ class UserController extends Controller
         return back()->with('success', 'L\'utilisateur a été réactivé avec succès.');
     }
 
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt'],
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+
+        if (!$handle) {
+            return back()->with('error', 'Impossible de lire le fichier importé.');
+        }
+
+        $firstLine = fgets($handle);
+        rewind($handle);
+
+        $delimiter = ';';
+        if (is_string($firstLine)) {
+            $commaCount = substr_count($firstLine, ',');
+            $semicolonCount = substr_count($firstLine, ';');
+            $delimiter = $commaCount > $semicolonCount ? ',' : ';';
+        }
+
+        $headers = fgetcsv($handle, 0, $delimiter);
+        if (!$headers || !is_array($headers)) {
+            fclose($handle);
+            return back()->with('error', 'Le fichier CSV est vide ou invalide.');
+        }
+
+        $headers = array_map(function ($header) {
+            return strtolower(trim((string) $header));
+        }, $headers);
+
+        if (!in_array('email', $headers, true)) {
+            fclose($handle);
+            return back()->with('error', 'Le CSV doit contenir au minimum la colonne: email.');
+        }
+
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            if (!is_array($row)) {
+                $skipped++;
+                continue;
+            }
+
+            if (count($row) === 1 && trim((string) $row[0]) === '') {
+                continue;
+            }
+
+            $data = [];
+            foreach ($headers as $index => $header) {
+                $data[$header] = isset($row[$index]) ? trim((string) $row[$index]) : null;
+            }
+
+            $email = strtolower((string) ($data['email'] ?? ''));
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $skipped++;
+                continue;
+            }
+
+            $name = (string) ($data['name'] ?? '');
+            if ($name === '') {
+                $name = explode('@', $email)[0];
+            }
+
+            $role = strtolower((string) ($data['role'] ?? 'client'));
+            if (!in_array($role, ['admin', 'coach', 'client'], true)) {
+                $role = 'client';
+            }
+
+            $statusRaw = strtolower((string) ($data['is_active'] ?? '1'));
+            $isActive = in_array($statusRaw, ['1', 'true', 'yes', 'actif', 'active'], true) ? 1 : 0;
+
+            $plainPassword = (string) ($data['password'] ?? '');
+            if ($plainPassword === '') {
+                $plainPassword = (string) env('TEST_USERS_PASSWORD', 'Test1234!');
+            }
+
+            $user = User::where('email', $email)->first();
+
+            if ($user) {
+                $user->name = $name;
+                $user->role = $role;
+                $user->is_active = $isActive;
+                if (!empty($data['password'])) {
+                    $user->password = Hash::make($plainPassword);
+                }
+                $user->save();
+                $updated++;
+            } else {
+                $newUser = new User();
+                $newUser->name = $name;
+                $newUser->email = $email;
+                $newUser->role = $role;
+                $newUser->is_active = $isActive;
+                $newUser->password = Hash::make($plainPassword);
+                $newUser->save();
+                $created++;
+            }
+        }
+
+        fclose($handle);
+
+        return back()->with('success', "Import terminé: {$created} créé(s), {$updated} mis à jour, {$skipped} ignoré(s).");
+    }
+
     public function export(Request $request)
     {
-        $query = User::query();
+        $query = User::query()
+            ->when($request->input('search'), function ($query, $search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->input('role') && $request->input('role') !== 'all', function ($query) use ($request) {
+                $query->where('role', $request->input('role'));
+            })
+            ->when($request->input('is_active') && $request->input('is_active') !== 'all', function ($query) use ($request) {
+                $query->where('is_active', $request->input('is_active'));
+            })
+            ->when($request->input('verified'), function ($query) use ($request) {
+                if ($request->input('verified') === 'verified') {
+                    $query->whereNotNull('email_verified_at');
+                } elseif ($request->input('verified') === 'unverified') {
+                    $query->whereNull('email_verified_at');
+                }
+            });
 
-        // Apply filters from request body
-        // if ($request->search) {
-        //     $query->where(function ($q) use ($request) {
-        //         $q->where('name', 'like', "%{$request->search}%")
-        //           ->orWhere('email', 'like', "%{$request->search}%");
-        //     });
-        // }
+        $allowedSorts = ['created_at', 'name', 'email', 'role'];
+        $sort = $request->input('sort');
+        $direction = $request->input('direction') === 'asc' ? 'asc' : 'desc';
 
-        // if ($request->role && $request->role !== 'all') {
-        //     $query->where('role', $request->role);
-        // }
+        if (in_array($sort, $allowedSorts, true)) {
+            $query->orderBy($sort, $direction);
+        } else {
+            $query->latest();
+        }
 
-        // if ($request->status && $request->status !== 'all') {
-        //     $query->where('status', $request->status);
-        // }
+        $users = $query->get();
 
-        // if ($request->verified && $request->verified !== 'all') {
-        //     if ($request->verified === 'verified') {
-        //         $query->whereNotNull('email_verified_at');
-        //     } else {
-        //         $query->whereNull('email_verified_at');
-        //     }
-        // }
+        return response()->streamDownload(function () use ($users) {
+            $output = fopen('php://output', 'w');
 
-        // // Sort
-        // if ($request->sort) {
-        //     $query->orderBy($request->sort, $request->direction ?? 'asc');
-        // }
+            // UTF-8 BOM for Excel compatibility
+            fwrite($output, "\xEF\xBB\xBF");
 
-        // $users = $query->get();
+            fputcsv($output, [
+                'ID',
+                'Nom',
+                'Email',
+                'Role',
+                'Statut',
+                'Verifie',
+                'Date de creation',
+            ], ';');
 
-        // return new StreamedResponse(function () use ($users) {
-        //     $csv = Writer::createFromFileObject(new \SplTempFileObject());
-        //     $csv->setOutputBOM(\League\Csv\Writer::BOM_UTF8);
+            foreach ($users as $user) {
+                fputcsv($output, [
+                    $user->id,
+                    $user->name,
+                    $user->email,
+                    $this->translateUserType($user->role),
+                    ((int) $user->is_active) === 1 ? 'Actif' : 'Inactif',
+                    $user->email_verified_at ? 'Oui' : 'Non',
+                    optional($user->created_at)->format('d/m/Y H:i'),
+                ], ';');
+            }
 
-        //     // Add headers
-        //     $csv->insertOne([
-        //         'ID',
-        //         'Nom',
-        //         'Email',
-        //         'Rôle',
-        //         'Statut',
-        //         'Vérifié',
-        //         'Date de création',
-        //     ]);
-
-        //     // Add data
-        //     foreach ($users as $user) {
-        //         $csv->insertOne([
-        //             $user->id,
-        //             $user->name,
-        //             $user->email,
-        //             $this->translateUserType($user->role),
-        //             $this->translateStatus($user->status),
-        //             $user->email_verified_at ? 'Oui' : 'Non',
-        //             $user->created_at->format('d/m/Y H:i'),
-        //         ]);
-        //     }
-
-        //     $csv->output('users.csv');
-        // }, 200, [
-        //     'Content-Type' => 'text/csv; charset=UTF-8',
-        //     'Content-Disposition' => 'attachment; filename="users.csv"',
-        // ]);
+            fclose($output);
+        }, 'users.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     private function translateUserType(string $type): string

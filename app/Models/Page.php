@@ -10,9 +10,14 @@ class Page extends Model
         'title',
         'slug',
         'content',
+        'meta',
         'viewed',
         'user_id',
         'status',
+    ];
+
+    protected $casts = [
+        'meta' => 'array',
     ];
 
     public function user()

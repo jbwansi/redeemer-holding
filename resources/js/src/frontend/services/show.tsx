@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import { Calendar, ArrowRight, ChevronRight, CheckCircle, UserRound, MessageCircle, Users } from 'lucide-react';
+import { Calendar, ArrowRight, ChevronLeft, ChevronRight, CheckCircle, Clock, Shield } from 'lucide-react';
 import parse from 'html-react-parser'; // Pour analyser le contenu HTML
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import IconComponent from '@/components/ui/icon';
+import { normalizeServiceIconName } from '@/lib/service-icon';
 
 // Interface pour le type de service
 interface Service {
@@ -54,29 +56,26 @@ const ServiceDetail = ({ service, relatedServices = [] }: ServiceDetailProps) =>
         })
         : null;
 
-    // Déterminer l'icône à afficher
-    const getIconComponent = () => {
-        // Si l'icône est stockée comme nom de classe, on peut la mapper vers un composant
-        // Ici en exemple, mais vous pouvez adapter selon votre système d'icônes
-        switch (service.icon) {
-            case 'user':
-                return <UserRound size={24} className="text-[#DA2E29]" />;
-            case 'message':
-                return <MessageCircle size={24} className="text-[#DA2E29]" />;
-            case 'users':
-                return <Users size={24} className="text-[#DA2E29]" />;
-            default:
-                // Icône par défaut ou rendu depuis une URL si l'icône est un chemin d'image
-                return service.icon?.startsWith('http')
-                    ? <img src={service.icon} alt="icon" className="w-6 h-6" />
-                    : <CheckCircle size={24} className="text-[#DA2E29]" />;
-        }
-    };
+    const iconName = normalizeServiceIconName(service.icon);
+    const requestUrl = service?.slug
+        ? `/services-requests/${encodeURIComponent(service.slug)}`
+        : '#';
 
     return (
         <FrontLayout>
             <main ref={containerRef} className="min-h-screen bg-white dark:bg-gray-950 pt-20 pb-16 overflow-hidden">
             <Head title={service.name} />
+
+            {/* Breadcrumb back-nav */}
+            <div className="max-w-[1400px] mx-auto px-4 md:px-8 pt-4 pb-2">
+                <Link
+                    href={route('services')}
+                    className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#DA2E29] dark:text-gray-400 dark:hover:text-[#DA2E29] transition-colors"
+                >
+                    <ChevronLeft className="h-4 w-4" />
+                    Retour aux services
+                </Link>
+            </div>
 
             {/* Hero Section */}
             <section ref={heroRef} className="relative h-[400px] md:h-[500px] overflow-hidden">
@@ -107,7 +106,7 @@ const ServiceDetail = ({ service, relatedServices = [] }: ServiceDetailProps) =>
                                 animate={isHeroInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
                                 transition={{ duration: 0.5, delay: 0.1 }}
                             >
-                                {service.icon && getIconComponent()}
+                                <IconComponent name={iconName || 'checkCircle'} size={24} color="#DA2E29" />
                             </motion.div>
 
                             <motion.h1
@@ -137,7 +136,7 @@ const ServiceDetail = ({ service, relatedServices = [] }: ServiceDetailProps) =>
                                 transition={{ duration: 0.6, delay: 0.4 }}
                             >
                                 <Link
-                                    href={route('services.requests', service?.slug)}
+                                    href={requestUrl}
                                     className="px-6 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium inline-flex items-center justify-center transition-colors duration-300 shadow-lg shadow-[#DA2E29]/20"
                                 >
                                     <Calendar className="mr-2 w-5 h-5" />
@@ -191,43 +190,82 @@ const ServiceDetail = ({ service, relatedServices = [] }: ServiceDetailProps) =>
 
                         {/* Sidebar */}
                         <div className="lg:col-span-4">
-                            <div className="sticky top-24 space-y-8">
-                                {/* Carte d'action */}
+                            <div className="sticky top-24 space-y-6">
+                                {/* Carte CTA principale */}
                                 <motion.div
                                     className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-700/30"
                                     initial={{ opacity: 0, y: 30 }}
                                     animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                                     transition={{ duration: 0.7, delay: 0.2 }}
                                 >
-                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                                        Intéressé par ce service?
+                                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                                        Commencer maintenant
                                     </h3>
-                                    <p className="text-gray-600 dark:text-gray-300 mb-6">
-                                        Contactez-nous dès maintenant pour en savoir plus ou réserver votre session.
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
+                                        Réservez un premier échange de 20 min pour clarifier vos objectifs.
                                     </p>
+
+                                    <ul className="mb-6 space-y-2">
+                                        {['Sans engagement initial', 'Réponse garantie sous 24h', 'Format adapté à votre rythme'].map((item) => (
+                                            <li key={item} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                                <CheckCircle className="h-4 w-4 text-[#DA2E29] flex-shrink-0" />
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+
                                     <Link
-                                        href={route('services.requests', service?.slug)}
+                                        href={requestUrl}
                                         className="w-full flex justify-center items-center py-3 px-4 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium transition-colors duration-300"
                                     >
                                         Réserver dès maintenant
                                         <ArrowRight className="ml-2 h-5 w-5" />
                                     </Link>
+
+                                    <div className="mt-4 text-center">
+                                        <Link
+                                            href={route('contact')}
+                                            className="text-sm text-gray-500 hover:text-[#DA2E29] dark:text-gray-400 dark:hover:text-[#DA2E29] transition-colors"
+                                        >
+                                            Poser une question d'abord →
+                                        </Link>
+                                    </div>
                                 </motion.div>
 
-                                {/* Statistiques */}
-                                {service.views > 0 && (
-                                    <motion.div
-                                        className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-100 dark:border-gray-700/30"
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                        transition={{ duration: 0.6, delay: 0.3 }}
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">Vues</span>
-                                            <span className="text-gray-900 dark:text-white font-medium">{service.views}</span>
+                                {/* Délai de réponse */}
+                                <motion.div
+                                    className="rounded-xl bg-[#DA2E29]/5 border border-[#DA2E29]/20 p-4"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                    transition={{ duration: 0.6, delay: 0.35 }}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-8 w-8 shrink-0 rounded-full bg-[#DA2E29]/10 flex items-center justify-center">
+                                            <Clock className="h-4 w-4 text-[#DA2E29]" />
                                         </div>
-                                    </motion.div>
-                                )}
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white">Réponse rapide garantie</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Nous répondons en moins de 24h ouvrables</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+
+                                {/* Confiance */}
+                                <motion.div
+                                    className="rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/30 p-4"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                                    transition={{ duration: 0.6, delay: 0.45 }}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="h-8 w-8 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                                            <Shield className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+                                        </div>
+                                        <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
+                                            Approche confidentielle, centrée sur vos objectifs, adaptée à votre contexte personnel et professionnel.
+                                        </p>
+                                    </div>
+                                </motion.div>
                             </div>
                         </div>
                     </div>
@@ -273,7 +311,7 @@ const ServiceDetail = ({ service, relatedServices = [] }: ServiceDetailProps) =>
                                         )}
 
                                         <Link
-                                            href={route('services.show', relatedService.slug)}
+                                            href={route('services.details', relatedService.slug)}
                                             className="inline-flex items-center text-[#DA2E29] hover:text-[#c02824] font-medium transition-colors"
                                         >
                                             <span>Découvrir</span>

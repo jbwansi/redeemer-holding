@@ -1,34 +1,16 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Link, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-    ChevronLeft,
-    Eye,
-    Calendar,
-    Clock,
-    Edit,
-    MoreHorizontal,
-    Trash2,
-    Music2,
-    Radio,
-    Mic2,
-    Podcast,
-    Video,
-    Headphones,
-    Music4,
-    AudioLines,
-    RadioTower,
-    MonitorPlay,
-    Speaker,
-    Volume2,
-    Disc,
-    Loader2,
+    ChevronLeft, Eye, Calendar, Clock, Edit, Trash2, Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import IconComponent from '@/components/ui/icon';
+import { normalizeServiceIconName } from '@/lib/service-icon';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -56,202 +38,122 @@ interface Service {
 interface Props {
     service: Service;
 }
-const ICONS = {
-    Music2,
-    Radio,
-    Mic2,
-    Podcast,
-    Video,
-    Headphones,
-    Music4,
-    AudioLines,
-    RadioTower,
-    Speaker,
-    MonitorPlay,
-    Volume2,
-    Disc
-};
-
-type IconType = keyof typeof ICONS;
 
 export default function Show({ service }: Props) {
     const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
     const [isDeleting, setIsDeleting] = React.useState(false);
+    const safeExcerpt = React.useMemo(() => DOMPurify.sanitize(service.excerpt || ''), [service.excerpt]);
+    const safeContent = React.useMemo(() => DOMPurify.sanitize(service.content || ''), [service.content]);
 
-    const getIconComponent = (iconName: string) => {
-        return ICONS[iconName as IconType] || ICONS.Disc;
-    };
-    const IconComponent = getIconComponent(service.icon);
+    const iconName = normalizeServiceIconName(service.icon);
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         setIsDeleting(true);
         router.delete(route('services.destroy', service.id), {
             onSuccess: () => {
-                toast.success('Service supprimé avec succès');
+                toast.success('Service supprim� avec succ�s');
                 router.visit(route('services.index'));
             },
             onError: () => {
                 toast.error('Erreur lors de la suppression du service');
                 setIsDeleting(false);
-            }
+            },
         });
     };
 
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString('fr-FR', {
+            year: 'numeric', month: 'long', day: 'numeric',
         });
-    };
 
     return (
-        <div className="mx-auto p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                    <Link
-                        href={route('services.index')}
-                        className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
-                    >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Retour aux services
-                    </Link>
-                    <h1 className="text-3xl font-bold tracking-tight">{service.name}</h1>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <Badge variant={service.status ? 'default' : 'secondary'}>
-                        {service.status ? 'Visible' : 'Masqué'}
-                    </Badge>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <Link href={route('services.edit', service.id)} className="w-full">
-                                <Button variant="ghost" size="sm" className="w-full justify-start">
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Modifier
-                                </Button>
+        <div className="p-6 space-y-6">
+            <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-6"
+            >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="h-16 w-16 rounded-2xl bg-primary/15 ring-2 ring-primary/20 flex items-center justify-center flex-shrink-0">
+                            <IconComponent name={iconName || 'package'} className="h-8 w-8 text-primary" />
+                        </div>
+                        <div>
+                            <Link href={route('services.index')} className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-1">
+                                <ChevronLeft className="h-3.5 w-3.5 mr-0.5" /> Services
                             </Link>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => setShowDeleteDialog(true)}
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
-                            </Button>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            <h1 className="text-2xl font-bold tracking-tight">{service.name}</h1>
+                            <Badge variant={service.status ? 'default' : 'secondary'} className={service.status ? 'mt-1 bg-emerald-100 text-emerald-700 border-emerald-200' : 'mt-1'}>
+                                {service.status ? 'Visible' : 'Masqu�'}
+                            </Badge>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Link href={route('services.edit', service.id)}>
+                            <Button variant="outline" size="sm" className="gap-2"><Edit className="h-4 w-4" /> Modifier</Button>
+                        </Link>
+                        <Button variant="destructive" size="sm" className="gap-2" onClick={() => setShowDeleteDialog(true)}>
+                            <Trash2 className="h-4 w-4" /> Supprimer
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
-
-            <div className="grid grid-cols-4 gap-6">
-                {/* Sidebar - Déplacé à gauche */}
-
-
-                {/* Main Content Area */}
-                <div className="col-span-3 space-y-6">
-                    {/* Excerpt Card */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-3 space-y-4">
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle>Résumé</CardTitle>
-                        </CardHeader>
+                        <CardHeader className="pb-3"><CardTitle className="text-base">R�sum�</CardTitle></CardHeader>
                         <CardContent>
                             <div className="prose prose-sm max-w-none">
-                                <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: service.excerpt }} />
+                                <div className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: safeExcerpt }} />
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* Description Card */}
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle>Description détaillée</CardTitle>
-                        </CardHeader>
+                        <CardHeader className="pb-3"><CardTitle className="text-base">Description d�taill�e</CardTitle></CardHeader>
                         <CardContent>
-                            <div className="prose prose-sm max-w-none">
-                                <div dangerouslySetInnerHTML={{ __html: service.content }} />
-                            </div>
+                            <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: safeContent }} />
                         </CardContent>
                     </Card>
                 </div>
-                <div className="space-y-6">
-                    {/* Icon Card */}
+                <div className="space-y-4">
                     <Card>
-                        <CardContent className="pt-6">
-                            <div className="flex items-center justify-center">
-                                <div className="h-24 w-24 bg-primary/10 rounded-xl flex items-center justify-center">
-                                    <IconComponent className="h-12 w-12 text-primary" />
-                                </div>
+                        <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground font-medium">Statistiques</CardTitle></CardHeader>
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2 text-muted-foreground"><Eye className="h-4 w-4" /> Vues</div>
+                                <span className="font-semibold">{service.views}</span>
                             </div>
                         </CardContent>
                     </Card>
-
-                    {/* Metadata Card */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Informations</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    {service.views} vues
-                                </span>
+                        <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground font-medium">Informations</CardTitle></CardHeader>
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-start gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div><p className="text-muted-foreground text-xs">Cr�� le</p><p>{formatDate(service.created_at)}</p></div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Créé le {formatDate(service.created_at)}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Dernière modification le {formatDate(service.updated_at)}
-                                </span>
+                            <div className="flex items-start gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div><p className="text-muted-foreground text-xs">Modifi� le</p><p>{formatDate(service.updated_at)}</p></div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
             </div>
 
-            {/* Delete Dialog */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                        <AlertDialogTitle>�tes-vous s�r ?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Cette action est irréversible. Le service
-                            <span className="font-semibold"> {service.name}</span> sera supprimé définitivement.
+                            Cette action est irr�versible. Le service <span className="font-semibold"> {service.name}</span> sera supprim� d�finitivement.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Suppression...
-                                </>
-                            ) : (
-                                <>
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Supprimer
-                                </>
-                            )}
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700" disabled={isDeleting}>
+                            {isDeleting ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Suppression...</>) : (<><Trash2 className="mr-2 h-4 w-4" /> Supprimer</>)}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

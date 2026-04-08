@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MapPin, Users, ImagePlus, Loader2, X, Link } from 'lucide-react' // Ajout de Link
+import { MapPin, Users, ImagePlus, Loader2, X, Link as LinkIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarIcon, Clock } from 'lucide-react'
@@ -28,7 +28,7 @@ interface EditFormationProps {
         end_date: string
         price: number
         max_participants: number
-        meeting_link: string // Nouveau champ ajouté
+        meeting_link: string
         featured_image: any
         is_published: boolean
         tags: string[]
@@ -46,7 +46,7 @@ const EditFormation = ({ formation }: EditFormationProps) => {
         end_date: formation.end_date,
         price: formation.price.toString(),
         max_participants: formation.max_participants.toString(),
-        meeting_link: formation.meeting_link || '', // Nouveau champ ajouté
+        meeting_link: formation.meeting_link || '',
         featured_image: null,
         is_published: formation.is_published,
         is_featured: formation.is_featured,
@@ -54,8 +54,19 @@ const EditFormation = ({ formation }: EditFormationProps) => {
         _method: 'POST'
     })
 
-    const [preview, setPreview] = React.useState(formation.featured_image.medium)
+    const [preview, setPreview] = React.useState<string | null>(formation.featured_image?.medium ?? null)
     const [inputValue, setInputValue] = React.useState('')
+
+    const updateDateField = React.useCallback(
+        (field: 'start_date' | 'end_date', updater: (date: Date) => void) => {
+            const rawValue = data[field]
+            const baseDate = rawValue ? new Date(rawValue) : new Date()
+            if (Number.isNaN(baseDate.getTime())) return
+            updater(baseDate)
+            setData(field, baseDate.toISOString())
+        },
+        [data, setData]
+    )
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] as any
@@ -200,11 +211,10 @@ const EditFormation = ({ formation }: EditFormationProps) => {
                                 </div>
                             </div>
 
-                            {/* Nouveau champ pour le lien de meeting */}
                             <div className="space-y-2">
                                 <Label htmlFor="meeting_link">Lien de meeting</Label>
                                 <div className="relative">
-                                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
                                     <Input
                                         id="meeting_link"
                                         type="url"
@@ -295,9 +305,9 @@ const EditFormation = ({ formation }: EditFormationProps) => {
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getHours().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('start_date', date.toISOString())
+                                                        updateDateField('start_date', (date) => {
+                                                            date.setHours(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -317,9 +327,9 @@ const EditFormation = ({ formation }: EditFormationProps) => {
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getMinutes().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('start_date', date.toISOString())
+                                                        updateDateField('start_date', (date) => {
+                                                            date.setMinutes(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -377,9 +387,9 @@ const EditFormation = ({ formation }: EditFormationProps) => {
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getHours().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('end_date', date.toISOString())
+                                                        updateDateField('end_date', (date) => {
+                                                            date.setHours(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -399,9 +409,9 @@ const EditFormation = ({ formation }: EditFormationProps) => {
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getMinutes().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('end_date', date.toISOString())
+                                                        updateDateField('end_date', (date) => {
+                                                            date.setMinutes(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">

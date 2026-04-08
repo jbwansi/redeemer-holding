@@ -6,8 +6,23 @@ import { InputField } from '@/components/frontend/auth/input-field';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { route } from 'ziggy-js';
 
-const AuthPage = () => {
+const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolean }) => {
     const [activeTab, setActiveTab] = useState('login');
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+
+        if (tab === 'register' && registrationEnabled) {
+            setActiveTab('register');
+        }
+    }, [registrationEnabled]);
+
+    useEffect(() => {
+        if (!registrationEnabled && activeTab === 'register') {
+            setActiveTab('login');
+        }
+    }, [registrationEnabled, activeTab]);
 
     // Animations
     const tabVariants = {
@@ -73,16 +88,24 @@ const AuthPage = () => {
                             >
                                 Connexion
                             </button>
-                            <button
-                                onClick={() => setActiveTab('register')}
-                                className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'register'
-                                    ? 'bg-white dark:bg-gray-800 text-[#DA2E29] shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    }`}
-                            >
-                                Inscription
-                            </button>
+                            {registrationEnabled && (
+                                <button
+                                    onClick={() => setActiveTab('register')}
+                                    className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${activeTab === 'register'
+                                        ? 'bg-white dark:bg-gray-800 text-[#DA2E29] shadow-sm'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                        }`}
+                                >
+                                    Inscription
+                                </button>
+                            )}
                         </div>
+
+                        {!registrationEnabled && (
+                            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
+                                Les inscriptions sont actuellement desactivees. Vous pouvez toujours vous connecter avec un compte existant.
+                            </div>
+                        )}
 
                         {/* Tab content */}
                         <AnimatePresence mode="wait">
@@ -94,7 +117,7 @@ const AuthPage = () => {
                                     animate="visible"
                                     exit="exit"
                                 >
-                                    <LoginForm setActiveTab={setActiveTab} />
+                                    <LoginForm setActiveTab={setActiveTab} registrationEnabled={registrationEnabled} />
                                 </motion.div>
                             ) : (
                                 <motion.div
@@ -119,7 +142,7 @@ const AuthPage = () => {
 
 
 // Login form component
-const LoginForm = ({ setActiveTab }: any) => {
+const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
     const [showPassword, setShowPassword] = useState(false);
 
     const { data, setData, post: loginPost, processing, errors: loginErrors, reset } = useForm({
@@ -226,16 +249,22 @@ const LoginForm = ({ setActiveTab }: any) => {
 
 
             <div className="mt-6 text-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Pas encore de compte?{' '}
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('register')}
-                        className="font-medium text-[#DA2E29] hover:text-[#c02824] transition-colors"
-                    >
-                        S'inscrire
-                    </button>
-                </p>
+                {registrationEnabled ? (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Pas encore de compte?{' '}
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('register')}
+                            className="font-medium text-[#DA2E29] hover:text-[#c02824] transition-colors"
+                        >
+                            S'inscrire
+                        </button>
+                    </p>
+                ) : (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        La creation de compte est temporairement indisponible.
+                    </p>
+                )}
             </div>
         </div>
     );
@@ -247,7 +276,8 @@ const RegisterForm = ({ setActiveTab }: any) => {
     const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
+        first_name: '',
+        last_name: '',
         email: '',
         password: '',
         password_confirmation: '',
@@ -277,18 +307,32 @@ const RegisterForm = ({ setActiveTab }: any) => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                <InputField
-                    id="register-name"
-                    name="name"
-                    type="text"
-                    value={data.name}
-                    onChange={(e: any) => setData('name', e.target.value)}
-                    required
-                    autoComplete="name"
-                    placeholder="Nom complet"
-                    icon={User}
-                    error={errors.name}
-                />
+                <div className="grid grid-cols-2 gap-3">
+                    <InputField
+                        id="register-first_name"
+                        name="first_name"
+                        type="text"
+                        value={data.first_name}
+                        onChange={(e: any) => setData('first_name', e.target.value)}
+                        required
+                        autoComplete="given-name"
+                        placeholder="Prénom"
+                        icon={User}
+                        error={errors.first_name}
+                    />
+                    <InputField
+                        id="register-last_name"
+                        name="last_name"
+                        type="text"
+                        value={data.last_name}
+                        onChange={(e: any) => setData('last_name', e.target.value)}
+                        required
+                        autoComplete="family-name"
+                        placeholder="Nom"
+                        icon={User}
+                        error={errors.last_name}
+                    />
+                </div>
 
                 <InputField
                     id="register-email"

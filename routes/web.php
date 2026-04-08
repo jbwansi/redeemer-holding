@@ -1,30 +1,48 @@
 <?php
 
+use App\Http\Controllers\Admin\AboutController;
+use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\ActivityReminderController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ChatbotController;
+use App\Http\Controllers\Admin\ChatbotLeadController;
 use App\Http\Controllers\Admin\ConfigController;
+use App\Http\Controllers\Admin\ContactController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventCategoryController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\FormationController;
+use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\ServiceRequestController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
 use App\Http\Controllers\Frontend\FormationPaymentController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\WebController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AppController::class, 'index'])->name('home');
+// Sitemaps
+Route::get('/sitemap.xml',            [SitemapController::class, 'main'])->name('sitemap');
+Route::get('/sitemap-index.xml',      [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap-static.xml',     [SitemapController::class, 'staticPages'])->name('sitemap.static');
+Route::get('/sitemap-events.xml',     [SitemapController::class, 'events'])->name('sitemap.events');
+Route::get('/sitemap-formations.xml', [SitemapController::class, 'formations'])->name('sitemap.formations');
+Route::get('/sitemap-posts.xml',      [SitemapController::class, 'posts'])->name('sitemap.posts');
+Route::get('/sitemap-services.xml',   [SitemapController::class, 'services'])->name('sitemap.services');
+
 Route::get('/contact', [AppController::class, 'contact'])->name('contact');
 Route::post('/contact', [AppController::class, 'send_contact'])->name('contact');
+Route::get('/faq', [AppController::class, 'faq'])->name('faq');
 Route::get('/about-me', [AppController::class, 'about'])->name('about');
 Route::get('/services', [AppController::class, 'services'])->name('services');
 Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
@@ -53,7 +71,7 @@ Route::get('/evenements/{slug}/facture/{reference}', [WebController::class, 'dow
 Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook']);
 
 // Route pour annuler une inscription
-Route::delete('/evenements/{slug}/inscription/{participant_id}', [EventController::class, 'cancelRegistration'])->name('events.registration.cancel');
+Route::delete('/evenements/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
 // Routes pour le paiement des formations (Stripe)
 Route::get('/formations/{slug}/paiement/{participant_id}', [FormationPaymentController::class, 'showPaymentForm'])->name('formations.payment');
@@ -69,7 +87,7 @@ Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::c
 Route::post('/stripe/webhook/formations', [FormationPaymentController::class, 'handleWebhook']);
 
 // Route pour annuler une inscription à une formation
-Route::delete('/formations/{slug}/inscription/{participant_id}', [FormationController::class, 'cancelRegistration'])->name('formations.registration.cancel');
+Route::delete('/formations/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration_formation'])->name('formations.registration.cancel');
 
 Route::get('termes-et-conditions', [AppController::class, 'terms'])->name('terms.show');
 Route::get('politique-de-confidentialite', [AppController::class, 'policy'])->name('policy.show');
@@ -77,25 +95,55 @@ Route::get('politique-des-cookies', [AppController::class, 'cookies'])->name('co
 
 Route::middleware(['guest'])->group(function () {
     Route::get('login', [AuthController::class, 'show_auth'])->name("login");
+    Route::get('inscription', [AuthController::class, 'show_auth'])->name("register.page");
     Route::post('login', [AuthController::class, 'login'])->name("login");
     Route::post('register', [AuthController::class, 'register'])->name("register");
     Route::get('password/request', [AuthController::class, 'password_request'])->name('password.request');
 });
 
-Route::get("/reminders/send/cron", function () {
-    Artisan::call("reminders:send");
-    Artisan::call("queue:work");
-});
+Route::middleware(['admin.access', 'active', 'throttle:6,1'])->get('/reminders/send/cron', function () {
+    Artisan::call('reminders:send');
 
-Route::get('settings/fetch', [SettingController::class, 'fetch'])->name('settings.fetch');
+    return response()->json([
+        'ok' => true,
+        'message' => 'Rappels envoyés',
+    ]);
+})->name('reminders.send.cron');
+
+Route::get('settings/public', [SettingController::class, 'publicFetch'])->name('settings.public');
+
+Route::middleware(['admin.access', 'active'])->get('settings/fetch', [SettingController::class, 'fetch'])->name('settings.fetch');
+
+$dashboardMiddleware = ['admin.access', 'active'];
+
+Route::middleware($dashboardMiddleware)
+    ->get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
+
+Route::middleware($dashboardMiddleware)
+    ->get('/dashboard/newsletters', [NewsletterController::class, 'index'])
+    ->name('newsletters.index');
+
+Route::middleware($dashboardMiddleware)
+    ->post('/dashboard/newsletters/send', [NewsletterController::class, 'send'])
+    ->name('newsletters.send');
+
+Route::middleware($dashboardMiddleware)
+    ->post('/dashboard/newsletters/import-users', [NewsletterController::class, 'importUsers'])
+    ->name('newsletters.import-users');
+
+Route::get('/newsletter/unsubscribe/{email}', [NewsletterController::class, 'unsubscribe'])
+    ->middleware('signed')
+    ->name('newsletters.unsubscribe');
+
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
+    ->name('newsletters.subscribe');
 
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::middleware(['active'])->group(function () {
+Route::middleware($dashboardMiddleware)->group(function () {
         Route::get("/logout", [AuthController::class, "logout"])->name("logout");
         Route::prefix('dashboard')->group(function () {
-            Route::get('/', [DashboardController::class, 'index'])->name("dashboard");
-
+            Route::get('/search/global', [SearchController::class, 'global'])->name('dashboard.search.global');
             Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
             Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create');
             Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
@@ -129,6 +177,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::post('/profile/sessions/terminate-others', 'terminateOtherSessions')->name('profile.terminate-other-sessions');
                 Route::get('/profile/security', 'security')->name('profile.security');
                 Route::get('/profile/activities', 'activities')->name('profile.activities');
+                Route::get('/profile/notifications', 'notifications')->name('profile.notifications');
+                Route::get('/profile/notifications/feed', 'notificationsFeed')->name('profile.notifications.feed');
+                Route::post('/profile/notifications/read-all', 'markAllNotificationsAsRead')->name('profile.notifications.read-all');
+                Route::post('/profile/notifications/{notification}/read', 'markNotificationAsRead')->name('profile.notifications.read');
                 Route::post('/profile/password', 'updatePassword')->name('profile.password.update');
             });
 
@@ -140,6 +192,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                 Route::get('settings/api', 'api')->name('settings.api');
                 Route::get('settings/payment', 'payment')->name('settings.payment');
                 Route::get('settings/socials', 'socials')->name('settings.socials');
+                Route::get('settings/test-users', 'testUsers')->name('settings.test-users');
                 Route::post('settings/update', 'update')->name('settings.update');
 
                 Route::post('settings/smtp/test', 'test_send_email')->name('settings.smtp.test');
@@ -170,20 +223,47 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                     ->name('events.participants');
                 Route::get('/events/{slug}/participants/{participant}', [EventController::class, 'showParticipant'])
                     ->name('events.participants.show');
+                Route::get('/events/participants/{slug}/export', [EventController::class, 'exportParticipantsCsv'])
+                    ->name('events.participants.export');
                 Route::get('/events/{slug}/facture/{reference}', [EventController::class, 'downloadInvoice'])
                     ->name('events.participants.invoice');
             });
 
             Route::controller(UserController::class)->group(function () {
-                Route::resource('users', UserController::class);
+                Route::post('users/import', 'import')->name('users.import');
+                Route::get('users/export-csv', 'export')->name('users.export');
+                Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
                 Route::post('users/{user}/verification/resend', 'resendVerification')->name('users.verification.resend');
                 Route::patch('users/{user}/status', [AccountController::class, 'updateStatus'])->name('users.status.update');
                 Route::patch('users/{user}/role', [AccountController::class, 'updateRole'])->name('users.role.update');
-                // Ajout de la nouvelle route pour les utilisateurs bloqués
-                Route::get('users/blocked/list', 'blockedUsers')->name('users.blocked');
                 Route::patch('users/{user}/reactivate', 'reactivateUser')->name('users.reactivate');
-                Route::post('/users/export', 'export')->name('users.export');
+                Route::resource('users', UserController::class);
             });
+
+            Route::controller(AboutController::class)->group(function () {
+                Route::get('/a-propos', 'edit')->name('about.edit');
+                Route::put('/a-propos', 'update')->name('about.update');
+            });
+
+                Route::controller(HomeController::class)->group(function () {
+                    Route::get('/accueil', 'edit')->name('home.edit');
+                    Route::put('/accueil', 'update')->name('home.update');
+                });
+
+                Route::controller(ContactController::class)->group(function () {
+                    Route::get('/contact-page', 'edit')->name('contact-page.edit');
+                    Route::put('/contact-page', 'update')->name('contact-page.update');
+                });
+
+                Route::controller(ChatbotController::class)->group(function () {
+                    Route::get('/chatbot', 'edit')->name('chatbot.edit');
+                    Route::put('/chatbot', 'update')->name('chatbot.update');
+                });
+
+                Route::controller(ChatbotLeadController::class)->group(function () {
+                    Route::get('/chatbot/leads', 'index')->name('chatbot-leads.index');
+                    Route::get('/chatbot/leads/export', 'export')->name('chatbot-leads.export');
+                });
 
             Route::controller(PageController::class)->group(function () {
                 Route::get('/pages', 'index')->name('pages.index');
@@ -209,11 +289,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
                     ->name('formations.participants');
                 Route::get('/formations/{slug}/participants/{participant}', [FormationController::class, 'showParticipant'])
                     ->name('formations.participants.show');
+                Route::get('/formations/participants/{slug}/export', [FormationController::class, 'exportParticipantsCsv'])
+                    ->name('formations.participants.export');
                 Route::get('/formations/{slug}/facture/{reference}', [FormationController::class, 'downloadInvoice'])
                     ->name('formations.participants.invoice');
             });
         });
-    });
 });
 
 Route::get('/account/inactive', [AccountController::class, 'inactive'])->name('account.inactive');

@@ -61,9 +61,8 @@ export default function Edit({ user }: Props) {
             <Head title="Modifier l'utilisateur" />
 
             <div className="flex flex-col min-h-screen bg-background">
-                {/* Header */}
-                <div className="border-b">
-                    <div className="flex h-16 items-center mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="border-b bg-gradient-to-r from-slate-50 to-white">
+                    <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
                         <div className="flex flex-1 items-center">
                             <Button
                                 variant="ghost"
@@ -88,9 +87,9 @@ export default function Edit({ user }: Props) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 py-6">
+                <div className="flex-1 py-8">
                     <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle>Informations de l'utilisateur</CardTitle>
                             </CardHeader>

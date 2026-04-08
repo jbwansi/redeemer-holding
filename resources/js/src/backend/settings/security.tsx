@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
     Shield,
     KeyRound,
@@ -90,8 +91,17 @@ const Security = () => {
                 </Alert>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Politique de mot de passe */}
-                    <div className="bg-background rounded-lg shadow p-6">
+                    <Tabs defaultValue="password" className="space-y-6">
+                        <TabsList className="w-full justify-start overflow-x-auto whitespace-nowrap h-auto p-1">
+                            <TabsTrigger value="password">Mots de passe</TabsTrigger>
+                            <TabsTrigger value="auth">Authentification</TabsTrigger>
+                            <TabsTrigger value="sessions">Sessions</TabsTrigger>
+                            <TabsTrigger value="logs">Journalisation</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="password" className="space-y-6">
+                            {/* Politique de mot de passe */}
+                            <div className="bg-background rounded-lg shadow p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <KeyRound className="h-5 w-5" />
                             <h2 className="text-lg font-semibold">Politique de mot de passe</h2>
@@ -164,9 +174,11 @@ const Security = () => {
                             </div>
                         </div>
                     </div>
+                        </TabsContent>
 
-                    {/* Authentification */}
-                    <div className="bg-background rounded-lg shadow p-6">
+                        <TabsContent value="auth" className="space-y-6">
+                            {/* Authentification */}
+                            <div className="bg-background rounded-lg shadow p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <Fingerprint className="h-5 w-5" />
                             <h2 className="text-lg font-semibold">Authentification</h2>
@@ -220,9 +232,11 @@ const Security = () => {
                             )}
                         </div>
                     </div>
+                        </TabsContent>
 
-                    {/* Sessions */}
-                    <div className="bg-background rounded-lg shadow p-6">
+                        <TabsContent value="sessions" className="space-y-6">
+                            {/* Sessions */}
+                            <div className="bg-background rounded-lg shadow p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <History className="h-5 w-5" />
                             <h2 className="text-lg font-semibold">Sessions</h2>
@@ -250,9 +264,11 @@ const Security = () => {
                             </div>
                         </div>
                     </div>
+                        </TabsContent>
 
-                    {/* Journalisation */}
-                    <div className="bg-background rounded-lg shadow p-6">
+                        <TabsContent value="logs" className="space-y-6">
+                            {/* Journalisation */}
+                            <div className="bg-background rounded-lg shadow p-6">
                         <div className="flex items-center gap-2 mb-6">
                             <UserCog className="h-5 w-5" />
                             <h2 className="text-lg font-semibold">Journalisation</h2>
@@ -304,6 +320,8 @@ const Security = () => {
                             </div>
                         </div>
                     </div>
+                        </TabsContent>
+                    </Tabs>
 
                     <div className="flex justify-end gap-4">
                         <Button

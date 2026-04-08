@@ -1,6 +1,6 @@
 // src/Pages/Posts/Create.tsx
 import React from "react";
-import { Link, useForm } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@inertiajs/core";
 import { Category } from "@/types/category";
 import {
@@ -11,8 +11,7 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { PostForm } from "@/components/partials/post-form";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Plus } from "lucide-react";
+import { AlertCircle, ArrowLeft, Plus } from "lucide-react";
 
 interface CreatePostProps extends PageProps {
     categories: Category[];
@@ -21,15 +20,22 @@ interface CreatePostProps extends PageProps {
 const Create = ({ categories }: CreatePostProps) => {
 
     return (
-        <div className="px-5 py-2 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Créer un article</h2>
-                    <p className="text-muted-foreground">
-                        Créez un nouvel article pour votre blog
+        <>
+            <Head title="Créer un article" />
+            <div className="p-6 space-y-6">
+                <div className="rounded-2xl border bg-gradient-to-r from-slate-50 to-white p-6">
+                    <Link
+                        href={route('posts.index')}
+                        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux articles
+                    </Link>
+                    <h2 className="mt-3 text-3xl font-semibold tracking-tight">Créer un article</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Préparez votre contenu et publiez un nouvel article.
                     </p>
                 </div>
-            </div>
+
             {categories?.length === 0 && (
                 <div className="rounded-lg border bg-amber-50 border-amber-200 shadow-sm">
                     <div className="flex flex-col space-y-1.5 p-6">
@@ -64,7 +70,8 @@ const Create = ({ categories }: CreatePostProps) => {
                     )
                 }
             </div>
-        </div>
+            </div>
+        </>
     );
 };
 

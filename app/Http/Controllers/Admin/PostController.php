@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PostRequest;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
 use App\Services\ImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -40,11 +41,16 @@ class PostController extends Controller
     {
         try {
             $validated = $request->validated();
+            $creatorId = Auth::id() ?? User::query()->value('id');
+
+            if (!$creatorId) {
+                throw new \RuntimeException("Aucun utilisateur disponible pour associer l'article. Créez un compte admin puis réessayez.");
+            }
 
             // Créer d'abord le post sans l'image
             $post = Post::create([
                 ...$validated,
-                'user_id' => Auth::id(),
+                'user_id' => $creatorId,
                 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['title']),
                 'featured_image' => null // Initialiser à null
             ]);
@@ -57,7 +63,7 @@ class PostController extends Controller
                 );
 
                 // Mettre à jour le post avec le JSON des images
-                $post->featured_image = json_encode($images);
+                $post->setAttribute('featured_image', json_encode($images));
                 $post->save();
             }
 
@@ -139,7 +145,7 @@ class PostController extends Controller
                 );
 
                 // Encoder en JSON avant de sauvegarder
-                $post->featured_image = json_encode($images);
+                $post->setAttribute('featured_image', json_encode($images));
             }
 
             $post->save();

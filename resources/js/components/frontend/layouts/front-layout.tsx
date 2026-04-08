@@ -5,10 +5,11 @@ import Footer from './footer'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toast, Toaster } from 'sonner';
 import { usePage } from '@inertiajs/react';
+import VisitorChatbot from '@/components/frontend/chatbot/visitor-chatbot';
 
 function FrontLayout({ children }: any) {
 
-    const { flash } = usePage() as any;
+    const { flash, app } = usePage() as any;
 
     useEffect(() => {
 
@@ -40,9 +41,15 @@ function FrontLayout({ children }: any) {
     return (
         <QueryClientProvider client={queryClient}>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+                {app?.is_test_env && (
+                    <div className="sticky top-0 z-[70] bg-amber-500 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-900">
+                        Environnement de test - Donnees non contractuelles
+                    </div>
+                )}
                 <Navbar />
                 {children}
                 <Toaster />
+                <VisitorChatbot />
                 <Footer />
             </ThemeProvider>
         </QueryClientProvider>

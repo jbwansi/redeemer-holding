@@ -1,9 +1,11 @@
 // src/Pages/Posts/Edit.tsx
 import React from "react";
+import { Head, Link } from "@inertiajs/react";
 import { PageProps } from "@inertiajs/core";
 import { Post } from "@/types/post";
 import { Category } from "@/types/category";
 import { PostForm } from "@/components/partials/post-form";
+import { ArrowLeft } from "lucide-react";
 
 interface EditPostProps extends PageProps {
     post: Post;
@@ -12,20 +14,27 @@ interface EditPostProps extends PageProps {
 
 const Edit = ({ post, categories }: EditPostProps) => {
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Modifier l'article</h2>
-                    <p className="text-muted-foreground">
-                        Modifiez les informations de votre article
+        <>
+            <Head title="Modifier un article" />
+            <div className="p-6 space-y-6">
+                <div className="rounded-2xl border bg-gradient-to-r from-slate-50 to-white p-6">
+                    <Link
+                        href={route('posts.index')}
+                        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" /> Retour aux articles
+                    </Link>
+                    <h2 className="mt-3 text-3xl font-semibold tracking-tight">Modifier l'article</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Mettez à jour les informations de publication.
                     </p>
                 </div>
-            </div>
 
-            <div className="grid gap-6">
-                <PostForm post={post} categories={categories} />
+                <div className="grid gap-6">
+                    <PostForm post={post} categories={categories} />
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

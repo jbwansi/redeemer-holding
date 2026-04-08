@@ -51,7 +51,7 @@ class Event extends Model
 
     public function category()
     {
-        return $this->belongsTo(EventCategory::class);
+        return $this->belongsTo(Category::class, 'category_id');
     }
 
     // public function participants()
@@ -75,21 +75,20 @@ class Event extends Model
         }
 
         try {
-            // Première décodage
-            $decodedOnce = json_decode($value, true);
-
-            // Si c'est une chaîne après le premier décodage, on décode une seconde fois
-            if (is_string($decodedOnce)) {
-                $images = json_decode($decodedOnce, true);
+            // In Laravel 10+, the 'array' cast may already decode the value before
+            // reaching this accessor. Handle both a raw JSON string and a PHP array.
+            if (is_array($value)) {
+                $images = $value;
             } else {
-                $images = $decodedOnce;
+                $decoded = json_decode($value, true);
+                $images = is_string($decoded) ? json_decode($decoded, true) : $decoded;
             }
 
             if (!is_array($images)) {
                 return [];
             }
 
-            // Transformer les chemins en URLs complètes
+            // Transform relative paths into full storage URLs
             return array_map(function ($image) {
                 if (!is_array($image)) {
                     return asset('storage/' . $image);
@@ -102,7 +101,6 @@ class Event extends Model
         } catch (\Exception $e) {
             Log::error('Erreur lors du décodage des images:', [
                 'error' => $e->getMessage(),
-                'value' => $value
             ]);
             return [];
         }

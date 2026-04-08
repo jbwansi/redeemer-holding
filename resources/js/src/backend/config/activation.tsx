@@ -1,186 +1,143 @@
-import React, { useEffect } from 'react'
-import { useForm } from '@inertiajs/react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import {
-    Radio,
-    CalendarDays,
-    ShoppingBag,
-    FileText,
-    MessagesSquare,
-    Users,
-    Music2,
-    Loader,
-    Settings2,
-    BadgeDollarSign,
-    Podcast,
-    Newspaper,
-    Calendar,
-    CircleDollarSign,
-    Store,
-    HeartHandshake,
-    BookOpen,
-    Home
-} from 'lucide-react'
-import { toast } from 'sonner'
-import { useSettings } from '@/hooks/use-settings'
+import React, { useEffect } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Home, BookOpen, MessagesSquare, Users, Calendar, Newspaper, Loader2, Settings2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useSettings } from '@/hooks/use-settings';
 
 const Activation = () => {
-    const { settings, isLoading, isError } = useSettings()
+    const { settings, isLoading, isError } = useSettings();
 
     const { data, setData, post, processing } = useForm({
-        // Radio & Streaming
         enable_radio: settings?.enable_radio || true,
         enable_live_chat: settings?.enable_live_chat || true,
-        enable_song_requests: settings?.enable_song_requests || true,
-        enable_podcasts: settings?.enable_podcasts || true,
-        enable_playlists: settings?.enable_playlists || true,
-
-        // Communauté & Social
         enable_events: settings?.enable_events || true,
         enable_blog: settings?.enable_blog || true,
         enable_comments: settings?.enable_comments || true,
         enable_user_profiles: settings?.enable_user_profiles || true,
-        enable_social_feed: settings?.enable_social_feed || true,
-
-        // E-commerce
-        enable_shop: settings?.enable_shop || true,
-        enable_donations: settings?.enable_donations || true,
-        enable_subscriptions: settings?.enable_subscriptions || true,
-        enable_merchandise: settings?.enable_merchandise || true,
-
-        // Services
-        enable_advertising: settings?.enable_advertising || true,
-        enable_partnerships: settings?.enable_partnerships || true,
-    })
+    });
 
     useEffect(() => {
-        if (settings) {
-            Object.keys(settings).forEach((key: any) => {
-                if (key in data) {
-                    setData(key, settings[key] || data[key])
-                }
-            })
-        }
-    }, [settings])
+        if (!settings) return;
 
-    const handleSubmit = (e: any) => {
-        e.preventDefault()
+        Object.keys(settings).forEach((key: any) => {
+            if (key in data) {
+                setData(key, settings[key] || data[key as keyof typeof data]);
+            }
+        });
+    }, [settings]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
         post(route('settings.update'), {
-            onSuccess: () => {
-                toast.success('Modules mis à jour avec succès')
-            },
-        })
-    }
+            onSuccess: () => toast.success('Modules mis a jour avec succes'),
+        });
+    };
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <Loader className="h-12 w-12 text-primary animate-spin dark:text-white" />
-                <p className="text-lg font-semibold">Chargement des modules...</p>
+            <div className="flex h-full flex-col items-center justify-center space-y-4">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-base font-medium">Chargement des modules...</p>
             </div>
-        )
+        );
     }
 
     if (isError) {
         return (
-            <div className="flex flex-col items-center justify-center h-full space-y-4">
-                <Settings2 className="h-12 w-12 text-red-500 dark:text-red-500" />
-                <p className="text-lg font-semibold">Une erreur s'est produite lors du chargement des modules.</p>
+            <div className="flex h-full flex-col items-center justify-center space-y-4">
+                <Settings2 className="h-10 w-10 text-red-500" />
+                <p className="text-base font-medium">Impossible de charger les modules.</p>
             </div>
-        )
+        );
     }
 
     const modules = [
         {
-            title: "Prinpal",
-            description: "Modules principaux de l'application.",
+            title: 'Principal',
+            description: 'Fonctionnalites essentielles de la plateforme.',
             icon: <Home className="h-5 w-5" />,
             features: [
                 {
-                    name: "Formations",
-                    description: "Module principal des formations",
+                    name: 'Formations',
+                    description: 'Module principal des formations',
                     enabled: data.enable_radio,
-                    key: "enable_radio",
-                    icon: <BookOpen className="h-4 w-4" />
+                    key: 'enable_radio',
+                    icon: <BookOpen className="h-4 w-4" />,
                 },
                 {
-                    name: "Services",
-                    description: "Gestion de vos différents services",
+                    name: 'Services',
+                    description: 'Gestion des demandes de services',
                     enabled: data.enable_live_chat,
-                    key: "enable_live_chat",
-                    icon: <MessagesSquare className="h-4 w-4" />
+                    key: 'enable_live_chat',
+                    icon: <MessagesSquare className="h-4 w-4" />,
                 },
-                // {
-                //     name: "Podcasts",
-                //     description: "Gestion et diffusion de podcasts",
-                //     enabled: data.enable_podcasts,
-                //     key: "enable_podcasts",
-                //     icon: <Podcast className="h-4 w-4" />
-                // },
-            ]
+            ],
         },
         {
-            title: "Communauté & Social",
-            description: "Modules de gestion de la communauté",
+            title: 'Communaute',
+            description: 'Fonctions sociales et de contenu.',
             icon: <Users className="h-5 w-5" />,
             features: [
                 {
-                    name: "Événements",
-                    description: "Gestion des événements et concerts",
+                    name: 'Evenements',
+                    description: 'Gestion des evenements',
                     enabled: data.enable_events,
-                    key: "enable_events",
-                    icon: <Calendar className="h-4 w-4" />
+                    key: 'enable_events',
+                    icon: <Calendar className="h-4 w-4" />,
                 },
                 {
-                    name: "Blog",
-                    description: "Articles et actualités",
+                    name: 'Blog',
+                    description: 'Articles et actualites',
                     enabled: data.enable_blog,
-                    key: "enable_blog",
-                    icon: <Newspaper className="h-4 w-4" />
+                    key: 'enable_blog',
+                    icon: <Newspaper className="h-4 w-4" />,
                 },
                 {
-                    name: "Commentaires",
-                    description: "Système de commentaires",
+                    name: 'Commentaires',
+                    description: 'Interaction avec les lecteurs',
                     enabled: data.enable_comments,
-                    key: "enable_comments",
-                    icon: <MessagesSquare className="h-4 w-4" />
+                    key: 'enable_comments',
+                    icon: <MessagesSquare className="h-4 w-4" />,
                 },
                 {
-                    name: "Profils utilisateurs",
-                    description: "Profils et paramètres utilisateurs",
+                    name: 'Profils utilisateurs',
+                    description: 'Pages et informations de profil',
                     enabled: data.enable_user_profiles,
-                    key: "enable_user_profiles",
-                    icon: <Users className="h-4 w-4" />
+                    key: 'enable_user_profiles',
+                    icon: <Users className="h-4 w-4" />,
                 },
-                // {
-                //     name: "Fil social",
-                //     description: "Fil d'actualité social",
-                //     enabled: data.enable_social_feed,
-                //     key: "enable_social_feed",
-                //     icon: <FileText className="h-4 w-4" />
-                // }
-            ]
-        }
-    ]
+            ],
+        },
+    ];
 
     return (
-        <div className="container mx-auto p-6">
-            <div className="space-y-6">
+        <>
+            <Head title="Activation des modules" />
+
+            <div className="container mx-auto space-y-6 p-6">
+                <div className="rounded-2xl border bg-gradient-to-r from-slate-50 to-white p-6">
+                    <h1 className="text-3xl font-semibold tracking-tight">Activation des modules</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Activez ou desactivez les sections du site selon votre strategie.
+                    </p>
+                </div>
+
                 <Alert>
                     <Settings2 className="h-4 w-4" />
-                    <AlertTitle className="text-lg font-semibold">Activation des modules</AlertTitle>
+                    <AlertTitle>Configuration globale</AlertTitle>
                     <AlertDescription>
-                        Gérez l'activation et la désactivation des différents modules de votre radio en ligne.
+                        Les changements sont appliques apres enregistrement et impactent immediatement le frontend.
                     </AlertDescription>
                 </Alert>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     {modules.map((module) => (
-                        <Card key={module.title}>
+                        <Card key={module.title} className="shadow-sm">
                             <CardHeader>
                                 <div className="flex items-center gap-2">
                                     {module.icon}
@@ -188,25 +145,19 @@ const Activation = () => {
                                 </div>
                                 <CardDescription>{module.description}</CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-6">
+                            <CardContent className="space-y-5">
                                 {module.features.map((feature) => (
-                                    <div key={feature.key} className="flex items-center justify-between">
+                                    <div key={feature.key} className="flex items-center justify-between rounded-xl border p-4">
                                         <div className="flex items-start gap-3">
                                             {feature.icon}
                                             <div>
-                                                <Label className="text-base font-semibold">
-                                                    {feature.name}
-                                                </Label>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {feature.description}
-                                                </p>
+                                                <Label className="text-base font-semibold">{feature.name}</Label>
+                                                <p className="text-sm text-muted-foreground">{feature.description}</p>
                                             </div>
                                         </div>
                                         <Switch
                                             checked={feature.enabled}
-                                            onCheckedChange={(checked) =>
-                                                setData(feature.key, checked)
-                                            }
+                                            onCheckedChange={(checked) => setData(feature.key, checked)}
                                         />
                                     </div>
                                 ))}
@@ -214,19 +165,15 @@ const Activation = () => {
                         </Card>
                     ))}
 
-                    <div className="flex justify-end gap-4">
-                        <Button
-                            type="submit"
-                            size="lg"
-                            disabled={processing}
-                        >
+                    <div className="flex justify-end gap-3">
+                        <Button type="submit" size="lg" disabled={processing}>
                             {processing ? 'Enregistrement...' : 'Enregistrer les modifications'}
                         </Button>
                     </div>
                 </form>
             </div>
-        </div>
-    )
-}
+        </>
+    );
+};
 
-export default Activation
+export default Activation;

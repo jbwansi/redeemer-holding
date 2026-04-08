@@ -54,6 +54,11 @@ class SettingController extends Controller
         return inertia('backend/settings/socials');
     }
 
+    public function testUsers()
+    {
+        return inertia('backend/settings/test-users');
+    }
+
     public function update(Request $request)
     {
         $this->settingsService->updateSettings($request->all());
@@ -63,6 +68,37 @@ class SettingController extends Controller
     public function fetch()
     {
         return $this->settingsService->getAllSettings();
+    }
+
+    public function publicFetch()
+    {
+        $settings = $this->settingsService->getAllSettings();
+
+        $allowedKeys = [
+            'app_name',
+            'contact_email',
+            'company_phone',
+            'company_address',
+            'calendly_link',
+            'enable_registration',
+            'show_social_links',
+            'facebook_enabled',
+            'facebook_url',
+            'instagram_enabled',
+            'instagram_url',
+            'twitter_enabled',
+            'twitter_url',
+            'linkedin_enabled',
+            'linkedin_url',
+            'youtube_enabled',
+            'youtube_url',
+            'tiktok_enabled',
+            'tiktok_url',
+        ];
+
+        return collect($settings)
+            ->only($allowedKeys)
+            ->toArray();
     }
 
     public function test_send_email(Request $request)

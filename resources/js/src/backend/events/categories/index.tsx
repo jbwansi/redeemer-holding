@@ -16,7 +16,7 @@ export interface CategoryForm {
 
 // pages/Events/Categories/index.tsx
 import React, { useState } from 'react'
-import { router, useForm } from '@inertiajs/react'
+import { Head, router, useForm } from '@inertiajs/react'
 import {
     Table,
     TableBody,
@@ -148,7 +148,20 @@ export default function CategoriesIndex({ categories }: Props) {
     }
 
     return (
-        <div className="p-6 space-y-6">
+        <>
+            <Head title="Categories des evenements" />
+
+            <div className="p-6 space-y-6">
+            <div className="rounded-2xl border bg-gradient-to-r from-indigo-50/70 to-white p-6">
+                <h1 className="text-3xl font-semibold tracking-tight">Categories des evenements</h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                    Organisez vos evenements avec des categories claires et visuelles.
+                </p>
+                <div className="mt-4 inline-flex rounded-full bg-white px-3 py-1 text-xs text-muted-foreground ring-1 ring-slate-200">
+                    {categories.meta.total} categories au total
+                </div>
+            </div>
+
             <div className="rounded-lg border bg-background">
                 <div className="p-6 border-b">
                     <div className="flex justify-between items-center mb-6">
@@ -319,14 +332,14 @@ export default function CategoriesIndex({ categories }: Props) {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="text-xl font-semibold">
-                            Edit Category
+                            Modifier la categorie
                         </DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={handleUpdate} className="space-y-6">
                         <div className="space-y-4">
                             <div>
-                                <Label>Name</Label>
+                                <Label>Nom</Label>
                                 <Input
                                     value={editForm.data.name}
                                     onChange={e => editForm.setData('name', e.target.value)}
@@ -349,7 +362,7 @@ export default function CategoriesIndex({ categories }: Props) {
                             </div>
 
                             <div>
-                                <Label>Color</Label>
+                                <Label>Couleur</Label>
                                 <div className="flex gap-3">
                                     <Input
                                         type="color"
@@ -375,7 +388,7 @@ export default function CategoriesIndex({ categories }: Props) {
                                 {editForm.processing && (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 )}
-                                Update Category
+                                Mettre a jour
                             </Button>
                         </DialogFooter>
                     </form>
@@ -403,5 +416,6 @@ export default function CategoriesIndex({ categories }: Props) {
                 </AlertDialogContent>
             </AlertDialog>
         </div>
+        </>
     )
 }

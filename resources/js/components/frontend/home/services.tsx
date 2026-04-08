@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion';
 import { UserRound, MessageCircle, UsersRound, ChevronRight } from 'lucide-react';
 import IconComponent from '@/components/ui/icon';
 import { Link } from '@inertiajs/react';
+import { normalizeServiceIconName } from '@/lib/service-icon';
 
 const Services = ({ services }: any) => {
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -74,7 +75,7 @@ const Services = ({ services }: any) => {
 
                             <div className="p-6 md:p-8">
                                 <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/80 flex items-center justify-center text-[#DA2E29] mb-6">
-                                    <IconComponent name={service.icon} color="red" />
+                                    <IconComponent name={normalizeServiceIconName(service.icon) || 'package'} color="red" />
                                 </div>
 
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">

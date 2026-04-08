@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
-import { AlertCircle, Ticket, X, Check } from 'lucide-react';
+import { AlertCircle, Ticket } from 'lucide-react';
 
 const EventJoin = ({ event, auth }: any) => {
     const [ticketQuantity, setTicketQuantity] = useState(1);
@@ -8,9 +8,12 @@ const EventJoin = ({ event, auth }: any) => {
     const MAX_TICKETS_PER_PERSON = 10; // Définir une limite par personne
     const maxQty = Math.min(event?.available_seats, MAX_TICKETS_PER_PERSON);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: auth?.user ? auth?.user?.name : '',
-        email: auth?.user ? auth?.user?.email : '',
+    const authName = auth?.user?.name ?? '';
+    const spaceIdx = authName.indexOf(' ');
+    const { data, setData, post, processing, errors } = useForm({
+        first_name: spaceIdx >= 0 ? authName.substring(0, spaceIdx) : authName,
+        last_name: spaceIdx >= 0 ? authName.substring(spaceIdx + 1) : '',
+        email: auth?.user?.email ?? '',
         phone: '',
         qty: ticketQuantity,
     });
@@ -57,67 +60,75 @@ const EventJoin = ({ event, auth }: any) => {
     }
 
     return (
-        <div id="registration" className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-100 dark:border-gray-700/30 mb-6">
-            <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        <div id="registration" className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-700 mb-6">
+            <div className="p-6 md:p-7">
+                <p className="text-xs uppercase tracking-wide text-[#da2e29] font-medium mb-2">Inscription</p>
+                <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-4">
                     Réserver votre place
                 </h3>
 
                 {event.available_seats <= 5 && (
-                    <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4">
+                    <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800/40">
                         <div className="flex items-center">
-                            <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-2 flex-shrink-0" />
-                            <p className="text-yellow-700 dark:text-yellow-300">
+                            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mr-2 flex-shrink-0" />
+                            <p className="text-amber-700 dark:text-amber-300">
                                 Plus que <strong>{event.available_seats}</strong> place{event.available_seats > 1 ? 's' : ''} disponible{event.available_seats > 1 ? 's' : ''}
                             </p>
                         </div>
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit}>
-                    {/* Champs pour utilisateurs non connectés */}
-                    {!auth?.user && (
-                        <>
-                            <div className="mb-4">
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Nom et prénom
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={data.name}
-                                    onChange={e => setData('name', e.target.value)}
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors duration-200 ${errors.name
-                                            ? 'border-red-500 dark:border-red-500 focus:ring-red-300'
-                                            : 'border-gray-300 dark:border-gray-600 focus:ring-red-500'
-                                        } bg-white dark:bg-gray-800`}
-                                    required
-                                />
-                                {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
-                            </div>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Prénom + Nom */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label htmlFor="event-first_name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Prénom
+                            </label>
+                            <input
+                                type="text"
+                                id="event-first_name"
+                                value={data.first_name}
+                                onChange={e => setData('first_name', e.target.value)}
+                                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:outline-none transition-colors duration-200 ${errors.first_name ? 'border-red-500 focus:ring-red-300' : 'border-slate-300 dark:border-slate-600 focus:ring-[#da2e29]'} bg-white dark:bg-slate-900`}
+                                required
+                            />
+                            {errors.first_name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.first_name}</p>}
+                        </div>
+                        <div>
+                            <label htmlFor="event-last_name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Nom
+                            </label>
+                            <input
+                                type="text"
+                                id="event-last_name"
+                                value={data.last_name}
+                                onChange={e => setData('last_name', e.target.value)}
+                                className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:outline-none transition-colors duration-200 ${errors.last_name ? 'border-red-500 focus:ring-red-300' : 'border-slate-300 dark:border-slate-600 focus:ring-[#da2e29]'} bg-white dark:bg-slate-900`}
+                                required
+                            />
+                            {errors.last_name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.last_name}</p>}
+                        </div>
+                    </div>
 
-                            <div className="mb-4">
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Adresse e-mail
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={data.email}
-                                    onChange={e => setData('email', e.target.value)}
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:outline-none transition-colors duration-200 ${errors.email
-                                            ? 'border-red-500 dark:border-red-500 focus:ring-red-300'
-                                            : 'border-gray-300 dark:border-gray-600 focus:ring-red-500'
-                                        } bg-white dark:bg-gray-800`}
-                                    required
-                                />
-                                {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
-                            </div>
-                        </>
-                    )}
+                    {/* Adresse e-mail */}
+                    <div>
+                        <label htmlFor="event-email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Adresse e-mail
+                        </label>
+                        <input
+                            type="email"
+                            id="event-email"
+                            value={data.email}
+                            onChange={e => setData('email', e.target.value)}
+                            className={`w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:outline-none transition-colors duration-200 ${errors.email ? 'border-red-500 focus:ring-red-300' : 'border-slate-300 dark:border-slate-600 focus:ring-[#da2e29]'} bg-white dark:bg-slate-900`}
+                            required
+                        />
+                        {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
+                    </div>
 
-                    <div className="mb-6">
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <div>
+                        <label htmlFor="phone" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                             Numéro de téléphone (facultatif)
                         </label>
                         <input
@@ -125,40 +136,40 @@ const EventJoin = ({ event, auth }: any) => {
                             id="phone"
                             value={data.phone}
                             onChange={e => setData('phone', e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none bg-white dark:bg-gray-800 transition-colors duration-200"
+                            className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[#da2e29] focus:outline-none bg-white dark:bg-slate-900 transition-colors duration-200"
                         />
                         {errors.phone && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phone}</p>}
                     </div>
 
-                    <div className="mb-6">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
                             Nombre de places
                         </label>
 
                         <div className="flex items-center">
-                            <div className="flex items-center w-36 h-12 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                            <div className="flex items-center w-36 h-12 border border-slate-300 dark:border-slate-600 rounded-xl overflow-hidden">
                                 <button
                                     type="button"
                                     onClick={decrementQuantity}
                                     disabled={ticketQuantity <= 1}
-                                    className="w-12 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                    className="w-12 h-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                                 >
                                     <span className="text-xl">−</span>
                                 </button>
-                                <div className="flex-1 h-full flex items-center justify-center font-medium text-gray-900 dark:text-white border-x border-gray-300 dark:border-gray-600">
+                                <div className="flex-1 h-full flex items-center justify-center font-medium text-slate-900 dark:text-white border-x border-slate-300 dark:border-slate-600">
                                     {ticketQuantity}
                                 </div>
                                 <button
                                     type="button"
                                     onClick={incrementQuantity}
                                     disabled={ticketQuantity >= maxQty}
-                                    className="w-12 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                    className="w-12 h-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                                 >
                                     <span className="text-xl">+</span>
                                 </button>
                             </div>
 
-                            <span className="ml-4 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="ml-4 text-sm text-slate-500 dark:text-slate-400">
                                 {event.max_participants !== null ? (
                                     <>
                                         {event.available_seats === 1 ? (
@@ -176,11 +187,11 @@ const EventJoin = ({ event, auth }: any) => {
                     </div>
 
                     {/* Récapitulatif */}
-                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 mb-8">
-                        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Récapitulatif</h4>
+                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700/80">
+                        <h4 className="text-lg font-medium text-slate-900 dark:text-white mb-4">Récapitulatif</h4>
 
                         <div className="space-y-3 mb-6">
-                            <div className="flex justify-between text-gray-700 dark:text-gray-300">
+                            <div className="flex justify-between text-slate-700 dark:text-slate-300">
                                 <span>
                                     {event.title} × {ticketQuantity}
                                 </span>
@@ -190,15 +201,15 @@ const EventJoin = ({ event, auth }: any) => {
                             </div>
 
                             {event.price > 0 && (
-                                <div className="flex justify-between text-gray-600 dark:text-gray-400 text-sm">
+                                <div className="flex justify-between text-slate-600 dark:text-slate-400 text-sm">
                                     <span>Frais de service</span>
                                     <span>{(event.price * ticketQuantity * 0.05).toFixed(2)} CHF</span>
                                 </div>
                             )}
                         </div>
 
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex justify-between font-bold text-lg text-gray-900 dark:text-white">
+                        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <div className="flex justify-between font-bold text-lg text-slate-900 dark:text-white">
                                 <span>Total</span>
                                 <span>
                                     {event.price === 0
@@ -214,7 +225,7 @@ const EventJoin = ({ event, auth }: any) => {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-300 flex items-center justify-center"
+                            className="w-full py-4 bg-[#da2e29] hover:bg-[#c62823] text-white rounded-xl font-medium transition-colors duration-300 flex items-center justify-center"
                         >
                             {processing ? (
                                 <>
@@ -232,7 +243,7 @@ const EventJoin = ({ event, auth }: any) => {
                             )}
                         </button>
 
-                        <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+                        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400 text-center">
                             En réservant, vous acceptez nos{' '}
                             <Link href={route('terms.show')} className="text-red-600 dark:text-red-400 hover:underline">
                                 conditions générales

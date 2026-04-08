@@ -1,48 +1,42 @@
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, Share2, Heart } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Link } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 
 const ShowEvent = ({ event }: any) => {
-    const sampleEvent = {
-        title: "Festival de musique d'été",
-        description: "Un weekend de musique live avec les meilleurs artistes",
-        content: `<p>Rejoignez-nous pour une expérience musicale inoubliable...</p>`,
-        location: "Parc Central, Paris",
-        category: { name: "Musique", color: "#FF5A5F" },
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 86400000).toISOString(),
-        price: "25000",
-        max_participants: "500",
-        featured_image: "/api/placeholder/1200/600",
-        is_published: true
-    };
-
-    const displayedEvent = event || sampleEvent;
+    const displayedEvent = event;
+    const safeContent = React.useMemo(() => DOMPurify.sanitize(displayedEvent.content || ''), [displayedEvent.content]);
 
     return (
-        <div className=" mx-auto p-6">
+        <div className="p-6 space-y-6">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-[#7f1d1d] px-6 py-7 text-white shadow-xl">
+                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
+                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                    <div>
+                        <p className="text-xs uppercase tracking-wide text-white/75">Détail événement</p>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1">{displayedEvent.title}</h1>
+                        <p className="mt-2 text-white/80 max-w-2xl">{displayedEvent.description}</p>
+                    </div>
+                    <Badge variant="secondary" className="w-fit text-slate-900 bg-white/95">
+                        {displayedEvent.is_published ? 'Publié' : 'Brouillon'}
+                    </Badge>
+                </div>
+            </div>
+
             <div className="grid lg:grid-cols-3 gap-8">
-                {/* Image et Infos Principales */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="relative aspect-[16/9] rounded-2xl overflow-hidden">
+                    <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-100 dark:border-slate-700/60 dark:bg-slate-900/50">
                         <img
                             src={displayedEvent.featured_image.large}
                             alt={displayedEvent.title}
                             className="object-cover w-full h-full"
                         />
-                        <div className="absolute top-4 right-4 flex gap-2">
-                            <Button size="icon" variant="secondary" className="rounded-full bg-white/80 backdrop-blur-sm">
-                                <Share2 className="h-5 w-5" />
-                            </Button>
-                            <Button size="icon" variant="secondary" className="rounded-full bg-white/80 backdrop-blur-sm">
-                                <Heart className="h-5 w-5" />
-                            </Button>
-                        </div>
                     </div>
 
                     <div className="space-y-6">
@@ -53,33 +47,29 @@ const ShowEvent = ({ event }: any) => {
                             >
                                 {displayedEvent.category.name}
                             </Badge>
-                            <h1 className="text-4xl font-bold tracking-tight mb-4">{displayedEvent.title}</h1>
-                            <p className="text-lg text-muted-foreground">{displayedEvent.description}</p>
+                            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Description</h2>
                         </div>
 
-                        <Card>
+                        <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
                             <CardContent className="p-6">
                                 <div className="prose max-w-none dark:prose-invert"
-                                    dangerouslySetInnerHTML={{ __html: displayedEvent.content }}
+                                    dangerouslySetInnerHTML={{ __html: safeContent }}
                                 />
                             </CardContent>
                         </Card>
                     </div>
                 </div>
 
-                {/* Sidebar */}
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70">
                         <CardContent className="p-6 space-y-6">
                             <div className="flex items-center justify-between">
-                                <span className="text-2xl font-bold">{parseInt(displayedEvent.price).toLocaleString()} CHF</span>
-                                <Badge variant="secondary" className="text-base px-4 py-1">
-                                    {displayedEvent.is_published ? 'Publié' : 'Brouillon'}
-                                </Badge>
+                                <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">{parseInt(displayedEvent.price).toLocaleString()} CHF</span>
+                                <Badge variant="outline" className="text-xs">{displayedEvent.is_full ? 'Complet' : 'Ouvert'}</Badge>
                             </div>
 
                             <Button
-                                className="w-full"
+                                className="w-full rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
                                 size="lg"
                                 variant={displayedEvent.is_full ? "outline" : "default"}
                                 asChild
@@ -89,24 +79,24 @@ const ShowEvent = ({ event }: any) => {
                                 </Link>
                             </Button>
 
-                            <hr className="border-muted" />
+                            <hr className="border-slate-200 dark:border-slate-700" />
 
                             <div className="space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <Calendar className="h-5 w-5 text-muted-foreground mt-1" />
+                                    <Calendar className="h-5 w-5 text-slate-500 mt-1" />
                                     <div>
                                         <p className="font-medium">Date</p>
-                                        <p className="text-muted-foreground">
+                                        <p className="text-slate-600 dark:text-slate-400">
                                             {format(new Date(displayedEvent.start_date), 'PPPP', { locale: fr })}
                                         </p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <Clock className="h-5 w-5 text-muted-foreground mt-1" />
+                                    <Clock className="h-5 w-5 text-slate-500 mt-1" />
                                     <div>
                                         <p className="font-medium">Horaires</p>
-                                        <p className="text-muted-foreground">
+                                        <p className="text-slate-600 dark:text-slate-400">
                                             {format(new Date(displayedEvent.start_date), 'HH:mm')} -
                                             {format(new Date(displayedEvent.end_date), 'HH:mm')}
                                         </p>
@@ -114,18 +104,18 @@ const ShowEvent = ({ event }: any) => {
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <MapPin className="h-5 w-5 text-muted-foreground mt-1" />
+                                    <MapPin className="h-5 w-5 text-slate-500 mt-1" />
                                     <div>
                                         <p className="font-medium">Lieu</p>
-                                        <p className="text-muted-foreground">{displayedEvent.location}</p>
+                                        <p className="text-slate-600 dark:text-slate-400">{displayedEvent.location}</p>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start gap-3">
-                                    <Users className="h-5 w-5 text-muted-foreground mt-1" />
+                                    <Users className="h-5 w-5 text-slate-500 mt-1" />
                                     <div>
                                         <p className="font-medium">Participants</p>
-                                        <p className="text-muted-foreground">
+                                        <p className="text-slate-600 dark:text-slate-400">
                                             {displayedEvent.max_participants} places maximum
                                         </p>
                                     </div>

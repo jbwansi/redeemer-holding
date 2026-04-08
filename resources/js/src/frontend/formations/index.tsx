@@ -1,389 +1,245 @@
-
-
-// export default FormationPage;
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import {
-    Calendar,
-    Clock,
-    MapPin,
-    Users,
-    Search,
-    Filter,
-    X,
-    ArrowRight,
-    History,
-    CheckCircle,
-    GraduationCap
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import FrontLayout from '@/components/frontend/layouts/front-layout';
-import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
+import { Calendar, GraduationCap, Search, Sparkles, ArrowRight, History } from 'lucide-react';
 import { route } from 'ziggy-js';
+import FrontLayout from '@/components/frontend/layouts/front-layout';
 import FormationCard from '@/components/frontend/formations/formation-card';
 
+const resolveImage = (image: any): string => {
+    if (!image) return '/assets/images/coaching-session.jpg';
+    if (typeof image === 'string') return image;
+    return image?.large || image?.medium || image?.original || image?.thumbnail || '/assets/images/coaching-session.jpg';
+};
+
+const toDate = (value: any): Date | null => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
 const FormationsPage = ({ formations, featuredFormation }: any) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [showFilters, setShowFilters] = useState(false);
-    const [showPastFormations, setShowPastFormations] = useState(false);
+    const [search, setSearch] = useState('');
+    const [showPast, setShowPast] = useState(false);
 
-    // Références pour animations au scroll
-    const containerRef = useRef(null);
-    const heroRef = useRef(null);
-    const featuredRef = useRef(null);
-    const upcomingRef = useRef(null);
-    const pastFormationsRef = useRef(null);
+    const allFormations = formations?.data ?? [];
+    const currentPage = formations?.meta?.current_page ?? 1;
+    const lastPage = formations?.meta?.last_page ?? 1;
+    const now = new Date();
 
-    // Détection de visibilité pour animations
-    const isHeroInView = useInView(heroRef, { once: false, amount: 0.3 });
-    const isFeaturedInView = useInView(featuredRef, { once: false, amount: 0.3 });
-    const isUpcomingInView = useInView(upcomingRef, { once: false, amount: 0.2 });
-    const isPastFormationsInView = useInView(pastFormationsRef, { once: false, amount: 0.2 });
+    const [upcoming, past] = useMemo(() => {
+        return allFormations.reduce(
+            (acc: any[], item: any) => {
+                const end = toDate(item?.end_date);
+                if (!end || end >= now) {
+                    acc[0].push(item);
+                } else {
+                    acc[1].push(item);
+                }
+                return acc;
+            },
+            [[], []]
+        );
+    }, [allFormations, now]);
 
-    // Animation parallax
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end start"]
-    });
+    const filteredUpcoming = useMemo(() => {
+        if (!search.trim()) return upcoming;
+        const term = search.toLowerCase();
 
-    const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
-
-    // Date actuelle pour comparer
-    const currentDate = new Date();
-
-    // Vérifier si la formation en vedette est encore valide (pas passée)
-    const validFeaturedFormation = featuredFormation && new Date(featuredFormation.end_date) >= currentDate ? featuredFormation : null;
-
-    // Séparer les formations à venir des formations passées
-    const [upcomingFormations, pastFormations] = formations?.data?.reduce(
-        (result: any, formation: any) => {
-            if (new Date(formation.end_date) >= currentDate) {
-                result[0].push(formation);
-            } else {
-                result[1].push(formation);
-            }
-            return result;
-        },
-        [[], []]
-    ) || [[], []];
-
-    // Filtrage des formations
-    const filterFormations = (formationsToFilter: any) => {
-        return formationsToFilter.filter((formation: any) => {
-            // Filtre par recherche
-            const matchesSearch = searchTerm === '' ||
-                formation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                formation.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                formation.tags.some((tag: any) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-
-            // Filtre par date
-            const matchesDate = !selectedDate || new Date(formation.date).toDateString() === new Date(selectedDate).toDateString();
-
-            return matchesSearch && matchesDate;
+        return upcoming.filter((item: any) => {
+            const title = item?.title?.toLowerCase?.() || '';
+            const excerpt = item?.excerpt?.toLowerCase?.() || '';
+            const tags = Array.isArray(item?.tags) ? item.tags.join(' ').toLowerCase() : '';
+            return title.includes(term) || excerpt.includes(term) || tags.includes(term);
         });
-    };
+    }, [upcoming, search]);
 
-    const filteredUpcomingFormations = filterFormations(upcomingFormations);
-    const filteredPastFormations = filterFormations(pastFormations);
+    const filteredPast = useMemo(() => {
+        if (!search.trim()) return past;
+        const term = search.toLowerCase();
 
-    // Gestion des filtres
-    const clearFilters = () => {
-        setSearchTerm('');
-        setSelectedDate(null);
-    };
+        return past.filter((item: any) => {
+            const title = item?.title?.toLowerCase?.() || '';
+            const excerpt = item?.excerpt?.toLowerCase?.() || '';
+            const tags = Array.isArray(item?.tags) ? item.tags.join(' ').toLowerCase() : '';
+            return title.includes(term) || excerpt.includes(term) || tags.includes(term);
+        });
+    }, [past, search]);
 
-    // Formatage des dates
-    const formatFormationDate = (dateString: any, includeYear = true) => {
-        const date = new Date(dateString);
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: includeYear ? 'numeric' : undefined
-        };
-        return date.toLocaleDateString('fr-FR', options as Intl.DateTimeFormatOptions);
-    };
+    const shouldShowPast = showPast || (filteredUpcoming.length === 0 && filteredPast.length > 0);
 
-    const formatFormationTime = (dateString: any) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    };
+    const activeFeatured = useMemo(() => {
+        const candidate = featuredFormation || upcoming?.[0] || null;
+        if (!candidate) return null;
+        const end = toDate(candidate?.end_date);
+        if (end && end < now) return null;
+        return candidate;
+    }, [featuredFormation, upcoming, now]);
 
     return (
-        <>
-            <Head title='Formations' />
-            <FrontLayout>
-                <main ref={containerRef} className="min-h-screen bg-white dark:bg-gray-950 pt-32 pb-20 overflow-hidden">
-                    {/* Hero Section */}
-                    <section ref={heroRef} className="relative pb-16">
-                        <motion.div
-                            className="absolute inset-0 bg-cover bg-center opacity-5 dark:opacity-10"
-                            style={{
-                                backgroundImage: "url('/assets/images/pattern-bg.jpg')",
-                                y: backgroundY
-                            }}
-                        />
+        <FrontLayout>
+            <Head title="Formations" />
 
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                            <div className="text-center max-w-3xl mx-auto mb-10">
-                                <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <span className="inline-block py-1 px-3 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                                        Nos Formations
-                                    </span>
-                                </motion.div>
+            <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-28 pb-20 dark:bg-slate-950">
+                <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#da2e29]/10 blur-3xl" />
 
-                                <motion.h1
-                                    className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.6, delay: 0.1 }}
-                                >
-                                    Développez vos <span className="text-primary">compétences</span> et <span className="text-primary">évoluez</span>
-                                </motion.h1>
+                <section className="mx-auto max-w-[1320px] px-6 md:px-8">
+                    <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                        <span className="inline-flex items-center gap-2 rounded-full border border-[#0f766e]/30 bg-white/80 px-4 py-1 text-xs uppercase tracking-wide text-[#0f766e] dark:bg-slate-900/70">
+                            <Sparkles className="h-3.5 w-3.5" />
+                            Formations
+                        </span>
+                        <h1 className="mt-5 max-w-4xl text-4xl font-semibold leading-tight text-slate-900 md:text-6xl dark:text-white">
+                            Passez au niveau superieur avec des formations concretes et actionnables
+                        </h1>
+                        <p className="mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
+                            Une experience pratique, des experts reconnus et un cadre clair pour transformer vos competences en resultats mesurables.
+                        </p>
+                    </motion.div>
 
-                                <motion.p
-                                    className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-8"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.6, delay: 0.2 }}
-                                >
-                                    Découvrez nos formations professionnelles et perfectionnez vos compétences avec des experts du domaine.
-                                </motion.p>
-
-                                {/* Search bar */}
-                                <motion.div
-                                    className="max-w-xl mx-auto relative"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.6, delay: 0.3 }}
-                                >
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="Rechercher une formation..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="w-full px-5 py-3 pl-12 pr-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                        />
-                                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                        {searchTerm && (
-                                            <button
-                                                onClick={() => setSearchTerm('')}
-                                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                                            >
-                                                <X className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            </div>
-
-                            {/* Filters */}
-                            <motion.div
-                                className="flex justify-center gap-4 mb-8"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                transition={{ duration: 0.6, delay: 0.4 }}
-                            >
-                                <button
-                                    onClick={() => setShowPastFormations(!showPastFormations)}
-                                    className={`px-4 py-2 rounded-lg transition-colors duration-200 ${showPastFormations
-                                        ? 'bg-primary text-white'
-                                        : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    <History className="w-4 h-4 inline mr-2" />
-                                    {showPastFormations ? 'Masquer les formations passées' : 'Voir les formations passées'}
-                                </button>
-                            </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.1 }}
+                        className="mt-8 flex flex-col gap-3 md:flex-row md:items-center"
+                    >
+                        <div className="relative w-full md:max-w-xl">
+                            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Rechercher une formation"
+                                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm outline-none transition focus:border-[#0f766e] dark:border-slate-700 dark:bg-slate-900"
+                            />
                         </div>
-                    </section>
 
-                    {/* Featured Formation */}
-                    {validFeaturedFormation && (
-                        <section ref={featuredRef} className="py-12">
-                            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                <motion.div
-                                    className="rounded-2xl overflow-hidden relative"
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={isFeaturedInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-                                    transition={{ duration: 0.7 }}
+                        <button
+                            type="button"
+                            onClick={() => setShowPast((prev) => !prev)}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800"
+                        >
+                            <History className="h-4 w-4" />
+                            {shouldShowPast ? 'Masquer les passees' : 'Afficher les passees'}
+                        </button>
+                    </motion.div>
+                </section>
+
+                {activeFeatured && (
+                    <section className="mx-auto mt-14 max-w-[1320px] px-6 md:px-8">
+                        <motion.div
+                            initial={{ opacity: 0, y: 18 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.55 }}
+                            className="relative overflow-hidden rounded-3xl"
+                        >
+                            <img src={resolveImage(activeFeatured?.featured_image)} alt={activeFeatured?.title} className="h-[420px] w-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
+
+                            <div className="absolute inset-0 z-10 p-8 md:p-12">
+                                <span className="inline-flex items-center rounded-full bg-[#0f766e] px-3 py-1 text-xs font-medium text-white">A la une</span>
+                                <h2 className="mt-5 max-w-3xl text-3xl font-semibold text-white md:text-5xl">{activeFeatured?.title}</h2>
+                                <p className="mt-4 max-w-2xl text-white/85">{activeFeatured?.excerpt}</p>
+
+                                <div className="mt-7 flex flex-wrap items-center gap-4 text-sm text-white/90">
+                                    <span className="inline-flex items-center gap-2"><Calendar className="h-4 w-4" />
+                                        {activeFeatured?.start_date ? new Date(activeFeatured.start_date).toLocaleDateString('fr-FR') : '-'}
+                                    </span>
+                                    <span className="rounded-full border border-white/30 px-3 py-1">{activeFeatured?.price === 0 ? 'Gratuit' : `${activeFeatured?.price} CHF`}</span>
+                                </div>
+
+                                <Link
+                                    href={route('formations.details', activeFeatured?.slug)}
+                                    className="mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-medium text-[#0f766e] hover:bg-slate-100"
                                 >
-                                    {/* Gradient overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/30 z-10"></div>
-
-                                    {/* Background image */}
-                                    <div className="absolute inset-0">
-                                        <img
-                                            src={validFeaturedFormation?.featured_image?.original}
-                                            alt={validFeaturedFormation?.title}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-
-                                    {/* Content */}
-                                    <div className="relative z-20 py-16 px-6 md:py-24 md:px-12">
-                                        <div className="max-w-3xl">
-                                            <span className="inline-block px-3 py-1 bg-primary text-white text-sm font-medium rounded-full mb-6">
-                                                Formation en vedette
-                                            </span>
-
-                                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                                                {validFeaturedFormation.title}
-                                            </h2>
-
-                                            <p className="text-lg text-white/90 mb-8">
-                                                {validFeaturedFormation.excerpt}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-6 mb-8">
-                                                <div className="flex items-center text-white/80">
-                                                    <Calendar className="w-5 h-5 mr-2" />
-                                                    <span>Du {formatFormationDate(validFeaturedFormation.start_date)} au {formatFormationDate(validFeaturedFormation.end_date)}</span>
-                                                </div>
-
-                                                <div className="flex items-center text-white/80">
-                                                    <MapPin className="w-5 h-5 mr-2" />
-                                                    <span>{validFeaturedFormation.location}</span>
-                                                </div>
-
-                                                <div className="flex items-center text-white/80">
-                                                    <Users className="w-5 h-5 mr-2" />
-                                                    <span>{validFeaturedFormation.max_participants} participants max.</span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-4">
-                                                <div className="bg-black/30 p-3 rounded-lg">
-                                                    <div className="text-sm text-white/70">Prix</div>
-                                                    <div className="text-2xl font-bold text-white">{validFeaturedFormation.price} CHF</div>
-                                                </div>
-
-                                                <Link
-                                                    href={route('formations.details', validFeaturedFormation.slug)}
-                                                    className="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors duration-300"
-                                                >
-                                                    En savoir plus
-                                                    <ArrowRight className="ml-2 w-5 h-5" />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
+                                    Voir la formation
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
                             </div>
-                        </section>
+                        </motion.div>
+                    </section>
+                )}
+
+                <section className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8">
+                    <div className="mb-8 flex items-end justify-between gap-4">
+                        <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl dark:text-white">Formations a venir</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{filteredUpcoming.length} resultat(s)</p>
+                    </div>
+
+                    {filteredUpcoming.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900">
+                            Aucune formation a venir ne correspond a votre recherche.
+                            {filteredPast.length > 0 && (
+                                <p className="mt-2 text-sm">Les formations passees sont affichees juste en dessous.</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="space-y-8">
+                            {filteredUpcoming.map((formation: any) => (
+                                <FormationCard key={formation.id} formation={formation} />
+                            ))}
+                        </div>
                     )}
 
-                    {/* Formations Grid */}
-                    <section ref={upcomingRef} className="py-16">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="mb-12 flex justify-between items-end">
-
-                                <motion.h2
-                                    className="text-2xl font-bold mb-6"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={isUpcomingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.6 }}
-                                >
-                                    Formations à venir
-                                </motion.h2>
-                                <motion.p
-                                    className="text-gray-600 dark:text-gray-300"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={isUpcomingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                    transition={{ duration: 0.6, delay: 0.1 }}
-                                >
-                                    {filteredUpcomingFormations.length === 0 ? (
-                                        "Aucune formation à venir ne correspond à votre recherche"
-                                    ) : (
-                                        `${filteredUpcomingFormations.length} formation${filteredUpcomingFormations.length > 1 ? 's' : ''} programmé${filteredUpcomingFormations.length > 1 ? 's' : ''}`
-                                    )}
-                                </motion.p>
-                            </div>
-                            {filteredUpcomingFormations.length === 0 ? (
-                                <motion.div
-                                    className="text-center py-12"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.6 }}
-                                >
-                                    <p className="text-gray-500">Aucune formation à venir pour le moment</p>
-                                </motion.div>
-                            ) : (
-                                <div className="space-y-8 ">
-                                    {filteredUpcomingFormations.map((formation: any, index: number) => (
-                                        <motion.div
-                                            key={formation.id}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={isUpcomingInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                                        >
-                                            <FormationCard formation={formation} />
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-
-
-                            {/* Past Formations */}
-                            {showPastFormations && (
-                                <div ref={pastFormationsRef}>
-                                    <motion.h2
-                                        className="text-2xl font-bold mb-6 flex items-center gap-2"
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 20 }}
-                                        transition={{ duration: 0.6 }}
-                                    >
-                                        <History className="w-6 h-6" />
-                                        Formations passées
-                                    </motion.h2>
-
-                                    {filteredPastFormations.length === 0 ? (
-                                        <motion.div
-                                            className="text-center py-12"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            transition={{ duration: 0.6 }}
-                                        >
-                                            <p className="text-gray-500">Aucune formation passée ne correspond à vos critères</p>
-                                        </motion.div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {filteredPastFormations.map((formation: any, index: number) => (
-                                                <motion.div
-                                                    key={formation.id}
-                                                    initial={{ opacity: 0, y: 20 }}
-                                                    animate={isPastFormationsInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 20 }}
-                                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                                >
-                                                    <div className="relative">
-                                                        <FormationCard formation={formation} />
-                                                        <div className="absolute top-2 right-2">
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className="bg-gray-800/80 text-white"
-                                                            >
-                                                                <CheckCircle className="w-3 h-3 mr-1" />
-                                                                Terminée
-                                                            </Badge>
-                                                        </div>
-                                                    </div>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+                    {lastPage > 1 && (
+                        <div className="mt-10 flex items-center justify-center gap-3">
+                            <Link
+                                href={route('formations', { page: currentPage - 1 })}
+                                className={`rounded-lg px-4 py-2 text-sm font-medium ${currentPage <= 1 ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'}`}
+                            >
+                                Precedent
+                            </Link>
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Page {currentPage} / {lastPage}</span>
+                            <Link
+                                href={route('formations', { page: currentPage + 1 })}
+                                className={`rounded-lg px-4 py-2 text-sm font-medium ${currentPage >= lastPage ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'}`}
+                            >
+                                Suivant
+                            </Link>
                         </div>
+                    )}
+                </section>
+
+                {shouldShowPast && (
+                    <section className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8">
+                        <div className="mb-8 flex items-end justify-between gap-4">
+                            <h2 className="text-2xl font-semibold text-slate-900 md:text-3xl dark:text-white">Formations passees</h2>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">{filteredPast.length} resultat(s)</p>
+                        </div>
+
+                        {filteredPast.length === 0 ? (
+                            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900">
+                                Aucune formation passee ne correspond a votre recherche.
+                            </div>
+                        ) : (
+                            <div className="space-y-8 opacity-90">
+                                {filteredPast.map((formation: any) => (
+                                    <FormationCard key={formation.id} formation={formation} />
+                                ))}
+                            </div>
+                        )}
                     </section>
-                </main>
-            </FrontLayout>
-        </>
+                )}
+
+                <section className="mx-auto mt-20 max-w-[1320px] px-6 md:px-8">
+                    <div className="rounded-3xl bg-gradient-to-r from-[#0f766e] to-[#115e59] p-10 text-white md:p-12">
+                        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                            <div>
+                                <p className="inline-flex items-center gap-2 text-sm text-white/80"><GraduationCap className="h-4 w-4" />
+                                    Besoin d'aide pour choisir ?
+                                </p>
+                                <h3 className="mt-3 text-3xl font-semibold">On vous recommande la meilleure formation selon votre objectif</h3>
+                            </div>
+                            <Link href={route('contact')} className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 font-medium text-[#0f766e]">
+                                Parler a un conseiller
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </FrontLayout>
     );
 };
 

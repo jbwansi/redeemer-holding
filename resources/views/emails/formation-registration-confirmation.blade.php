@@ -68,6 +68,12 @@
             <p>Votre inscription à la formation <strong>{{ $formation->title }}</strong> a été confirmée avec succès.
             </p>
 
+            @if (!empty($customMessage))
+                <div class="meeting-link" style="text-align: left;">
+                    <p>{{ $customMessage }}</p>
+                </div>
+            @endif
+
             <div class="event-card">
                 <h3>{{ $formation->title }}</h3>
 

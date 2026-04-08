@@ -19,6 +19,10 @@ function AccountWrapper({ children }: any) {
             title: 'Activités de connexion',
             href: 'profile.activities',
         },
+        {
+            title: 'Notifications',
+            href: 'profile.notifications',
+        },
     ];
 
     return (

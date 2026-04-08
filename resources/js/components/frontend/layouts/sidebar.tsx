@@ -45,9 +45,9 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
 }) => (
     <Link
         href={href}
-        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 ${isActive
-            ? 'bg-red-600 text-white'
-            : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+        className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${isActive
+            ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-md shadow-red-500/25'
+            : 'hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
             }`}
         onClick={onClick}
     >
@@ -77,32 +77,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <>
             <motion.aside
                 className={`fixed lg:sticky top-16 lg:top-24 left-0 h-[calc(100vh-4rem)] lg:h-[calc(100vh-6rem)] 
-                bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 
+                bg-white/95 dark:bg-slate-900/95 border-r border-slate-200 dark:border-slate-800 backdrop-blur 
                 transition-all duration-300 z-40 
                 ${isOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20'}`}
                 initial={false}
             >
                 <div className="flex flex-col h-full">
-                    {/* En-tête */}
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                         <div className="flex items-center space-x-3 overflow-hidden">
-                            <span className="font-semibold text-gray-900 dark:text-white truncate">
+                            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-red-600 to-rose-700 text-white flex items-center justify-center text-sm font-semibold">
+                                {userName?.charAt(0)?.toUpperCase()}
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-slate-100 truncate">
                                 {userName}
                             </span>
                         </div>
                         <button
                             onClick={onToggle}
-                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         >
                             {isOpen ? (
-                                <ChevronLeft className="w-5 h-5 text-gray-500" />
+                                <ChevronLeft className="w-5 h-5 text-slate-500" />
                             ) : (
-                                <Menu className="w-5 h-5 text-gray-500" />
+                                <Menu className="w-5 h-5 text-slate-500" />
                             )}
                         </button>
                     </div>
 
-                    {/* Navigation */}
                     <nav className="flex-1 overflow-y-auto p-4 space-y-2">
                         {items.map((item) => (
                             <SidebarItem
@@ -117,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         ))}
                         {userRole == "admin" && <Link
                             href={route('dashboard')}
-                            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300`}
+                            className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300`}
                         >
                             <span className="flex-shrink-0"><LayoutDashboard /></span>
 
@@ -126,12 +127,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </Link>}
                     </nav>
 
-                    {/* Footer */}
-                    <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+                    <div className="p-4 border-t border-slate-200 dark:border-slate-800">
                         <Link
                             href={route('logout')}
-                            className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 dark:text-red-400 
-                            hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-300"
+                            className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors duration-300"
                         >
                             <LogOut className="w-5 h-5" />
                             {isOpen && <span className="font-medium">Déconnexion</span>}
@@ -156,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Bouton toggle mobile */}
             <button
                 onClick={onToggle}
-                className={`fixed bottom-4 right-4 z-40 lg:hidden bg-red-600 text-white p-3 rounded-full shadow-lg 
+                className={`fixed bottom-4 right-4 z-40 lg:hidden bg-gradient-to-r from-red-600 to-rose-600 text-white p-3 rounded-full shadow-lg shadow-red-500/30 
                 ${isOpen ? 'hidden' : 'flex'}`}
             >
                 <Menu className="w-6 h-6" />

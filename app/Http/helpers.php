@@ -2,13 +2,18 @@
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\QueryException;
 
 if (!function_exists('get_setting')) {
     function get_setting($key, $default = null, $lang = false)
     {
-        $settings = Cache::remember('business_settings', 300, function () {
-            return Setting::all();
-        });
+        try {
+            $settings = Cache::remember('business_settings', 300, function () {
+                return Setting::all();
+            });
+        } catch (QueryException $e) {
+            return $default;
+        }
 
         if ($lang == false) {
             $setting = $settings->where('type', $key)->first();

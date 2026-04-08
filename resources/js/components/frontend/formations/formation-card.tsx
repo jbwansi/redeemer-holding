@@ -66,8 +66,11 @@ const FormationCard = ({ formation }: any) => {
                         alt={formation.title}
                         className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${isPast ? 'filter grayscale' : ''
                             }`}
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(min-width: 768px) 33vw, 100vw"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent md:from-black/20 md:via-black/5"></div>
 
                     {/* Type badge */}
                     <div className="absolute top-4 left-4">
@@ -94,7 +97,7 @@ const FormationCard = ({ formation }: any) => {
                         </div>
                     )}
 
-                    <div className="absolute bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-black to-transparent py-4 px-4">
+                    <div className="absolute bottom-0 left-0 right-0 md:hidden bg-gradient-to-t from-black/80 via-black/45 to-transparent py-4 px-4">
                         <div className="flex items-center text-white">
                             <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span className="text-sm">{formatFormationDate(formation.start_date, false)}</span>

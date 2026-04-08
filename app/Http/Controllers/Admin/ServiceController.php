@@ -33,7 +33,12 @@ class ServiceController extends Controller
 
         return inertia('backend/services/index', [
             'services' => $query->paginate(12),
-            'filters' => $request->only(['search', 'status'])
+            'filters' => $request->only(['search', 'status']),
+            'stats' => [
+                'total'    => Service::count(),
+                'active'   => Service::where('status', true)->count(),
+                'inactive' => Service::where('status', false)->count(),
+            ],
         ]);
     }
     public function create()

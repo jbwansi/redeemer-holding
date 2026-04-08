@@ -13,9 +13,9 @@ import { CalendarIcon, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { router, useForm } from '@inertiajs/react'
+import { useForm } from '@inertiajs/react'
 import QuillEditor from '@/components/ui/quill-editor'
-import { EventCategory } from '@/types/event'
+import { Category } from '@/types/category'
 
 interface EditEventProps {
     event: {
@@ -34,7 +34,7 @@ interface EditEventProps {
         tags: string[],
         is_featured: boolean
     }
-    categories: EventCategory[]
+    categories: Category[]
 }
 
 const EditEvent = ({ event, categories }: EditEventProps) => {
@@ -54,8 +54,19 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
         tags: event?.tags || [],
         _method: 'POST'
     })
-    const [preview, setPreview] = React.useState(event.featured_image.medium)
+    const [preview, setPreview] = React.useState<string | null>(event.featured_image?.medium ?? null)
     const [inputValue, setInputValue] = React.useState('');
+
+    const updateDateField = React.useCallback(
+        (field: 'start_date' | 'end_date', updater: (date: Date) => void) => {
+            const rawValue = data[field]
+            const baseDate = rawValue ? new Date(rawValue) : new Date()
+            if (Number.isNaN(baseDate.getTime())) return
+            updater(baseDate)
+            setData(field, baseDate.toISOString())
+        },
+        [data, setData]
+    )
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] as any
         if (file) {
@@ -155,15 +166,9 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                             <SelectValue placeholder="Sélectionnez..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {categories?.map((category: EventCategory) => (
+                                            {categories?.map((category: Category) => (
                                                 <SelectItem key={category.id} value={category.id.toString()}>
-                                                    <div className="flex items-center gap-2">
-                                                        <div
-                                                            className="w-3 h-3 rounded-full"
-                                                            style={{ backgroundColor: category.color }}
-                                                        />
-                                                        {category.name}
-                                                    </div>
+                                                    {category.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -301,9 +306,9 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getHours().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('start_date', date.toISOString())
+                                                        updateDateField('start_date', (date) => {
+                                                            date.setHours(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -323,9 +328,9 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getMinutes().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('start_date', date.toISOString())
+                                                        updateDateField('start_date', (date) => {
+                                                            date.setMinutes(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -383,9 +388,9 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getHours().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('end_date', date.toISOString())
+                                                        updateDateField('end_date', (date) => {
+                                                            date.setHours(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">
@@ -405,9 +410,9 @@ const EditEvent = ({ event, categories }: EditEventProps) => {
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getMinutes().toString() : ""}
                                                     onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('end_date', date.toISOString())
+                                                        updateDateField('end_date', (date) => {
+                                                            date.setMinutes(parseInt(value, 10))
+                                                        })
                                                     }}
                                                 >
                                                     <SelectTrigger className="h-12">

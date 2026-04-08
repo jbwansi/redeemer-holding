@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 class Category extends Model
@@ -24,5 +25,10 @@ class Category extends Model
     {
         return $this->belongsToMany(Post::class, 'category_post')
                     ->withTrashed();
+    }
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class, 'category_id');
     }
 }

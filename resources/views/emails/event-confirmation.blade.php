@@ -263,6 +263,12 @@
                     sommes ravis de vous compter parmi nos participants.</p>
             </div>
 
+            @if (!empty($customMessage))
+                <div class="message-box">
+                    <p>{{ $customMessage }}</p>
+                </div>
+            @endif
+
             <div class="reference-highlight">
                 <p style="margin-bottom: 8px; color: #92400E; font-weight: 500;">Votre référence de réservation</p>
                 <div class="reference-code">{{ $participant->reference }}</div>

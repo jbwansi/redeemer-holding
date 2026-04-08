@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
+use App\Services\SeoService;
 use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Event\EventResource;
 use App\Http\Resources\Formation\FormationCollection;
@@ -36,27 +37,38 @@ class WebController extends Controller
 
 
 
-    public function blogs()
+    public function blogs(Request $request)
     {
+        $postsPaginator = Post::with(['user', 'categories'])
+            ->published()
+            ->latest()
+            ->paginate(9)
+            ->appends($request->query());
 
-        $posts = new PostCollection(Post::with(['user', 'categories'])->published()->latest()->get());
-        $featuredPost = PostResource::make(Post::with(['user', 'categories'])->published()->latest()->first());
+        $posts = PostResource::collection($postsPaginator);
+        $featuredModel = Post::with(['user', 'categories'])->published()->latest()->first();
+        $featuredPost = $featuredModel ? PostResource::make($featuredModel) : null;
         $categories = Category::orderBy('name')->withCount('posts')->get();
         //recuperer toutes les tags des posts
         $tags = [];
-        foreach ($posts as $post) {
+        foreach ($postsPaginator->items() as $post) {
             foreach ($post->tags ?? [] as $tag) {
                 array_push($tags, $tag);
             }
         }
 
-        return inertia('frontend/blogs/index', ['tags' => $tags, 'posts' => $posts, 'categories' => $categories, 'featuredPost' => $featuredPost]);
+        return inertia('frontend/blogs/index', [
+            'tags'         => $tags,
+            'posts'        => $posts,
+            'categories'   => $categories,
+            'featuredPost' => $featuredPost,
+            'seo'          => SeoService::page('Blog', 'Articles sur la transformation personnelle, le développement personnel et le coaching.'),
+        ]);
     }
 
     public function blog_detail($slug)
     {
-
-        $blog = PostResource::make(Post::with(['user', 'categories'])->published()->where('slug', $slug)->first());
+        $blog = PostResource::make(Post::with(['user', 'categories'])->published()->where('slug', $slug)->firstOrFail());
         $relatedPosts = Post::with(['user', 'categories'])->published()->whereHas('categories', function ($query) use ($blog) {
             $query->where('category_id', $blog->categories->first()->id);
         });
@@ -65,24 +77,57 @@ class WebController extends Controller
             $blog->increment('views');
             Cache::put($cacheKey, true, now()->addHours(1));
         }
-        return inertia('frontend/blogs/show', ['post' => $blog, 'relatedPosts' => new PostCollection($relatedPosts->get())]);
+        $postModel = $blog->resource;
+        $postImage = SeoService::firstImageUrl($postModel->featured_image ?? []);
+        return inertia('frontend/blogs/show', [
+            'post'         => $blog,
+            'relatedPosts' => new PostCollection($relatedPosts->get()),
+            'seo'          => SeoService::article(
+                $postModel->title ?? $postModel->name ?? '',
+                $postModel->excerpt ?? $postModel->description ?? '',
+                $postImage,
+                optional($postModel->published_at)->toIso8601String() ?? now()->toIso8601String(),
+                optional($postModel->user)->name ?? '',
+            ),
+        ]);
     }
 
 
-    public function events()
+    public function events(Request $request)
     {
-        $events = new EventCollection(Event::with(['category'])->published()->latest()->get());
+        $events = new EventCollection(
+            Event::with(['category'])
+                ->published()
+                ->latest()
+                ->paginate(9)
+                ->appends($request->query())
+        );
 
         $categories = EventCategory::orderBy('name')->withCount('events')->get();
         $featuredEvent = Event::with(['category'])->where('is_featured', true)->published()->first();
-        return inertia('frontend/events/index', ['events' => $events, 'categories' => $categories, 'featuredEvent' => $featuredEvent]);
+        return inertia('frontend/events/index', [
+            'events'        => $events,
+            'categories'    => $categories,
+            'featuredEvent' => $featuredEvent,
+            'seo'           => SeoService::page('Événements', 'Découvrez nos prochains événements de coaching et de développement personnel.'),
+        ]);
     }
 
     public function evenement_detail($slug)
     {
-        $event = Event::with(['category'])->published()->where('slug', $slug)->first();
+        $event = Event::with(['category'])->published()->where('slug', $slug)->firstOrFail();
         $event->incrementViews();
-        return inertia('frontend/events/show', ['event' => $event]);
+        $eventImage = SeoService::firstImageUrl($event->featured_image ?? []);
+        return inertia('frontend/events/show', [
+            'event' => $event,
+            'seo'   => SeoService::event(
+                $event->title ?? $event->name ?? '',
+                $event->description ?? $event->excerpt ?? '',
+                $eventImage,
+                optional($event->start_date)->toIso8601String() ?? '',
+                $event->location ?? null,
+            ),
+        ]);
     }
 
     /**
@@ -116,10 +161,11 @@ class WebController extends Controller
         $maxTickets = $event->max_participants === null ? 10 : min($event->available_seats, 10);
 
         $validated = $request->validate([
-            'name' => auth()->check() ? 'nullable|string|max:255' : 'required|string|max:255',
-            'email' => auth()->check() ? 'nullable|email|max:255' : 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'qty' => "required|integer|min:1|max:{$maxTickets}"
+            'first_name' => 'required|string|max:255',
+            'last_name'  => 'required|string|max:255',
+            'email'      => 'required|email|max:255',
+            'phone'      => 'nullable|string|max:20',
+            'qty'        => "required|integer|min:1|max:{$maxTickets}"
         ]);
 
         try {
@@ -141,11 +187,11 @@ class WebController extends Controller
             $reference = strtoupper(Str::random(8));
             $participant = new EventParticipant([
                 'user_id' => auth()->id(),
-                'name' => $validated['name'] ?? auth()->user()->name,
-                'email' => $validated['email'] ?? auth()->user()->email,
-                'phone' => $validated['phone'],
-                'qty' => $validated['qty'],
-                'status' => EventParticipant::STATUS_PENDING,
+                'name'    => trim($validated['first_name'] . ' ' . $validated['last_name']),
+                'email'   => $validated['email'],
+                'phone'   => $validated['phone'],
+                'qty'     => $validated['qty'],
+                'status'  => EventParticipant::STATUS_PENDING,
                 'reference' => $reference
             ]);
 
@@ -166,14 +212,11 @@ class WebController extends Controller
 
                 // Envoyer un email de confirmation
                 $this->sendConfirmationEmails($event, $participant);
-                // ... logique d'envoi d'email
-                // dd("bug");
                 return redirect()->route('events.registration.confirmation', [
                     'slug' => $event->slug,
                     'participant_id' => $participant->id
                 ]);
             }
-            // dd("pay");
             // Sinon, rediriger vers la page de paiement Stripe
             return redirect()->route('events.payment', [
                 'slug' => $event->slug,
@@ -199,13 +242,17 @@ class WebController extends Controller
     {
         try {
             // 1. Email au participant
-            Mail::to($participant->email, $participant->name)
-                ->send(new EventConfirmationMail($event, $participant));
+            if ((bool) get_setting('event_confirmation_enabled', true)) {
+                Mail::to($participant->email, $participant->name)
+                    ->queue(new EventConfirmationMail($event, $participant));
+            }
 
-            // 2. Email admin en dur temporairement
+            // 2. Email admin
             $adminEmail =  get_setting('support_email');
-            Mail::to($adminEmail)
-                ->send(new AdminEventNotificationMail($event, $participant));
+            if ($adminEmail) {
+                Mail::to($adminEmail)
+                    ->queue(new AdminEventNotificationMail($event, $participant));
+            }
 
             Log::info('Emails envoyés avec succès', [
                 'participant' => $participant->email,
@@ -285,13 +332,14 @@ class WebController extends Controller
             DB::beginTransaction();
 
             // Mettre à jour le statut
+            $previousStatus = $participant->status;
             $participant->update([
                 'status' => EventParticipant::STATUS_CANCELLED,
                 'cancelled_at' => now()
             ]);
 
             // Si le participant avait payé, traiter le remboursement si applicable
-            if ($participant->status === EventParticipant::STATUS_COMPLETED && $event->price > 0 && $participant->payment_id) {
+            if ($previousStatus === EventParticipant::STATUS_COMPLETED && $event->price > 0 && $participant->payment_id) {
                 // Logique de remboursement via Stripe
                 // ... appel au service de remboursement
             }
@@ -365,14 +413,20 @@ class WebController extends Controller
         return $pdf->download('facture_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
     }
     //Formation
-    public function formations()
+    public function formations(Request $request)
     {
-        $formations = new FormationCollection(Formation::published()->get());
+        $formations = new FormationCollection(
+            Formation::published()
+                ->latest()
+                ->paginate(9)
+                ->appends($request->query())
+        );
         $featuredFormation = Formation::where('is_featured', true)->published()->first();
 
         return inertia('frontend/formations/index', [
             'formations' => $formations,
-            'featuredFormation' => $featuredFormation
+            'featuredFormation' => $featuredFormation,
+            'seo' => SeoService::page('Formations', 'Découvrez nos formations en développement personnel et transformation par les valeurs.'),
         ]);
     }
 
@@ -381,7 +435,15 @@ class WebController extends Controller
         $formation = Formation::published()->where('slug', $slug)->firstOrFail();
         $formation->incrementViews();
 
-        return inertia('frontend/formations/show', ['formation' => $formation]);
+        $formationImage = SeoService::firstImageUrl($formation->featured_image ?? []);
+        return inertia('frontend/formations/show', [
+            'formation' => $formation,
+            'seo'       => SeoService::page(
+                $formation->title ?? $formation->name ?? '',
+                $formation->description ?? $formation->excerpt ?? '',
+                $formationImage,
+            ),
+        ]);
     }
 
 
@@ -509,10 +571,9 @@ class WebController extends Controller
             'phone' => 'nullable|string|max:20',
         ];
 
-        if (!auth()->check()) {
-            $validationRules['name'] = 'required|string|max:255';
-            $validationRules['email'] = 'required|email|max:255';
-        }
+        $validationRules['first_name'] = 'required|string|max:255';
+        $validationRules['last_name']  = 'required|string|max:255';
+        $validationRules['email']      = 'required|email|max:255';
 
         $validated = $request->validate($validationRules);
 
@@ -530,8 +591,8 @@ class WebController extends Controller
                 $participant = new FormationParticipant();
                 $participant->formation_id = $formation->id; // Ajout explicite
                 $participant->user_id = auth()->id();
-                $participant->name = $validated['name'] ?? auth()->user()->name;
-                $participant->email = $validated['email'] ?? auth()->user()->email;
+                $participant->name = trim($validated['first_name'] . ' ' . $validated['last_name']);
+                $participant->email = $validated['email'];
                 $participant->phone = $validated['phone'];
                 $participant->qty = $validated['qty'];
                 $participant->status = FormationParticipant::STATUS_PENDING;
@@ -581,12 +642,14 @@ class WebController extends Controller
     {
         try {
             // Email au participant
-            Mail::to($participant->email)->send(new FormationRegistrationConfirmation($formation, $participant));
+            if ((bool) get_setting('formation_confirmation_enabled', true)) {
+                Mail::to($participant->email)->queue(new FormationRegistrationConfirmation($formation, $participant));
+            }
 
             // Email à l'administrateur
             $adminEmail = get_setting('support_email');
             if ($adminEmail) {
-                Mail::to($adminEmail)->send(new FormationRegistrationAdminNotification($formation, $participant));
+                Mail::to($adminEmail)->queue(new FormationRegistrationAdminNotification($formation, $participant));
             }
 
             Log::info('Emails de confirmation envoyés', [
@@ -660,12 +723,13 @@ class WebController extends Controller
         try {
             DB::beginTransaction();
 
+            $previousStatus = $participant->status;
             $participant->update([
                 'status' => FormationParticipant::STATUS_CANCELLED,
                 'cancelled_at' => now()
             ]);
 
-            if ($participant->status === FormationParticipant::STATUS_COMPLETED && $formation->price > 0 && $participant->payment_id) {
+            if ($previousStatus === FormationParticipant::STATUS_COMPLETED && $formation->price > 0 && $participant->payment_id) {
                 // Logique de remboursement via Stripe à implémenter
             }
 

@@ -70,9 +70,8 @@ export default function Show({ user }: Props) {
             <Head title={`Utilisateur - ${user.name}`} />
 
             <div className="flex flex-col min-h-screen bg-background">
-                {/* Header */}
-                <div className="border-b">
-                    <div className="flex h-16 items-center mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="border-b bg-gradient-to-r from-slate-50 to-white">
+                    <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
                         <div className="flex flex-1 items-center justify-between">
                             <div className="flex items-center">
                                 <Button
@@ -102,7 +101,7 @@ export default function Show({ user }: Props) {
 
                             <div className="flex items-center gap-4">
                                 {getStatusBadge(user.status)}
-                                <Button asChild>
+                                <Button asChild className="h-11">
                                     <Link href={route('users.edit', user.id)}>
                                         <Edit className="h-4 w-4 mr-2" />
                                         Modifier

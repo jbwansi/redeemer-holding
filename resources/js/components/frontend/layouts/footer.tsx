@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Facebook,
     Instagram,
     Linkedin,
     Youtube,
+    Music2,
     Mail,
     Phone,
     MapPin,
@@ -16,7 +17,23 @@ import {
 import { useSettings } from '@/hooks/use-settings';
 
 const Footer = () => {
-    const { settings, isLoading, isError, error } = useSettings();
+    const { settings } = useSettings();
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+    });
+
+    const isEnabled = (value: unknown) => {
+        return value === true || value === 1 || value === '1' || value === 'true';
+    };
+
+    const handleNewsletterSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+
+        post(route('newsletters.subscribe'), {
+            preserveScroll: true,
+            onSuccess: () => reset('email'),
+        });
+    };
     // Animation variants
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -46,40 +63,76 @@ const Footer = () => {
         {
             title: "Services",
             links: [
-                { name: "Coaching individuel", href: "/services/coaching" },
-                { name: "Consultation", href: "/services/consultation" },
-                { name: "Formation en groupe", href: "/services/formation" },
-                { name: "Webinaires", href: "/services/webinaires" },
-                { name: "Ressources gratuites", href: "/ressources" },
+                { name: "Coaching individuel", href: route('services', { focus: 'coaching' }) },
+                { name: "Consultation", href: route('services', { focus: 'consultation' }) },
+                { name: "Formation en groupe", href: route('services', { focus: 'formation' }) },
+                { name: "Webinaires", href: route('services', { focus: 'webinaire' }) },
+                { name: "Ressources gratuites", href: route('services', { focus: 'ressources' }) },
             ],
         },
         {
             title: "À propos",
             links: [
-                { name: "Mon parcours", href: "/a-propos" },
-                { name: "Services", href: "/services" },
-                { name: "Blog", href: "/blogs" },
-                { name: "Formations", href: "/formations" },
+                { name: "Mon parcours", href: route('about') },
+                { name: "Services", href: route('services') },
+                { name: "Blog", href: route('blogs') },
+                { name: "Formations", href: route('formations') },
                 { name: "Politique des cookies", href: route('cookies.show') },
             ],
         },
     ];
 
-    // Social media links
+    // Social media links are controlled from dashboard settings.
+    const canShowSocialLinks = settings?.show_social_links === undefined
+        ? true
+        : isEnabled(settings?.show_social_links);
+
     const socialLinks = [
-        { icon: <Facebook size={18} />, href: settings?.facebook_url, label: "Facebook" },
-        { icon: <Instagram size={18} />, href: settings?.instagram_url, label: "Instagram" },
-        { icon: <Linkedin size={18} />, href: settings?.instagram_url, label: "LinkedIn" },
-        { icon: <Twitter size={18} />, href: settings?.twitter_url, label: "Twitter" },
-    ];
+        {
+            icon: <Facebook size={18} />,
+            href: settings?.facebook_url,
+            label: "Facebook",
+            enabled: settings?.facebook_enabled,
+        },
+        {
+            icon: <Instagram size={18} />,
+            href: settings?.instagram_url,
+            label: "Instagram",
+            enabled: settings?.instagram_enabled,
+        },
+        {
+            icon: <Linkedin size={18} />,
+            href: settings?.linkedin_url,
+            label: "LinkedIn",
+            enabled: settings?.linkedin_enabled,
+        },
+        {
+            icon: <Twitter size={18} />,
+            href: settings?.twitter_url,
+            label: "Twitter",
+            enabled: settings?.twitter_enabled,
+        },
+        {
+            icon: <Youtube size={18} />,
+            href: settings?.youtube_url,
+            label: "YouTube",
+            enabled: settings?.youtube_enabled,
+        },
+        {
+            icon: <Music2 size={18} />,
+            href: settings?.tiktok_url,
+            label: "TikTok",
+            enabled: settings?.tiktok_enabled,
+        },
+    ].filter((social) => canShowSocialLinks && isEnabled(social.enabled) && !!social.href);
 
     // Contact information
     const contactInfo = [
-        { icon: <Mail size={16} />, content: "jb.wansi@redeemerholding.com" },
-        { icon: <Phone size={16} />, content: "+41 76 582 11 09" },
+        { icon: <Mail size={16} />, content: settings?.contact_email || "jb.wansi@redeemerholding.com" },
+        { icon: <Phone size={16} />, content: settings?.company_phone || "+41 76 582 11 09" },
         {
             icon: <MapPin size={16} />,
-            content: "Avenue Jean-Marie-Musy 5 1700 Fribourg"
+            content: settings?.company_address || "Avenue Jean-Marie-Musy 5 1700 Fribourg"
         },
     ];
 
@@ -113,7 +166,7 @@ const Footer = () => {
                                 </div>
                                 <div>
                                     <span className="block font-bold tracking-tight text-gray-900 dark:text-white text-lg">
-                                        Redeemer <span className="text-[#DA2E29]">Holding</span>
+                                        {settings?.app_name || "Redeemer Holding"}
                                     </span>
                                     <span className="block text-xs text-gray-500 dark:text-gray-400 tracking-wider uppercase">
                                         Formation & Coaching
@@ -130,36 +183,48 @@ const Footer = () => {
                             <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
                                 Restez informé
                             </h4>
-                            <div className="flex max-w-md">
+                            <form onSubmit={handleNewsletterSubmit} className="flex max-w-md">
                                 <input
                                     type="email"
                                     placeholder="Votre adresse email"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    required
                                     className="flex-1 px-4 py-3 rounded-l-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50"
                                 />
-                                <button className="px-4 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-r-lg transition-colors duration-300 flex items-center justify-center">
-                                    <span className="hidden sm:inline mr-2">S'abonner</span>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="px-4 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-r-lg transition-colors duration-300 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+                                >
+                                    <span className="hidden sm:inline mr-2">{processing ? 'En cours...' : "S'abonner"}</span>
                                     <ArrowUpRight size={18} />
                                 </button>
-                            </div>
+                            </form>
+                            {errors.email && (
+                                <p className="text-xs text-red-500 mt-2">{errors.email}</p>
+                            )}
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                                 Je respecte votre vie privée. Désabonnez-vous à tout moment.
                             </p>
                         </div>
 
-                        <div className="flex space-x-3">
-                            {socialLinks.map((social, index) => (
-                                <a
-                                    key={index}
-                                    href={social.href}
-                                    aria-label={social.label}
-                                    className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#DA2E29]/10 hover:text-[#DA2E29] dark:hover:bg-[#DA2E29]/20 dark:hover:text-[#DA2E29] transition-colors duration-300"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    {social.icon}
-                                </a>
-                            ))}
-                        </div>
+                        {socialLinks.length > 0 && (
+                            <div className="flex space-x-3">
+                                {socialLinks.map((social, index) => (
+                                    <a
+                                        key={index}
+                                        href={social.href}
+                                        aria-label={social.label}
+                                        className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-[#DA2E29]/10 hover:text-[#DA2E29] dark:hover:bg-[#DA2E29]/20 dark:hover:text-[#DA2E29] transition-colors duration-300"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {social.icon}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
 
                     {/* Quick Links */}

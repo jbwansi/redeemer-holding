@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\ServiceProvider;
 
@@ -42,6 +43,11 @@ class ConfigServiceProvider extends ServiceProvider
         if(get_setting('default_timezone') != null) {
             Config::set('app.timezone', get_setting('default_timezone'));
             date_default_timezone_set(get_setting('default_timezone'));
+        }
+
+        if (get_setting('default_language') != null) {
+            Config::set('app.locale', get_setting('default_language'));
+            App::setLocale(get_setting('default_language'));
         }
     }
 }

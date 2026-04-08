@@ -11,19 +11,35 @@ class ServiceRequestConfirmationNotification extends Notification
 {
     use Queueable;
 
-    public function __construct(private ServiceRequest $serviceRequest) {}
+    private bool $enabled;
+    private string $subject;
+    private ?string $customMessage;
+
+    public function __construct(private ServiceRequest $serviceRequest)
+    {
+        $this->enabled = (bool) get_setting('service_confirmation_enabled', true);
+        $this->subject = (string) get_setting('service_confirmation_subject', 'Confirmation de votre demande de service');
+        $this->customMessage = get_setting('service_confirmation_message');
+    }
 
     public function via($notifiable): array
     {
-        return ['mail'];
+        return $this->enabled ? ['mail'] : [];
     }
 
     public function toMail($notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject('Confirmation de votre demande de service')
-            ->greeting("Bonjour {$this->serviceRequest->first_name}!")
-            ->line('Nous avons bien reçu votre demande de service.')
+        $mail = (new MailMessage)
+            ->subject($this->subject)
+            ->greeting("Bonjour {$this->serviceRequest->first_name}!");
+
+        if (!empty($this->customMessage)) {
+            $mail->line($this->customMessage);
+        } else {
+            $mail->line('Nous avons bien reçu votre demande de service.');
+        }
+
+        return $mail
             ->line('Service demandé: ' . $this->serviceRequest->service->name)
             ->line('Nous traiterons votre demande dans les plus brefs délais.')
             ->line('Un de nos conseillers vous contactera prochainement.')

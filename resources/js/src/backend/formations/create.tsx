@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -6,35 +6,50 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MapPin, Users, ImagePlus, Loader2, X, Link } from 'lucide-react'
+import { MapPin, Users, ImagePlus, Loader2, X, Link as LinkIcon } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn, isDateInPast, isEndDateBeforeStartDate } from '@/lib/utils'
-import { useForm } from '@inertiajs/react'
+import { useForm, usePage } from '@inertiajs/react'
 import QuillEditor from '@/components/ui/quill-editor'
 import { route } from 'ziggy-js';
 
 const CreateFormation = () => {
-    const { data, setData, post, processing, errors } = useForm({
+    const { flash } = usePage().props as any
+    const now = new Date()
+    const inOneHour = new Date(now.getTime() + 60 * 60 * 1000)
+
+    const { data, setData, post, processing, errors, transform } = useForm({
         title: '',
         excerpt: '',
         content: '',
         location: '',
-        start_date: new Date().toISOString(),
-        end_date: new Date().toISOString(),
+        start_date: now.toISOString(),
+        end_date: inOneHour.toISOString(),
         price: '0',
-        max_participants: '0',
+        max_participants: '',
         meeting_link: '', // Nouveau champ ajouté
         featured_image: null as File | null,
         is_published: false as boolean,
         tags: [] as string[],
         is_featured: false as boolean
     })
-    const [preview, setPreview] = useState<string | null>(null)
-    const [inputValue, setInputValue] = useState('')
+    const [preview, setPreview] = React.useState<string | null>(null)
+    const [inputValue, setInputValue] = React.useState('')
+
+    const updateDateField = React.useCallback(
+        (field: 'start_date' | 'end_date', updater: (date: Date) => void) => {
+            const rawValue = data[field]
+            const baseDate = rawValue ? new Date(rawValue) : new Date()
+            if (Number.isNaN(baseDate.getTime())) return
+            updater(baseDate)
+            setData(field, baseDate.toISOString())
+        },
+        [data, setData]
+    )
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -46,7 +61,16 @@ const CreateFormation = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        post(route('formations.store'))
+        transform((form) => ({
+            ...form,
+            price: form.price === '' ? 0 : Number(form.price),
+            max_participants: form.max_participants === '' ? null : Number(form.max_participants),
+        }))
+
+        post(route('formations.store'), {
+            forceFormData: true,
+            preserveScroll: true,
+        })
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -66,16 +90,29 @@ const CreateFormation = () => {
     }
 
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <div className="mb-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-[#7f1d1d] px-6 py-7 text-white shadow-xl">
+                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
                 <h1 className="text-3xl font-bold tracking-tight">Créer une formation</h1>
-                <p className="text-muted-foreground">Remplissez les informations ci-dessous pour créer votre formation</p>
+                <p className="mt-2 text-white/80">Remplissez les informations ci-dessous pour créer votre formation</p>
             </div>
+
+            {flash?.error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                    {flash.error}
+                </div>
+            )}
+
+            {flash?.success && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    {flash.success}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Colonne gauche */}
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70">
                         <CardContent className="p-6 space-y-6">
                             <div
                                 className={cn(
@@ -180,7 +217,7 @@ const CreateFormation = () => {
                             <div className="space-y-2">
                                 <Label htmlFor="meeting_link">Lien de meeting</Label>
                                 <div className="relative">
-                                    <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                                    <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
                                     <Input
                                         id="meeting_link"
                                         type="url"
@@ -230,7 +267,7 @@ const CreateFormation = () => {
 
                 {/* Colonne droite */}
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70">
                         <CardContent className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -257,10 +294,9 @@ const CreateFormation = () => {
                                                     selected={data.start_date ? new Date(data.start_date) : undefined}
                                                     onSelect={date => {
                                                         if (date) {
-                                                            const currentDate = data.start_date ? new Date(data.start_date) : new Date()
-                                                            date.setHours(currentDate.getHours())
-                                                            date.setMinutes(currentDate.getMinutes())
-                                                            setData('start_date', date.toISOString())
+                                                            updateDateField('start_date', (currentDate) => {
+                                                                currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+                                                            })
                                                         }
                                                     }}
                                                     initialFocus
@@ -271,11 +307,7 @@ const CreateFormation = () => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getHours().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('start_date', date.toISOString())
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('start_date', (date) => date.setHours(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <Clock className="mr-2 h-4 w-4" />
@@ -293,11 +325,7 @@ const CreateFormation = () => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getMinutes().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = new Date(data.start_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('start_date', date.toISOString())
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('start_date', (date) => date.setMinutes(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <SelectValue placeholder="Min" />
@@ -340,10 +368,9 @@ const CreateFormation = () => {
                                                     selected={data.end_date ? new Date(data.end_date) : undefined}
                                                     onSelect={date => {
                                                         if (date) {
-                                                            const currentDate = data.end_date ? new Date(data.end_date) : new Date()
-                                                            date.setHours(currentDate.getHours())
-                                                            date.setMinutes(currentDate.getMinutes())
-                                                            setData('end_date', date.toISOString())
+                                                            updateDateField('end_date', (currentDate) => {
+                                                                currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+                                                            })
                                                         }
                                                     }}
                                                     initialFocus
@@ -354,11 +381,7 @@ const CreateFormation = () => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getHours().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setHours(parseInt(value))
-                                                        setData('end_date', date.toISOString())
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('end_date', (date) => date.setHours(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <Clock className="mr-2 h-4 w-4" />
@@ -376,11 +399,7 @@ const CreateFormation = () => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getMinutes().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = new Date(data.end_date)
-                                                        date.setMinutes(parseInt(value))
-                                                        setData('end_date', date.toISOString())
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('end_date', (date) => date.setMinutes(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <SelectValue placeholder="Min" />
@@ -457,6 +476,7 @@ const CreateFormation = () => {
                             size="lg"
                             type="button"
                             onClick={() => window.history.back()}
+                            className="rounded-xl"
                         >
                             Annuler
                         </Button>
@@ -464,6 +484,7 @@ const CreateFormation = () => {
                             type="submit"
                             size="lg"
                             disabled={processing}
+                            className="rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700"
                         >
                             {processing && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -57,15 +57,20 @@ export function NavMain({ items }: { items: NavItem[] }) {
 
     // Classes communes pour les éléments de menu
     const getMenuItemClasses = (isActive: boolean) => `
-        mb-[5px]
-        font-semibold
-        transition-colors
+        mb-1.5
+        rounded-xl
+        font-medium
+        transition-all
         duration-200
         text-gray-700
         hover:text-gray-900
+        hover:bg-gray-100/80
         dark:text-gray-400
-        dark:hover:text-gray-200
-        ${isActive ? 'text-primary dark:text-primary bg-primary/10 dark:bg-primary/20' : ''}
+        dark:hover:text-gray-100
+        dark:hover:bg-slate-800/70
+        focus-visible:ring-2
+        focus-visible:ring-primary/40
+        ${isActive ? 'text-primary dark:text-primary bg-primary/10 dark:bg-primary/20 border border-primary/20 shadow-sm' : ''}
     `.trim()
 
     return (
@@ -87,21 +92,21 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                     >
                                         {item.icon && (
                                             <item.icon
-                                                className={`text-[14px] ${isGroupActive(item)
+                                                className={`h-4 w-4 ${isGroupActive(item)
                                                         ? 'text-primary dark:text-primary'
                                                         : 'text-gray-500 dark:text-gray-400'
                                                     }`}
                                             />
                                         )}
-                                        <span className="text-[14px]">{item.title}</span>
+                                        <span className="text-[14px] tracking-tight">{item.title}</span>
                                         <ChevronRight
-                                            className="ml-auto transition-transform duration-200
+                                            className="ml-auto h-4 w-4 transition-transform duration-200
                                             group-data-[state=open]/collapsible:rotate-90"
                                         />
                                     </SidebarMenuButton>
                                 </CollapsibleTrigger>
-                                <CollapsibleContent>
-                                    <SidebarMenuSub>
+                                <CollapsibleContent className="pl-2">
+                                    <SidebarMenuSub className="border-l border-border/60 ml-2">
                                         {item.items.map((subItem) => (
                                             <SidebarMenuSubItem key={subItem.title}>
                                                 <SidebarMenuSubButton
@@ -110,9 +115,9 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                                 >
                                                     <Link
                                                         href={subItem.url}
-                                                        className="text-[14px] w-full"
+                                                        className="text-[13px] w-full"
                                                     >
-                                                        <span className="text-[14px]">{subItem.title}</span>
+                                                        <span className="text-[13px] tracking-tight">{subItem.title}</span>
                                                     </Link>
                                                 </SidebarMenuSubButton>
                                             </SidebarMenuSubItem>
@@ -128,16 +133,16 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                 tooltip={item.title}
                                 className={getMenuItemClasses(isLinkActive(item.url))}
                             >
-                                <Link href={item.url} className="text-[15px]">
+                                <Link href={item.url} className="text-[14px]">
                                     {item.icon && (
                                         <item.icon
-                                            className={`text-[15px] ${isLinkActive(item.url)
+                                            className={`h-4 w-4 ${isLinkActive(item.url)
                                                     ? 'text-primary dark:text-primary'
                                                     : 'text-gray-500 dark:text-gray-400'
                                                 }`}
                                         />
                                     )}
-                                    <span className="text-[15px]">{item.title}</span>
+                                    <span className="text-[14px] tracking-tight">{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

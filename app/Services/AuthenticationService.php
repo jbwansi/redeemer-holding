@@ -28,8 +28,16 @@ class AuthenticationService
         try {
             $userData = $request->validated();
 
+            // Combiner prénom et nom en un seul champ name
+            $userData['name'] = trim($userData['first_name'] . ' ' . $userData['last_name']);
+            unset($userData['first_name'], $userData['last_name']);
+
             // Gestion du mot de passe
             $userData['password'] = Hash::make($userData['password']);
+            $userData['role'] = 'client';
+
+            // Champs front-only a ignorer en base
+            unset($userData['terms']);
 
             // Création de l'utilisateur
             $user = User::create($userData);

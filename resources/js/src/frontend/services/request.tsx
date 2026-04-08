@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
-    User,
     Mail,
     Phone,
-    MessageSquare,
     Calendar,
     ArrowRight,
     CheckCircle,
-    Clock
+    Clock,
+    User,
+    MessageSquare
 } from 'lucide-react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import IconComponent from '@/components/ui/icon';
+import { normalizeServiceIconName } from '@/lib/service-icon';
 
 // Types
 interface Service {
@@ -28,6 +30,8 @@ interface ServiceRequestProps {
 }
 
 const ServiceRequest = ({ service }: ServiceRequestProps) => {
+    const iconName = normalizeServiceIconName(service.icon);
+
     // Form handling with Inertia
     const { data, setData, post, processing, errors, reset, clearErrors } = useForm({
         service_id: service.id,
@@ -316,12 +320,7 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                                     <div className="relative h-full flex flex-col justify-center items-center text-white p-6 text-center">
                                         {service.icon && (
                                             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4">
-                                                {/* You'll need to customize this based on how your icons are stored */}
-                                                {service.icon === 'user' && <User size={32} />}
-                                                {service.icon === 'message' && <MessageSquare size={32} />}
-                                                {service.icon === 'users' && <Users size={32} />}
-                                                {/* Default icon */}
-                                                {!['user', 'message', 'users'].includes(service.icon) && <CheckCircle size={32} />}
+                                                <IconComponent name={iconName || 'checkCircle'} size={32} color="#ffffff" />
                                             </div>
                                         )}
                                         <h2 className="text-2xl font-bold">{service.name}</h2>

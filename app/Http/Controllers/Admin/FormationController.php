@@ -41,7 +41,8 @@ class FormationController extends Controller
                         return $q->where('start_date', '<=', now())
                             ->where('end_date', '>=', now());
                 }
-            });
+            })
+            ->latest();
 
         return inertia('backend/formations/index', [
             'formations' => $query->paginate(12),
@@ -59,7 +60,7 @@ class FormationController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'price' => 'nullable|numeric|min:0',
-            'max_participants' => 'nullable|integer|min:1',
+            'max_participants' => 'nullable|integer|min:0',
             'featured_image' => 'nullable|image|max:2048',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
@@ -67,8 +68,16 @@ class FormationController extends Controller
             'meeting_link' => 'nullable|string',
         ]);
 
-        if ($validated['is_featured'] == true) {
+        $isFeatured = (bool) ($validated['is_featured'] ?? false);
+        $isPublished = (bool) ($validated['is_published'] ?? false);
+
+        if ($isFeatured) {
             Formation::where('is_featured', true)->update(['is_featured' => false]);
+        }
+
+        // 0 or empty means no participant limit.
+        if (empty($validated['max_participants']) || (int) $validated['max_participants'] <= 0) {
+            $validated['max_participants'] = null;
         }
 
         DB::beginTransaction();
@@ -80,9 +89,11 @@ class FormationController extends Controller
             $validated['end_date'] = $endDate;
             $formation = Formation::create([
                 ...$validated,
+                'is_featured' => $isFeatured,
+                'is_published' => $isPublished,
                 'user_id' => Auth::id(),
                 'slug' => rand(1000, 9999) . '-' . Str::slug($request->title),
-                'published_at' => $request->is_published ? now() : null,
+                'published_at' => $isPublished ? now() : null,
                 'featured_image' => null
             ]);
 
@@ -96,10 +107,10 @@ class FormationController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('formations.index')->with('success', 'Formation créée avec succès');
+            return redirect()->route('formations.show', $formation->slug)->with('success', 'Formation créée avec succès');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erreur lors de la création de la formation: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Erreur lors de la création de la formation: ' . $e->getMessage());
         }
     }
 
@@ -113,7 +124,7 @@ class FormationController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'price' => 'nullable|numeric|min:0',
-            'max_participants' => 'nullable|integer|min:1',
+            'max_participants' => 'nullable|integer|min:0',
             'featured_image' => 'nullable|image|max:2048',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
@@ -122,8 +133,15 @@ class FormationController extends Controller
 
         ]);
 
-        if ($validated['is_featured'] == true) {
+        $isFeatured = (bool) ($validated['is_featured'] ?? false);
+        $isPublished = (bool) ($validated['is_published'] ?? false);
+
+        if ($isFeatured) {
             Formation::where('is_featured', true)->update(['is_featured' => false]);
+        }
+
+        if (empty($validated['max_participants']) || (int) $validated['max_participants'] <= 0) {
+            $validated['max_participants'] = null;
         }
 
         DB::beginTransaction();
@@ -148,7 +166,9 @@ class FormationController extends Controller
             $validated['end_date'] = $endDate;
             $formation->update([
                 ...$validated,
-                'published_at' => $request->is_published ? now() : null,
+                'is_featured' => $isFeatured,
+                'is_published' => $isPublished,
+                'published_at' => $isPublished ? now() : null,
             ]);
 
             DB::commit();
@@ -252,6 +272,62 @@ class FormationController extends Controller
                 'to' => $participants->lastItem(),
                 'links' => $participants->linkCollection()->toArray()
             ]
+        ]);
+    }
+
+    public function exportParticipantsCsv($slug)
+    {
+        $formation = Formation::where('slug', $slug)->firstOrFail();
+
+        $participants = $formation->participants()
+            ->orderBy('created_at', 'desc')
+            ->get([
+                'name',
+                'email',
+                'phone',
+                'reference',
+                'qty',
+                'status',
+                'payment_amount',
+                'payment_date',
+                'created_at',
+            ]);
+
+        $filename = 'participants_formation_' . $formation->slug . '_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($participants) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                'Nom',
+                'Email',
+                'Telephone',
+                'Reference',
+                'Places',
+                'Statut',
+                'Montant paiement',
+                'Date paiement',
+                'Date inscription',
+            ], ';');
+
+            foreach ($participants as $participant) {
+                fputcsv($handle, [
+                    $participant->name,
+                    $participant->email,
+                    $participant->phone,
+                    $participant->reference,
+                    $participant->qty,
+                    $participant->status,
+                    $participant->payment_amount,
+                    optional($participant->payment_date)->format('Y-m-d H:i:s'),
+                    optional($participant->created_at)->format('Y-m-d H:i:s'),
+                ], ';');
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
 

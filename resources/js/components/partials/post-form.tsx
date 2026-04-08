@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from 'dompurify';
 import { useForm } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ export function PostForm({ post, categories }: PostFormProps) {
     const [previewImage, setPreviewImage] = React.useState<string>(
         post?.featured_image ?? ''
     );
+    const safePreviewContent = React.useMemo(() => DOMPurify.sanitize(form.data.content || ''), [form.data.content]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -171,7 +173,7 @@ export function PostForm({ post, categories }: PostFormProps) {
                                 </TabsContent>
                                 <TabsContent value="preview">
                                     <div className="prose min-h-[400px] p-4 border rounded-md">
-                                        <div dangerouslySetInnerHTML={{ __html: form.data.content }} />
+                                        <div dangerouslySetInnerHTML={{ __html: safePreviewContent }} />
                                     </div>
                                 </TabsContent>
                             </Tabs>

@@ -11,6 +11,8 @@ use App\Models\Post;
 use App\Models\Service;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -56,11 +58,68 @@ class DashboardController extends Controller
             'revenue_distribution' => $this->getRevenueDistribution(),
             'activity_by_type' => $this->getActivityByType(),
             'top_content' => $this->getTopContent(),
+            'queue_health' => $this->getQueueHealth(),
         ];
 
         return inertia("backend/index", [
             'stats' => $stats
         ]);
+    }
+
+    private function getQueueHealth(): array
+    {
+        $driver = (string) config('queue.default');
+
+        if ($driver !== 'database' || !Schema::hasTable('jobs') || !Schema::hasTable('failed_jobs')) {
+            return [
+                'driver' => $driver,
+                'available' => false,
+                'status' => 'unavailable',
+                'pending_jobs' => 0,
+                'failed_jobs' => 0,
+                'oldest_pending_minutes' => 0,
+                'thresholds' => [
+                    'max_pending' => 300,
+                    'max_failed' => 20,
+                    'max_oldest_minutes' => 20,
+                ],
+            ];
+        }
+
+        $maxPending = 300;
+        $maxFailed = 20;
+        $maxOldestMinutes = 20;
+
+        $pendingJobs = DB::table('jobs')->whereNull('reserved_at')->count();
+        $failedJobs = DB::table('failed_jobs')->count();
+
+        $oldestPendingTimestamp = DB::table('jobs')
+            ->whereNull('reserved_at')
+            ->min('created_at');
+
+        $oldestPendingMinutes = 0;
+
+        if ($oldestPendingTimestamp !== null) {
+            $oldestPendingMinutes = max(0, (int) floor((time() - (int) $oldestPendingTimestamp) / 60));
+        }
+
+        $isHealthy = $pendingJobs <= $maxPending
+            && $failedJobs <= $maxFailed
+            && $oldestPendingMinutes <= $maxOldestMinutes;
+
+        return [
+            'driver' => $driver,
+            'available' => true,
+            'status' => $isHealthy ? 'healthy' : 'alert',
+            'pending_jobs' => $pendingJobs,
+            'failed_jobs' => $failedJobs,
+            'oldest_pending_minutes' => $oldestPendingMinutes,
+            'thresholds' => [
+                'max_pending' => $maxPending,
+                'max_failed' => $maxFailed,
+                'max_oldest_minutes' => $maxOldestMinutes,
+            ],
+        ];
     }
 
     private function calculateTrend($type)
@@ -157,7 +216,7 @@ class DashboardController extends Controller
                     'title' => $event->title,
                     'type' => 'Événement',
                     'views' => $event->views,
-                    'trend' => $this->calculateViewsTrend($event)
+                    'trend' => $this->calculateViewsTrend($event),
                 ]);
             });
 
@@ -170,7 +229,7 @@ class DashboardController extends Controller
                     'title' => $training->title,
                     'type' => 'Formation',
                     'views' => $training->views,
-                    'trend' => $this->calculateViewsTrend($training)
+                    'trend' => $this->calculateViewsTrend($training),
                 ]);
             });
 
@@ -183,11 +242,21 @@ class DashboardController extends Controller
                     'title' => $post->title,
                     'type' => 'Article',
                     'views' => $post->views,
-                    'trend' => $this->calculateViewsTrend($post)
+                    'trend' => $this->calculateViewsTrend($post),
                 ]);
             });
 
-        return $content->sortByDesc('views')->take(5)->values();
+        $top = $content->sortByDesc('views')->take(5)->values();
+        $totalTopViews = (float) $top->sum('views');
+
+        return $top->map(function ($item) use ($totalTopViews) {
+            $views = (float) ($item['views'] ?? 0);
+            $share = $totalTopViews > 0 ? round(($views / $totalTopViews) * 100, 1) : 0.0;
+
+            $item['share_percent'] = $share;
+
+            return $item;
+        })->values();
     }
 
 

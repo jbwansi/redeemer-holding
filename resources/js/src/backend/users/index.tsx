@@ -35,6 +35,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Download,
+    Upload,
     ArrowDown,
     ArrowUp,
     Mail,
@@ -43,7 +44,7 @@ import {
     Calendar
 } from 'lucide-react';
 import debounce from 'lodash/debounce';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
     Card,
     CardContent,
@@ -105,12 +106,16 @@ const verifiedOptions = [
 ];
 
 export default function Index({ users, filters }: Props) {
+    const importInputRef = useRef<HTMLInputElement | null>(null);
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [selectedrole, setSelectedrole] = useState(filters.role || 'all');
     const [selectedStatus, setSelectedStatus] = useState(filters.is_active || 'all');
     const [selectedVerified, setSelectedVerified] = useState(filters.verified || 'all');
     const [sortField, setSortField] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+    const activeCount = users?.data?.filter((u) => u.is_active === 1).length ?? 0;
+    const verifiedCount = users?.data?.filter((u) => !!u.email_verified_at).length ?? 0;
 
     const debouncedSearch = useCallback(
         debounce((value: string) => {
@@ -183,77 +188,122 @@ export default function Index({ users, filters }: Props) {
     };
 
     const handleExport = () => {
-        // Créer un blob à partir de la réponse
-        router.post(
-            route('users.export'),
-            {
-                search: searchQuery,
-                role: selectedrole,
-                is_active: selectedStatus,
-                verified: selectedVerified,
-                sort: sortField,
-                direction: sortDirection,
-            },
-            {
-                preserveScroll: true,
-                headers: {
-                    Accept: 'text/csv',
-                },
-                onSuccess: (response: any) => {
-                    // Créer un blob depuis la réponse
-                    const blob = new Blob([response], { type: 'text/csv' });
+        const exportUrl = route('users.export', {
+            search: searchQuery || undefined,
+            role: selectedrole,
+            is_active: selectedStatus,
+            verified: selectedVerified,
+            sort: sortField,
+            direction: sortDirection,
+        });
 
-                    // Créer une URL pour le blob
-                    const url = window.URL.createObjectURL(blob);
-
-                    // Créer un lien temporaire et cliquer dessus
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', 'users.csv');
-                    document.body.appendChild(link);
-                    link.click();
-
-                    // Nettoyer
-                    link.parentNode?.removeChild(link);
-                    window.URL.revokeObjectURL(url);
-                },
-                onError: () => {
-                    toast.error("Une erreur est survenue lors de l'export");
-                }
-            }
-        );
+        window.location.href = exportUrl;
     };
+
+    const handleImportUsersToNewsletter = () => {
+        router.post(route('newsletters.import-users'), {}, {
+            preserveScroll: true,
+            onSuccess: () => toast.success('Contacts utilisateurs importes vers la newsletter.'),
+            onError: () => toast.error('Echec de l import des contacts utilisateurs.'),
+        });
+    };
+
+    const handleImportUsers = () => {
+        importInputRef.current?.click();
+    };
+
+    const handleImportFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        router.post(route('users.import'), { file }, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Import des utilisateurs terminé');
+                if (importInputRef.current) {
+                    importInputRef.current.value = '';
+                }
+            },
+            onError: () => {
+                toast.error('Echec de l import des utilisateurs');
+            },
+        });
+    };
+
     return (
         <>
             <Head title="Utilisateurs" />
+            <input
+                ref={importInputRef}
+                type="file"
+                accept=".csv,text/csv,.txt"
+                className="hidden"
+                onChange={handleImportFileChange}
+            />
 
             <div className="flex flex-col min-h-screen bg-background">
-                {/* Header */}
-                <div className="border-b">
-                    <div className="flex h-16 items-center mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex flex-1 items-center justify-between">
+                <div className="border-b bg-gradient-to-r from-slate-50 to-white">
+                    <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                             <div>
-                                <h1 className="text-2xl font-semibold">Utilisateurs</h1>
-                                <p className="text-sm text-muted-foreground">
-                                    {users?.total || 0} utilisateurs au total
+                                <h1 className="text-3xl font-semibold tracking-tight">Utilisateurs</h1>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Gérez les comptes, rôles et statuts de votre plateforme.
                                 </p>
                             </div>
-
-                            <div className="flex gap-4">
+                            <div className="flex gap-3">
                                 <Button
                                     variant="outline"
-                                    size="icon"
-                                    className="h-12 w-12 p-3"
+                                    className="h-11"
+                                    onClick={handleImportUsersToNewsletter}
+                                >
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Import newsletter
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="h-11"
+                                    onClick={handleImportUsers}
+                                >
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Import utilisateurs
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="h-11"
                                     onClick={handleExport}
                                 >
-                                    <Download className="h-6 w-6" />
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Export CSV
                                 </Button>
-                                <Button asChild>
+                                <Button asChild className="h-11">
                                     <Link href={route('users.create')}>
                                         Nouvel utilisateur
                                     </Link>
                                 </Button>
                             </div>
+                        </div>
+
+                        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                            <Card>
+                                <CardContent className="p-4">
+                                    <p className="text-xs text-muted-foreground">Total</p>
+                                    <p className="mt-1 text-2xl font-semibold">{users?.total || 0}</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardContent className="p-4">
+                                    <p className="text-xs text-muted-foreground">Actifs (page)</p>
+                                    <p className="mt-1 text-2xl font-semibold text-emerald-600">{activeCount}</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardContent className="p-4">
+                                    <p className="text-xs text-muted-foreground">Vérifiés (page)</p>
+                                    <p className="mt-1 text-2xl font-semibold text-blue-600">{verifiedCount}</p>
+                                </CardContent>
+                            </Card>
                         </div>
                     </div>
                 </div>

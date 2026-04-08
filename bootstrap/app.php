@@ -3,6 +3,9 @@
 use App\Http\Middleware\CheckUserRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\OnlyTestUsers;
+use App\Http\Middleware\RespectMaintenanceMode;
+use App\Http\Middleware\RequireAdminAccess;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,21 +19,33 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+            'stripe/webhook/formations',
+        ]);
         $middleware->web(append: [
             HandleInertiaRequests::class,
+            OnlyTestUsers::class,
+            RespectMaintenanceMode::class,
         ]);
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'role' => CheckUserRole::class,
+            'admin.access' => RequireAdminAccess::class,
+            'test.users' => OnlyTestUsers::class,
         ]);
     })
     ->withCommands([
         // Ajouter vos commandes personnalisées ici
         \App\Console\Commands\SendActivityReminders::class,
+        \App\Console\Commands\QueueHealthCheck::class,
     ])
     ->withSchedule(function (Schedule $schedule) {
         // Planification des tâches
         $schedule->command('reminders:send')->dailyAt('09:00');
+        $schedule->command('queue:health-check --max-pending=300 --max-failed=20 --max-oldest-minutes=20')
+            ->everyFiveMinutes()
+            ->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

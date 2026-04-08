@@ -4,37 +4,14 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-    ChevronLeft,
-    Eye,
-    Calendar,
-    Clock,
-    MoreHorizontal,
-    Trash2,
-    Mail,
-    Phone,
-    User,
-    MessageSquare,
-    Loader2,
-    Building
+    ChevronLeft, Eye, Calendar, Clock, Trash2, Mail, Phone,
+    User, Loader2, Building, AlertCircle, Loader, CheckCircle2, XCircle, MessageSquare,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
+    AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
 interface Service {
@@ -62,11 +39,11 @@ interface Props {
     serviceRequest: ServiceRequest;
 }
 
-const STATUS_BADGES = {
-    pending: { label: 'En attente', className: 'bg-yellow-50 text-yellow-700 border-yellow-300' },
-    in_progress: { label: 'En cours', className: 'bg-blue-50 text-blue-700 border-blue-300' },
-    completed: { label: 'Terminé', className: 'bg-green-50 text-green-700 border-green-300' },
-    cancelled: { label: 'Annulé', className: 'bg-red-50 text-red-700 border-red-300' },
+const STATUS_CONFIG = {
+    pending:     { label: 'En attente', cls: 'bg-amber-50 text-amber-700 border-amber-200',    icon: AlertCircle },
+    in_progress: { label: 'En cours',   cls: 'bg-blue-50 text-blue-700 border-blue-200',       icon: Loader },
+    completed:   { label: 'Terminé',    cls: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: CheckCircle2 },
+    cancelled:   { label: 'Annulé',     cls: 'bg-red-50 text-red-700 border-red-200',          icon: XCircle },
 };
 
 export default function Show({ serviceRequest }: Props) {
@@ -75,7 +52,7 @@ export default function Show({ serviceRequest }: Props) {
     const [status, setStatus] = React.useState(serviceRequest.status);
     const [isUpdatingStatus, setIsUpdatingStatus] = React.useState(false);
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         setIsDeleting(true);
         router.delete(route('service-requests.destroy', serviceRequest.id), {
             onSuccess: () => {
@@ -83,99 +60,86 @@ export default function Show({ serviceRequest }: Props) {
                 router.visit(route('service-requests.index'));
             },
             onError: () => {
-                toast.error('Erreur lors de la suppression de la demande');
+                toast.error('Erreur lors de la suppression');
                 setIsDeleting(false);
-            }
+            },
         });
     };
 
     const handleStatusChange = (newStatus: string) => {
         setIsUpdatingStatus(true);
-        router.put(route('service-requests.update-status', serviceRequest.id), {
-            status: newStatus
-        }, {
+        router.put(route('service-requests.update-status', serviceRequest.id), { status: newStatus }, {
             onSuccess: () => {
                 setStatus(newStatus as ServiceRequest['status']);
                 toast.success('Statut mis à jour avec succès');
             },
-            onError: () => {
-                toast.error('Erreur lors de la mise à jour du statut');
-            },
-            onFinish: () => setIsUpdatingStatus(false)
+            onError: () => toast.error('Erreur lors de la mise à jour du statut'),
+            onFinish: () => setIsUpdatingStatus(false),
         });
     };
 
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString('fr-FR', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit',
         });
-    };
+
+    const st = STATUS_CONFIG[status];
+    const StatusIcon = st.icon;
 
     return (
-        <div className=" mx-auto p-6 space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                    <Link
-                        href={route('service-requests.index')}
-                        className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
-                    >
-                        <ChevronLeft className="h-4 w-4 mr-1" />
-                        Retour aux demandes
-                    </Link>
-                    <h1 className="text-3xl font-bold tracking-tight">
-                        Demande de {serviceRequest.service.name} (#{serviceRequest.code})
-                    </h1>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    <div className={`px-3 py-1 rounded-full border ${STATUS_BADGES[status].className}`}>
-                        {STATUS_BADGES[status].label}
+        <div className="p-6 space-y-6">
+            {/* Hero header */}
+            <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/10 p-6"
+            >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <Link
+                            href={route('service-requests.index')}
+                            className="inline-flex items-center text-xs text-muted-foreground hover:text-primary mb-2"
+                        >
+                            <ChevronLeft className="h-3.5 w-3.5 mr-0.5" />
+                            Demandes de service
+                        </Link>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            Demande #{serviceRequest.code}
+                        </h1>
+                        <p className="text-muted-foreground text-sm mt-0.5">
+                            {serviceRequest.service.name} · {serviceRequest.first_name} {serviceRequest.last_name}
+                        </p>
                     </div>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-red-600 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => setShowDeleteDialog(true)}
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Supprimer
-                            </Button>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center gap-3">
+                        <span className={`inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full border font-medium ${st.cls}`}>
+                            <StatusIcon className="h-3.5 w-3.5" />
+                            {st.label}
+                        </span>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => setShowDeleteDialog(true)}
+                        >
+                            <Trash2 className="h-4 w-4" /> Supprimer
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-4 gap-6">
-
-
-                {/* Main Content Area */}
-                <div className="col-span-3 space-y-6">
-                    {/* Status Management Card */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Main content */}
+                <div className="lg:col-span-3 space-y-4">
+                    {/* Status change */}
                     <Card>
                         <CardHeader className="pb-3">
-                            <CardTitle>Statut de la demande</CardTitle>
+                            <CardTitle className="text-base">Changer le statut</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex items-center gap-4">
-                                <Select
-                                    value={status}
-                                    onValueChange={handleStatusChange}
-                                    disabled={isUpdatingStatus}
-                                >
-                                    <SelectTrigger className="w-[200px]">
+                            <div className="flex items-center gap-3">
+                                <Select value={status} onValueChange={handleStatusChange} disabled={isUpdatingStatus}>
+                                    <SelectTrigger className="w-[220px]">
                                         <SelectValue placeholder="Changer le statut" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -186,96 +150,101 @@ export default function Show({ serviceRequest }: Props) {
                                     </SelectContent>
                                 </Select>
                                 {isUpdatingStatus && (
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                        Mise à jour...
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Loader2 className="h-4 w-4 animate-spin" /> Mise à jour…
                                     </div>
                                 )}
                             </div>
                         </CardContent>
                     </Card>
 
-                    {/* Message Card */}
+                    {/* Message */}
                     {serviceRequest.message && (
                         <Card>
                             <CardHeader className="pb-3">
-                                <CardTitle>Message</CardTitle>
+                                <CardTitle className="text-base flex items-center gap-2">
+                                    <MessageSquare className="h-4 w-4 text-primary" />
+                                    Message du client
+                                </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="prose prose-sm max-w-none">
-                                    <div className="text-muted-foreground whitespace-pre-wrap">
-                                        {serviceRequest.message}
-                                    </div>
+                                <div className="rounded-xl bg-slate-50 dark:bg-slate-800/40 p-4 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                                    {serviceRequest.message}
                                 </div>
                             </CardContent>
                         </Card>
                     )}
                 </div>
-                {/* Sidebar - Contact Information */}
-                <div className="space-y-6">
-                    {/* Contact Card */}
+
+                {/* Sidebar */}
+                <div className="space-y-4">
+                    {/* Contact */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Contact</CardTitle>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm text-muted-foreground font-medium">Contact</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <span className="font-medium">
+                                    {serviceRequest.first_name} {serviceRequest.last_name}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                <a href={`mailto:${serviceRequest.email}`} className="text-primary hover:underline truncate">
+                                    {serviceRequest.email}
+                                </a>
+                            </div>
+                            {serviceRequest.phone && (
                                 <div className="flex items-center gap-2">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span>
-                                        {serviceRequest.first_name} {serviceRequest.last_name}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-muted-foreground" />
-                                    <a href={`mailto:${serviceRequest.email}`} className="text-primary hover:underline">
-                                        {serviceRequest.email}
+                                    <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <a href={`tel:${serviceRequest.phone}`} className="text-primary hover:underline">
+                                        {serviceRequest.phone}
                                     </a>
                                 </div>
-                                {serviceRequest.phone && (
-                                    <div className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-muted-foreground" />
-                                        <a href={`tel:${serviceRequest.phone}`} className="text-primary hover:underline">
-                                            {serviceRequest.phone}
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
+                            )}
                         </CardContent>
                     </Card>
 
-                    {/* Metadata Card */}
+                    {/* Meta */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Informations</CardTitle>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm text-muted-foreground font-medium">Informations</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Building className="h-4 w-4 text-muted-foreground" />
-                                <Link
-                                    href={route('services.show', serviceRequest.service.slug)}
-                                    className="text-primary hover:underline"
-                                >
-                                    {serviceRequest.service.name}
-                                </Link>
+                        <CardContent className="space-y-3 text-sm">
+                            <div className="flex items-start gap-2">
+                                <Building className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-muted-foreground text-xs">Service concerné</p>
+                                    <Link
+                                        href={route('services.show', serviceRequest.service.id)}
+                                        className="text-primary hover:underline font-medium"
+                                    >
+                                        {serviceRequest.service.name}
+                                    </Link>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    {serviceRequest.views} vues
-                                </span>
+                            <div className="flex items-start gap-2">
+                                <Eye className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-muted-foreground text-xs">Vues</p>
+                                    <p>{serviceRequest.views}</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Reçue le {formatDate(serviceRequest.created_at)}
-                                </span>
+                            <div className="flex items-start gap-2">
+                                <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-muted-foreground text-xs">Reçue le</p>
+                                    <p>{formatDate(serviceRequest.created_at)}</p>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">
-                                    Mise à jour le {formatDate(serviceRequest.updated_at)}
-                                </span>
+                            <div className="flex items-start gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-muted-foreground text-xs">Mise à jour le</p>
+                                    <p>{formatDate(serviceRequest.updated_at)}</p>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -296,19 +265,13 @@ export default function Show({ serviceRequest }: Props) {
                         <AlertDialogCancel disabled={isDeleting}>Annuler</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
-                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                            className="bg-red-600 hover:bg-red-700"
                             disabled={isDeleting}
                         >
                             {isDeleting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Suppression...
-                                </>
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Suppression...</>
                             ) : (
-                                <>
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Supprimer
-                                </>
+                                <><Trash2 className="mr-2 h-4 w-4" /> Supprimer</>
                             )}
                         </AlertDialogAction>
                     </AlertDialogFooter>

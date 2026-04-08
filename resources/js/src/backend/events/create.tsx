@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,29 +13,45 @@ import { CalendarIcon, Clock } from 'lucide-react'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { cn, isDateInPast, isEndDateBeforeStartDate } from '@/lib/utils'
-import { useForm } from '@inertiajs/react'
+import { useForm, usePage } from '@inertiajs/react'
 import QuillEditor from '@/components/ui/quill-editor'
-import { EventCategory } from '@/types/event'
+import { Category } from '@/types/category'
+import { route } from 'ziggy-js'
 
 const CreateEvent = ({ categories }: any) => {
-    const { data, setData, post, processing, errors, setError } = useForm({
+    const { flash } = usePage().props as any
+    const now = new Date()
+    const inOneHour = new Date(now.getTime() + 60 * 60 * 1000)
+
+    const { data, setData, post, processing, errors, transform } = useForm({
         title: '',
         description: '',
         content: '',
         location: '',
         category_id: '',
-        start_date: new Date().toISOString(),
-        end_date: new Date().toISOString(),
+        start_date: now.toISOString(),
+        end_date: inOneHour.toISOString(),
         price: '0',
-        max_participants: '0',
-        featured_image: null,
+        max_participants: '',
+        featured_image: null as File | null,
         is_published: false,
         tags: [] as string[],
         is_featured: false
     })
-    const [preview, setPreview] = React.useState<any>(null)
+    const [preview, setPreview] = React.useState<string | null>(null)
     const [inputValue, setInputValue] = React.useState('');
+    const setField = (key: string, value: any) => setData(key as any, value)
 
+    const updateDateField = React.useCallback(
+        (field: 'start_date' | 'end_date', updater: (date: Date) => void) => {
+            const rawValue = data[field]
+            const baseDate = rawValue ? new Date(rawValue) : new Date()
+            if (Number.isNaN(baseDate.getTime())) return
+            updater(baseDate)
+            setData(field, baseDate.toISOString())
+        },
+        [data, setData]
+    )
 
     const handleImageChange = (e: any) => {
         const file = e.target.files?.[0]
@@ -47,7 +63,16 @@ const CreateEvent = ({ categories }: any) => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault()
-        post(route('events.store'))
+        transform((form) => ({
+            ...form,
+            price: form.price === '' ? 0 : Number(form.price),
+            max_participants: form.max_participants === '' ? null : Number(form.max_participants),
+        }))
+
+        post(route('events.store'), {
+            forceFormData: true,
+            preserveScroll: true,
+        })
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -83,16 +108,29 @@ const CreateEvent = ({ categories }: any) => {
 
     // Ajoutez cette section dans votre première Card, après le champ max_participants
     return (
-        <div className="p-6 max-w-7xl mx-auto">
-            <div className="mb-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-slate-950 via-slate-900 to-[#7f1d1d] px-6 py-7 text-white shadow-xl">
+                <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
                 <h1 className="text-3xl font-bold tracking-tight">Créer un événement</h1>
-                <p className="text-muted-foreground">Remplissez les informations ci-dessous pour créer votre événement</p>
+                <p className="mt-2 text-white/80">Remplissez les informations ci-dessous pour créer votre événement</p>
             </div>
+
+            {flash?.error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
+                    {flash.error}
+                </div>
+            )}
+
+            {flash?.success && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    {flash.success}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Colonne gauche */}
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70">
                         <CardContent className="p-6 space-y-6">
                             <div
                                 className={cn(
@@ -135,7 +173,7 @@ const CreateEvent = ({ categories }: any) => {
                                     id="title"
                                     placeholder="Entrez le titre..."
                                     value={data.title}
-                                    onChange={e => setData(prev => ({ ...prev, title: e.target.value }))}
+                                    onChange={e => setField('title', e.target.value)}
                                     className="h-12"
                                 />
                                 {errors.title && <p className='text-red-500 text-sm mt-2'>{errors.title}</p>}
@@ -146,21 +184,15 @@ const CreateEvent = ({ categories }: any) => {
                                     <Label>Catégorie</Label>
                                     <Select
                                         value={data.category_id}
-                                        onValueChange={value => setData(prev => ({ ...prev, category_id: value }))}
+                                        onValueChange={value => setField('category_id', value)}
                                     >
                                         <SelectTrigger className="h-12">
                                             <SelectValue placeholder="Sélectionnez..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {categories?.map((category: EventCategory) => (
+                                            {categories?.map((category: Category) => (
                                                 <SelectItem key={category.id} value={category.id.toString()}>
-                                                    <div className="flex items-center gap-2">
-                                                        <div
-                                                            className="w-3 h-3 rounded-full"
-                                                            style={{ backgroundColor: category.color }}
-                                                        />
-                                                        {category.name}
-                                                    </div>
+                                                    {category.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -176,7 +208,7 @@ const CreateEvent = ({ categories }: any) => {
                                             id="location"
                                             placeholder="Lieu..."
                                             value={data.location}
-                                            onChange={e => setData(prev => ({ ...prev, location: e.target.value }))}
+                                            onChange={e => setField('location', e.target.value)}
                                             className="h-12 pl-11"
                                         />
                                     </div>
@@ -194,7 +226,7 @@ const CreateEvent = ({ categories }: any) => {
                                             min="0"
                                             step="0.01"
                                             value={data.price}
-                                            onChange={e => setData(prev => ({ ...prev, price: e.target.value }))}
+                                            onChange={e => setField('price', e.target.value)}
                                             className="h-12"
                                         />
                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
@@ -213,7 +245,7 @@ const CreateEvent = ({ categories }: any) => {
                                             id="max_participants"
                                             min="0"
                                             value={data.max_participants}
-                                            onChange={e => setData(prev => ({ ...prev, max_participants: e.target.value }))}
+                                            onChange={e => setField('max_participants', e.target.value)}
                                             className="h-12 pl-11"
                                         />
                                     </div>
@@ -255,7 +287,7 @@ const CreateEvent = ({ categories }: any) => {
 
                 {/* Colonne droite */}
                 <div className="space-y-6">
-                    <Card>
+                    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70">
                         <CardContent className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
@@ -282,13 +314,9 @@ const CreateEvent = ({ categories }: any) => {
                                                     selected={data.start_date ? new Date(data.start_date) : undefined}
                                                     onSelect={date => {
                                                         if (date) {
-                                                            const currentDate = data.start_date ? new Date(data.start_date) : new Date()
-                                                            date.setHours(currentDate.getHours())
-                                                            date.setMinutes(currentDate.getMinutes())
-                                                            setData(prev => ({
-                                                                ...prev,
-                                                                start_date: date.toISOString()
-                                                            }))
+                                                            updateDateField('start_date', (currentDate) => {
+                                                                currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+                                                            })
                                                         }
                                                     }}
                                                     initialFocus
@@ -299,14 +327,7 @@ const CreateEvent = ({ categories }: any) => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getHours().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = data.start_date ? new Date(data.start_date) : new Date()
-                                                        date.setHours(parseInt(value))
-                                                        setData(prev => ({
-                                                            ...prev,
-                                                            start_date: date.toISOString()
-                                                        }))
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('start_date', (date) => date.setHours(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <Clock className="mr-2 h-4 w-4" />
@@ -324,14 +345,7 @@ const CreateEvent = ({ categories }: any) => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.start_date ? new Date(data.start_date).getMinutes().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = data.start_date ? new Date(data.start_date) : new Date()
-                                                        date.setMinutes(parseInt(value))
-                                                        setData(prev => ({
-                                                            ...prev,
-                                                            start_date: date.toISOString()
-                                                        }))
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('start_date', (date) => date.setMinutes(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <SelectValue placeholder="Min" />
@@ -374,13 +388,9 @@ const CreateEvent = ({ categories }: any) => {
                                                     selected={data.end_date ? new Date(data.end_date) : undefined}
                                                     onSelect={date => {
                                                         if (date) {
-                                                            const currentDate = data.end_date ? new Date(data.end_date) : new Date()
-                                                            date.setHours(currentDate.getHours())
-                                                            date.setMinutes(currentDate.getMinutes())
-                                                            setData(prev => ({
-                                                                ...prev,
-                                                                end_date: date.toISOString()
-                                                            }))
+                                                            updateDateField('end_date', (currentDate) => {
+                                                                currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+                                                            })
                                                         }
                                                     }}
                                                     initialFocus
@@ -391,14 +401,7 @@ const CreateEvent = ({ categories }: any) => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getHours().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = data.end_date ? new Date(data.end_date) : new Date()
-                                                        date.setHours(parseInt(value))
-                                                        setData(prev => ({
-                                                            ...prev,
-                                                            end_date: date.toISOString()
-                                                        }))
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('end_date', (date) => date.setHours(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <Clock className="mr-2 h-4 w-4" />
@@ -416,14 +419,7 @@ const CreateEvent = ({ categories }: any) => {
                                             <div className="flex-1">
                                                 <Select
                                                     value={data.end_date ? new Date(data.end_date).getMinutes().toString() : ""}
-                                                    onValueChange={(value) => {
-                                                        const date = data.end_date ? new Date(data.end_date) : new Date()
-                                                        date.setMinutes(parseInt(value))
-                                                        setData(prev => ({
-                                                            ...prev,
-                                                            end_date: date.toISOString()
-                                                        }))
-                                                    }}
+                                                    onValueChange={(value) => updateDateField('end_date', (date) => date.setMinutes(parseInt(value, 10)))}
                                                 >
                                                     <SelectTrigger className="h-12">
                                                         <SelectValue placeholder="Min" />
@@ -449,7 +445,7 @@ const CreateEvent = ({ categories }: any) => {
                                     id="description"
                                     placeholder="Une brève description de l'événement..."
                                     value={data.description}
-                                    onChange={e => setData(prev => ({ ...prev, description: e.target.value }))}
+                                    onChange={e => setField('description', e.target.value)}
                                     rows={3}
                                 />
                                 {errors.description && <p className='text-red-500 text-sm mt-2'>{errors.description}</p>}
@@ -476,7 +472,7 @@ const CreateEvent = ({ categories }: any) => {
                                 </div>
                                 <Switch
                                     checked={data.is_published}
-                                    onCheckedChange={checked => setData(prev => ({ ...prev, is_published: checked }))}
+                                    onCheckedChange={checked => setField('is_published', checked)}
                                 />
                             </div>
                             <div className="flex items-center justify-between pt-6 border-t">
@@ -488,7 +484,7 @@ const CreateEvent = ({ categories }: any) => {
                                 </div>
                                 <Switch
                                     checked={data.is_featured}
-                                    onCheckedChange={checked => setData(prev => ({ ...prev, is_featured: checked }))}
+                                    onCheckedChange={checked => setField('is_featured', checked)}
                                 />
                             </div>
                         </CardContent>
@@ -499,6 +495,8 @@ const CreateEvent = ({ categories }: any) => {
                             variant="outline"
                             size="lg"
                             type="button"
+                            onClick={() => window.history.back()}
+                            className="rounded-xl"
                         >
                             Annuler
                         </Button>
@@ -506,6 +504,7 @@ const CreateEvent = ({ categories }: any) => {
                             type="submit"
                             size="lg"
                             disabled={processing}
+                            className="rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700"
                         >
                             {processing && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

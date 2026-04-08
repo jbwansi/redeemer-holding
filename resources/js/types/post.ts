@@ -68,6 +68,10 @@ export interface PostProps {
 
 export interface PostResponse {
     data: PostProps[];
+    meta?: {
+        current_page?: number;
+        last_page?: number;
+    };
 }
 export interface SinglePostResponse {
     data: PostProps;

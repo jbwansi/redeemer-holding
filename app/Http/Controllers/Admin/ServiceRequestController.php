@@ -85,6 +85,13 @@ class ServiceRequestController extends Controller
                     'per_page' => $requests->perPage()
                 ]
             ],
+            'stats' => [
+                'total'       => ServiceRequest::count(),
+                'pending'     => ServiceRequest::where('status', 'pending')->count(),
+                'in_progress' => ServiceRequest::where('status', 'in_progress')->count(),
+                'completed'   => ServiceRequest::where('status', 'completed')->count(),
+                'cancelled'   => ServiceRequest::where('status', 'cancelled')->count(),
+            ],
             'filters' => $request->only([
                 'search',
                 'status',

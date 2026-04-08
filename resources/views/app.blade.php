@@ -5,24 +5,45 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 
-    <!-- Balises Title et Meta description optimisées -->
-    <title>{{ config('app.name') }} - Transformation personnelle par les valeurs</title>
-    <meta name="description" content="{{ config('app.description', 'Découvrez votre véritable potentiel et vivez une vie épanouie grâce à la transformation par les valeurs. Coaching personnalisé pour votre développement personnel.') }}">
+    @php
+        $seo         = $page['props']['seo'] ?? [];
+        $seoTitle    = $seo['title']          ?? config('app.name');
+        $seoDesc     = $seo['description']    ?? '';
+        $seoOgTitle  = $seo['og_title']       ?? $seoTitle;
+        $seoOgDesc   = $seo['og_description'] ?? $seoDesc;
+        $seoOgImage  = $seo['og_image']       ?? asset('assets/images/logo.png');
+        $seoOgType   = $seo['og_type']        ?? 'website';
+        $seoCanon    = $seo['canonical']      ?? url()->current();
+        $seoRobots   = $seo['robots']         ?? 'index, follow';
+        $seoSchema   = $seo['schema']         ?? null;
+    @endphp
+
+    <!-- Balises Title et Meta description -->
+    <title>{{ $seoTitle }}</title>
+    <meta name="description" content="{{ $seoDesc }}">
 
     <!-- Meta tags SEO supplémentaires -->
-    <meta name="author" content="Acatech">
+    <meta name="author" content="{{ config('app.name') }}">
     <meta name="keywords" content="transformation personnelle, développement personnel, coaching valeurs, épanouissement, potentiel, bien-être">
-    <meta name="robots" content="index, follow">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="{{ config('app.name') }} - Transformation personnelle par les valeurs">
-    <meta property="og:description" content="{{ config('app.description') }}">
-    <meta property="og:image" content="{{ asset('assets/images/logo.png') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta name="robots" content="{{ $seoRobots }}">
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta property="og:type" content="{{ $seoOgType }}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:locale" content="fr_CH">
+    <meta property="og:title" content="{{ $seoOgTitle }}">
+    <meta property="og:description" content="{{ $seoOgDesc }}">
+    <meta property="og:image" content="{{ $seoOgImage }}">
+    <meta property="og:url" content="{{ $seoCanon }}">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoOgTitle }}">
+    <meta name="twitter:description" content="{{ $seoOgDesc }}">
+    <meta name="twitter:image" content="{{ $seoOgImage }}">
 
     <!-- Sécurité et Performance -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ $seoCanon }}">
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('sitemap') }}">
+    <link rel="sitemap" type="application/xml" title="Sitemap Index" href="{{ route('sitemap.index') }}">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -45,13 +66,16 @@
 
     <!-- Schema.org -->
     <script type="application/ld+json">
+    @if($seoSchema)
+    {!! json_encode($seoSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+    @else
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
         "name": "{{ config('app.name') }}",
-        "description": "Découvrez votre véritable potentiel et vivez une vie épanouie grâce à la transformation par les valeurs. Coaching personnalisé pour votre développement personnel.",
         "url": "{{ url('/') }}"
     }
+    @endif
     </script>
 </head>
 

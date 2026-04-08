@@ -29,6 +29,10 @@ function SettingWrapper({ children }: any) {
         {
             title: 'Comptes réseaux sociaux',
             href: 'settings.socials',
+        },
+        {
+            title: 'Utilisateurs test',
+            href: 'settings.test-users',
         }
     ];
 

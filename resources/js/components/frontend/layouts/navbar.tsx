@@ -8,6 +8,7 @@ import {
     Moon,
     ChevronRight,
     LogIn,
+    LogOut,
     Calendar1,
     User
 } from 'lucide-react';
@@ -22,6 +23,38 @@ import { useTheme } from "@/components/theme-provider";
 import { useSettings } from '@/hooks/use-settings';
 import { route } from 'ziggy-js';
 
+type NavItem = {
+    name: string;
+    href: string;
+    delay: number;
+    matchers: string[];
+};
+
+const normalizePath = (value: string): string => {
+    if (!value) return '/';
+
+    try {
+        const parsedUrl = value.startsWith('http') ? new URL(value) : new URL(value, window.location.origin);
+        const path = parsedUrl.pathname || '/';
+        return path.length > 1 ? path.replace(/\/+$/, '') : path;
+    } catch {
+        const noQuery = value.split('?')[0].split('#')[0] || '/';
+        return noQuery.length > 1 ? noQuery.replace(/\/+$/, '') : noQuery;
+    }
+};
+
+const isNavItemActive = (currentPath: string, item: NavItem): boolean => {
+    return item.matchers.some((matcher) => {
+        const normalizedMatcher = normalizePath(matcher);
+
+        if (normalizedMatcher === '/') {
+            return currentPath === '/';
+        }
+
+        return currentPath === normalizedMatcher || currentPath.startsWith(`${normalizedMatcher}/`);
+    });
+};
+
 const Navbar = () => {
     const [searchActive, setSearchActive] = useState(false);
     const { theme, setTheme } = useTheme();
@@ -29,7 +62,11 @@ const Navbar = () => {
     const { settings, isLoading, isError, error } = useSettings();
     const [hasRendered, setHasRendered] = useState(false);
 
-    const { auth } = usePage().props as any
+    const page = usePage() as any;
+    const { auth } = page.props;
+    const currentPath = normalizePath(page.url || window.location.pathname);
+    const isAdmin = auth?.user?.role === 'admin';
+    const accountRoute = isAdmin ? route('dashboard') : route('dashboard.client.profile');
 
     // Smoother animations with spring physics
     const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
@@ -47,14 +84,14 @@ const Navbar = () => {
     const smoothLogoScale = useSpring(useTransform(scrollY, [0, 100], [1, 0.9]), springConfig);
 
     // Nav items
-    const navItems = [
-        { name: 'Accueil', href: route('home'), delay: 0 },
-        { name: 'Services', href: route('services'), delay: 0.1 },
-        { name: 'Formations', href: route('formations'), delay: 0.1 },
-        { name: 'Événements', href: '/evenements', delay: 0.2 },
-        { name: 'Blog', href: route('blogs'), delay: 0.3 },
-        { name: 'À propos', href: route('about'), delay: 0.4 },
-        { name: 'Contact', href: route("contact"), delay: 0.5 },
+    const navItems: NavItem[] = [
+        { name: 'Accueil', href: route('home'), delay: 0, matchers: [route('home')] },
+        { name: 'Services', href: route('services'), delay: 0.1, matchers: [route('services')] },
+        { name: 'Formations', href: route('formations'), delay: 0.1, matchers: [route('formations')] },
+        { name: 'Événements', href: route('evenements'), delay: 0.2, matchers: [route('evenements')] },
+        { name: 'Blog', href: route('blogs'), delay: 0.3, matchers: [route('blogs')] },
+        { name: 'À propos', href: route('about'), delay: 0.4, matchers: [route('about')] },
+        { name: 'Contact', href: route('contact'), delay: 0.5, matchers: [route('contact')] },
     ];
 
     // Toggle search input
@@ -134,16 +171,9 @@ const Navbar = () => {
         />
     );
 
-    // Active link tracker
-    const [activePath, setActivePath] = useState('/');
-
-    useEffect(() => {
-        setActivePath(window.location.pathname);
-    }, []);
-
     // Custom nav link component with indicator
-    const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => {
-        const isActive = activePath === href;
+    const NavLink = ({ item, children }: { item: NavItem, children: React.ReactNode }) => {
+        const isActive = isNavItemActive(currentPath, item);
 
         return (
             <motion.div
@@ -152,16 +182,15 @@ const Navbar = () => {
                 custom={hasRendered}
             >
                 <Link
-                    href={href}
-                    className={`relative h-full flex items-center px-4 text-base font-medium transition-colors duration-300
+                    href={item.href}
+                    className={`relative h-full flex items-center px-4 rounded-xl text-base font-medium transition-all duration-300
                         ${isActive ?
-                            'text-[#DA2E29] dark:text-[#DA2E29]' :
+                            'text-[#DA2E29] dark:text-[#DA2E29] bg-[#DA2E29]/10 dark:bg-[#DA2E29]/20' :
                             'text-gray-700 dark:text-gray-200 hover:text-[#DA2E29] dark:hover:text-[#DA2E29]'
                         }`}
-                    onClick={() => setActivePath(href)}
                 >
                     {children}
-                    {isActive && <NavIndicator pathname={href} />}
+                    {isActive && <NavIndicator pathname={item.href} />}
                 </Link>
             </motion.div>
         );
@@ -262,7 +291,7 @@ const Navbar = () => {
                 <div className="hidden h-full lg:flex items-center">
                     <nav className="h-full flex items-center space-x-2">
                         {navItems.map((item) => (
-                            <NavLink key={item.name} href={item.href}>
+                            <NavLink key={item.name} item={item}>
                                 {item.name}
                             </NavLink>
                         ))}
@@ -305,8 +334,15 @@ const Navbar = () => {
                         </AnimatePresence>
                     </div>
 
-                    {/* Calendly Link */}
-                    <a href={settings?.calendly_link} target='_blank'>
+                    {/* Quick booking button */}
+                    <a
+                        href={settings?.calendly_link || route('contact')}
+                        target={settings?.calendly_link ? '_blank' : undefined}
+                        rel={settings?.calendly_link ? 'noopener noreferrer' : undefined}
+                        title={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
+                        aria-label={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
+                        className="group relative"
+                    >
                         <motion.button
                             variants={buttonHoverEffect}
                             initial="rest"
@@ -321,6 +357,10 @@ const Navbar = () => {
                                 className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-br from-[#DA2E29] to-rose-600 rounded-full ring-2 ring-white dark:ring-gray-900"
                             ></motion.span>
                         </motion.button>
+
+                        <span className="pointer-events-none absolute left-1/2 top-[115%] -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap dark:bg-slate-100 dark:text-slate-900">
+                            {settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
+                        </span>
                     </a>
 
                     {/* Theme Toggle with enhanced transition */}
@@ -347,7 +387,16 @@ const Navbar = () => {
                     </motion.button>
 
                     {/* Login/Profile Button */}
-                    <Link href={!auth?.user ? route('login') : route('dashboard.client.profile')}>
+                    {!auth?.user && (
+                        <Link
+                            href={route('register.page', { tab: 'register' })}
+                            className="hidden md:inline-flex items-center rounded-full border border-[#DA2E29]/30 bg-[#DA2E29]/10 px-4 py-2 text-sm font-medium text-[#DA2E29] hover:bg-[#DA2E29]/15 transition-colors"
+                        >
+                            S'inscrire
+                        </Link>
+                    )}
+
+                    <Link href={!auth?.user ? route('login') : accountRoute}>
                         <motion.div
                             variants={buttonHoverEffect}
                             initial="rest"
@@ -358,6 +407,20 @@ const Navbar = () => {
                             {auth?.user ? <User className="w-[18px] h-[18px]" /> : <LogIn className="w-[18px] h-[18px]" />}
                         </motion.div>
                     </Link>
+
+                    {auth?.user && (
+                        <Link href={route('logout')} title="Déconnexion" aria-label="Déconnexion">
+                            <motion.div
+                                variants={buttonHoverEffect}
+                                initial="rest"
+                                whileHover="hover"
+                                whileTap="tap"
+                                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 hover:text-[#DA2E29] hover:bg-gray-200 dark:hover:bg-gray-700/90 transition-colors duration-300 backdrop-blur-sm"
+                            >
+                                <LogOut className="w-[18px] h-[18px]" />
+                            </motion.div>
+                        </Link>
+                    )}
 
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -414,7 +477,7 @@ const Navbar = () => {
                                                     >
                                                         <motion.span
                                                             className={`text-xl font-medium transition-all duration-300
-                                                                ${activePath === item.href ?
+                                                                ${isNavItemActive(currentPath, item) ?
                                                                     'text-[#DA2E29]' :
                                                                     'text-gray-800 dark:text-gray-200 group-hover:text-[#DA2E29] group-hover:translate-x-1'
                                                                 }`}
@@ -446,12 +509,32 @@ const Navbar = () => {
                                             </button>
 
                                             <Link
-                                                href={auth?.user ? route('login') : route('dashboard.client.profile')}
+                                                href={auth?.user ? accountRoute : route('login')}
                                                 className="flex items-center space-x-2 text-[#DA2E29] font-medium group"
                                             >
-                                                <span>Connexion</span>
+                                                <span>{auth?.user ? (isAdmin ? 'Dashboard admin' : 'Mon espace') : 'Connexion'}</span>
                                                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                                             </Link>
+
+                                            {!auth?.user && (
+                                                <Link
+                                                    href={route('register.page', { tab: 'register' })}
+                                                    className="flex items-center space-x-2 text-slate-700 dark:text-slate-200 font-medium group"
+                                                >
+                                                    <span>S'inscrire</span>
+                                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                                                </Link>
+                                            )}
+
+                                            {auth?.user && (
+                                                <Link
+                                                    href={route('logout')}
+                                                    className="flex items-center space-x-2 text-red-600 dark:text-red-400 font-medium group"
+                                                >
+                                                    <span>Déconnexion</span>
+                                                    <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PageRequest;
 use App\Models\Page;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class PageController extends Controller
 {

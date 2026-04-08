@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
     Share2,
     Facebook,
@@ -83,6 +84,7 @@ const SocialMedia = () => {
         { name: 'Twitter', icon: Twitter, enabled: 'twitter_enabled', url: 'twitter_url' },
         { name: 'LinkedIn', icon: Linkedin, enabled: 'linkedin_enabled', url: 'linkedin_url' },
         { name: 'YouTube', icon: Youtube, enabled: 'youtube_enabled', url: 'youtube_url' },
+        { name: 'TikTok', icon: Globe, enabled: 'tiktok_enabled', url: 'tiktok_url' },
     ]
 
     return (
@@ -97,76 +99,85 @@ const SocialMedia = () => {
                 </Alert>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Configuration générale */}
-                    <div className="bg-background rounded-lg shadow p-6">
-                        <div className="flex items-center gap-2 mb-6">
-                            <Settings2 className="h-5 w-5" />
-                            <h2 className="text-lg font-semibold">Configuration générale</h2>
-                        </div>
+                    <Tabs defaultValue="general" className="space-y-6">
+                        <TabsList className="w-full justify-start overflow-x-auto whitespace-nowrap h-auto p-1">
+                            <TabsTrigger value="general">Général</TabsTrigger>
+                            <TabsTrigger value="networks">Réseaux</TabsTrigger>
+                        </TabsList>
 
-                        <div className="mt-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Label className="text-base font-semibold">Afficher les liens sociaux</Label>
-                                    <p className="text-sm text-muted-foreground">Afficher les liens vers vos réseaux sociaux sur le site</p>
+                        <TabsContent value="general" className="space-y-6">
+                            <div className="bg-background rounded-lg shadow p-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Settings2 className="h-5 w-5" />
+                                    <h2 className="text-lg font-semibold">Configuration générale</h2>
                                 </div>
-                                <Switch
-                                    checked={data.show_social_links}
-                                    onCheckedChange={(checked) => setData('show_social_links', checked)}
-                                />
-                            </div>
 
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Label className="text-base font-semibold">Activer le partage social</Label>
-                                    <p className="text-sm text-muted-foreground">Permettre aux utilisateurs de partager le contenu sur les réseaux sociaux</p>
-                                </div>
-                                <Switch
-                                    checked={data.show_social_share}
-                                    onCheckedChange={(checked) => setData('show_social_share', checked)}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Configuration des réseaux sociaux */}
-                    <div className="bg-background rounded-lg shadow p-6">
-                        <div className="flex items-center gap-2 mb-6">
-                            <Globe className="h-5 w-5" />
-                            <h2 className="text-lg font-semibold">Réseaux sociaux</h2>
-                        </div>
-
-                        <div className="space-y-6">
-                            {socialNetworks.map((network) => (
-                                <div key={network.name} className="border-b border-border pb-6 last:border-0 last:pb-0">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-2">
-                                            <network.icon className="h-5 w-5" />
-                                            <Label className="text-base font-semibold">{network.name}</Label>
+                                <div className="mt-6 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <Label className="text-base font-semibold">Afficher les liens sociaux</Label>
+                                            <p className="text-sm text-muted-foreground">Afficher les liens vers vos réseaux sociaux sur le site</p>
                                         </div>
                                         <Switch
-                                            checked={data[network.enabled]}
-                                            onCheckedChange={(checked) => setData(network.enabled, checked)}
+                                            checked={data.show_social_links}
+                                            onCheckedChange={(checked) => setData('show_social_links', checked)}
                                         />
                                     </div>
 
-                                    {data[network.enabled] && (
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <Input
-                                                value={data[network.url]}
-                                                onChange={e => setData(network.url, e.target.value)}
-                                                className="h-12 px-4 rounded-xl bg-white/50 dark:bg-slate-900"
-                                                placeholder={`URL de votre page ${network.name}`}
-                                            />
-                                            <p className="text-sm text-muted-foreground mt-2">
-                                                Entrez l'URL complète de votre profil {network.name}
-                                            </p>
+                                            <Label className="text-base font-semibold">Activer le partage social</Label>
+                                            <p className="text-sm text-muted-foreground">Permettre aux utilisateurs de partager le contenu sur les réseaux sociaux</p>
                                         </div>
-                                    )}
+                                        <Switch
+                                            checked={data.show_social_share}
+                                            onCheckedChange={(checked) => setData('show_social_share', checked)}
+                                        />
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="networks" className="space-y-6">
+                            <div className="bg-background rounded-lg shadow p-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Globe className="h-5 w-5" />
+                                    <h2 className="text-lg font-semibold">Réseaux sociaux</h2>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {socialNetworks.map((network) => (
+                                        <div key={network.name} className="border-b border-border pb-6 last:border-0 last:pb-0">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center gap-2">
+                                                    <network.icon className="h-5 w-5" />
+                                                    <Label className="text-base font-semibold">{network.name}</Label>
+                                                </div>
+                                                <Switch
+                                                    checked={data[network.enabled]}
+                                                    onCheckedChange={(checked) => setData(network.enabled, checked)}
+                                                />
+                                            </div>
+
+                                            {data[network.enabled] && (
+                                                <div>
+                                                    <Input
+                                                        value={data[network.url]}
+                                                        onChange={e => setData(network.url, e.target.value)}
+                                                        className="h-12 px-4 rounded-xl bg-white/50 dark:bg-slate-900"
+                                                        placeholder={`URL de votre page ${network.name}`}
+                                                    />
+                                                    <p className="text-sm text-muted-foreground mt-2">
+                                                        Entrez l'URL complète de votre profil {network.name}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
 
                     <div className="flex justify-end gap-4">
                         <Button

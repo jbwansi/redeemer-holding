@@ -43,4 +43,9 @@ return [
         'api_version' => env('STRIPE_API_VERSION', '2022-11-15'),
     ],
 
+    'openai' => [
+        'key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_CHAT_MODEL', 'gpt-4o-mini'),
+    ],
+
 ];

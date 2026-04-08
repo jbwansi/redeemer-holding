@@ -97,9 +97,8 @@ export default function BlockedUsers({ blockedUsers }: Props) {
             <Head title="Utilisateurs bloqués" />
 
             <div className="flex flex-col min-h-screen bg-background">
-                {/* Header */}
-                <div className="border-b">
-                    <div className="flex h-16 items-center mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="border-b bg-gradient-to-r from-rose-50/60 to-white">
+                    <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
                         <div>
                             <h1 className="text-2xl font-semibold">Utilisateurs bloqués</h1>
                             <p className="text-sm text-muted-foreground">
@@ -110,9 +109,9 @@ export default function BlockedUsers({ blockedUsers }: Props) {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 py-6">
+                <div className="flex-1 py-8">
                     <div className="mx-auto px-4 sm:px-6 lg:px-8">
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <CardTitle>

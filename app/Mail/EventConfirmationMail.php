@@ -17,6 +17,7 @@ class EventConfirmationMail extends Mailable
 
     public $event;
     public $participant;
+    public $customMessage;
 
     /**
      * Create a new message instance.
@@ -25,6 +26,7 @@ class EventConfirmationMail extends Mailable
     {
         $this->event = $event;
         $this->participant = $participant;
+        $this->customMessage = get_setting('event_confirmation_message');
     }
 
     /**
@@ -32,8 +34,10 @@ class EventConfirmationMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = get_setting('event_confirmation_subject', 'Confirmation de réservation - ' . $this->event->title);
+
         return new Envelope(
-            subject: 'Confirmation de réservation - ' . $this->event->title,
+            subject: $subject,
             from: config('mail.from.address', 'noreply@redeemerholding.com'),
             replyTo: [
                 config('mail.support.address', 'support@redeemerholding.com')
@@ -51,6 +55,7 @@ class EventConfirmationMail extends Mailable
             with: [
                 'event' => $this->event,
                 'participant' => $this->participant,
+                'customMessage' => $this->customMessage,
             ]
         );
     }

@@ -8,6 +8,9 @@ export const useSettings = () => {
     const settingsQuery = useQuery<Settings, Error>({
         queryKey: ['settings'],
         queryFn: fetchSettings,
+        staleTime: 0,
+        refetchOnMount: 'always',
+        refetchOnWindowFocus: true,
     });
 
     return {
