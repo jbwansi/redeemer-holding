@@ -105,19 +105,19 @@ class PostSeeder extends Seeder
 
         foreach ($posts as $data) {
             $slug = Str::slug($data['title']);
-            $post = Post::updateOrCreate(
-                ['slug' => $slug],
-                [
-                    'title'          => $data['title'],
-                    'excerpt'        => $data['excerpt'],
-                    'content'        => $data['content'],
-                    'featured_image' => $data['featured_image'],
-                    'tags'           => $data['tags'],
-                    'published'      => true,
-                    'published_at'   => now()->subDays(random_int(1, 90)),
-                    'user_id'        => $admin->id,
-                ]
-            );
+           $post = Post::updateOrCreate(
+    ['slug' => $slug],
+    [
+        'title'          => $data['title'],
+        'excerpt'        => $data['excerpt'],
+        'content'        => $data['content'],
+        'featured_image' => $data['featured_image']['original'],
+        'tags'           => $data['tags'],
+        'published'      => true,
+        'published_at'   => now()->subDays(random_int(1, 90)),
+        'user_id'        => $admin->id,
+    ]
+);
 
             $category = Category::where('name', $data['category'])->first();
             if ($category) {

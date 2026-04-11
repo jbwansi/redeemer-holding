@@ -13,6 +13,20 @@ import {
 } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import VisitorsByCountry from './visitors-by-country';
+
+import BackupButton from './backup-button';
+
+// Simple notification component
+const Notification = ({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) => (
+    <div className={`fixed top-6 right-6 z-50 px-4 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+             role="alert">
+        <div className="flex items-center justify-between gap-4">
+            <span>{message}</span>
+            <button onClick={onClose} className="ml-4 text-white font-bold">×</button>
+        </div>
+    </div>
+);
 
 interface ClientDashboardProps {
     countCurrentFormations: number;
@@ -41,6 +55,13 @@ const DashboardContent = ({
     auth
 }: ClientDashboardProps) => {
     // Références pour les animations
+    const [notification, setNotification] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+    // Helper to show notification
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
     const profileRef = useRef(null);
     const statsRef = useRef(null);
 
@@ -54,6 +75,13 @@ const DashboardContent = ({
 
     return (
         <div className="p-4 lg:p-8">
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
             {/* Section Profil */}
             <motion.div
                 ref={profileRef}
@@ -319,6 +347,18 @@ const DashboardContent = ({
                             </div>
                         </div>
                     </motion.div>
+                </div>
+
+                {/* Section Visiteurs par pays */}
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Visiteurs par pays</h3>
+                    <VisitorsByCountry />
+                </div>
+
+                {/* Section Export/Backup */}
+                <div className="my-8">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Export/Backup</h3>
+                    <BackupButton onNotify={showNotification} />
                 </div>
             </motion.div>
         </div>

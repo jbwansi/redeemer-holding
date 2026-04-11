@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
 import { AlertCircle, Ticket } from 'lucide-react';
 
-const EventJoin = ({ event, auth }: any) => {
+const EventJoin = ({ event, auth, onNotify }: any) => {
     const [ticketQuantity, setTicketQuantity] = useState(1);
 
     const MAX_TICKETS_PER_PERSON = 10; // Définir une limite par personne
@@ -34,7 +34,14 @@ const EventJoin = ({ event, auth }: any) => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        post(route('events.register', event.slug));
+        post(route('events.register', event.slug), {
+            onSuccess: () => {
+                onNotify && onNotify('Inscription réussie à l\'événement.', 'success');
+            },
+            onError: () => {
+                onNotify && onNotify('Erreur lors de l\'inscription à l\'événement.', 'error');
+            }
+        });
     };
 
     // Rendu en fonction de la disponibilité des places

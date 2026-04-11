@@ -1,6 +1,17 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Calendar, CalendarDays, CheckCircle, Clock, FileText, Mail, MapPin, Printer, Share2, Ticket, X } from 'lucide-react';
+
+// Notification system (reuse from dashboard)
+const Notification = ({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) => (
+    <div className={`fixed top-6 right-6 z-50 px-4 py-3 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+             role="alert">
+        <div className="flex items-center justify-between gap-4">
+            <span>{message}</span>
+            <button onClick={onClose} className="ml-4 text-white font-bold">×</button>
+        </div>
+    </div>
+);
 import { route } from 'ziggy-js';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { formatDate, formatTime, formatCurrency } from '@/lib/utils';
@@ -13,6 +24,11 @@ const resolveImage = (image: any): string => {
 };
 
 const PaymentConfirmationPage = ({ event, registration }: any) => {
+    const [notification, setNotification] = React.useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 4000);
+    };
     const isEventFree = event?.price <= 0;
 
     const calendarUrl = (() => {
@@ -27,6 +43,13 @@ const PaymentConfirmationPage = ({ event, registration }: any) => {
         <FrontLayout>
             <Head title={`Confirmation - ${event?.title || 'Evenement'}`} />
 
+            {notification && (
+                <Notification
+                    message={notification.message}
+                    type={notification.type}
+                    onClose={() => setNotification(null)}
+                />
+            )}
             <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-24 pb-20 dark:bg-slate-950">
                 <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#da2e29]/15 blur-3xl" />
 
@@ -92,6 +115,8 @@ const PaymentConfirmationPage = ({ event, registration }: any) => {
                                 method="delete"
                                 as="button"
                                 className="mt-3 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white"
+                                onSuccess={() => showNotification('Réservation annulée avec succès.', 'success')}
+                                onError={() => showNotification('Erreur lors de l\'annulation de la réservation.', 'error')}
                             >
                                 <X className="h-4 w-4" />
                                 Annuler ma reservation

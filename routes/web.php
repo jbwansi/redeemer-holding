@@ -204,9 +204,12 @@ Route::middleware($dashboardMiddleware)->group(function () {
                 Route::get('config/changelog', 'changelog')->name('config.changelog');
                 Route::get('config/activation', 'activation')->name('config.activation');
                 Route::get('config/social-login', 'social_login')->name('config.social_login');
+                Route::get('config/database', 'index')->name('config.database.index');
                 Route::get('config/database/clean', 'database_clean')->name('config.database_clean');
                 Route::post('config/database/{table}/truncate', 'truncate')->name('database.truncate');
                 Route::post('config/database/{table}/optimize', 'optimize')->name('database.optimize');
+                Route::get('config/database/backup', 'database_backup')->name('database.backup');
+                 Route::get('config/database/logs', 'database_logs')->name('database.logs');
             });
 
             Route::resource('event-categories', EventCategoryController::class);
