@@ -108,69 +108,6 @@ public function system()
         }
     }
 
-    public function database_clean()
-    {
-        try {
-            $driver = DB::connection()->getDriverName();
-            $tables = [];
-
-            if ($driver === 'sqlite') {
-                $rows = DB::select("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
-
-                foreach ($rows as $row) {
-                    $name = $row->name;
-                    $count = (int) DB::table($name)->count();
-
-                    $tables[] = (object) [
-                        'name' => $name,
-                        'rows' => $count,
-                        'created_at' => now()->toDateTimeString(),
-                        'updated_at' => now()->toDateTimeString(),
-                        'collation' => 'N/A',
-                        'engine' => 'SQLite',
-                        'size' => 'N/A',
-                    ];
-                }
-            } else {
-                $defaultConnection = config('database.default');
-                $database = config("database.connections.{$defaultConnection}.database");
-
-                $tables = DB::select(
-                    "
-                    SELECT
-                        TABLE_NAME as name,
-                        TABLE_ROWS as table_rows,
-                        CREATE_TIME as created_at,
-                        UPDATE_TIME as updated_at,
-                        TABLE_COLLATION as collation,
-                        ENGINE as engine,
-                        DATA_LENGTH + INDEX_LENGTH as size
-                    FROM information_schema.TABLES
-                    WHERE TABLE_SCHEMA = ?
-                    ORDER BY TABLE_NAME
-                    ",
-                    [$database]
-                );
-
-                foreach ($tables as $table) {
-                    $table->size = number_format(((float) $table->size) / 1024 / 1024, 2) . ' MB';
-                    // Overwrite table_rows with actual count for consistency with SQLite branch
-                    $table->rows = (int) DB::table($table->name)->count();
-                }
-            }
-
-            return inertia('backend/config/database-clean', [
-                'tables' => $tables
-            ]);
-        } catch (Throwable $e) {
-            Log::error('Erreur lors de la récupération des tables : ' . $e->getMessage());
-
-            return inertia('backend/config/database-clean', [
-                'tables' => [],
-                'error' => 'Une erreur est survenue lors de la récupération des tables.'
-            ]);
-        }
-    }
 
     public function truncate(Request $request, string $table)
     {

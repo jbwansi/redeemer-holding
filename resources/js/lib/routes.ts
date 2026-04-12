@@ -204,7 +204,7 @@ export const dataRoutes = {
                 },
                 {
                     title: "Base de données",
-                    url: route("config.database_clean"),
+                    url: route("config.database.index"),
                 },
                 {
                     title: "Système",

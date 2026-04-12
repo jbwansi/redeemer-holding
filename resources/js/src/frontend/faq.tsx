@@ -24,9 +24,10 @@ const defaultMeta = {
     ],
 };
 
-export default function FaqPage({ page }: any) {
+export default function FaqPage({ page, faqs = [] }: any) {
     const meta = { ...defaultMeta, ...(page?.meta ?? {}) };
-    const faqs = Array.isArray(meta.faqs) ? meta.faqs : [];
+    // Si faqs est fourni par le backend, on l'utilise, sinon on prend meta.faqs
+    const faqsToShow = Array.isArray(faqs) && faqs.length > 0 ? faqs : (Array.isArray(meta.faqs) ? meta.faqs : []);
 
     return (
         <FrontLayout>
@@ -53,12 +54,12 @@ export default function FaqPage({ page }: any) {
 
                 <section className="mx-auto mt-10 max-w-[1100px] px-6 md:px-8">
                     <div className="space-y-4">
-                        {faqs.length === 0 ? (
+                        {faqsToShow.length === 0 ? (
                             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-900">
                                 Aucune question frequente n est disponible pour le moment.
                             </div>
                         ) : (
-                            faqs.map((faq: any, index: number) => (
+                            faqsToShow.map((faq: any, index: number) => (
                                 <article key={`${faq?.question}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{faq?.question}</h2>
                                     <p className="mt-2 leading-relaxed text-slate-600 dark:text-slate-300">{faq?.answer}</p>
