@@ -1,6 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion'
-import { ArrowRight, Calendar, Check, LucideIcon } from 'lucide-react'
+import {
+    motion,
+    AnimatePresence,
+    useInView,
+    useScroll,
+    useTransform,
+} from 'framer-motion'
+import { ArrowRight, Calendar, Check } from 'lucide-react'
 import { Link } from '@inertiajs/react'
 
 type ReassuranceItem = {
@@ -25,12 +31,10 @@ interface HeroMeta {
     hero_floating_stat_label?: string
 }
 
-const defaultImages = [
-    '/assets/images/portrait.jpg',
-]
+const defaultImages = ['/assets/images/portrait.jpg']
 
 const Hero = ({ meta }: { meta?: HeroMeta }) => {
-    const containerRef = useRef<HTMLDivElement>(null)
+    const containerRef = useRef<HTMLElement>(null)
     const textRef = useRef<HTMLDivElement>(null)
     const imageRef = useRef<HTMLDivElement>(null)
 
@@ -44,6 +48,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
 
     const textY = useTransform(scrollYProgress, [0, 1], ['0%', '8%'])
     const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '5%'])
+
     const [currentIndex, setCurrentIndex] = useState(0)
 
     const badge = meta?.hero_badge ?? 'Formation • Coaching • Conseil'
@@ -66,10 +71,10 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
         meta?.hero_reassurance_items?.length
             ? meta.hero_reassurance_items
             : [
-                { text: 'Sans engagement' },
-                { text: 'Aucun paiement requis' },
-                { text: '30 minutes' },
-            ]
+                  { text: 'Sans engagement' },
+                  { text: 'Aucun paiement requis' },
+                  { text: '30 minutes' },
+              ]
 
     const showFloatingStat = meta?.hero_floating_stat_enabled !== false
     const floatingStatValue = meta?.hero_floating_stat_value ?? '97%'
@@ -77,17 +82,18 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
 
     const images = useMemo(() => {
         const fromMetaArray =
-            meta?.hero_images?.filter((img) => typeof img === 'string' && img.trim() !== '') ?? []
+            meta?.hero_images?.filter(
+                (img) => typeof img === 'string' && img.trim() !== ''
+            ) ?? []
 
         if (fromMetaArray.length > 0) return fromMetaArray
 
-        if (meta?.hero_image && meta.hero_image.trim() !== '') {
+        if (meta?.hero_image?.trim()) {
             return [meta.hero_image]
         }
 
         return defaultImages
     }, [meta?.hero_images, meta?.hero_image])
-
 
     useEffect(() => {
         if (images.length <= 1) return
@@ -137,7 +143,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
     return (
         <section
             ref={containerRef}
-            className="relative overflow-hidden bg-gradient-to-br from-[#071224] via-[#0b1830] to-[#050b17] pt-24 pb-16 md:pt-28 md:pb-20"
+            className="relative w-full overflow-hidden bg-gradient-to-b from-gray-50 to-white pt-24 pb-16 dark:from-gray-900 dark:to-gray-950 md:pt-28 md:pb-20"
         >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(218,46,41,0.16),transparent_30%)]" />
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(255,255,255,0.06),transparent_25%)]" />
@@ -154,23 +160,25 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                         style={{ y: textY }}
                     >
                         <motion.div variants={itemVariants}>
-                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                            <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-white/90 dark:backdrop-blur">
                                 {badge}
                             </span>
                         </motion.div>
 
                         <motion.h1
                             variants={itemVariants}
-                            className="mt-6 text-4xl font-bold leading-[1.02] tracking-tight text-white md:text-5xl xl:text-6xl"
+                            className="mb-4 text-4xl font-bold leading-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
                         >
                             <span className="block">{titleLine1}</span>
                             <span className="mt-1 block">{titleLine2}</span>
-                            <span className="mt-1 block text-[#DA2E29]">{titleLine3}</span>
+                            <span className="mt-1 block text-[#DA2E29]">
+                                {titleLine3}
+                            </span>
                         </motion.h1>
 
                         <motion.p
                             variants={itemVariants}
-                            className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 md:text-xl"
+                            className="mb-8 text-lg text-gray-700 dark:text-gray-300 md:text-xl"
                         >
                             {subtitle}
                         </motion.p>
@@ -195,7 +203,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="inline-flex min-w-[240px] items-center justify-center rounded-xl border border-white/12 bg-white/5 px-7 py-4 text-base font-semibold text-white backdrop-blur transition-colors hover:bg-white/10"
+                                    className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-4 font-medium text-gray-800 transition-colors hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                                 >
                                     <span>{secondaryCtaText}</span>
                                 </motion.button>
@@ -210,10 +218,10 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                 <motion.div
                                     key={index}
                                     variants={itemVariants}
-                                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-300"
+                                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
                                 >
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/8">
-                                        <Check className="h-3.5 w-3.5 text-white/90" />
+                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 dark:bg-white/10">
+                                        <Check className="h-3.5 w-3.5 text-[#DA2E29] dark:text-white/90" />
                                     </div>
                                     <span>{item.text}</span>
                                 </motion.div>
@@ -232,38 +240,31 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                         <div className="relative mx-auto max-w-[620px]">
                             <div className="absolute -inset-6 rounded-[32px] bg-[#DA2E29]/10 blur-3xl" />
 
-                            <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/5 p-3 shadow-2xl backdrop-blur-sm">
+                            <div className="relative overflow-hidden rounded-[28px] border border-gray-200 bg-white p-3 shadow-2xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-sm">
                                 <div className="relative h-[460px] overflow-hidden rounded-[22px] md:h-[560px]">
-                                    <motion.img
-                                        key={currentIndex}
-                                        src={images[currentIndex]}
-                                        alt="Coaching et formation"
-                                        className="absolute inset-0 h-full w-full object-cover"
-                                        initial={{ opacity: 0, scale: 1.02 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 0.9, ease: 'easeInOut' }}
-                                        loading={currentIndex === 0 ? 'eager' : 'lazy'}
-                                        decoding="async"
-                                    />
+                                    <AnimatePresence mode="wait">
+                                        <motion.img
+                                            key={images[currentIndex]}
+                                            src={images[currentIndex]}
+                                            alt="Coaching et formation"
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                            initial={{ opacity: 0, scale: 1.03 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 1.01 }}
+                                            transition={{
+                                                duration: 0.9,
+                                                ease: 'easeInOut',
+                                            }}
+                                            loading={
+                                                currentIndex === 0
+                                                    ? 'eager'
+                                                    : 'lazy'
+                                            }
+                                            decoding="async"
+                                        />
+                                    </AnimatePresence>
 
-                                    <div className="relative h-[460px] overflow-hidden rounded-[22px] md:h-[560px]">
-                                        <AnimatePresence mode="wait">
-                                            <motion.img
-                                                key={images[currentIndex]}
-                                                src={images[currentIndex]}
-                                                alt="Coaching et formation"
-                                                className="absolute inset-0 h-full w-full object-cover"
-                                                initial={{ opacity: 0, scale: 1.03 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 1.01 }}
-                                                transition={{ duration: 0.9, ease: 'easeInOut' }}
-                                                loading={currentIndex === 0 ? 'eager' : 'lazy'}
-                                                decoding="async"
-                                            />
-                                        </AnimatePresence>
-
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent" />
-                                    </div>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent" />
                                 </div>
                             </div>
 
@@ -290,10 +291,11 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                             key={index}
                                             type="button"
                                             onClick={() => setCurrentIndex(index)}
-                                            className={`h-2.5 rounded-full transition-all duration-300 ${index === currentIndex
-                                                ? 'w-6 bg-white'
-                                                : 'w-2.5 bg-white/35 hover:bg-white/60'
-                                                }`}
+                                            className={`h-2.5 rounded-full transition-all duration-300 ${
+                                                index === currentIndex
+                                                    ? 'w-6 bg-white'
+                                                    : 'w-2.5 bg-white/35 hover:bg-white/60'
+                                            }`}
                                             aria-label={`Afficher l’image ${index + 1}`}
                                         />
                                     ))}

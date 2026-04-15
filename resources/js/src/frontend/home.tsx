@@ -4,7 +4,6 @@ import StatsBand from '@/components/frontend/home/stats-band'
 import HowItWorks from '@/components/frontend/home/how-it-works'
 import ForWhom from '@/components/frontend/home/for-whom'
 import FeaturedFormations from '@/components/frontend/home/featured-formations'
-import FrequentEventsGallery from '@/components/frontend/home/frequent-events-gallery'
 import WelcomeVideo from '@/components/frontend/home/welcome-video'
 import TestimonialsSection from '@/components/frontend/home/testimonials-section'
 import BlogPreview from '@/components/frontend/home/blog-preview'
@@ -16,143 +15,140 @@ import React from 'react'
 
 const defaultHomeMeta = {
     // ── Hero ──────────────────────────────────────────────────────────────────
-   hero_badge: 'Formation • Coaching • Conseil',
-hero_title_line1: 'Structurez vos actions',
-hero_title_line2: 'et atteignez vos objectifs',
-hero_title_line3: 'durablement',
-hero_subtitle:
-    'Un accompagnement humain et structuré pour clarifier vos priorités, renforcer vos habitudes et avancer avec constance.',
-hero_cta_text: 'Réserver une consultation gratuite',
-hero_cta_url: '/contact',
-hero_secondary_cta_text: 'Découvrir les formations',
-hero_secondary_cta_url: '/formations',
-hero_image: '/assets/images/portrait.jpg',
-hero_images: [
-    '/assets/images/portrait.jpg',
-    '/assets/images/coaching-1.jpg',
-    '/assets/images/formation-presentiel.jpg',
-],
-hero_reassurance_items: [
-    { text: 'Sans engagement' },
-    { text: 'Aucun paiement requis' },
-    { text: '30 minutes' },
-],
-hero_floating_stat_enabled: true,
-hero_floating_stat_value: '97%',
-hero_floating_stat_label: 'Satisfaction',
+    hero_badge: 'Coaching • Formation • Accompagnement',
+    hero_title_line1: 'Structurez vos actions',
+    hero_title_line2: 'et développez des résultats',
+    hero_title_line3: 'durables',
+    hero_subtitle:
+        'J’accompagne les entrepreneurs, les leaders et les professionnels en évolution à clarifier leurs priorités, renforcer leur posture et avancer avec méthode.',
+    hero_cta_text: 'Réserver une session découverte',
+    hero_cta_url: '/contact',
+    hero_secondary_cta_text: 'Découvrir les accompagnements',
+    hero_secondary_cta_url: '/services',
+    hero_image: '/assets/images/portrait.jpg',
+    hero_images: [] as string[],
+    hero_reassurance_items: [
+        { text: 'Sans engagement' },
+        { text: '30 minutes' },
+        { text: 'En visio ou en présentiel' },
+    ],
+    hero_floating_stat_enabled: true,
+    hero_floating_stat_value: '97%',
+    hero_floating_stat_label: 'Satisfaction',
 
-    // ── Transformation block ─────────────────────────────────────────────────
+    // ── Clarity / Action block ────────────────────────────────────────────────
     clarity_action_enabled: true,
-    clarity_action_title: "Du flou à l’action : un cadre simple pour avancer",
+    clarity_action_title: 'Du flou à l’action : un cadre simple pour avancer',
     clarity_action_left_title: 'Vous vous reconnaissez si :',
     clarity_action_left_items: [
-        { text: 'Trop de priorités et pas assez de clarté' },
-        { text: 'Vous démarrez fort puis perdez le rythme' },
-        { text: 'Vous êtes souvent dans l’urgence' },
-        { text: 'Vous avancez sans résultats stables' },
+        { text: 'Vous avez trop de priorités et pas assez de clarté' },
+        { text: 'Vous avancez beaucoup, mais sans résultats suffisamment stables' },
+        { text: 'Vous avez du mal à garder un cap dans la durée' },
+        { text: 'Vous ressentez le besoin de structurer votre progression' },
     ],
     clarity_action_right_title: 'Vous repartez avec :',
     clarity_action_right_items: [
-        { text: 'Des priorités nettes et une direction claire' },
-        { text: 'Un plan d’action simple et réaliste' },
-        { text: 'Des habitudes durables' },
-        { text: 'Des résultats mesurables' },
+        { text: 'Des priorités claires et une direction plus nette' },
+        { text: 'Une méthode simple, réaliste et applicable' },
+        { text: 'Des habitudes plus solides et plus durables' },
+        { text: 'Une progression visible, mesurable et cohérente' },
     ],
 
-    // ── Stats ────────────────────────────────────────────────────────────────
+    // ── Stats band ────────────────────────────────────────────────────────────
     stats: [
-        { value: '150+', label: 'Clients accompagnés' },
+        { value: '150+', label: 'Personnes accompagnées' },
         { value: '10+', label: "Années d’expérience" },
-        { value: '40+', label: 'Formations & ateliers' },
+        { value: '40+', label: 'Formations et ateliers' },
         { value: '97%', label: 'Taux de satisfaction' },
     ],
 
-    // ── Process ──────────────────────────────────────────────────────────────
-    process_title: 'Mon approche',
-    process_subtitle: 'Une méthode claire, humaine et orientée résultats.',
+    // ── Process ───────────────────────────────────────────────────────────────
+    process_title: 'Une méthode claire, humaine et orientée résultats',
+    process_subtitle:
+        'Chaque accompagnement s’appuie sur un cadre structuré pour transformer vos intentions en avancées concrètes.',
     process: [
         {
             icon: 'MessageCircle',
-            title: 'Premier échange',
-            description: 'Nous clarifions vos enjeux, vos objectifs et vos priorités.',
+            title: 'Clarifier',
+            description: 'Nous faisons le point sur votre situation, vos enjeux et vos priorités réelles.',
         },
         {
             icon: 'Search',
-            title: 'Diagnostic ciblé',
-            description: 'Nous identifions les leviers les plus utiles à votre évolution.',
+            title: 'Identifier',
+            description: 'Nous repérons les leviers les plus utiles pour avancer avec plus d’impact.',
         },
         {
             icon: 'Clipboard',
-            title: "Plan d’action",
-            description: 'Vous repartez avec une feuille de route concrète et progressive.',
+            title: 'Structurer',
+            description: 'Nous construisons un plan d’action simple, cohérent et réaliste.',
         },
         {
             icon: 'Target',
-            title: 'Résultats durables',
-            description: 'Nous consolidons les avancées pour inscrire le changement dans le temps.',
+            title: 'Consolider',
+            description: 'Nous ancrons des résultats durables dans votre fonctionnement quotidien.',
         },
     ],
 
-    // ── For whom ─────────────────────────────────────────────────────────────
-    for_whom_title: 'Pour qui ?',
+    // ── For whom ──────────────────────────────────────────────────────────────
+    for_whom_title: 'Un accompagnement pensé pour celles et ceux qui veulent avancer avec plus de clarté et d’impact',
     for_whom_subtitle:
-        'Entrepreneurs, leaders, professionnels en évolution et porteurs de projet.',
+        'Entrepreneurs, managers, professionnels en transition ou porteurs de projet : chaque accompagnement s’adapte à votre réalité.',
     for_whom: [
         {
             icon: 'Briefcase',
-            title: 'Entrepreneur(e)s',
-            description: 'Structurer une vision, poser des priorités et avancer avec cohérence.',
+            title: 'Entrepreneurs & indépendants',
+            description: 'Structurer votre vision, mieux prioriser et avancer avec davantage de cohérence.',
         },
         {
             icon: 'Users',
             title: 'Managers & leaders',
-            description: 'Renforcer sa posture, mieux décider et mieux fédérer.',
+            description: 'Renforcer votre posture, mieux décider et mieux fédérer autour de l’essentiel.',
         },
         {
             icon: 'Rocket',
             title: 'Transitions professionnelles',
-            description: 'Retrouver un cap clair et construire la suite avec confiance.',
+            description: 'Retrouver un cap clair, reprendre confiance et construire la suite avec méthode.',
         },
     ],
 
-    // ── Testimonials ─────────────────────────────────────────────────────────
-    testimonials_title: 'Ce que disent mes clients',
+    // ── Testimonials ──────────────────────────────────────────────────────────
+    testimonials_title: 'Ce que disent les personnes accompagnées',
     testimonials: [
         {
-            content: 'Un accompagnement puissant, pragmatique et profondément humain.',
+            content: 'Un accompagnement exigeant, humain et immédiatement utile. J’ai gagné en clarté et en efficacité.',
             author: 'Aline K.',
             position: "Cheffe d'entreprise",
             image: '',
         },
         {
-            content: "J’ai gagné en clarté, en discipline et en sérénité.",
+            content: 'J’ai enfin pu remettre de l’ordre dans mes priorités et avancer avec plus de sérénité.',
             author: 'Samuel T.',
             position: 'Cadre dirigeant',
             image: '',
         },
     ],
 
-    // ── Dynamic sections ─────────────────────────────────────────────────────
-    formations_title: 'Formations à découvrir',
+    // ── Dynamic sections ──────────────────────────────────────────────────────
+    formations_title: 'Formations & ateliers à découvrir',
     blog_title: 'Articles & réflexions',
 
-    // ── Welcome video ────────────────────────────────────────────────────────
+    // ── Welcome video ─────────────────────────────────────────────────────────
     video_enabled: false,
     video_url: '',
     video_title: 'Bienvenue',
     video_subtitle:
         'Une courte vidéo pour découvrir mon approche et ma manière d’accompagner.',
 
-    // ── Gallery ──────────────────────────────────────────────────────────────
+    // ── Gallery ───────────────────────────────────────────────────────────────
     events_gallery_enabled: true,
     events_gallery_title: 'En images',
     events_gallery_images: [] as string[],
     events_gallery_captions: [] as string[],
 
-    // ── CTA ──────────────────────────────────────────────────────────────────
+    // ── CTA ───────────────────────────────────────────────────────────────────
     cta_benefits: [
-        { text: 'Clarifier vos enjeux prioritaires' },
-        { text: 'Identifier vos leviers de progression' },
+        { text: 'Clarifier votre situation actuelle et vos priorités' },
+        { text: 'Identifier les leviers les plus utiles pour avancer' },
         { text: 'Repartir avec une direction concrète et applicable' },
     ],
 }
@@ -197,6 +193,8 @@ function Home({ services, home, posts, formations }: any) {
                 subtitle={meta.for_whom_subtitle}
             />
 
+            <Services services={services} />
+
             <HowItWorks
                 steps={meta.process ?? []}
                 title={meta.process_title}
@@ -205,32 +203,22 @@ function Home({ services, home, posts, formations }: any) {
 
             <StatsBand stats={meta.stats ?? []} />
 
-            <Services services={services} />
+            <TestimonialsSection
+                testimonials={meta.testimonials ?? []}
+                title={meta.testimonials_title}
+            />
 
             <FeaturedFormations
                 formations={formations ?? []}
                 title={meta.formations_title}
             />
 
-            <TestimonialsSection
-                testimonials={meta.testimonials ?? []}
-                title={meta.testimonials_title}
-            />
-
-            <WelcomeVideo
+             <WelcomeVideo
                 enabled={meta.video_enabled !== false && !!meta.video_url}
                 videoUrl={meta.video_url}
                 title={meta.video_title}
                 subtitle={meta.video_subtitle}
             />
-
-            {meta.events_gallery_enabled !== false && (
-                <FrequentEventsGallery
-                    images={meta.events_gallery_images ?? []}
-                    captions={meta.events_gallery_captions ?? []}
-                    title={meta.events_gallery_title}
-                />
-            )}
 
             <BlogPreview
                 posts={posts ?? []}
