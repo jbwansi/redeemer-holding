@@ -15,8 +15,12 @@ class SettingsService
         return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
             return Setting::all()->mapWithKeys(function ($setting) {
                 $value = $setting->value;
-                return [$setting->type => is_string($value) && $this->isJson($value) ?
-                    json_decode($value, true) : $value];
+
+                return [
+                    $setting->type => is_string($value) && $this->isJson($value)
+                        ? json_decode($value, true)
+                        : $value
+                ];
             })->toArray();
         });
     }
@@ -30,15 +34,33 @@ class SettingsService
     public function updateSettings(array $settings)
     {
         foreach ($settings as $key => $value) {
-            $setting = Setting::firstOrNew(['type' => $key]);
-            $setting->value = is_array($value) ? json_encode($value) : $value;
-            $setting->save();
+            if (in_array($key, ['_token', '_method'], true)) {
+                continue;
+            }
+
+            if ($value === null) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+            } elseif (is_bool($value)) {
+                $value = $value ? '1' : '0';
+            } else {
+                $value = (string) $value;
+            }
+
+            Setting::updateOrCreate(
+                ['type' => $key],
+                ['value' => $value]
+            );
         }
 
         Cache::forget(self::CACHE_KEY);
     }
 
-    private function isJson($string) {
+    private function isJson($string)
+    {
         json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
     }

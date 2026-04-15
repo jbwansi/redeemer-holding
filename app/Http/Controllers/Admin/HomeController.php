@@ -99,73 +99,95 @@ class HomeController extends Controller
     }
 
     public function update(Request $request)
-    {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'meta'    => 'nullable|array',
-            'gallery_uploads'   => 'nullable|array',
-            'gallery_uploads.*' => 'nullable|image|max:5120',
-        ]);
+{
+    $validated = $request->validate([
+        'title'   => 'required|string|max:255',
+        'content' => 'nullable|string',
+        'meta'    => 'nullable|array',
 
-        $page = Page::where('slug', 'accueil')->firstOrFail();
+        'gallery_uploads'   => 'nullable|array',
+        'gallery_uploads.*' => 'nullable|image|max:5120',
 
-        $meta = $validated['meta'] ?? [];
-        $galleryImages = data_get($meta, 'events_gallery_images', []);
-        $galleryCaptions = data_get($meta, 'events_gallery_captions', []);
-        $imageService = app(ImageService::class);
+        'hero_uploads'   => 'nullable|array',
+        'hero_uploads.*' => 'nullable|image|max:5120',
+    ]);
 
-        foreach (($request->file('gallery_uploads') ?? []) as $index => $file) {
-            if ($file) {
-                // Save a resized/compressed variant for faster gallery loading.
-                $uploaded = $imageService->uploadImage($file, 'home/gallery', [
-                    'large' => ['width' => 1600, 'height' => 1100],
-                ]);
+    $page = Page::where('slug', 'accueil')->firstOrFail();
 
-                $storedPath = data_get($uploaded, 'large', data_get($uploaded, 'original'));
-                $galleryImages[$index] = asset('storage/' . $storedPath);
-            }
+    $meta = $validated['meta'] ?? [];
+    $galleryImages = data_get($meta, 'events_gallery_images', []);
+    $galleryCaptions = data_get($meta, 'events_gallery_captions', []);
+    $heroImages = data_get($meta, 'hero_images', []);
+
+    $imageService = app(ImageService::class);
+
+    foreach (($request->file('gallery_uploads') ?? []) as $index => $file) {
+        if ($file) {
+            $uploaded = $imageService->uploadImage($file, 'home/gallery', [
+                'large' => ['width' => 1600, 'height' => 1100],
+            ]);
+
+            $storedPath = data_get($uploaded, 'large', data_get($uploaded, 'original'));
+            $galleryImages[$index] = asset('storage/' . $storedPath);
         }
-
-        $meta['events_gallery_enabled'] = filter_var(
-            data_get($meta, 'events_gallery_enabled', true),
-            FILTER_VALIDATE_BOOLEAN,
-            FILTER_NULL_ON_FAILURE
-        );
-
-        if ($meta['events_gallery_enabled'] === null) {
-            $meta['events_gallery_enabled'] = true;
-        }
-
-        $meta['video_enabled'] = filter_var(
-            data_get($meta, 'video_enabled', false),
-            FILTER_VALIDATE_BOOLEAN,
-            FILTER_NULL_ON_FAILURE
-        ) ?? false;
-
-        $meta['video_url'] = trim((string) data_get($meta, 'video_url', ''));
-
-        $meta['events_gallery_images'] = array_values(array_map(function ($image) {
-            return is_string($image) ? trim($image) : '';
-        }, $galleryImages));
-
-        $meta['events_gallery_captions'] = array_values(array_map(function ($caption) {
-            return is_string($caption) ? trim($caption) : '';
-        }, $galleryCaptions));
-
-        $galleryCount = count($meta['events_gallery_images']);
-        $meta['events_gallery_captions'] = array_pad(
-            array_slice($meta['events_gallery_captions'], 0, $galleryCount),
-            $galleryCount,
-            ''
-        );
-
-        $page->update([
-            'title'   => $validated['title'],
-            'content' => $validated['content'] ?? null,
-            'meta'    => $meta,
-        ]);
-
-        return back()->with('success', 'Page d\'accueil mise à jour avec succès.');
     }
+
+    foreach (($request->file('hero_uploads') ?? []) as $index => $file) {
+        if ($file) {
+            $uploaded = $imageService->uploadImage($file, 'home/hero', [
+                'large' => ['width' => 1800, 'height' => 1400],
+            ]);
+
+            $storedPath = data_get($uploaded, 'large', data_get($uploaded, 'original'));
+            $heroImages[$index] = asset('storage/' . $storedPath);
+        }
+    }
+
+    $meta['events_gallery_enabled'] = filter_var(
+        data_get($meta, 'events_gallery_enabled', true),
+        FILTER_VALIDATE_BOOLEAN,
+        FILTER_NULL_ON_FAILURE
+    );
+
+    if ($meta['events_gallery_enabled'] === null) {
+        $meta['events_gallery_enabled'] = true;
+    }
+
+    $meta['video_enabled'] = filter_var(
+        data_get($meta, 'video_enabled', false),
+        FILTER_VALIDATE_BOOLEAN,
+        FILTER_NULL_ON_FAILURE
+    ) ?? false;
+
+    $meta['video_url'] = trim((string) data_get($meta, 'video_url', ''));
+
+    $meta['hero_images'] = array_values(array_filter(array_map(function ($image) {
+        return is_string($image) ? trim($image) : '';
+    }, $heroImages), function ($image) {
+        return $image !== '';
+    }));
+
+    $meta['events_gallery_images'] = array_values(array_map(function ($image) {
+        return is_string($image) ? trim($image) : '';
+    }, $galleryImages));
+
+    $meta['events_gallery_captions'] = array_values(array_map(function ($caption) {
+        return is_string($caption) ? trim($caption) : '';
+    }, $galleryCaptions));
+
+    $galleryCount = count($meta['events_gallery_images']);
+    $meta['events_gallery_captions'] = array_pad(
+        array_slice($meta['events_gallery_captions'], 0, $galleryCount),
+        $galleryCount,
+        ''
+    );
+
+    $page->update([
+        'title'   => $validated['title'],
+        'content' => $validated['content'] ?? null,
+        'meta'    => $meta,
+    ]);
+
+    return back()->with('success', 'Page d\'accueil mise à jour avec succès.');
+}
 }

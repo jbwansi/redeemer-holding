@@ -1,148 +1,171 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Calendar } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import React from 'react'
+import { motion } from 'framer-motion'
+import { ArrowRight, Calendar } from 'lucide-react'
+import { Link } from '@inertiajs/react'
 
 interface Post {
-    id: number;
-    title: string;
-    slug: string;
-    excerpt?: string;
-    featured_image?: string | Record<string, any>;
-    published_at?: string;
-    tags?: string | string[];
+    id: number
+    title: string
+    slug: string
+    excerpt?: string
+    featured_image?: string | Record<string, any>
+    published_at?: string
+    tags?: string | string[]
 }
 
 function resolveImageSrc(image?: string | Record<string, any>): string {
-    if (!image) return '';
-    if (typeof image === 'string') return image;
+    if (!image) return ''
+    if (typeof image === 'string') return image
 
-    const candidates = [image.medium, image.large, image.original, image.thumbnail];
+    const candidates = [image.medium, image.large, image.original, image.thumbnail]
     for (const value of candidates) {
         if (typeof value === 'string' && value.trim() !== '') {
-            return value;
+            return value
         }
         if (Array.isArray(value)) {
-            const first = value.find((entry) => typeof entry === 'string' && entry.trim() !== '');
-            if (first) return first;
+            const first = value.find((entry) => typeof entry === 'string' && entry.trim() !== '')
+            if (first) return first
         }
     }
 
-    return '';
+    return ''
 }
 
 function formatDate(dateStr?: string): string {
-    if (!dateStr) return '';
+    if (!dateStr) return ''
     try {
-        return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+        return new Date(dateStr).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        })
     } catch {
-        return dateStr;
+        return dateStr
     }
 }
 
-export default function BlogPreview({ posts, title }: {
-    posts: Post[];
-    title?: string;
+export default function BlogPreview({
+    posts,
+    title,
+}: {
+    posts: Post[]
+    title?: string
 }) {
-    if (!posts?.length) return null;
+    if (!posts?.length) return null
 
     return (
-        <section className="py-20 bg-white dark:bg-gray-950">
-            <div className="max-w-[1400px] mx-auto px-6 md:px-8">
-                <div className="flex items-end justify-between mb-12 flex-wrap gap-4">
+        <section className="py-20 md:py-24 bg-white dark:bg-gray-950">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        viewport={{ once: true, amount: 0.4 }}
                         transition={{ duration: 0.6 }}
+                        className="max-w-3xl"
                     >
-                        <span className="inline-block py-1 px-4 text-sm font-medium bg-[#DA2E29]/10 text-[#DA2E29] rounded-full mb-4">
+                        <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
                             Blog
                         </span>
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+
+                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
                             {title ?? 'Derniers articles'}
                         </h2>
+
+                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                            Des articles et réflexions pour nourrir votre progression, clarifier vos enjeux et enrichir votre manière d’agir.
+                        </p>
                     </motion.div>
+
                     <Link
                         href={route('blogs')}
-                        className="flex items-center gap-2 text-[#DA2E29] font-medium hover:gap-3 transition-all duration-200"
+                        className="inline-flex items-center text-sm font-medium text-[#DA2E29]"
                     >
-                        Voir tous les articles <ArrowRight className="w-4 h-4" />
+                        <span>Voir tous les articles</span>
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 hover:translate-x-1" />
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {posts.map((post, i) => {
                         const tags = Array.isArray(post.tags)
                             ? post.tags
                             : typeof post.tags === 'string' && post.tags
-                                ? post.tags.split(',').map(t => t.trim())
-                                : [];
-                        const imageSrc = resolveImageSrc(post.featured_image);
+                              ? post.tags.split(',').map((t) => t.trim())
+                              : []
+
+                        const imageSrc = resolveImageSrc(post.featured_image)
 
                         return (
                             <motion.article
                                 key={post.id}
-                                className="bg-gray-50 dark:bg-gray-800 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col group"
-                                initial={{ opacity: 0, y: 30 }}
+                                className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-800 dark:bg-gray-900"
+                                initial={{ opacity: 0, y: 24 }}
                                 whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
+                                viewport={{ once: true, amount: 0.3 }}
                                 transition={{ delay: i * 0.12, duration: 0.6 }}
-                                whileHover={{ y: -5 }}
                             >
-                                {imageSrc && (
-                                    <div className="relative h-48 overflow-hidden">
+                                {imageSrc ? (
+                                    <div className="relative h-52 overflow-hidden">
                                         <img
                                             src={imageSrc}
                                             alt={post.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                             loading="lazy"
                                             decoding="async"
-                                            sizes="(min-width: 1024px) 30vw, (min-width: 768px) 45vw, 100vw"
+                                            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 45vw, 100vw"
                                         />
                                     </div>
-                                )}
-                                <div className="p-6 flex flex-col flex-grow">
-                                    {tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mb-3">
+                                ) : null}
+
+                                <div className="flex flex-1 flex-col p-6">
+                                    {tags.length > 0 ? (
+                                        <div className="mb-3 flex flex-wrap gap-2">
                                             {tags.slice(0, 2).map((tag, j) => (
                                                 <span
                                                     key={j}
-                                                    className="px-2 py-0.5 text-xs font-medium bg-[#DA2E29]/10 text-[#DA2E29] rounded-full"
+                                                    className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-[#DA2E29] dark:bg-red-500/10"
                                                 >
                                                     {tag}
                                                 </span>
                                             ))}
                                         </div>
-                                    )}
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-[#DA2E29] transition-colors duration-200">
+                                    ) : null}
+
+                                    <h3 className="text-xl font-semibold text-gray-900 transition-colors duration-200 group-hover:text-[#DA2E29] dark:text-white">
                                         {post.title}
                                     </h3>
-                                    {post.excerpt && (
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3 flex-grow">
+
+                                    {post.excerpt ? (
+                                        <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-400 line-clamp-3">
                                             {post.excerpt}
                                         </p>
-                                    )}
-                                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-200 dark:border-gray-700">
-                                        {post.published_at && (
+                                    ) : null}
+
+                                    <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-800">
+                                        {post.published_at ? (
                                             <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                                                <Calendar className="w-3.5 h-3.5" />
-                                                {formatDate(post.published_at)}
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                <span>{formatDate(post.published_at)}</span>
                                             </div>
+                                        ) : (
+                                            <div />
                                         )}
+
                                         <Link
                                             href={route('blogs.details', { slug: post.slug })}
-                                            className="flex items-center gap-1 text-[#DA2E29] text-sm font-medium hover:gap-2 transition-all duration-200 ml-auto"
+                                            className="inline-flex items-center text-sm font-medium text-[#DA2E29]"
                                         >
-                                            Lire <ArrowRight className="w-3.5 h-3.5" />
+                                            <span>Lire</span>
+                                            <ArrowRight className="ml-2 h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                                         </Link>
                                     </div>
                                 </div>
                             </motion.article>
-                        );
+                        )
                     })}
                 </div>
             </div>
         </section>
-    );
+    )
 }

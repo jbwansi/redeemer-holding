@@ -8,6 +8,7 @@ import FrequentEventsGallery from '@/components/frontend/home/frequent-events-ga
 import WelcomeVideo from '@/components/frontend/home/welcome-video'
 import TestimonialsSection from '@/components/frontend/home/testimonials-section'
 import BlogPreview from '@/components/frontend/home/blog-preview'
+import ClarityActionBlock from '@/components/frontend/home/clarity-action-block'
 import CalendlyCTA from '@/components/frontend/layouts/calendly-cta'
 import FrontLayout from '@/components/frontend/layouts/front-layout'
 import { Head } from '@inertiajs/react'
@@ -15,42 +16,50 @@ import React from 'react'
 
 const defaultHomeMeta = {
     // ── Hero ──────────────────────────────────────────────────────────────────
-    hero_badge: 'Coaching, formation & conseil',
-    hero_title_line1: 'Avancer avec clarté,',
-    hero_title_line2: 'grandir avec justesse',
-    hero_subtitle:
-        "J’accompagne les personnes et les organisations à structurer leur évolution, renforcer leur posture et transformer leurs objectifs en résultats durables.",
-    hero_cta_text: 'Découvrir mes accompagnements',
-    hero_cta_url: '/services',
-    hero_image: '/assets/images/portrait.jpg',
-    hero_steps: [
-        {
-            icon: 'Clock',
-            title: 'Clarifier votre cap',
-            description: 'Faire émerger une direction claire, alignée et réaliste.',
-        },
-        {
-            icon: 'Brain',
-            title: 'Structurer votre progression',
-            description: 'Mettre en place une méthode simple, concrète et durable.',
-        },
-        {
-            icon: 'Zap',
-            title: 'Passer à l’action',
-            description: 'Transformer vos intentions en résultats visibles et mesurables.',
-        },
+   hero_badge: 'Formation • Coaching • Conseil',
+hero_title_line1: 'Structurez vos actions',
+hero_title_line2: 'et atteignez vos objectifs',
+hero_title_line3: 'durablement',
+hero_subtitle:
+    'Un accompagnement humain et structuré pour clarifier vos priorités, renforcer vos habitudes et avancer avec constance.',
+hero_cta_text: 'Réserver une consultation gratuite',
+hero_cta_url: '/contact',
+hero_secondary_cta_text: 'Découvrir les formations',
+hero_secondary_cta_url: '/formations',
+hero_image: '/assets/images/portrait.jpg',
+hero_images: [
+    '/assets/images/portrait.jpg',
+    '/assets/images/coaching-1.jpg',
+    '/assets/images/formation-presentiel.jpg',
+],
+hero_reassurance_items: [
+    { text: 'Sans engagement' },
+    { text: 'Aucun paiement requis' },
+    { text: '30 minutes' },
+],
+hero_floating_stat_enabled: true,
+hero_floating_stat_value: '97%',
+hero_floating_stat_label: 'Satisfaction',
+
+    // ── Transformation block ─────────────────────────────────────────────────
+    clarity_action_enabled: true,
+    clarity_action_title: "Du flou à l’action : un cadre simple pour avancer",
+    clarity_action_left_title: 'Vous vous reconnaissez si :',
+    clarity_action_left_items: [
+        { text: 'Trop de priorités et pas assez de clarté' },
+        { text: 'Vous démarrez fort puis perdez le rythme' },
+        { text: 'Vous êtes souvent dans l’urgence' },
+        { text: 'Vous avancez sans résultats stables' },
     ],
-    hero_testimonial: {
-        content: 'Un accompagnement structuré, humain et profondément transformateur.',
-        author: 'Marie L.',
-        position: 'Entrepreneure',
-    },
-    hero_stats: [
-        { value: '97%', label: 'Satisfaction' },
-        { value: '150+', label: 'Personnes accompagnées' },
+    clarity_action_right_title: 'Vous repartez avec :',
+    clarity_action_right_items: [
+        { text: 'Des priorités nettes et une direction claire' },
+        { text: 'Un plan d’action simple et réaliste' },
+        { text: 'Des habitudes durables' },
+        { text: 'Des résultats mesurables' },
     ],
 
-    // ── Stats band ────────────────────────────────────────────────────────────
+    // ── Stats ────────────────────────────────────────────────────────────────
     stats: [
         { value: '150+', label: 'Clients accompagnés' },
         { value: '10+', label: "Années d’expérience" },
@@ -58,8 +67,8 @@ const defaultHomeMeta = {
         { value: '97%', label: 'Taux de satisfaction' },
     ],
 
-    // ── Process ───────────────────────────────────────────────────────────────
-    process_title: "Mon approche",
+    // ── Process ──────────────────────────────────────────────────────────────
+    process_title: 'Mon approche',
     process_subtitle: 'Une méthode claire, humaine et orientée résultats.',
     process: [
         {
@@ -84,7 +93,7 @@ const defaultHomeMeta = {
         },
     ],
 
-    // ── For whom ──────────────────────────────────────────────────────────────
+    // ── For whom ─────────────────────────────────────────────────────────────
     for_whom_title: 'Pour qui ?',
     for_whom_subtitle:
         'Entrepreneurs, leaders, professionnels en évolution et porteurs de projet.',
@@ -106,7 +115,7 @@ const defaultHomeMeta = {
         },
     ],
 
-    // ── Testimonials ──────────────────────────────────────────────────────────
+    // ── Testimonials ─────────────────────────────────────────────────────────
     testimonials_title: 'Ce que disent mes clients',
     testimonials: [
         {
@@ -123,38 +132,42 @@ const defaultHomeMeta = {
         },
     ],
 
-    // ── Other sections ────────────────────────────────────────────────────────
+    // ── Dynamic sections ─────────────────────────────────────────────────────
     formations_title: 'Formations à découvrir',
+    blog_title: 'Articles & réflexions',
 
-    // ── Welcome video ─────────────────────────────────────────────────────────
+    // ── Welcome video ────────────────────────────────────────────────────────
     video_enabled: false,
     video_url: '',
     video_title: 'Bienvenue',
     video_subtitle:
         'Une courte vidéo pour découvrir mon approche et ma manière d’accompagner.',
 
-    // ── Gallery ───────────────────────────────────────────────────────────────
+    // ── Gallery ──────────────────────────────────────────────────────────────
     events_gallery_enabled: true,
     events_gallery_title: 'En images',
     events_gallery_images: [] as string[],
     events_gallery_captions: [] as string[],
 
-    // ── Blog ──────────────────────────────────────────────────────────────────
-    blog_title: 'Articles & réflexions',
-
-    // ── CTA ───────────────────────────────────────────────────────────────────
+    // ── CTA ──────────────────────────────────────────────────────────────────
     cta_benefits: [
         { text: 'Clarifier vos enjeux prioritaires' },
         { text: 'Identifier vos leviers de progression' },
-        { text: "Repartir avec une direction concrète et applicable" },
+        { text: 'Repartir avec une direction concrète et applicable' },
     ],
 }
 
 function Home({ services, home, posts, formations }: any) {
     const meta = { ...defaultHomeMeta, ...(home?.meta ?? {}) }
 
-    const pageTitle =
-        `${meta.hero_title_line1 ?? 'Avancer avec clarté'}, ${meta.hero_title_line2 ?? 'grandir avec justesse'}`
+    const pageTitle = [
+        meta.hero_title_line1 ?? 'Avancer avec clarté',
+        meta.hero_title_line2 ?? 'grandir avec justesse',
+        meta.hero_title_line3 ?? '',
+    ]
+        .filter(Boolean)
+        .join(' ')
+
     const pageDescription = meta.hero_subtitle ?? defaultHomeMeta.hero_subtitle
 
     return (
@@ -169,14 +182,13 @@ function Home({ services, home, posts, formations }: any) {
 
             <Hero meta={meta} />
 
-            <StatsBand stats={meta.stats ?? []} />
-
-            <Services services={services} />
-
-            <HowItWorks
-                steps={meta.process ?? []}
-                title={meta.process_title}
-                subtitle={meta.process_subtitle}
+            <ClarityActionBlock
+                enabled={meta.clarity_action_enabled !== false}
+                title={meta.clarity_action_title}
+                leftTitle={meta.clarity_action_left_title}
+                leftItems={meta.clarity_action_left_items ?? []}
+                rightTitle={meta.clarity_action_right_title}
+                rightItems={meta.clarity_action_right_items ?? []}
             />
 
             <ForWhom
@@ -185,9 +197,24 @@ function Home({ services, home, posts, formations }: any) {
                 subtitle={meta.for_whom_subtitle}
             />
 
+            <HowItWorks
+                steps={meta.process ?? []}
+                title={meta.process_title}
+                subtitle={meta.process_subtitle}
+            />
+
+            <StatsBand stats={meta.stats ?? []} />
+
+            <Services services={services} />
+
             <FeaturedFormations
                 formations={formations ?? []}
                 title={meta.formations_title}
+            />
+
+            <TestimonialsSection
+                testimonials={meta.testimonials ?? []}
+                title={meta.testimonials_title}
             />
 
             <WelcomeVideo
@@ -195,11 +222,6 @@ function Home({ services, home, posts, formations }: any) {
                 videoUrl={meta.video_url}
                 title={meta.video_title}
                 subtitle={meta.video_subtitle}
-            />
-
-            <TestimonialsSection
-                testimonials={meta.testimonials ?? []}
-                title={meta.testimonials_title}
             />
 
             {meta.events_gallery_enabled !== false && (
