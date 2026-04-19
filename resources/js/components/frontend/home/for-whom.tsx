@@ -2,6 +2,7 @@ import React from 'react'
 import * as LucideIcons from 'lucide-react'
 import { LucideIcon, ArrowRight } from 'lucide-react'
 import { Link } from '@inertiajs/react'
+import SectionHeader from '@/components/frontend/layouts/section-header'
 
 type CardItem = {
     icon?: string
@@ -43,21 +44,7 @@ export default function ForWhom({
     return (
         <section className="py-20 md:py-24 bg-white dark:bg-gray-950">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto mb-12 max-w-3xl text-center">
-                    <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
-                        Pour qui
-                    </span>
-
-                    <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
-                        {title}
-                    </h2>
-
-                    {subtitle ? (
-                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                            {subtitle}
-                        </p>
-                    ) : null}
-                </div>
+                <SectionHeader label="Pour qui" title={title} subtitle={subtitle} />
 
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {cards.map((card, index) => {

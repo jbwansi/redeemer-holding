@@ -37,8 +37,14 @@ const defaultHomeMeta = {
     hero_floating_stat_label: 'Satisfaction',
 
     // ── Clarity / Action block ────────────────────────────────────────────────
+    // ── Clarity / Action block ────────────────────────────────────────────────
     clarity_action_enabled: true,
+    clarity_action_badge: 'Transformation',
     clarity_action_title: 'Du flou à l’action : un cadre simple pour avancer',
+    clarity_action_subtitle:
+        'Identifiez ce qui freine votre progression et découvrez le cadre concret pour avancer avec plus de clarté, de constance et de résultats.',
+
+    clarity_action_left_eyebrow: 'Situation actuelle',
     clarity_action_left_title: 'Vous vous reconnaissez si :',
     clarity_action_left_items: [
         { text: 'Vous avez trop de priorités et pas assez de clarté' },
@@ -46,6 +52,8 @@ const defaultHomeMeta = {
         { text: 'Vous avez du mal à garder un cap dans la durée' },
         { text: 'Vous ressentez le besoin de structurer votre progression' },
     ],
+
+    clarity_action_right_eyebrow: 'Résultat attendu',
     clarity_action_right_title: 'Vous repartez avec :',
     clarity_action_right_items: [
         { text: 'Des priorités claires et une direction plus nette' },
@@ -53,6 +61,13 @@ const defaultHomeMeta = {
         { text: 'Des habitudes plus solides et plus durables' },
         { text: 'Une progression visible, mesurable et cohérente' },
     ],
+
+    clarity_action_final_cta_title: 'Faisons le point sur votre situation',
+    clarity_action_final_cta_subtitle:
+        'Profitez d’un premier échange pour clarifier vos priorités, prendre du recul et identifier les prochaines étapes à mettre en place.',
+    clarity_action_final_cta_button_text: 'Réserver mon appel découverte',
+    clarity_action_final_cta_button_href: '/contact',
+    clarity_action_final_cta_disclaimer: '30 minutes • Sans engagement',
 
     // ── Stats band ────────────────────────────────────────────────────────────
     stats: [
@@ -180,17 +195,20 @@ function Home({ services, home, posts, formations }: any) {
 
             <ClarityActionBlock
                 enabled={meta.clarity_action_enabled !== false}
+                badge={meta.clarity_action_badge}
                 title={meta.clarity_action_title}
+                subtitle={meta.clarity_action_subtitle}
+                leftEyebrow={meta.clarity_action_left_eyebrow}
                 leftTitle={meta.clarity_action_left_title}
                 leftItems={meta.clarity_action_left_items ?? []}
+                rightEyebrow={meta.clarity_action_right_eyebrow}
                 rightTitle={meta.clarity_action_right_title}
                 rightItems={meta.clarity_action_right_items ?? []}
-            />
-
-            <ForWhom
-                cards={meta.for_whom ?? []}
-                title={meta.for_whom_title}
-                subtitle={meta.for_whom_subtitle}
+                finalCtaTitle={meta.clarity_action_final_cta_title}
+                finalCtaSubtitle={meta.clarity_action_final_cta_subtitle}
+                finalCtaButtonText={meta.clarity_action_final_cta_button_text}
+                finalCtaDisclaimer={meta.clarity_action_final_cta_disclaimer}
+                submitUrl={route('contact.store')}
             />
 
             <Services services={services} />
@@ -199,6 +217,12 @@ function Home({ services, home, posts, formations }: any) {
                 steps={meta.process ?? []}
                 title={meta.process_title}
                 subtitle={meta.process_subtitle}
+            />
+
+            <ForWhom
+                cards={meta.for_whom ?? []}
+                title={meta.for_whom_title}
+                subtitle={meta.for_whom_subtitle}
             />
 
             <StatsBand stats={meta.stats ?? []} />
@@ -213,7 +237,7 @@ function Home({ services, home, posts, formations }: any) {
                 title={meta.formations_title}
             />
 
-             <WelcomeVideo
+            <WelcomeVideo
                 enabled={meta.video_enabled !== false && !!meta.video_url}
                 videoUrl={meta.video_url}
                 title={meta.video_title}

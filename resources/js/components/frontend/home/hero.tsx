@@ -50,20 +50,27 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
     const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '5%'])
 
     const [currentIndex, setCurrentIndex] = useState(0)
+    const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({})
 
-    const badge = meta?.hero_badge ?? 'Formation • Coaching • Conseil'
-    const titleLine1 = meta?.hero_title_line1 ?? 'Structurez vos actions'
-    const titleLine2 = meta?.hero_title_line2 ?? 'et atteignez vos objectifs'
-    const titleLine3 = meta?.hero_title_line3 ?? 'durablement'
+    const handleImageError = (index: number) => {
+        setImageErrors((prev) => ({ ...prev, [index]: true }))
+    }
+
+
+    const badge = meta?.hero_badge ?? 'Coaching • Conseil • Accompagnement'
+    const titleLine1 = meta?.hero_title_line1 ?? 'Transformez votre potentiel'
+    const titleLine2 = meta?.hero_title_line2 ?? 'en résultats'
+    const titleLine3 = meta?.hero_title_line3 ?? 'durables et concrets'
+
     const subtitle =
         meta?.hero_subtitle ??
-        'Un accompagnement humain et structuré pour clarifier vos priorités, renforcer vos habitudes et avancer avec constance.'
+        "J’accompagne les entrepreneurs, les dirigeants et les professionnels en évolution à clarifier leurs priorités, structurer leurs actions et avancer avec plus d’impact."
 
-    const ctaText = meta?.hero_cta_text ?? 'Réserver une consultation gratuite'
+    const ctaText = meta?.hero_cta_text ?? 'Réserver un appel découverte'
     const ctaUrl = meta?.hero_cta_url ?? route('contact')
 
     const secondaryCtaText =
-        meta?.hero_secondary_cta_text ?? 'Découvrir les formations'
+        meta?.hero_secondary_cta_text ?? 'Découvrir les accompagnements'
     const secondaryCtaUrl =
         meta?.hero_secondary_cta_url ?? route('formations')
 
@@ -71,10 +78,10 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
         meta?.hero_reassurance_items?.length
             ? meta.hero_reassurance_items
             : [
-                  { text: 'Sans engagement' },
-                  { text: 'Aucun paiement requis' },
-                  { text: '30 minutes' },
-              ]
+                { text: 'Sans engagement' },
+                { text: '30 minutes' },
+                { text: 'En visio ou en présentiel' },
+            ]
 
     const showFloatingStat = meta?.hero_floating_stat_enabled !== false
     const floatingStatValue = meta?.hero_floating_stat_value ?? '97%'
@@ -150,6 +157,8 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
             <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                {/* HERO */}
                 <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-14">
                     <motion.div
                         ref={textRef}
@@ -191,7 +200,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="inline-flex min-w-[280px] items-center justify-center rounded-xl bg-[#DA2E29] px-7 py-4 text-base font-semibold text-white shadow-lg shadow-[#DA2E29]/20 transition-colors hover:bg-[#c02824]"
+                                    className="inline-flex min-w-[250px] items-center justify-center rounded-2xl bg-[#EF3B36] px-7 py-4 text-base font-semibold text-white shadow-lg shadow-[#EF3B36]/25 transition-colors hover:bg-[#db312d]"
                                 >
                                     <Calendar className="mr-2 h-5 w-5" />
                                     <span>{ctaText}</span>
@@ -203,7 +212,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                 <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-6 py-4 font-medium text-gray-800 transition-colors hover:bg-gray-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                                    className="inline-flex min-w-[250px] items-center justify-center rounded-2xl border border-white/10 bg-[#09152d] px-6 py-4 font-medium text-white transition-colors hover:bg-[#0d1b38]"
                                 >
                                     <span>{secondaryCtaText}</span>
                                 </motion.button>
@@ -212,7 +221,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
 
                         <motion.div
                             variants={containerVariants}
-                            className="mt-7 flex flex-wrap gap-x-6 gap-y-3"
+                            className="mt-6 flex flex-wrap gap-x-6 gap-y-3"
                         >
                             {reassuranceItems.map((item, index) => (
                                 <motion.div
@@ -220,12 +229,35 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                     variants={itemVariants}
                                     className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
                                 >
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-200 dark:bg-white/10">
-                                        <Check className="h-3.5 w-3.5 text-[#DA2E29] dark:text-white/90" />
+                                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/8">
+                                        <Check className="h-3.5 w-3.5 text-white" />
                                     </div>
                                     <span>{item.text}</span>
                                 </motion.div>
                             ))}
+                        </motion.div>
+
+
+                        {/** TRUSTPILOT + NOTE  a  configurer au dashboard*/}
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={isTextInView ? { opacity: 1, y: 0 } : {}}
+                            transition={{ delay: 0.4, duration: 0.5 }}
+                            className="mt-6 flex flex-col gap-2 text-sm text-slate-300"
+                        >
+                            <span className="text-slate-400">
+                                Plus de 1000 professionnels accompagnés
+                            </span>
+
+                            <div className="flex items-center gap-3">
+                                <div className="flex text-yellow-400">★★★★★</div>
+                                <span className="font-semibold text-white">
+                                    4,9/5
+                                </span>
+                                <span className="rounded-md bg-white/10 px-2 py-1 text-xs font-medium text-slate-300">
+                                    Trustpilot
+                                </span>
+                            </div>
                         </motion.div>
                     </motion.div>
 
@@ -237,17 +269,18 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                         variants={imageVariants}
                         style={{ y: imageY }}
                     >
-                        <div className="relative mx-auto max-w-[620px]">
-                            <div className="absolute -inset-6 rounded-[32px] bg-[#DA2E29]/10 blur-3xl" />
+                        <div className="relative mx-auto max-w-[600px]">
+                            <div className="absolute -inset-5 rounded-[32px] bg-[#EF3B36]/10 blur-3xl" />
 
-                            <div className="relative overflow-hidden rounded-[28px] border border-gray-200 bg-white p-3 shadow-2xl dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-sm">
-                                <div className="relative h-[460px] overflow-hidden rounded-[22px] md:h-[560px]">
+                            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-white/5 p-3 shadow-2xl backdrop-blur-sm">
+                                <div className="relative h-[400px] overflow-hidden rounded-[24px] md:h-[520px]">
                                     <AnimatePresence mode="wait">
                                         <motion.img
                                             key={images[currentIndex]}
-                                            src={images[currentIndex]}
-                                            alt="Coaching et formation"
+                                            src={imageErrors[currentIndex] ? defaultImages[0] : images[currentIndex]}
+                                            alt="Coaching et accompagnement"
                                             className="absolute inset-0 h-full w-full object-cover"
+                                            onError={() => handleImageError(currentIndex)}
                                             initial={{ opacity: 0, scale: 1.03 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0, scale: 1.01 }}
@@ -264,7 +297,8 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                         />
                                     </AnimatePresence>
 
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent" />
+                                    <div className="absolute inset-0 bg-slate-950/35" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/60 to-transparent" />
                                 </div>
                             </div>
 
@@ -273,7 +307,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                     initial={{ opacity: 0, x: 18 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.45, duration: 0.5 }}
-                                    className="absolute top-5 right-5 rounded-2xl border border-white/10 bg-slate-950/75 px-5 py-4 shadow-xl backdrop-blur-md"
+                                    className="absolute top-5 right-5 rounded-2xl border border-white/10 bg-slate-950/80 px-5 py-4 shadow-xl backdrop-blur-md"
                                 >
                                     <div className="text-3xl font-bold tracking-tight text-[#DA2E29]">
                                         {floatingStatValue}
@@ -291,11 +325,10 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                                             key={index}
                                             type="button"
                                             onClick={() => setCurrentIndex(index)}
-                                            className={`h-2.5 rounded-full transition-all duration-300 ${
-                                                index === currentIndex
-                                                    ? 'w-6 bg-white'
-                                                    : 'w-2.5 bg-white/35 hover:bg-white/60'
-                                            }`}
+                                            className={`h-2.5 rounded-full transition-all duration-300 ${index === currentIndex
+                                                ? 'w-6 bg-white'
+                                                : 'w-2.5 bg-white/35 hover:bg-white/60'
+                                                }`}
                                             aria-label={`Afficher l’image ${index + 1}`}
                                         />
                                     ))}

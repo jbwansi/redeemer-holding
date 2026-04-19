@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import { Link } from '@inertiajs/react'
 import IconComponent from '@/components/ui/icon'
+import SectionHeader from '@/components/frontend/layouts/section-header'
 import { normalizeServiceIconName } from '@/lib/service-icon'
 
 const Services = ({ services }: any) => {
@@ -41,26 +42,11 @@ const Services = ({ services }: any) => {
             <div className="absolute bottom-20 right-20 h-80 w-80 rounded-full bg-rose-500/4 dark:bg-rose-500/6 blur-[120px]" />
 
             <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.7 }}
-                    className="mx-auto mb-12 max-w-3xl text-center"
-                >
-                    <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
-                        Accompagnements
-                    </span>
-
-                    <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
-                        Des accompagnements concrets pour avancer avec clarté
-                    </h2>
-
-                    <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                        Découvrez des accompagnements pensés pour structurer vos actions,
-                        renforcer votre posture et obtenir des résultats durables.
-                    </p>
-                </motion.div>
+                <SectionHeader
+                    label="Accompagnements"
+                    title="Des accompagnements concrets pour avancer avec clarté"
+                    subtitle="Découvrez des accompagnements pensés pour structurer vos actions, renforcer votre posture et obtenir des résultats durables."
+                />
 
                 <motion.div
                     ref={sectionRef}

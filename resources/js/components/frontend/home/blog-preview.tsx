@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, Calendar } from 'lucide-react'
 import { Link } from '@inertiajs/react'
+import SectionHeader from '@/components/frontend/layouts/section-header'
 
 interface Post {
     id: number
@@ -64,17 +65,11 @@ export default function BlogPreview({
                         transition={{ duration: 0.6 }}
                         className="max-w-3xl"
                     >
-                        <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
-                            Blog
-                        </span>
-
-                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
-                            {title ?? 'Derniers articles'}
-                        </h2>
-
-                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                            Des articles et réflexions pour nourrir votre progression, clarifier vos enjeux et enrichir votre manière d’agir.
-                        </p>
+                        <SectionHeader
+                            label="Blog"
+                            title={title ?? 'Derniers articles'}
+                            subtitle="Des articles et réflexions pour nourrir votre progression, clarifier vos enjeux et enrichir votre manière d’agir."
+                        />
                     </motion.div>
 
                     <Link

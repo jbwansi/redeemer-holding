@@ -18,6 +18,7 @@ interface AudienceCard { icon: string; title: string; description: string }
 interface TestimonialItem { content: string; author: string; position: string; image: string }
 interface CtaBenefit { text: string }
 interface StatsBandItem { value: string; label: string }
+interface TextItem {text: string}
 
 interface Meta {
     // Hero
@@ -66,12 +67,30 @@ interface Meta {
     // CTA
     cta_benefits: CtaBenefit[]
     // Bloc clarté
-    clarity_action_enabled: boolean
-    clarity_action_title: string
-    clarity_action_left_title: string
-    clarity_action_left_items: { text: string }[]
-    clarity_action_right_title: string
-    clarity_action_right_items: { text: string }[]
+    // Activation
+    clarity_action_enabled?: boolean
+
+    // Contenu principal
+    clarity_action_title?: string
+    clarity_action_subtitle?: string
+    clarity_action_badge?: string
+
+    // Colonne gauche (problèmes)
+    clarity_action_left_eyebrow?: string
+    clarity_action_left_title?: string
+    clarity_action_left_items?: TextItem[]
+
+    // Colonne droite (solutions)
+    clarity_action_right_eyebrow?: string
+    clarity_action_right_title?: string
+    clarity_action_right_items?: TextItem[]
+
+    // Final CTA
+    clarity_action_final_cta_title?: string
+    clarity_action_final_cta_subtitle?: string
+    clarity_action_final_cta_button_text?: string
+    clarity_action_final_cta_button_href?: string
+    clarity_action_final_cta_disclaimer?: string
 }
 
 interface Page {
@@ -94,7 +113,7 @@ const defaultMeta: Meta = {
     hero_cta_text: 'Découvrir mes formations',
     hero_cta_url: '',
     hero_images: [],
-    
+
     // hero_image: '/assets/images/portrait.jpg',
     hero_steps: [
         { icon: 'Clock', title: 'Révélez votre potentiel', description: 'Découvrez vos forces cachées et définissez votre vision personnelle' },
@@ -124,7 +143,10 @@ const defaultMeta: Meta = {
     events_gallery_captions: [],
     cta_benefits: [],
     clarity_action_enabled: true,
-    clarity_action_title: "Du flou à l’action : un cadre simple pour avancer",
+    clarity_action_title: 'Du flou à l’action : un cadre simple pour avancer',
+    clarity_action_subtitle:
+        'Identifiez ce qui freine votre progression et découvrez le cadre concret pour avancer avec plus de clarté, de constance et de résultats.',
+
     clarity_action_left_title: 'Vous vous reconnaissez si :',
     clarity_action_left_items: [
         { text: 'Trop de priorités et pas assez de clarté' },
@@ -132,6 +154,7 @@ const defaultMeta: Meta = {
         { text: 'Vous êtes souvent dans l’urgence' },
         { text: 'Vous avancez sans résultats stables' },
     ],
+
     clarity_action_right_title: 'Vous repartez avec :',
     clarity_action_right_items: [
         { text: 'Des priorités nettes et une direction claire' },
@@ -139,6 +162,11 @@ const defaultMeta: Meta = {
         { text: 'Des habitudes durables' },
         { text: 'Des résultats mesurables' },
     ],
+
+    clarity_action_final_cta_title: 'Faisons le point sur votre situation',
+    clarity_action_final_cta_subtitle:
+        'Profitez d’un premier échange pour clarifier vos priorités, prendre du recul et identifier les prochaines étapes à mettre en place.',
+    clarity_action_final_cta_button_text: 'Réserver mon appel découverte',
 
 }
 
@@ -546,179 +574,250 @@ const HomeEdit = ({ page }: { page: Page }) => {
 
 
                     <TabsContent value="clarity-action">
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Bloc “Du flou à l’action”</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-center justify-between rounded-lg border p-3">
-                                        <div>
-                                            <Label className="mb-0">Activer ce bloc</Label>
-                                            <p className="text-muted-foreground text-xs">
-                                                Affiche ou masque complètement cette section sur la page d’accueil.
-                                            </p>
-                                        </div>
-                                        <Switch
-                                            checked={m.clarity_action_enabled ?? true}
-                                            onCheckedChange={(checked) => setMeta({ clarity_action_enabled: checked })}
-                                        />
-                                    </div>
+    <div className="space-y-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>Bloc “Du flou à l’action”</CardTitle>
+            </CardHeader>
 
-                                    <div>
-                                        <Label className="mb-2">Titre principal</Label>
-                                        <Input
-                                            value={m.clarity_action_title}
-                                            onChange={e => setMeta({ clarity_action_title: e.target.value })}
-                                            placeholder="Du flou à l’action : un cadre simple pour avancer"
-                                        />
-                                    </div>
+            <CardContent className="space-y-6">
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                        <Label className="mb-0">Activer ce bloc</Label>
+                        <p className="text-muted-foreground text-xs">
+                            Affiche ou masque complètement cette section sur la page d’accueil.
+                        </p>
+                    </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="mb-2">Titre colonne gauche</Label>
-                                                <Input
-                                                    value={m.clarity_action_left_title}
-                                                    onChange={e => setMeta({ clarity_action_left_title: e.target.value })}
-                                                    placeholder="Vous vous reconnaissez si :"
-                                                />
-                                            </div>
+                    <Switch
+                        checked={m.clarity_action_enabled ?? true}
+                        onCheckedChange={(checked) =>
+                            setMeta({ clarity_action_enabled: checked })
+                        }
+                    />
+                </div>
 
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label>Liste gauche</Label>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            setMeta({
-                                                                clarity_action_left_items: [
-                                                                    ...(m.clarity_action_left_items ?? []),
-                                                                    { text: '' },
-                                                                ],
-                                                            })
-                                                        }
-                                                    >
-                                                        <Plus className="h-4 w-4 mr-1" /> Ajouter
-                                                    </Button>
-                                                </div>
+                <div className="space-y-4">
+                    <div>
+                        <Label className="mb-2">Titre principal</Label>
+                        <Input
+                            value={m.clarity_action_title ?? ''}
+                            onChange={(e) =>
+                                setMeta({ clarity_action_title: e.target.value })
+                            }
+                            placeholder="Du flou à l’action : un cadre simple pour avancer"
+                        />
+                    </div>
 
-                                                {(m.clarity_action_left_items ?? []).map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-3">
-                                                        <Input
-                                                            placeholder="Texte du point"
-                                                            value={item.text}
-                                                            onChange={e =>
-                                                                setMeta({
-                                                                    clarity_action_left_items: updateItem(
-                                                                        m.clarity_action_left_items ?? [],
-                                                                        i,
-                                                                        { text: e.target.value }
-                                                                    ),
-                                                                })
-                                                            }
-                                                        />
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                setMeta({
-                                                                    clarity_action_left_items: removeItem(
-                                                                        m.clarity_action_left_items ?? [],
-                                                                        i
-                                                                    ),
-                                                                })
-                                                            }
-                                                        >
-                                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
+                    <div>
+                        <Label className="mb-2">Sous-titre</Label>
+                        <Textarea
+                            value={m.clarity_action_subtitle ?? ''}
+                            onChange={(e) =>
+                                setMeta({ clarity_action_subtitle: e.target.value })
+                            }
+                            placeholder="Identifiez ce qui freine votre progression et découvrez le cadre concret pour avancer avec plus de clarté, de constance et de résultats."
+                            rows={3}
+                        />
+                    </div>
+                </div>
 
-                                                {(m.clarity_action_left_items ?? []).length === 0 && (
-                                                    <p className="text-muted-foreground text-sm text-center py-2">
-                                                        Aucun élément. Cliquez sur Ajouter.
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="mb-2">Titre colonne droite</Label>
-                                                <Input
-                                                    value={m.clarity_action_right_title}
-                                                    onChange={e => setMeta({ clarity_action_right_title: e.target.value })}
-                                                    placeholder="Vous repartez avec :"
-                                                />
-                                            </div>
-
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label>Liste droite</Label>
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            setMeta({
-                                                                clarity_action_right_items: [
-                                                                    ...(m.clarity_action_right_items ?? []),
-                                                                    { text: '' },
-                                                                ],
-                                                            })
-                                                        }
-                                                    >
-                                                        <Plus className="h-4 w-4 mr-1" /> Ajouter
-                                                    </Button>
-                                                </div>
-
-                                                {(m.clarity_action_right_items ?? []).map((item, i) => (
-                                                    <div key={i} className="flex items-center gap-3">
-                                                        <Input
-                                                            placeholder="Texte du point"
-                                                            value={item.text}
-                                                            onChange={e =>
-                                                                setMeta({
-                                                                    clarity_action_right_items: updateItem(
-                                                                        m.clarity_action_right_items ?? [],
-                                                                        i,
-                                                                        { text: e.target.value }
-                                                                    ),
-                                                                })
-                                                            }
-                                                        />
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                setMeta({
-                                                                    clarity_action_right_items: removeItem(
-                                                                        m.clarity_action_right_items ?? [],
-                                                                        i
-                                                                    ),
-                                                                })
-                                                            }
-                                                        >
-                                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
-
-                                                {(m.clarity_action_right_items ?? []).length === 0 && (
-                                                    <p className="text-muted-foreground text-sm text-center py-2">
-                                                        Aucun élément. Cliquez sur Ajouter.
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="mb-2">Titre colonne gauche</Label>
+                            <Input
+                                value={m.clarity_action_left_title ?? ''}
+                                onChange={(e) =>
+                                    setMeta({
+                                        clarity_action_left_title: e.target.value,
+                                    })
+                                }
+                                placeholder="Vous vous reconnaissez si :"
+                            />
                         </div>
-                    </TabsContent>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label>Liste gauche</Label>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() =>
+                                        setMeta({
+                                            clarity_action_left_items: [
+                                                ...(m.clarity_action_left_items ?? []),
+                                                { text: '' },
+                                            ],
+                                        })
+                                    }
+                                >
+                                    <Plus className="mr-1 h-4 w-4" /> Ajouter
+                                </Button>
+                            </div>
+
+                            {(m.clarity_action_left_items ?? []).map((item, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <Input
+                                        placeholder="Texte du point"
+                                        value={item.text}
+                                        onChange={(e) =>
+                                            setMeta({
+                                                clarity_action_left_items: updateItem(
+                                                    m.clarity_action_left_items ?? [],
+                                                    i,
+                                                    { text: e.target.value }
+                                                ),
+                                            })
+                                        }
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            setMeta({
+                                                clarity_action_left_items: removeItem(
+                                                    m.clarity_action_left_items ?? [],
+                                                    i
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                </div>
+                            ))}
+
+                            {(m.clarity_action_left_items ?? []).length === 0 && (
+                                <p className="text-muted-foreground py-2 text-center text-sm">
+                                    Aucun élément. Cliquez sur Ajouter.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div>
+                            <Label className="mb-2">Titre colonne droite</Label>
+                            <Input
+                                value={m.clarity_action_right_title ?? ''}
+                                onChange={(e) =>
+                                    setMeta({
+                                        clarity_action_right_title: e.target.value,
+                                    })
+                                }
+                                placeholder="Vous repartez avec :"
+                            />
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <Label>Liste droite</Label>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() =>
+                                        setMeta({
+                                            clarity_action_right_items: [
+                                                ...(m.clarity_action_right_items ?? []),
+                                                { text: '' },
+                                            ],
+                                        })
+                                    }
+                                >
+                                    <Plus className="mr-1 h-4 w-4" /> Ajouter
+                                </Button>
+                            </div>
+
+                            {(m.clarity_action_right_items ?? []).map((item, i) => (
+                                <div key={i} className="flex items-center gap-3">
+                                    <Input
+                                        placeholder="Texte du point"
+                                        value={item.text}
+                                        onChange={(e) =>
+                                            setMeta({
+                                                clarity_action_right_items: updateItem(
+                                                    m.clarity_action_right_items ?? [],
+                                                    i,
+                                                    { text: e.target.value }
+                                                ),
+                                            })
+                                        }
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            setMeta({
+                                                clarity_action_right_items: removeItem(
+                                                    m.clarity_action_right_items ?? [],
+                                                    i
+                                                ),
+                                            })
+                                        }
+                                    >
+                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                </div>
+                            ))}
+
+                            {(m.clarity_action_right_items ?? []).length === 0 && (
+                                <p className="text-muted-foreground py-2 text-center text-sm">
+                                    Aucun élément. Cliquez sur Ajouter.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="rounded-lg border p-4 space-y-4">
+                    <div>
+                        <Label className="mb-2">Titre du formulaire</Label>
+                        <Input
+                            value={m.clarity_action_final_cta_title ?? ''}
+                            onChange={(e) =>
+                                setMeta({
+                                    clarity_action_final_cta_title: e.target.value,
+                                })
+                            }
+                            placeholder="Faisons le point sur votre situation"
+                        />
+                    </div>
+
+                    <div>
+                        <Label className="mb-2">Texte du formulaire</Label>
+                        <Textarea
+                            value={m.clarity_action_final_cta_subtitle ?? ''}
+                            onChange={(e) =>
+                                setMeta({
+                                    clarity_action_final_cta_subtitle: e.target.value,
+                                })
+                            }
+                            placeholder="Profitez d’un premier échange pour clarifier vos priorités, prendre du recul et identifier les prochaines étapes à mettre en place."
+                            rows={3}
+                        />
+                    </div>
+
+                    <div>
+                        <Label className="mb-2">Texte du bouton</Label>
+                        <Input
+                            value={m.clarity_action_final_cta_button_text ?? ''}
+                            onChange={(e) =>
+                                setMeta({
+                                    clarity_action_final_cta_button_text:
+                                        e.target.value,
+                                })
+                            }
+                            placeholder="Réserver mon appel découverte"
+                        />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    </div>
+</TabsContent>
 
                     {/* ── Statistiques (bande rouge) ─────────────── */}
                     <TabsContent value="stats">

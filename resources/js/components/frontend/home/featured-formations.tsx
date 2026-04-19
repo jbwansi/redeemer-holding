@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, MapPin, Users, ArrowRight, Euro } from 'lucide-react'
 import { Link } from '@inertiajs/react'
+import SectionHeader from '@/components/frontend/layouts/section-header'
 
 interface Formation {
     id: number
@@ -67,17 +68,11 @@ export default function FeaturedFormations({
                         transition={{ duration: 0.6 }}
                         className="max-w-3xl"
                     >
-                        <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
-                            Formations
-                        </span>
-
-                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
-                            {title ?? 'Prochaines formations'}
-                        </h2>
-
-                        <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-                            Des formations conçues pour renforcer vos compétences, structurer votre progression et passer à l’action avec méthode.
-                        </p>
+                        <SectionHeader
+                            label="Formations"
+                            title={title ?? 'Prochaines formations'}
+                            subtitle="Des formations conçues pour renforcer vos compétences, structurer votre progression et passer à l’action avec méthode."
+                        />
                     </motion.div>
 
                     <Link
