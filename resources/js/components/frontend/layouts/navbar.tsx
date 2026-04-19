@@ -409,7 +409,7 @@ const Navbar = () => {
                     </Link>
 
                     {auth?.user && (
-                        <Link href={route('logout')} title="Déconnexion" aria-label="Déconnexion">
+                        <Link href={route('logout')} method="post" as="button" title="Déconnexion" aria-label="Déconnexion">
                             <motion.div
                                 variants={buttonHoverEffect}
                                 initial="rest"
@@ -529,6 +529,8 @@ const Navbar = () => {
                                             {auth?.user && (
                                                 <Link
                                                     href={route('logout')}
+                                                    method="post"
+                                                    as="button"
                                                     className="flex items-center space-x-2 text-red-600 dark:text-red-400 font-medium group"
                                                 >
                                                     <span>Déconnexion</span>

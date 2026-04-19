@@ -130,6 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <div className="p-4 border-t border-slate-200 dark:border-slate-800">
                         <Link
                             href={route('logout')}
+                            method="post"
+                            as="button"
                             className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors duration-300"
                         >
                             <LogOut className="w-5 h-5" />
