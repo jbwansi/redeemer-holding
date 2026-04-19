@@ -56,7 +56,7 @@ class ServiceController extends Controller
                 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['name']),
                 'user_id' => Auth::id()
             ]);
-            return redirect()->route('services.index')->with('success', 'Service created successfully');
+            return redirect()->route('services.index')->with('success', 'Service créé avec succès.');
         } catch (\Exception $e) {
             report($e);
             return redirect()
@@ -81,7 +81,7 @@ class ServiceController extends Controller
                 ...$validated,
                 // 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['name']),
             ]);
-            return redirect()->route('services.index')->with('success', 'Service updated successfully');
+            return redirect()->route('services.index')->with('success', 'Service mis à jour avec succès.');
         } catch (\Exception $e) {
             report($e);
             return redirect()
@@ -93,7 +93,7 @@ class ServiceController extends Controller
     public function destroy(Service $service)
     {
         $service->delete();
-        return redirect()->route('services.index')->with('success', 'Service deleted successfully');
+        return redirect()->route('services.index')->with('success', 'Service supprimé avec succès.');
     }
     public function show(Service $service)
     {
@@ -104,6 +104,6 @@ class ServiceController extends Controller
     public function toggleStatus(Service $service)
     {
         $service->update(['status' => !$service->status]);
-        return redirect()->route('services.index')->with('success', 'Service status updated successfully');
+        return redirect()->route('services.index')->with('success', 'Statut du service mis à jour avec succès.');
     }
 }

@@ -125,10 +125,10 @@ class EventController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('events.show', $event->slug)->with('success', 'Event created');
+            return redirect()->route('events.show', $event->slug)->with('success', 'Événement créé avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Error creating event: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Erreur lors de la création de l\'événement : ' . $e->getMessage());
         }
     }
 
@@ -195,10 +195,10 @@ class EventController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('events.index')->with('success', 'Event updated');
+            return redirect()->route('events.index')->with('success', 'Événement mis à jour avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error updating event');
+            return back()->with('error', 'Erreur lors de la mise à jour de l\'événement');
         }
     }
 
@@ -214,10 +214,10 @@ class EventController extends Controller
             $event->delete();
 
             DB::commit();
-            return redirect()->route('events.index')->with('success', 'Event deleted');
+            return redirect()->route('events.index')->with('success', 'Événement supprimé avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Error deleting event');
+            return back()->with('error', 'Erreur lors de la suppression de l\'événement');
         }
     }
 

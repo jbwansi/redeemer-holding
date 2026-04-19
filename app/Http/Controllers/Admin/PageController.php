@@ -58,7 +58,7 @@ class PageController extends Controller
                 'user_id' => Auth::id(),
                 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['title']),
             ]);
-            return redirect()->route('pages.index')->with('success', 'Page crée avec succès');
+            return redirect()->route('pages.index')->with('success', 'Page créée avec succès');
         } catch (\Exception $e) {
             report($e);
             return redirect()
@@ -92,7 +92,7 @@ class PageController extends Controller
                 ...$validated,
                 'slug' => rand(1000, 9999) . '-' . Str::slug($validated['title']),
             ]);
-            return redirect()->route('pages.index')->with('success', 'Page mise à jour avec suceess');
+            return redirect()->route('pages.index')->with('success', 'Page mise à jour avec succès');
         } catch (\Exception $e) {
             report($e);
             return redirect()

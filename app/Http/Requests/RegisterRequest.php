@@ -29,14 +29,14 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'first_name.required' => 'Le prénom est requis',
-            'last_name.required'  => 'Le nom est requis',
-            'email.required' => 'L\'email est requis',
-            'email.email' => 'L\'email doit être une adresse valide',
-            'email.unique' => 'Cet email est déjà utilisé',
-            'password.required' => 'Le mot de passe est requis',
-            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas',
-            'terms.accepted' => 'Vous devez accepter les conditions d\'utilisation',
+            'first_name.required' => 'Le prénom est requis.',
+            'last_name.required'  => 'Le nom est requis.',
+            'email.required' => 'L\'email est requis.',
+            'email.email' => 'L\'email doit être une adresse valide.',
+            'email.unique' => 'Cet email est déjà utilisé.',
+            'password.required' => 'Le mot de passe est requis.',
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'terms.accepted' => 'Vous devez accepter les conditions d\'utilisation.',
         ];
     }
 }

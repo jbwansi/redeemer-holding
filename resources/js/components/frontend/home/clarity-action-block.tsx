@@ -127,10 +127,9 @@ export default function ClarityActionBlock({
     }
 
     const inputClass = (hasError: boolean) =>
-        `w-full rounded-2xl border px-4 py-4 text-white placeholder:text-slate-500 focus:outline-none ${
-            hasError
-                ? 'border-red-500 bg-[#081226]'
-                : 'border-white/10 bg-[#081226] focus:border-[#EF3B36]'
+        `w-full rounded-2xl border px-4 py-4 text-white placeholder:text-slate-500 focus:outline-none ${hasError
+            ? 'border-red-500 bg-[#081226]'
+            : 'border-white/10 bg-[#081226] focus:border-[#EF3B36]'
         }`
 
     return (
@@ -149,70 +148,69 @@ export default function ClarityActionBlock({
                         ) : null}
 
                         {subtitle ? (
-                          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
                                 {subtitle}
                             </p>
                         ) : null}
 
                         <div className="mt-10 grid gap-6 md:grid-cols-2">
+
+                            {/* PROBLÈME */}
                             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                                <div className="mb-4 text-sm text-red-400">
-                                    {leftEyebrow}
+                                <div className="mb-3 text-sm text-red-400">
+                                    Situation actuelle
                                 </div>
 
-                                {leftTitle ? (
-                                    <h3 className="text-xl font-semibold text-white">
-                                        {leftTitle}
-                                    </h3>
-                                ) : null}
+                                <h3 className="text-xl font-semibold text-white">
+                                    Vous avancez… mais sans direction vraiment claire
+                                </h3>
 
                                 <ul className="mt-4 space-y-3">
                                     {filteredLeftItems.map((item, index) => (
-                                        <li
-                                            key={`left-${index}`}
-                                            className="flex items-start gap-3 text-sm text-slate-300"
-                                        >
-                                            <XCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+                                        <li key={index} className="flex items-start gap-3 text-sm text-slate-300">
+                                            <XCircle className="mt-0.5 h-5 w-5 text-red-500 flex-shrink-0" />
                                             <span>{item.text}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
 
+                            {/* SOLUTION */}
                             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-                                <div className="mb-4 text-sm text-green-400">
-                                    {rightEyebrow}
+                                <div className="mb-3 text-sm text-green-400">
+                                    Résultat attendu
                                 </div>
 
-                                {rightTitle ? (
-                                    <h3 className="text-xl font-semibold text-white">
-                                        {rightTitle}
-                                    </h3>
-                                ) : null}
+                                <h3 className="text-xl font-semibold text-white">
+                                    Ce que vous obtenez concrètement :
+                                </h3>
 
                                 <ul className="mt-4 space-y-3">
                                     {filteredRightItems.map((item, index) => (
-                                        <li
-                                            key={`right-${index}`}
-                                            className="flex items-start gap-3 text-sm text-slate-300"
-                                        >
-                                            <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-500" />
+                                        <li key={index} className="flex items-start gap-3 text-sm text-slate-300">
+                                            <CheckCircle className="mt-0.5 h-5 w-5 text-green-500 flex-shrink-0" />
                                             <span>{item.text}</span>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
-                        </div>
-                    </div>
 
+                        </div>
+
+                        {/* Phrase pivot */}
+                        <p className="mt-8 text-center text-sm text-slate-400">
+                            Et si vous pouviez avancer avec plus de clarté et de constance ?
+                        </p>
+                    </div>
                     <div className="lg:col-span-5">
                         <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
                             <h3 className="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
-                                {finalCtaTitle}
+                                {finalCtaTitle ?? 'Réservez un échange pour clarifier vos prochaines étapes'}
                             </h3>
 
                             <p className="mt-4 text-base leading-7 text-slate-300">
-                                {finalCtaSubtitle}
+                                {finalCtaSubtitle ??
+                                    'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.'}
                             </p>
 
                             <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
@@ -225,7 +223,7 @@ export default function ClarityActionBlock({
                                         name="name"
                                         value={data.name}
                                         onChange={(e) => handleFieldChange('name', e.target.value)}
-                                        placeholder="Votre nom"
+                                        placeholder="Nom et prénom"
                                         className={inputClass(!!mergedErrors.name)}
                                     />
                                     {mergedErrors.name ? (
@@ -244,7 +242,7 @@ export default function ClarityActionBlock({
                                         name="email"
                                         value={data.email}
                                         onChange={(e) => handleFieldChange('email', e.target.value)}
-                                        placeholder="adresse@email.com"
+                                        placeholder="Votre adresse e-mail"
                                         className={inputClass(!!mergedErrors.email)}
                                     />
                                     {mergedErrors.email ? (
@@ -263,7 +261,7 @@ export default function ClarityActionBlock({
                                         name="phone"
                                         value={data.phone}
                                         onChange={(e) => handleFieldChange('phone', e.target.value)}
-                                        placeholder="Votre numéro"
+                                        placeholder="Votre numéro de téléphone"
                                         className={inputClass(!!mergedErrors.phone)}
                                     />
                                     {mergedErrors.phone ? (
@@ -276,11 +274,10 @@ export default function ClarityActionBlock({
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className={`w-full flex items-center justify-center py-3 px-6 rounded-lg text-white font-medium text-lg transition-all duration-300 ${
-                                        processing
-                                            ? 'bg-gray-400 cursor-not-allowed'
-                                            : 'bg-gradient-to-r from-[#DA2E29] to-rose-600 hover:shadow-lg hover:shadow-[#DA2E29]/20'
-                                    }`}
+                                    className={`w-full flex items-center justify-center py-3 px-6 rounded-lg text-white font-medium text-lg transition-all duration-300 ${processing
+                                        ? 'bg-gray-400 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-[#DA2E29] to-rose-600 hover:shadow-lg hover:shadow-[#DA2E29]/20'
+                                        }`}
                                 >
                                     {processing ? (
                                         <>
@@ -308,7 +305,7 @@ export default function ClarityActionBlock({
                                     ) : (
                                         <>
                                             <Send size={20} className="mr-2" />
-                                            {finalCtaButtonText ?? 'Envoyer le message'}
+                                            {finalCtaButtonText ?? 'Réserver mon appel découverte'}
                                         </>
                                     )}
                                 </button>
@@ -318,9 +315,19 @@ export default function ClarityActionBlock({
                                         Merci, votre demande a bien été envoyée.
                                     </p>
                                 ) : (
-                                    <p className="text-center text-sm text-slate-400">
-                                        {finalCtaDisclaimer}
-                                    </p>
+                                    <div className="space-y-2 text-center">
+                                        <p className="text-sm text-slate-400">
+                                            30 minutes • Sans engagement
+                                        </p>
+
+                                        <p className="text-sm font-medium text-white">
+                                            +1000 professionnels accompagnés • 4,9/5 de satisfaction
+                                        </p>
+
+                                        <p className="text-xs leading-6 text-slate-500">
+                                            Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.
+                                        </p>
+                                    </div>
                                 )}
                             </form>
                         </div>

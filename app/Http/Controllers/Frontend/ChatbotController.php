@@ -33,14 +33,14 @@ class ChatbotController extends Controller
         return response()->json([
             'enabled' => (bool) data_get($meta, 'enabled', true),
             'title' => (string) data_get($meta, 'title', 'Assistant Redeemer'),
-            'welcome_message' => (string) data_get($meta, 'welcome_message', 'Bonjour. Je suis l\'assistant Redeemer. Je peux vous aider 24h/24 sur les formations, evenements, services et contacts.'),
+            'welcome_message' => (string) data_get($meta, 'welcome_message', 'Bonjour. Je suis l\'assistant Redeemer. Je peux vous aider 24h/24 sur les formations, événements, services et contacts.'),
             'quick_questions' => data_get($meta, 'quick_questions', [
                 'Quelles formations sont disponibles ?',
-                'Comment participer a un evenement ?',
+                'Comment participer à un événement ?',
                 'Comment vous contacter ?',
             ]),
             'lead_capture_enabled' => (bool) data_get($meta, 'lead_capture_enabled', true),
-            'lead_prompt' => (string) data_get($meta, 'lead_prompt', 'Laissez votre email pour etre recontacte rapidement.'),
+            'lead_prompt' => (string) data_get($meta, 'lead_prompt', 'Laissez votre email pour être recontacté rapidement.'),
         ]);
     }
 
@@ -59,7 +59,7 @@ class ChatbotController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Merci, vos coordonnees ont bien ete enregistrees.',
+            'message' => 'Merci, vos coordonnées ont bien été enregistrées.',
         ]);
     }
 }

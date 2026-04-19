@@ -15,6 +15,14 @@
             --border-radius-md: 12px;
             --border-radius-lg: 16px;
             --border-radius-xl: 24px;
+            /* Tailles de police standardisées */
+            --text-xs: 12px;
+            --text-sm: 14px;
+            --text-base: 16px;
+            --text-lg: 18px;
+            --text-xl: 20px;
+            --text-2xl: 24px;
+            --text-3xl: 30px;
         }
 
         * {
@@ -50,7 +58,7 @@
 
         .logo {
             color: var(--primary-color);
-            font-size: 26px;
+            font-size: var(--text-2xl);
             font-weight: 700;
             letter-spacing: -0.5px;
         }
@@ -63,7 +71,7 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: var(--text-2xl);
             font-weight: 600;
             margin-bottom: 12px;
         }
@@ -155,7 +163,7 @@
         }
 
         .disclaimer {
-            font-size: 12px;
+            font-size: var(--text-xs);
             color: #6B7280;
             margin-top: 16px;
         }

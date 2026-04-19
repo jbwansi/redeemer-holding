@@ -15,6 +15,14 @@
             --border-radius-md: 12px;
             --border-radius-lg: 16px;
             --border-radius-xl: 24px;
+            /* Tailles de police standardisées */
+            --text-xs: 12px;
+            --text-sm: 14px;
+            --text-base: 16px;
+            --text-lg: 18px;
+            --text-xl: 20px;
+            --text-2xl: 24px;
+            --text-3xl: 30px;
         }
 
         * {
@@ -50,7 +58,7 @@
 
         .logo {
             color: var(--primary-color);
-            font-size: 26px;
+            font-size: var(--text-2xl);
             font-weight: 700;
             letter-spacing: -0.5px;
         }
@@ -63,7 +71,7 @@
         }
 
         .header h1 {
-            font-size: 20px;
+            font-size: var(--text-2xl);
             font-weight: 600;
             margin-bottom: 8px;
         }
@@ -81,7 +89,7 @@
         }
 
         .event-title {
-            font-size: 18px;
+            font-size: var(--text-lg);
             font-weight: 600;
             color: var(--primary-color);
             margin-bottom: 16px;
@@ -113,7 +121,7 @@
             display: inline-block;
             padding: 8px 16px;
             border-radius: var(--border-radius-xl);
-            font-size: 13px;
+            font-size: var(--text-xs);
             font-weight: 600;
             text-align: center;
             background-color: #D1FAE5;
@@ -130,7 +138,7 @@
         }
 
         .reference-code {
-            font-size: 24px;
+            font-size: var(--text-2xl);
             font-weight: 700;
             color: #92400E;
             letter-spacing: 2px;
@@ -211,13 +219,13 @@
         }
 
         .disclaimer {
-            font-size: 12px;
+            font-size: var(--text-xs);
             color: #6B7280;
             margin-top: 16px;
         }
 
         .price-total {
-            font-size: 18px;
+            font-size: var(--text-lg);
             font-weight: 700;
             color: var(--primary-color);
         }

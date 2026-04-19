@@ -107,7 +107,7 @@ class FormationController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('formations.show', $formation->slug)->with('success', 'Formation créée avec succès');
+            return redirect()->route('formations.show', $formation->slug)->with('success', 'Formation créée avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Erreur lors de la création de la formation: ' . $e->getMessage());
@@ -172,7 +172,7 @@ class FormationController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('formations.index')->with('success', 'Formation mise à jour avec succès');
+            return redirect()->route('formations.index')->with('success', 'Formation mise à jour avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erreur lors de la mise à jour de la formation');
@@ -191,7 +191,7 @@ class FormationController extends Controller
             $formation->delete();
 
             DB::commit();
-            return redirect()->route('formations.index')->with('success', 'Formation supprimée avec succès');
+            return redirect()->route('formations.index')->with('success', 'Formation supprimée avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erreur lors de la suppression de la formation');

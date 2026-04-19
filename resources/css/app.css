@@ -43,6 +43,15 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 350 82% 50%;  /* #DF213F */
+
+    /* Tailles de texte uniformisées */
+    --text-xs: 12px;    /* Petit texte (disclaimers, notes) */
+    --text-sm: 14px;    /* Texte secondaire */
+    --text-base: 16px;  /* Texte normal */
+    --text-lg: 18px;    /* Titres de sections */
+    --text-xl: 20px;    /* Sous-titres */
+    --text-2xl: 24px;   /* Titres principaux */
+    --text-3xl: 30px;   /* Grands titres */
   }
 
   .dark {

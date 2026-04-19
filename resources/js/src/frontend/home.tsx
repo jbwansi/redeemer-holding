@@ -14,37 +14,44 @@ import { Head } from '@inertiajs/react'
 import React from 'react'
 
 const defaultHomeMeta = {
-    // ── Hero ──────────────────────────────────────────────────────────────────
+    // ── HERO ─────────────────────────────────────────────
     hero_badge: 'Coaching • Formation • Accompagnement',
+
     hero_title_line1: 'Structurez vos actions',
     hero_title_line2: 'et développez des résultats',
     hero_title_line3: 'durables',
+
     hero_subtitle:
         'J’accompagne les entrepreneurs, les leaders et les professionnels en évolution à clarifier leurs priorités, renforcer leur posture et avancer avec méthode.',
-    hero_cta_text: 'Réserver une session découverte',
+
+    hero_cta_text: 'Réserver un appel découverte',
     hero_cta_url: '/contact',
+
     hero_secondary_cta_text: 'Découvrir les accompagnements',
     hero_secondary_cta_url: '/services',
+
     hero_image: '/assets/images/portrait.jpg',
     hero_images: [] as string[],
+
     hero_reassurance_items: [
         { text: 'Sans engagement' },
         { text: '30 minutes' },
         { text: 'En visio ou en présentiel' },
     ],
+
     hero_floating_stat_enabled: true,
     hero_floating_stat_value: '97%',
     hero_floating_stat_label: 'Satisfaction',
 
-    // ── Clarity / Action block ────────────────────────────────────────────────
-    // ── Clarity / Action block ────────────────────────────────────────────────
+    // ── CLARITY ACTION ───────────────────────────────────
     clarity_action_enabled: true,
-    clarity_action_badge: 'Transformation',
-    clarity_action_title: 'Du flou à l’action : un cadre simple pour avancer',
-    clarity_action_subtitle:
-        'Identifiez ce qui freine votre progression et découvrez le cadre concret pour avancer avec plus de clarté, de constance et de résultats.',
 
-    clarity_action_left_eyebrow: 'Situation actuelle',
+    clarity_action_title:
+        'Du flou à l’action : un cadre simple pour avancer',
+
+    clarity_action_subtitle:
+        'Quand tout semble prioritaire, il devient difficile d’avancer avec clarté. Cet échange vous aide à faire le tri, retrouver une direction nette et passer à l’action avec plus de sérénité.',
+
     clarity_action_left_title: 'Vous vous reconnaissez si :',
     clarity_action_left_items: [
         { text: 'Vous avez trop de priorités et pas assez de clarté' },
@@ -53,7 +60,6 @@ const defaultHomeMeta = {
         { text: 'Vous ressentez le besoin de structurer votre progression' },
     ],
 
-    clarity_action_right_eyebrow: 'Résultat attendu',
     clarity_action_right_title: 'Vous repartez avec :',
     clarity_action_right_items: [
         { text: 'Des priorités claires et une direction plus nette' },
@@ -62,14 +68,78 @@ const defaultHomeMeta = {
         { text: 'Une progression visible, mesurable et cohérente' },
     ],
 
-    clarity_action_final_cta_title: 'Faisons le point sur votre situation',
-    clarity_action_final_cta_subtitle:
-        'Profitez d’un premier échange pour clarifier vos priorités, prendre du recul et identifier les prochaines étapes à mettre en place.',
-    clarity_action_final_cta_button_text: 'Réserver mon appel découverte',
-    clarity_action_final_cta_button_href: '/contact',
-    clarity_action_final_cta_disclaimer: '30 minutes • Sans engagement',
+    clarity_action_final_cta_title:
+        'Réservez un échange pour clarifier vos prochaines étapes',
 
-    // ── Stats band ────────────────────────────────────────────────────────────
+    clarity_action_final_cta_subtitle:
+        'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.',
+
+    clarity_action_final_cta_button_text:
+        'Réserver mon appel découverte',
+
+    // ── PROCESS / MÉTHODE ────────────────────────────────
+    process_title:
+        'Une méthode claire, humaine et orientée résultats',
+
+    process_subtitle:
+        'Chaque accompagnement s’appuie sur un cadre structuré pour transformer vos intentions en avancées concrètes.',
+
+    process: [
+        {
+            icon: 'MessageCircle',
+            title: 'Clarifier',
+            description:
+                'Nous faisons le point sur votre situation, vos enjeux et vos priorités réelles.',
+        },
+        {
+            icon: 'Search',
+            title: 'Identifier',
+            description:
+                'Nous repérons les leviers les plus utiles pour avancer avec plus d’impact.',
+        },
+        {
+            icon: 'Clipboard',
+            title: 'Structurer',
+            description:
+                'Nous construisons un plan d’action simple, cohérent et réaliste.',
+        },
+        {
+            icon: 'Target',
+            title: 'Consolider',
+            description:
+                'Nous ancrons des résultats durables dans votre fonctionnement quotidien.',
+        },
+    ],
+
+    // ── POUR QUI ─────────────────────────────────────────
+    for_whom_title:
+        'Un accompagnement pensé pour celles et ceux qui veulent avancer avec plus de clarté et d’impact',
+
+    for_whom_subtitle:
+        'Entrepreneurs, managers, professionnels en transition ou porteurs de projet : chaque accompagnement s’adapte à votre réalité.',
+
+    for_whom: [
+        {
+            icon: 'Briefcase',
+            title: 'Entrepreneurs & indépendants',
+            description:
+                'Structurer votre vision, mieux prioriser et avancer avec davantage de cohérence.',
+        },
+        {
+            icon: 'Users',
+            title: 'Managers & leaders',
+            description:
+                'Renforcer votre posture, mieux décider et mieux fédérer autour de l’essentiel.',
+        },
+        {
+            icon: 'Rocket',
+            title: 'Transitions professionnelles',
+            description:
+                'Retrouver un cap clair, reprendre confiance et construire la suite avec méthode.',
+        },
+    ],
+
+    // ── STATS ────────────────────────────────────────────
     stats: [
         { value: '150+', label: 'Personnes accompagnées' },
         { value: '10+', label: "Années d’expérience" },
@@ -77,90 +147,44 @@ const defaultHomeMeta = {
         { value: '97%', label: 'Taux de satisfaction' },
     ],
 
-    // ── Process ───────────────────────────────────────────────────────────────
-    process_title: 'Une méthode claire, humaine et orientée résultats',
-    process_subtitle:
-        'Chaque accompagnement s’appuie sur un cadre structuré pour transformer vos intentions en avancées concrètes.',
-    process: [
-        {
-            icon: 'MessageCircle',
-            title: 'Clarifier',
-            description: 'Nous faisons le point sur votre situation, vos enjeux et vos priorités réelles.',
-        },
-        {
-            icon: 'Search',
-            title: 'Identifier',
-            description: 'Nous repérons les leviers les plus utiles pour avancer avec plus d’impact.',
-        },
-        {
-            icon: 'Clipboard',
-            title: 'Structurer',
-            description: 'Nous construisons un plan d’action simple, cohérent et réaliste.',
-        },
-        {
-            icon: 'Target',
-            title: 'Consolider',
-            description: 'Nous ancrons des résultats durables dans votre fonctionnement quotidien.',
-        },
-    ],
-
-    // ── For whom ──────────────────────────────────────────────────────────────
-    for_whom_title: 'Un accompagnement pensé pour celles et ceux qui veulent avancer avec plus de clarté et d’impact',
-    for_whom_subtitle:
-        'Entrepreneurs, managers, professionnels en transition ou porteurs de projet : chaque accompagnement s’adapte à votre réalité.',
-    for_whom: [
-        {
-            icon: 'Briefcase',
-            title: 'Entrepreneurs & indépendants',
-            description: 'Structurer votre vision, mieux prioriser et avancer avec davantage de cohérence.',
-        },
-        {
-            icon: 'Users',
-            title: 'Managers & leaders',
-            description: 'Renforcer votre posture, mieux décider et mieux fédérer autour de l’essentiel.',
-        },
-        {
-            icon: 'Rocket',
-            title: 'Transitions professionnelles',
-            description: 'Retrouver un cap clair, reprendre confiance et construire la suite avec méthode.',
-        },
-    ],
-
-    // ── Testimonials ──────────────────────────────────────────────────────────
+    // ── TESTIMONIALS ─────────────────────────────────────
     testimonials_title: 'Ce que disent les personnes accompagnées',
+
     testimonials: [
         {
-            content: 'Un accompagnement exigeant, humain et immédiatement utile. J’ai gagné en clarté et en efficacité.',
+            content:
+                'Un accompagnement exigeant, humain et immédiatement utile. J’ai gagné en clarté et en efficacité.',
             author: 'Aline K.',
             position: "Cheffe d'entreprise",
             image: '',
         },
         {
-            content: 'J’ai enfin pu remettre de l’ordre dans mes priorités et avancer avec plus de sérénité.',
+            content:
+                'J’ai enfin pu remettre de l’ordre dans mes priorités et avancer avec plus de sérénité.',
             author: 'Samuel T.',
             position: 'Cadre dirigeant',
             image: '',
         },
     ],
 
-    // ── Dynamic sections ──────────────────────────────────────────────────────
+    // ── DYNAMIQUE ────────────────────────────────────────
     formations_title: 'Formations & ateliers à découvrir',
     blog_title: 'Articles & réflexions',
 
-    // ── Welcome video ─────────────────────────────────────────────────────────
+    // ── VIDÉO ────────────────────────────────────────────
     video_enabled: false,
     video_url: '',
     video_title: 'Bienvenue',
     video_subtitle:
         'Une courte vidéo pour découvrir mon approche et ma manière d’accompagner.',
 
-    // ── Gallery ───────────────────────────────────────────────────────────────
+    // ── GALERIE ──────────────────────────────────────────
     events_gallery_enabled: true,
     events_gallery_title: 'En images',
     events_gallery_images: [] as string[],
     events_gallery_captions: [] as string[],
 
-    // ── CTA ───────────────────────────────────────────────────────────────────
+    // ── CTA FINAL (Calendly) ─────────────────────────────
     cta_benefits: [
         { text: 'Clarifier votre situation actuelle et vos priorités' },
         { text: 'Identifier les leviers les plus utiles pour avancer' },

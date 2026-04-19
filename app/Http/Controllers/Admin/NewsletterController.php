@@ -81,7 +81,7 @@ class NewsletterController extends Controller
                 ctaUrl: $validated['cta_url'] ?? null,
             ));
 
-            return back()->with('success', 'Email de test envoye avec succes.');
+            return back()->with('success', 'Email de test envoyé avec succès.');
         }
 
         if ($recipients->isEmpty()) {
@@ -126,7 +126,7 @@ class NewsletterController extends Controller
 
         NewsletterUnsubscribe::query()->where('email', $email)->delete();
 
-        return back()->with('success', 'Inscription newsletter confirmee.');
+        return back()->with('success', 'Inscription newsletter confirmée.');
     }
 
     public function unsubscribe(Request $request, string $email): Response
@@ -177,7 +177,7 @@ class NewsletterController extends Controller
                 }
             });
 
-        return back()->with('success', $imported . ' contact(s) utilisateur importe(s) dans la newsletter.');
+        return back()->with('success', $imported . ' contact(s) utilisateur importé(s) dans la newsletter.');
     }
 
     private function resolveRecipients(array $segments, ?string $customEmails): Collection

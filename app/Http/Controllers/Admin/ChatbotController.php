@@ -60,6 +60,6 @@ class ChatbotController extends Controller
         $page = Page::where('slug', 'chatbot')->firstOrFail();
         $page->update($validated);
 
-        return back()->with('success', 'Configuration chatbot mise a jour avec succes.');
+        return back()->with('success', 'Configuration chatbot mise à jour avec succès.');
     }
 }

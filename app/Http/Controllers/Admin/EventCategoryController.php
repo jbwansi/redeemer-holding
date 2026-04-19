@@ -31,7 +31,7 @@ class EventCategoryController extends Controller
         ]);
 
         EventCategory::create($validated);
-        return redirect()->back()->with('success', 'Category created successfully');
+        return redirect()->back()->with('success', 'Catégorie créée avec succès.');
     }
 
     public function update(Request $request, $id)
@@ -45,17 +45,17 @@ class EventCategoryController extends Controller
         ]);
 
         $category->update($validated);
-        return redirect()->back()->with('success', 'Category updated');
+        return redirect()->back()->with('success', 'Catégorie mise à jour avec succès.');
     }
 
     public function destroy($id)
     {
         $category = EventCategory::findOrFail($id);
         if ($category->events()->count() > 0) {
-            return back()->with('error', 'Cannot delete - category has events');
+            return back()->with('error', 'Impossible de supprimer - la catégorie contient des événements.');
         }
 
         $category->delete();
-        return redirect()->back()->with('success', 'Category deleted');
+        return redirect()->back()->with('success', 'Catégorie supprimée avec succès.');
     }
 }
