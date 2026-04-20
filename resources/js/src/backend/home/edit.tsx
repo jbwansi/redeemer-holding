@@ -18,9 +18,10 @@ interface AudienceCard { icon: string; title: string; description: string }
 interface TestimonialItem { content: string; author: string; position: string; image: string }
 interface CtaBenefit { text: string }
 interface StatsBandItem { value: string; label: string }
-interface TextItem {text: string}
+interface TextItem { text: string }
 
 interface Meta {
+    hero_floating_stat: any
     // Hero
     hero_badge: string
     hero_title_line1: string
@@ -37,6 +38,10 @@ interface Meta {
     hero_floating_stat_enabled: boolean
     hero_floating_stat_value: string
     hero_floating_stat_label: string
+    hero_social_proof_text: string
+    hero_social_rating: string
+    hero_social_platform: string
+    hero_testimonial: HeroTestimonial
     // Stats band
     stats: StatsBandItem[]
     // Process
@@ -69,6 +74,8 @@ interface Meta {
     // Bloc clarté
     // Activation
     clarity_action_enabled?: boolean
+    clarity_action_social_proof_text?: string
+    clarity_action_urgency_text?: string
 
     // Contenu principal
     clarity_action_title?: string
@@ -239,16 +246,16 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                     <div>
                                         <Label className="mb-2">Badge</Label>
                                         <Input
-                                            value={m.hero_badge}
+                                            value={m.hero_badge ?? ''}
                                             onChange={e => setMeta({ hero_badge: e.target.value })}
-                                            placeholder="Formation • Coaching • Conseil"
+                                            placeholder="Coaching • Formation • Accompagnement"
                                         />
                                     </div>
 
                                     <div>
                                         <Label className="mb-2">Titre — Ligne 1</Label>
                                         <Input
-                                            value={m.hero_title_line1}
+                                            value={m.hero_title_line1 ?? ''}
                                             onChange={e => setMeta({ hero_title_line1: e.target.value })}
                                             placeholder="Structurez vos actions"
                                         />
@@ -257,18 +264,18 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                     <div>
                                         <Label className="mb-2">Titre — Ligne 2</Label>
                                         <Input
-                                            value={m.hero_title_line2}
+                                            value={m.hero_title_line2 ?? ''}
                                             onChange={e => setMeta({ hero_title_line2: e.target.value })}
-                                            placeholder="et atteignez vos objectifs"
+                                            placeholder="et développez des résultats"
                                         />
                                     </div>
 
                                     <div>
                                         <Label className="mb-2">Titre — Ligne 3</Label>
                                         <Input
-                                            value={m.hero_title_line3}
+                                            value={m.hero_title_line3 ?? ''}
                                             onChange={e => setMeta({ hero_title_line3: e.target.value })}
-                                            placeholder="durablement"
+                                            placeholder="durables"
                                         />
                                     </div>
 
@@ -276,19 +283,10 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                         <Label className="mb-2">Sous-titre</Label>
                                         <Textarea
                                             rows={3}
-                                            value={m.hero_subtitle}
+                                            value={m.hero_subtitle ?? ''}
                                             onChange={e => setMeta({ hero_subtitle: e.target.value })}
                                         />
                                     </div>
-
-                                    {/* <div>
-                                        <Label className="mb-2">Image hero (URL)</Label>
-                                        <Input
-                                            value={m.hero_image}
-                                            onChange={e => setMeta({ hero_image: e.target.value })}
-                                            placeholder="/assets/images/portrait.jpg"
-                                        />
-                                    </div> */}
                                 </CardContent>
                             </Card>
 
@@ -435,15 +433,15 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                         <div>
                                             <Label className="mb-2">Texte bouton principal</Label>
                                             <Input
-                                                value={m.hero_cta_text}
+                                                value={m.hero_cta_text ?? ''}
                                                 onChange={e => setMeta({ hero_cta_text: e.target.value })}
-                                                placeholder="Réserver une consultation gratuite"
+                                                placeholder="Réserver un appel découverte"
                                             />
                                         </div>
                                         <div>
                                             <Label className="mb-2">URL bouton principal</Label>
                                             <Input
-                                                value={m.hero_cta_url}
+                                                value={m.hero_cta_url ?? ''}
                                                 onChange={e => setMeta({ hero_cta_url: e.target.value })}
                                                 placeholder="/contact"
                                             />
@@ -454,17 +452,17 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                         <div>
                                             <Label className="mb-2">Texte bouton secondaire</Label>
                                             <Input
-                                                value={m.hero_secondary_cta_text}
+                                                value={m.hero_secondary_cta_text ?? ''}
                                                 onChange={e => setMeta({ hero_secondary_cta_text: e.target.value })}
-                                                placeholder="Découvrir les formations"
+                                                placeholder="Découvrir les accompagnements"
                                             />
                                         </div>
                                         <div>
                                             <Label className="mb-2">URL bouton secondaire</Label>
                                             <Input
-                                                value={m.hero_secondary_cta_url}
+                                                value={m.hero_secondary_cta_url ?? ''}
                                                 onChange={e => setMeta({ hero_secondary_cta_url: e.target.value })}
-                                                placeholder="/formations"
+                                                placeholder="/services"
                                             />
                                         </div>
                                     </div>
@@ -530,23 +528,71 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                     )}
                                 </CardContent>
                             </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Preuve sociale</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label className="mb-2">Texte principal</Label>
+                                        <Input
+                                            value={m.hero_social_proof_text ?? ''}
+                                            onChange={e => setMeta({ hero_social_proof_text: e.target.value })}
+                                            placeholder="Des professionnels accompagnés avec méthode"
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <Label className="mb-2">Note / mention</Label>
+                                            <Input
+                                                value={m.hero_social_rating ?? ''}
+                                                onChange={e => setMeta({ hero_social_rating: e.target.value })}
+                                                placeholder="Retours très positifs"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Plateforme / libellé</Label>
+                                            <Input
+                                                value={m.hero_social_platform ?? ''}
+                                                onChange={e => setMeta({ hero_social_platform: e.target.value })}
+                                                placeholder="Accompagnements appréciés"
+                                            />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Statistique flottante</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
+                                    <div className="flex items-center justify-between rounded-lg border p-3">
+                                        <div>
+                                            <Label className="mb-0">Afficher la statistique flottante</Label>
+                                            <p className="text-muted-foreground text-xs">
+                                                Affiche ou masque le petit badge sur l’image du hero.
+                                            </p>
+                                        </div>
+
+                                        <Switch
+                                            checked={m.hero_floating_stat_enabled ?? true}
+                                            onCheckedChange={(checked) =>
+                                                setMeta({ hero_floating_stat_enabled: checked })
+                                            }
+                                        />
+                                    </div>
+
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <Label className="mb-2">Valeur</Label>
                                             <Input
-                                                value={m.hero_floating_stat?.value ?? ''}
+                                                value={m.hero_floating_stat_value ?? ''}
                                                 onChange={e =>
-                                                    setMeta({
-                                                        hero_floating_stat: {
-                                                            ...(m.hero_floating_stat ?? { value: '', label: '' }),
-                                                            value: e.target.value,
-                                                        },
-                                                    })
+                                                    setMeta({ hero_floating_stat_value: e.target.value })
                                                 }
                                                 placeholder="97%"
                                             />
@@ -554,14 +600,9 @@ const HomeEdit = ({ page }: { page: Page }) => {
                                         <div>
                                             <Label className="mb-2">Libellé</Label>
                                             <Input
-                                                value={m.hero_floating_stat?.label ?? ''}
+                                                value={m.hero_floating_stat_label ?? ''}
                                                 onChange={e =>
-                                                    setMeta({
-                                                        hero_floating_stat: {
-                                                            ...(m.hero_floating_stat ?? { value: '', label: '' }),
-                                                            label: e.target.value,
-                                                        },
-                                                    })
+                                                    setMeta({ hero_floating_stat_label: e.target.value })
                                                 }
                                                 placeholder="Satisfaction"
                                             />
@@ -574,250 +615,277 @@ const HomeEdit = ({ page }: { page: Page }) => {
 
 
                     <TabsContent value="clarity-action">
-    <div className="space-y-6">
-        <Card>
-            <CardHeader>
-                <CardTitle>Bloc “Du flou à l’action”</CardTitle>
-            </CardHeader>
+                        <div className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Bloc “Du flou à l’action”</CardTitle>
+                                </CardHeader>
 
-            <CardContent className="space-y-6">
-                <div className="flex items-center justify-between rounded-lg border p-3">
-                    <div>
-                        <Label className="mb-0">Activer ce bloc</Label>
-                        <p className="text-muted-foreground text-xs">
-                            Affiche ou masque complètement cette section sur la page d’accueil.
-                        </p>
-                    </div>
+                                <CardContent className="space-y-6">
+                                    <div className="flex items-center justify-between rounded-lg border p-3">
+                                        <div>
+                                            <Label className="mb-0">Activer ce bloc</Label>
+                                            <p className="text-muted-foreground text-xs">
+                                                Affiche ou masque complètement cette section sur la page d’accueil.
+                                            </p>
+                                        </div>
 
-                    <Switch
-                        checked={m.clarity_action_enabled ?? true}
-                        onCheckedChange={(checked) =>
-                            setMeta({ clarity_action_enabled: checked })
-                        }
-                    />
-                </div>
+                                        <Switch
+                                            checked={m.clarity_action_enabled ?? true}
+                                            onCheckedChange={(checked) =>
+                                                setMeta({ clarity_action_enabled: checked })
+                                            }
+                                        />
+                                    </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <Label className="mb-2">Titre principal</Label>
-                        <Input
-                            value={m.clarity_action_title ?? ''}
-                            onChange={(e) =>
-                                setMeta({ clarity_action_title: e.target.value })
-                            }
-                            placeholder="Du flou à l’action : un cadre simple pour avancer"
-                        />
-                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <Label className="mb-2">Titre principal</Label>
+                                            <Input
+                                                value={m.clarity_action_title ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({ clarity_action_title: e.target.value })
+                                                }
+                                                placeholder="Du flou à l’action : un cadre simple pour avancer"
+                                            />
+                                        </div>
 
-                    <div>
-                        <Label className="mb-2">Sous-titre</Label>
-                        <Textarea
-                            value={m.clarity_action_subtitle ?? ''}
-                            onChange={(e) =>
-                                setMeta({ clarity_action_subtitle: e.target.value })
-                            }
-                            placeholder="Identifiez ce qui freine votre progression et découvrez le cadre concret pour avancer avec plus de clarté, de constance et de résultats."
-                            rows={3}
-                        />
-                    </div>
-                </div>
+                                        <div>
+                                            <Label className="mb-2">Sous-titre</Label>
+                                            <Textarea
+                                                value={m.clarity_action_subtitle ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({ clarity_action_subtitle: e.target.value })
+                                                }
+                                                placeholder="Quand tout semble prioritaire, il devient difficile d’avancer avec clarté. Cet échange vous aide à faire le tri, retrouver une direction nette et passer à l’action avec plus de sérénité."
+                                                rows={3}
+                                            />
+                                        </div>
+                                    </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                    <div className="space-y-4">
-                        <div>
-                            <Label className="mb-2">Titre colonne gauche</Label>
-                            <Input
-                                value={m.clarity_action_left_title ?? ''}
-                                onChange={(e) =>
-                                    setMeta({
-                                        clarity_action_left_title: e.target.value,
-                                    })
-                                }
-                                placeholder="Vous vous reconnaissez si :"
-                            />
+                                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="mb-2">Titre colonne gauche</Label>
+                                                <Input
+                                                    value={m.clarity_action_left_title ?? ''}
+                                                    onChange={(e) =>
+                                                        setMeta({
+                                                            clarity_action_left_title: e.target.value,
+                                                        })
+                                                    }
+                                                    placeholder="Vous avancez… mais sans direction vraiment claire"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <Label>Liste gauche</Label>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setMeta({
+                                                                clarity_action_left_items: [
+                                                                    ...(m.clarity_action_left_items ?? []),
+                                                                    { text: '' },
+                                                                ],
+                                                            })
+                                                        }
+                                                    >
+                                                        <Plus className="mr-1 h-4 w-4" /> Ajouter
+                                                    </Button>
+                                                </div>
+
+                                                {(m.clarity_action_left_items ?? []).map((item, i) => (
+                                                    <div key={i} className="flex items-center gap-3">
+                                                        <Input
+                                                            placeholder="Texte du point"
+                                                            value={item.text}
+                                                            onChange={(e) =>
+                                                                setMeta({
+                                                                    clarity_action_left_items: updateItem(
+                                                                        m.clarity_action_left_items ?? [],
+                                                                        i,
+                                                                        { text: e.target.value },
+                                                                    ),
+                                                                })
+                                                            }
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                setMeta({
+                                                                    clarity_action_left_items: removeItem(
+                                                                        m.clarity_action_left_items ?? [],
+                                                                        i,
+                                                                    ),
+                                                                })
+                                                            }
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+
+                                                {(m.clarity_action_left_items ?? []).length === 0 && (
+                                                    <p className="text-muted-foreground py-2 text-center text-sm">
+                                                        Aucun élément. Cliquez sur Ajouter.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="mb-2">Titre colonne droite</Label>
+                                                <Input
+                                                    value={m.clarity_action_right_title ?? ''}
+                                                    onChange={(e) =>
+                                                        setMeta({
+                                                            clarity_action_right_title: e.target.value,
+                                                        })
+                                                    }
+                                                    placeholder="Ce que vous obtenez concrètement :"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <Label>Liste droite</Label>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setMeta({
+                                                                clarity_action_right_items: [
+                                                                    ...(m.clarity_action_right_items ?? []),
+                                                                    { text: '' },
+                                                                ],
+                                                            })
+                                                        }
+                                                    >
+                                                        <Plus className="mr-1 h-4 w-4" /> Ajouter
+                                                    </Button>
+                                                </div>
+
+                                                {(m.clarity_action_right_items ?? []).map((item, i) => (
+                                                    <div key={i} className="flex items-center gap-3">
+                                                        <Input
+                                                            placeholder="Texte du point"
+                                                            value={item.text}
+                                                            onChange={(e) =>
+                                                                setMeta({
+                                                                    clarity_action_right_items: updateItem(
+                                                                        m.clarity_action_right_items ?? [],
+                                                                        i,
+                                                                        { text: e.target.value },
+                                                                    ),
+                                                                })
+                                                            }
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                setMeta({
+                                                                    clarity_action_right_items: removeItem(
+                                                                        m.clarity_action_right_items ?? [],
+                                                                        i,
+                                                                    ),
+                                                                })
+                                                            }
+                                                        >
+                                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+
+                                                {(m.clarity_action_right_items ?? []).length === 0 && (
+                                                    <p className="text-muted-foreground py-2 text-center text-sm">
+                                                        Aucun élément. Cliquez sur Ajouter.
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-lg border p-4 space-y-4">
+                                        <div>
+                                            <Label className="mb-2">Titre du formulaire</Label>
+                                            <Input
+                                                value={m.clarity_action_final_cta_title ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({
+                                                        clarity_action_final_cta_title: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Réservez un échange pour clarifier vos prochaines étapes"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Texte du formulaire</Label>
+                                            <Textarea
+                                                value={m.clarity_action_final_cta_subtitle ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({
+                                                        clarity_action_final_cta_subtitle: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer."
+                                                rows={3}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Texte du bouton</Label>
+                                            <Input
+                                                value={m.clarity_action_final_cta_button_text ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({
+                                                        clarity_action_final_cta_button_text:
+                                                            e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Réserver mon appel découverte"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Preuve sociale du formulaire</Label>
+                                            <Input
+                                                value={m.clarity_action_social_proof_text ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({
+                                                        clarity_action_social_proof_text: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Un accompagnement structuré et orienté résultats"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Texte de rareté / qualité</Label>
+                                            <Textarea
+                                                value={m.clarity_action_urgency_text ?? ''}
+                                                onChange={(e) =>
+                                                    setMeta({
+                                                        clarity_action_urgency_text: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité."
+                                                rows={2}
+                                            />
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
-
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Label>Liste gauche</Label>
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() =>
-                                        setMeta({
-                                            clarity_action_left_items: [
-                                                ...(m.clarity_action_left_items ?? []),
-                                                { text: '' },
-                                            ],
-                                        })
-                                    }
-                                >
-                                    <Plus className="mr-1 h-4 w-4" /> Ajouter
-                                </Button>
-                            </div>
-
-                            {(m.clarity_action_left_items ?? []).map((item, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                    <Input
-                                        placeholder="Texte du point"
-                                        value={item.text}
-                                        onChange={(e) =>
-                                            setMeta({
-                                                clarity_action_left_items: updateItem(
-                                                    m.clarity_action_left_items ?? [],
-                                                    i,
-                                                    { text: e.target.value }
-                                                ),
-                                            })
-                                        }
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                            setMeta({
-                                                clarity_action_left_items: removeItem(
-                                                    m.clarity_action_left_items ?? [],
-                                                    i
-                                                ),
-                                            })
-                                        }
-                                    >
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                </div>
-                            ))}
-
-                            {(m.clarity_action_left_items ?? []).length === 0 && (
-                                <p className="text-muted-foreground py-2 text-center text-sm">
-                                    Aucun élément. Cliquez sur Ajouter.
-                                </p>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div>
-                            <Label className="mb-2">Titre colonne droite</Label>
-                            <Input
-                                value={m.clarity_action_right_title ?? ''}
-                                onChange={(e) =>
-                                    setMeta({
-                                        clarity_action_right_title: e.target.value,
-                                    })
-                                }
-                                placeholder="Vous repartez avec :"
-                            />
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <Label>Liste droite</Label>
-                                <Button
-                                    type="button"
-                                    size="sm"
-                                    onClick={() =>
-                                        setMeta({
-                                            clarity_action_right_items: [
-                                                ...(m.clarity_action_right_items ?? []),
-                                                { text: '' },
-                                            ],
-                                        })
-                                    }
-                                >
-                                    <Plus className="mr-1 h-4 w-4" /> Ajouter
-                                </Button>
-                            </div>
-
-                            {(m.clarity_action_right_items ?? []).map((item, i) => (
-                                <div key={i} className="flex items-center gap-3">
-                                    <Input
-                                        placeholder="Texte du point"
-                                        value={item.text}
-                                        onChange={(e) =>
-                                            setMeta({
-                                                clarity_action_right_items: updateItem(
-                                                    m.clarity_action_right_items ?? [],
-                                                    i,
-                                                    { text: e.target.value }
-                                                ),
-                                            })
-                                        }
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() =>
-                                            setMeta({
-                                                clarity_action_right_items: removeItem(
-                                                    m.clarity_action_right_items ?? [],
-                                                    i
-                                                ),
-                                            })
-                                        }
-                                    >
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                </div>
-                            ))}
-
-                            {(m.clarity_action_right_items ?? []).length === 0 && (
-                                <p className="text-muted-foreground py-2 text-center text-sm">
-                                    Aucun élément. Cliquez sur Ajouter.
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="rounded-lg border p-4 space-y-4">
-                    <div>
-                        <Label className="mb-2">Titre du formulaire</Label>
-                        <Input
-                            value={m.clarity_action_final_cta_title ?? ''}
-                            onChange={(e) =>
-                                setMeta({
-                                    clarity_action_final_cta_title: e.target.value,
-                                })
-                            }
-                            placeholder="Faisons le point sur votre situation"
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="mb-2">Texte du formulaire</Label>
-                        <Textarea
-                            value={m.clarity_action_final_cta_subtitle ?? ''}
-                            onChange={(e) =>
-                                setMeta({
-                                    clarity_action_final_cta_subtitle: e.target.value,
-                                })
-                            }
-                            placeholder="Profitez d’un premier échange pour clarifier vos priorités, prendre du recul et identifier les prochaines étapes à mettre en place."
-                            rows={3}
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="mb-2">Texte du bouton</Label>
-                        <Input
-                            value={m.clarity_action_final_cta_button_text ?? ''}
-                            onChange={(e) =>
-                                setMeta({
-                                    clarity_action_final_cta_button_text:
-                                        e.target.value,
-                                })
-                            }
-                            placeholder="Réserver mon appel découverte"
-                        />
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    </div>
-</TabsContent>
+                    </TabsContent>
 
                     {/* ── Statistiques (bande rouge) ─────────────── */}
                     <TabsContent value="stats">

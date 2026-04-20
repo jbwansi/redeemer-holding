@@ -43,6 +43,18 @@ const defaultHomeMeta = {
     hero_floating_stat_value: '97%',
     hero_floating_stat_label: 'Satisfaction',
 
+
+    // ── Preuve sociale Hero ──────────────────────────────────
+    hero_social_proof_text: 'Des professionnels accompagnés avec méthode et bienveillance',
+    hero_social_rating: 'Retours très positifs',
+    hero_social_platform: 'Accompagnements appréciés',
+
+    // ── Preuve sociale Formulaire / CTA ──────────────────────
+    clarity_action_social_proof_text:
+        'Un accompagnement structuré et orienté résultats',
+    clarity_action_urgency_text:
+        'Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.',
+
     // ── CLARITY ACTION ───────────────────────────────────
     clarity_action_enabled: true,
 
@@ -232,6 +244,8 @@ function Home({ services, home, posts, formations }: any) {
                 finalCtaSubtitle={meta.clarity_action_final_cta_subtitle}
                 finalCtaButtonText={meta.clarity_action_final_cta_button_text}
                 finalCtaDisclaimer={meta.clarity_action_final_cta_disclaimer}
+                finalCtaSocialProofText={meta.clarity_action_social_proof_text}
+                finalCtaUrgencyText={meta.clarity_action_urgency_text}
                 submitUrl={route('contact.store')}
             />
 

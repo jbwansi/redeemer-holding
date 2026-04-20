@@ -29,6 +29,9 @@ interface HeroMeta {
     hero_floating_stat_enabled?: boolean
     hero_floating_stat_value?: string
     hero_floating_stat_label?: string
+    hero_social_proof_text?: string
+    hero_social_rating?: string
+    hero_social_platform?: string
 }
 
 const defaultImages = ['/assets/images/portrait.jpg']
@@ -61,6 +64,17 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
     const titleLine1 = meta?.hero_title_line1 ?? 'Transformez votre potentiel'
     const titleLine2 = meta?.hero_title_line2 ?? 'en résultats'
     const titleLine3 = meta?.hero_title_line3 ?? 'durables et concrets'
+
+    const heroSocialProofText =
+        meta?.hero_social_proof_text ?? 'Des professionnels accompagnés avec méthode et bienveillance'
+
+    const heroSocialRating =
+        meta?.hero_social_rating ?? 'Retours très positifs'
+
+    const heroSocialPlatform =
+        meta?.hero_social_platform ?? 'Accompagnements appréciés'
+
+
 
     const subtitle =
         meta?.hero_subtitle ??
@@ -246,16 +260,16 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                             className="mt-6 flex flex-col gap-2 text-sm text-slate-300"
                         >
                             <span className="text-slate-400">
-                                Plus de 1000 professionnels accompagnés
+                                {heroSocialProofText}
                             </span>
 
                             <div className="flex items-center gap-3">
                                 <div className="flex text-yellow-400">★★★★★</div>
                                 <span className="font-semibold text-white">
-                                    4,9/5
+                                    {heroSocialRating}
                                 </span>
                                 <span className="rounded-md bg-white/10 px-2 py-1 text-xs font-medium text-slate-300">
-                                    Trustpilot
+                                    {heroSocialPlatform}
                                 </span>
                             </div>
                         </motion.div>

@@ -22,6 +22,8 @@ type ClarityActionBlockProps = {
     finalCtaButtonText?: string
     finalCtaDisclaimer?: string
     submitUrl?: string
+    finalCtaSocialProofText?: string
+    finalCtaUrgencyText?: string
 }
 
 export default function ClarityActionBlock({
@@ -40,6 +42,8 @@ export default function ClarityActionBlock({
     finalCtaButtonText = 'Réserver mon appel découverte',
     finalCtaDisclaimer = '30 minutes • Sans engagement',
     submitUrl = '/contact',
+    finalCtaSocialProofText = 'Un accompagnement structuré et orienté résultats',
+    finalCtaUrgencyText = 'Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.',
 }: ClarityActionBlockProps) {
     const filteredLeftItems = leftItems.filter((item) => item?.text?.trim())
     const filteredRightItems = rightItems.filter((item) => item?.text?.trim())
@@ -321,11 +325,11 @@ export default function ClarityActionBlock({
                                         </p>
 
                                         <p className="text-sm font-medium text-white">
-                                            +1000 professionnels accompagnés • 4,9/5 de satisfaction
+                                            {finalCtaSocialProofText}
                                         </p>
 
                                         <p className="text-xs leading-6 text-slate-500">
-                                            Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.
+                                          {finalCtaUrgencyText}
                                         </p>
                                     </div>
                                 )}
