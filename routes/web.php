@@ -177,9 +177,22 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     Route::get('/search/global', [SearchController::class, 'global'])->name('dashboard.search.global');
 
     // Newsletters
-    Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletters.index');
-    Route::post('/newsletters/send', [NewsletterController::class, 'send'])->name('newsletters.send');
-    Route::post('/newsletters/import-users', [NewsletterController::class, 'importUsers'])->name('newsletters.import-users');
+Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletters.index');
+Route::post('/newsletters/send', [NewsletterController::class, 'send'])->name('newsletters.send');
+Route::post('/newsletters/import-users', [NewsletterController::class, 'importUsers'])->name('newsletters.import-users');
+
+// ✅ ROUTE POUR S'INSCRIRE (formulaire)
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+
+// ✅ ROUTE POUR CLIQUER DANS L'EMAIL
+Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
+
+// Page de confirmation (React / Inertia)
+Route::get('/newsletters/confirmation', function (Request $request) {
+    return inertia('newsletter/confirmation', [
+        'status' => $request->query('status'),
+    ]);
+})->name('newsletter.confirmation');
 
     // Services
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');

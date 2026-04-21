@@ -46,6 +46,7 @@ interface NewsletterForm {
     custom_emails: string;
     test_mode: boolean;
     test_email: string;
+    scheduled_at: string;
 }
 
 const segmentLabels: Record<Exclude<SegmentKey, 'custom'>, string> = {
@@ -67,6 +68,7 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
         custom_emails: '',
         test_mode: false,
         test_email: '',
+        scheduled_at: '',
     });
 
     const estimatedRecipients = useMemo(() => {
@@ -130,23 +132,23 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
             <div className="p-6 space-y-6">
                 <div className="rounded-2xl border bg-gradient-to-r from-sky-50 to-white p-6">
                     <div className="flex items-start justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-semibold tracking-tight">Newsletters</h1>
-                        <p className="text-muted-foreground">
-                            Creez, testez et envoyez vos campagnes depuis un espace unifie.
-                        </p>
+                        <div>
+                            <h1 className="text-3xl font-semibold tracking-tight">Newsletters</h1>
+                            <p className="text-muted-foreground">
+                                Creez, testez et envoyez vos campagnes depuis un espace unifie.
+                            </p>
+                        </div>
+                        <Badge className="px-3 py-1 text-sm" variant="secondary">
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {estimatedRecipients} destinataires estimes
+                        </Badge>
                     </div>
-                    <Badge className="px-3 py-1 text-sm" variant="secondary">
-                        <Sparkles className="h-4 w-4 mr-2" />
-                        {estimatedRecipients} destinataires estimes
-                    </Badge>
-                </div>
-                <div className="mt-4 flex justify-end">
-                    <Button type="button" variant="outline" onClick={importUsersContacts}>
-                        <Upload className="h-4 w-4 mr-2" />
-                        Importer les utilisateurs comme contacts
-                    </Button>
-                </div>
+                    <div className="mt-4 flex justify-end">
+                        <Button type="button" variant="outline" onClick={importUsersContacts}>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Importer les utilisateurs comme contacts
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
@@ -281,14 +283,29 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
                                     )}
                                 </div>
 
+                                <div className="space-y-2">
+                                    <Label htmlFor="scheduled_at">Programmer l’envoi (optionnel)</Label>
+                                    <Input
+                                        id="scheduled_at"
+                                        type="datetime-local"
+                                        value={data.scheduled_at}
+                                        onChange={(e) => setData('scheduled_at', e.target.value)}
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Laissez vide pour un envoi immédiat.
+                                    </p>
+                                </div>
+
                                 <div className="flex justify-end">
                                     <Button type="submit" disabled={processing} className="min-w-44">
                                         {data.test_mode ? <TestTube2 className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
                                         {processing
-                                            ? 'Envoi en cours...'
+                                            ? 'Traitement...'
                                             : data.test_mode
                                                 ? 'Envoyer un test'
-                                                : 'Envoyer la newsletter'}
+                                                : data.scheduled_at
+                                                    ? 'Programmer la newsletter'
+                                                    : 'Envoyer la newsletter'}
                                     </Button>
                                 </div>
                             </form>

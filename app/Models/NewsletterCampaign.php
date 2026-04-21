@@ -29,6 +29,7 @@ class NewsletterCampaign extends Model
     protected $casts = [
         'segments' => 'array',
         'queued_at' => 'datetime',
+        'scheduled_at' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
