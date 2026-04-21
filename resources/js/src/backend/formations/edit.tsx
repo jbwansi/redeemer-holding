@@ -26,8 +26,8 @@ interface EditFormationProps {
         location: string
         start_date: string
         end_date: string
-        price: number
-        max_participants: number
+        price: number | null
+        max_participants: number | null
         meeting_link: string
         featured_image: any
         is_published: boolean
@@ -44,8 +44,8 @@ const EditFormation = ({ formation }: EditFormationProps) => {
         location: formation.location,
         start_date: formation.start_date,
         end_date: formation.end_date,
-        price: formation.price.toString(),
-        max_participants: formation.max_participants.toString(),
+        price: (formation.price ?? 0).toString(),
+        max_participants: (formation.max_participants ?? 0).toString(),
         meeting_link: formation.meeting_link || '',
         featured_image: null,
         is_published: formation.is_published,
