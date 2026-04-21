@@ -30,6 +30,7 @@ use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardContro
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -188,7 +189,7 @@ Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])
 Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
 
 // Page de confirmation (React / Inertia)
-Route::get('/newsletters/confirmation', function (Request $request) {
+Route::get('/newsletter/confirmation', function (Request $request) {
     return inertia('newsletter/confirmation', [
         'status' => $request->query('status'),
     ]);
