@@ -4,18 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\TestEmailSender;
+use App\Services\DynamicMailerService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
 
     protected $settingsService;
+    protected $dynamicMailerService;
 
-    public function __construct(SettingsService $settingsService)
+    public function __construct(SettingsService $settingsService, DynamicMailerService $dynamicMailerService)
     {
         $this->settingsService = $settingsService;
+        $this->dynamicMailerService = $dynamicMailerService;
     }
 
 
@@ -101,14 +105,41 @@ class SettingController extends Controller
             ->toArray();
     }
 
-    public function test_send_email(Request $request)
-    {
-        try {
-            Mail::to($request->test_email)->send(new TestEmailSender());
-        } catch (\Exception $e) {
-            return back()->with('error', 'Une erreur s\'est produite lors de l\'envoi de l\'email de test');
-        }
+   public function test_send_email(Request $request)
+{
+    $request->validate([
+        'test_email' => ['required', 'email'],
+    ]);
 
-        return back()->with('success', 'Un email de test a été envoyé avec succès');
+    try {
+        // 🔥 Log utile
+        $settings = $this->settingsService->getAllSettings();
+        $host = $settings['host'] ?? null;
+        $port = isset($settings['port']) ? (int) $settings['port'] : 587;
+        $encryption = $settings['encryption'] ?? null;
+        $username = $settings['username'] ?? null;
+        $senderEmail = $settings['sender_email'] ?? config('mail.from.address') ?? 'admin@redeemerholding.com';
+
+        Log::channel('newsletter')->info('SMTP TEST CONFIG', [
+            'host' => $host,
+            'port' => $port,
+            'encryption' => $encryption,
+            'username' => $username,
+            'from' => $senderEmail,
+        ]);
+
+        // 🔥 Utilise le service de mail dynamique
+        $this->dynamicMailerService->send(new TestEmailSender(), $request->test_email);
+
+    } catch (\Throwable $e) {
+
+        Log::channel('newsletter')->error('SMTP TEST ERROR', [
+            'message' => $e->getMessage(),
+        ]);
+
+        return back()->with('error', 'Erreur SMTP : ' . $e->getMessage());
     }
+
+    return back()->with('success', 'Email de test envoyé avec succès');
+}
 }

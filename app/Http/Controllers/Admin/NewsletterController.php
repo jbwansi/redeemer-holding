@@ -13,6 +13,7 @@ use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use App\Services\DynamicMailerService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -23,6 +24,13 @@ use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
+    protected DynamicMailerService $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
+
     public function index()
     {
         return inertia('backend/newsletters/index', [
@@ -133,14 +141,15 @@ class NewsletterController extends Controller
             }
 
             try {
-                Mail::to($validated['test_email'])->send(
+                $this->dynamicMailerService->send(
                     new NewsletterCampaignMail(
                         subject: $validated['subject'],
                         headline: $validated['headline'],
                         content: $validated['content'],
                         ctaText: $validated['cta_text'] ?? null,
                         ctaUrl: $validated['cta_url'] ?? null,
-                    )
+                    ),
+                    $validated['test_email']
                 );
 
                 Log::channel('newsletter')->info('Newsletter send: email de test envoyé', [
@@ -274,7 +283,7 @@ class NewsletterController extends Controller
                 'username' => config('mail.mailers.smtp.username'),
                 'from' => config('mail.from.address'),
             ]);
-            Mail::to($email)->send(new ConfirmNewsletterSubscriptionMail($subscriber));
+            $this->dynamicMailerService->send(new ConfirmNewsletterSubscriptionMail($subscriber), $email);
 
             Log::channel('newsletter')->info('Subscribe: email de confirmation envoyé', [
                 'subscriber_id' => $subscriber->id,

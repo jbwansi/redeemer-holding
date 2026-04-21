@@ -5,12 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\ServiceStatusUpdate;
 use App\Models\ServiceRequest;
+use App\Services\DynamicMailerService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
 class ServiceRequestController extends Controller
 {
+    protected $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
     public function index(Request $request)
     {
         // Query de base avec les relations
@@ -123,7 +130,7 @@ class ServiceRequestController extends Controller
         $serviceRequest->status = $request->status;
         $serviceRequest->save();
 
-        Mail::to($serviceRequest->email)->send(new ServiceStatusUpdate($serviceRequest));
+        $this->dynamicMailerService->send(new ServiceStatusUpdate($serviceRequest), $serviceRequest->email);
 
         return redirect()->route('service-requests.show', $serviceRequest->id);
     }

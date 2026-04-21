@@ -30,9 +30,16 @@ use Illuminate\Support\Facades\Log as FacadesLog;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\DynamicMailerService;
 
 class WebController extends Controller
 {
+    protected $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
 
 
 
@@ -243,15 +250,13 @@ class WebController extends Controller
         try {
             // 1. Email au participant
             if ((bool) get_setting('event_confirmation_enabled', true)) {
-                Mail::to($participant->email, $participant->name)
-                    ->queue(new EventConfirmationMail($event, $participant));
+                $this->dynamicMailerService->queue(new EventConfirmationMail($event, $participant), $participant->email);
             }
 
             // 2. Email admin
             $adminEmail =  get_setting('support_email');
             if ($adminEmail) {
-                Mail::to($adminEmail)
-                    ->queue(new AdminEventNotificationMail($event, $participant));
+                $this->dynamicMailerService->queue(new AdminEventNotificationMail($event, $participant), $adminEmail);
             }
 
             Log::info('Emails envoyés avec succès', [
@@ -643,13 +648,13 @@ class WebController extends Controller
         try {
             // Email au participant
             if ((bool) get_setting('formation_confirmation_enabled', true)) {
-                Mail::to($participant->email)->queue(new FormationRegistrationConfirmation($formation, $participant));
+                $this->dynamicMailerService->queue(new FormationRegistrationConfirmation($formation, $participant), $participant->email);
             }
 
             // Email à l'administrateur
             $adminEmail = get_setting('support_email');
             if ($adminEmail) {
-                Mail::to($adminEmail)->queue(new FormationRegistrationAdminNotification($formation, $participant));
+                $this->dynamicMailerService->queue(new FormationRegistrationAdminNotification($formation, $participant), $adminEmail);
             }
 
             Log::info('Emails de confirmation envoyés', [

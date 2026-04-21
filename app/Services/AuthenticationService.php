@@ -9,10 +9,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeMail;
+use App\Services\DynamicMailerService;
 
 class AuthenticationService
 {
-    public function __construct() {}
+    protected $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
 
     public function authenticate(LoginRequest $request): void
     {
@@ -41,7 +47,7 @@ class AuthenticationService
 
             // Création de l'utilisateur
             $user = User::create($userData);
-            Mail::to($user->email)->send(new WelcomeMail($user));
+            $this->dynamicMailerService->send(new WelcomeMail($user), $user->email);
             // Connexion automatique
             Auth::login($user);
 

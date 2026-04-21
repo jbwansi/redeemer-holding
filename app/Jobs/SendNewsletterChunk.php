@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Mail\NewsletterCampaignMail;
 use App\Models\NewsletterCampaign;
+use App\Services\DynamicMailerService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,6 +24,7 @@ class SendNewsletterChunk implements ShouldQueue
     public function __construct(
         public int $campaignId,
         public array $emails,
+        protected DynamicMailerService $dynamicMailerService,
     ) {
     }
 
@@ -52,14 +54,17 @@ class SendNewsletterChunk implements ShouldQueue
                     ['email' => $email]
                 );
 
-                Mail::to($email)->send(new NewsletterCampaignMail(
-                    subject: $campaign->subject,
-                    headline: $campaign->headline,
-                    content: $campaign->content,
-                    ctaText: $campaign->cta_text,
-                    ctaUrl: $campaign->cta_url,
-                    unsubscribeUrl: $unsubscribeUrl,
-                ));
+                $this->dynamicMailerService->send(
+                    new NewsletterCampaignMail(
+                        subject: $campaign->subject,
+                        headline: $campaign->headline,
+                        content: $campaign->content,
+                        ctaText: $campaign->cta_text,
+                        ctaUrl: $campaign->cta_url,
+                        unsubscribeUrl: $unsubscribeUrl,
+                    ),
+                    $email
+                );
 
                 $sent++;
             } catch (\Throwable $exception) {

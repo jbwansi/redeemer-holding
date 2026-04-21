@@ -1,42 +1,54 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Confirmation abonnement</title>
 </head>
-<body style="margin:0; padding:0; background:#0b1220; font-family:Arial, Helvetica, sans-serif; color:#ffffff;">
-    <div style="max-width:600px; margin:0 auto; padding:40px 24px;">
-        
-        <h1 style="font-size:28px; margin-bottom:16px;">
-            Confirmez votre abonnement
-        </h1>
 
-        <p style="font-size:16px; line-height:1.6; margin-bottom:16px;">
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px;">
+
+    <div style="max-width:600px; margin:auto; background:#ffffff; padding:30px; border-radius:10px;">
+
+        <h2 style="color:#111827;">Confirmez votre abonnement</h2>
+
+        <p style="color:#374151;">
             Merci pour votre inscription avec l’adresse :
             <strong>{{ $email }}</strong>
         </p>
 
-        <p style="font-size:16px; line-height:1.6; margin-bottom:24px;">
+        <p style="color:#374151;">
             Pour finaliser votre inscription à la newsletter, cliquez sur le bouton ci-dessous :
         </p>
 
-        <p style="margin-bottom:32px;">
-            <a href="{{ $confirmUrl }}"
-               style="display:inline-block;
-                      background:#ef3b2d;
-                      color:#ffffff;
-                      text-decoration:none;
-                      padding:14px 24px;
-                      border-radius:10px;
-                      font-weight:bold;">
+        <div style="text-align:center; margin:30px 0;">
+            <a href="{{ $confirmUrl }}" style="
+                    background:#ef3b2d;
+                    color:#ffffff;
+                    padding:12px 20px;
+                    text-decoration:none;
+                    border-radius:8px;
+                    display:inline-block;
+                    font-weight:bold;
+               ">
                 Confirmer mon abonnement
             </a>
+        </div>
+
+        <!-- ✅ FALLBACK ICI -->
+        <p style="font-size:12px; color:#9ca3af;">
+            Si le bouton ne fonctionne pas, copiez ce lien :
+            <br>
+            <a href="{{ $confirmUrl }}">{{ $confirmUrl }}</a>
         </p>
 
-        <p style="font-size:14px; line-height:1.6; color:#cbd5e1;">
+
+        <p style="color:#6b7280; font-size:14px;">
             Si vous n’êtes pas à l’origine de cette demande, vous pouvez ignorer cet email.
         </p>
 
     </div>
+
 </body>
+
 </html>

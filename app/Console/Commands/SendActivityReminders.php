@@ -9,11 +9,20 @@ use App\Models\FormationParticipant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\DynamicMailerService;
 
 class SendActivityReminders extends Command
 {
     protected $signature = 'reminders:send';
     protected $description = 'Envoyer les rappels pour les formations et événements à venir';
+
+    protected $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        parent::__construct();
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
 
     public function handle()
     {
@@ -66,8 +75,7 @@ class SendActivityReminders extends Command
                             'days_before' => $daysBefore,
                         ]);
 
-                        Mail::to($participant->email)
-                            ->queue(new EventReminderMail($participant, $daysBefore, $eventZoomLink));
+                        $this->dynamicMailerService->queue(new EventReminderMail($participant, $daysBefore, $eventZoomLink), $participant->email);
 
                         Log::info('Rappel d\'événement envoyé avec succès', [
                             'participant_id' => $participant->id
@@ -108,8 +116,7 @@ class SendActivityReminders extends Command
                             'days_before' => $daysBefore,
                         ]);
 
-                        Mail::to($participant->email)
-                            ->queue(new FormationReminderMail($participant, $daysBefore, $formationZoomLink));
+                        $this->dynamicMailerService->queue(new FormationReminderMail($participant, $daysBefore, $formationZoomLink), $participant->email);
 
                         Log::info('Rappel de formation envoyé avec succès', [
                             'participant_id' => $participant->id

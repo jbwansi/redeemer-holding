@@ -10,9 +10,16 @@ use App\Models\FormationParticipant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Services\DynamicMailerService;
 
 class ActivityReminderController extends Controller
 {
+    protected $dynamicMailerService;
+
+    public function __construct(DynamicMailerService $dynamicMailerService)
+    {
+        $this->dynamicMailerService = $dynamicMailerService;
+    }
     public function send(): JsonResponse
     {
         $tomorrow = now()->addDay()->format('Y-m-d');
@@ -35,8 +42,7 @@ class ActivityReminderController extends Controller
             $eventReminders = 0;
             foreach ($eventParticipants as $participant) {
                 try {
-                    Mail::to($participant->email)
-                        ->queue(new EventReminderMail($participant));
+                    $this->dynamicMailerService->queue(new EventReminderMail($participant), $participant->email);
                     $eventReminders++;
                 } catch (\Exception $e) {
                     Log::error('Erreur lors de l\'envoi du rappel d\'événement', [
@@ -57,8 +63,7 @@ class ActivityReminderController extends Controller
             $formationReminders = 0;
             foreach ($formationParticipants as $participant) {
                 try {
-                    Mail::to($participant->email)
-                        ->queue(new FormationReminderMail($participant));
+                    $this->dynamicMailerService->queue(new FormationReminderMail($participant), $participant->email);
                     $formationReminders++;
                 } catch (\Exception $e) {
                     Log::error('Erreur lors de l\'envoi du rappel de formation', [
