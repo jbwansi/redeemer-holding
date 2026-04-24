@@ -42,8 +42,6 @@ class WebController extends Controller
     }
 
 
-
-
     public function blogs(Request $request)
     {
         $postsPaginator = Post::with(['user', 'categories'])
@@ -65,11 +63,11 @@ class WebController extends Controller
         }
 
         return inertia('frontend/blogs/index', [
-            'tags'         => $tags,
-            'posts'        => $posts,
-            'categories'   => $categories,
+            'tags' => $tags,
+            'posts' => $posts,
+            'categories' => $categories,
             'featuredPost' => $featuredPost,
-            'seo'          => SeoService::page('Blog', 'Articles sur la transformation personnelle, le développement personnel et le coaching.'),
+            'seo' => SeoService::page('Blog', 'Articles sur la transformation personnelle, le développement personnel et le coaching.'),
         ]);
     }
 
@@ -87,9 +85,9 @@ class WebController extends Controller
         $postModel = $blog->resource;
         $postImage = SeoService::firstImageUrl($postModel->featured_image ?? []);
         return inertia('frontend/blogs/show', [
-            'post'         => $blog,
+            'post' => $blog,
             'relatedPosts' => new PostCollection($relatedPosts->get()),
-            'seo'          => SeoService::article(
+            'seo' => SeoService::article(
                 $postModel->title ?? $postModel->name ?? '',
                 $postModel->excerpt ?? $postModel->description ?? '',
                 $postImage,
@@ -113,10 +111,10 @@ class WebController extends Controller
         $categories = EventCategory::orderBy('name')->withCount('events')->get();
         $featuredEvent = Event::with(['category'])->where('is_featured', true)->published()->first();
         return inertia('frontend/events/index', [
-            'events'        => $events,
-            'categories'    => $categories,
+            'events' => $events,
+            'categories' => $categories,
             'featuredEvent' => $featuredEvent,
-            'seo'           => SeoService::page('Événements', 'Découvrez nos prochains événements de coaching et de développement personnel.'),
+            'seo' => SeoService::page('Événements', 'Découvrez nos prochains événements de coaching et de développement personnel.'),
         ]);
     }
 
@@ -127,7 +125,7 @@ class WebController extends Controller
         $eventImage = SeoService::firstImageUrl($event->featured_image ?? []);
         return inertia('frontend/events/show', [
             'event' => $event,
-            'seo'   => SeoService::event(
+            'seo' => SeoService::event(
                 $event->title ?? $event->name ?? '',
                 $event->description ?? $event->excerpt ?? '',
                 $eventImage,
@@ -169,10 +167,10 @@ class WebController extends Controller
 
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|max:255',
-            'phone'      => 'nullable|string|max:20',
-            'qty'        => "required|integer|min:1|max:{$maxTickets}"
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'qty' => "required|integer|min:1|max:{$maxTickets}"
         ]);
 
         try {
@@ -194,11 +192,11 @@ class WebController extends Controller
             $reference = strtoupper(Str::random(8));
             $participant = new EventParticipant([
                 'user_id' => auth()->id(),
-                'name'    => trim($validated['first_name'] . ' ' . $validated['last_name']),
-                'email'   => $validated['email'],
-                'phone'   => $validated['phone'],
-                'qty'     => $validated['qty'],
-                'status'  => EventParticipant::STATUS_PENDING,
+                'name' => trim($validated['first_name'] . ' ' . $validated['last_name']),
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'qty' => $validated['qty'],
+                'status' => EventParticipant::STATUS_PENDING,
                 'reference' => $reference
             ]);
 
@@ -254,7 +252,7 @@ class WebController extends Controller
             }
 
             // 2. Email admin
-            $adminEmail =  get_setting('support_email');
+            $adminEmail = get_setting('support_email');
             if ($adminEmail) {
                 $this->dynamicMailerService->queue(new AdminEventNotificationMail($event, $participant), $adminEmail);
             }
@@ -443,7 +441,7 @@ class WebController extends Controller
         $formationImage = SeoService::firstImageUrl($formation->featured_image ?? []);
         return inertia('frontend/formations/show', [
             'formation' => $formation,
-            'seo'       => SeoService::page(
+            'seo' => SeoService::page(
                 $formation->title ?? $formation->name ?? '',
                 $formation->description ?? $formation->excerpt ?? '',
                 $formationImage,
@@ -452,99 +450,6 @@ class WebController extends Controller
     }
 
 
-    // public function register_formation(Request $request, $slug)
-    // {
-    //     Log::info('Début de l\'inscription à la formation', ['slug' => $slug]);
-
-    //     // 1. Récupération et vérification de la formation
-    //     $formation = Formation::where('slug', $slug)
-    //         ->published()
-    //         ->firstOrFail();
-
-    //     // 2. Vérifications préliminaires
-    //     if (now() > $formation->end_date) {
-    //         return back()->withErrors(['general' => "Cette formation est déjà terminée."]);
-    //     }
-
-    //     $formation->loadCount('participants'); // Charge le compte des participants
-    //     $availableSeats = $formation->max_participants
-    //         ? $formation->max_participants - $formation->participants_count
-    //         : PHP_INT_MAX;
-
-    //     if ($availableSeats <= 0) {
-    //         return back()->withErrors(['general' => "Désolé, cette formation est complète."]);
-    //     }
-
-    //     // 3. Validation
-    //     $maxPlaces = $formation->max_participants === null ? 10 : min($availableSeats, 10);
-
-    //     $validationRules = [
-    //         'qty' => "required|integer|min:1|max:{$maxPlaces}",
-    //         'phone' => 'nullable|string|max:20',
-    //     ];
-
-    //     if (!auth()->check()) {
-    //         $validationRules['name'] = 'required|string|max:255';
-    //         $validationRules['email'] = 'required|email|max:255';
-    //     }
-
-    //     $validated = $request->validate($validationRules);
-
-    //     // 4. Transaction
-    //     try {
-    //         return DB::transaction(function () use ($formation, $validated, $availableSeats) {
-    //             // Revérification du nombre de places
-    //             if ($validated['qty'] > $availableSeats && $formation->max_participants !== null) {
-    //                 return back()->withErrors([
-    //                     'qty' => "Il ne reste que {$availableSeats} place(s) disponible(s)."
-    //                 ]);
-    //             }
-
-    //             // Création du participant
-    //             $participant = new FormationParticipant();
-    //             $participant->formation_id = $formation->id; // Ajout explicite
-    //             $participant->user_id = auth()->id();
-    //             $participant->name = $validated['name'] ?? auth()->user()->name;
-    //             $participant->email = $validated['email'] ?? auth()->user()->email;
-    //             $participant->phone = $validated['phone'];
-    //             $participant->qty = $validated['qty'];
-    //             $participant->status = FormationParticipant::STATUS_PENDING;
-    //             $participant->reference = 'FORM-' . strtoupper(Str::random(8));
-    //             $participant->save();
-
-    //             // Session pour utilisateur non connecté
-    //             if (!auth()->check()) {
-    //                 session()->put('temp_participant_' . $participant->id, true);
-    //             }
-
-    //             // Redirection selon le prix
-    //             if ($formation->price <= 0) {
-    //                 $participant->update(['status' => FormationParticipant::STATUS_COMPLETED]);
-    //                 return redirect()->route('formations.registration.confirmation', [
-    //                     'slug' => $formation->slug,
-    //                     'participant_id' => $participant->id
-    //                 ]);
-    //             }
-
-
-    //             return redirect()->route('formations.payment', [
-    //                 'slug' => $formation->slug,
-    //                 'participant_id' => $participant->id
-    //             ]);
-    //         });
-    //     } catch (\Exception $e) {
-    //         Log::error('Erreur lors de l\'inscription à la formation', [
-    //             'error' => $e->getMessage(),
-    //             'formation_id' => $formation->id,
-    //             'user_id' => auth()->id(),
-    //             'data' => $validated
-    //         ]);
-
-    //         return back()->withErrors([
-    //             'general' => "Une erreur s'est produite lors de l'inscription. Veuillez réessayer."
-    //         ]);
-    //     }
-    // }
     public function register_formation(Request $request, $slug)
     {
         Log::info('Début de l\'inscription à la formation', ['slug' => $slug]);
@@ -577,8 +482,8 @@ class WebController extends Controller
         ];
 
         $validationRules['first_name'] = 'required|string|max:255';
-        $validationRules['last_name']  = 'required|string|max:255';
-        $validationRules['email']      = 'required|email|max:255';
+        $validationRules['last_name'] = 'required|string|max:255';
+        $validationRules['email'] = 'required|email|max:255';
 
         $validated = $request->validate($validationRules);
 

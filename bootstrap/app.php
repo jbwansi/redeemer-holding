@@ -2,10 +2,12 @@
 
 use App\Http\Middleware\CheckUserRole;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\OnlyTestUsers;
 use App\Http\Middleware\RespectMaintenanceMode;
 use App\Http\Middleware\RequireAdminAccess;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,11 +25,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'stripe/webhook',
             'stripe/webhook/formations',
         ]);
+        // $middleware->web(prepend: [
+        //     ForceHttps::class,
+        // ]);
         $middleware->web(append: [
             HandleInertiaRequests::class,
             OnlyTestUsers::class,
             RespectMaintenanceMode::class,
+            // SecurityHeaders::class,
         ]);
+        // $middleware->api(append: [
+        //     SecurityHeaders::class,
+        // ]);
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'role' => CheckUserRole::class,

@@ -26,58 +26,73 @@ class ConfigController extends Controller
     }
 
 
-public function index()
-{
-      $defaultConnection = config('database.default');
-                $database = config("database.connections.{$defaultConnection}.database");
-    
-    $tables = DB::select("
-        SELECT
-            TABLE_NAME AS name,
-            TABLE_ROWS AS table_rows,
-            CREATE_TIME AS created_at,
-            UPDATE_TIME AS updated_at,
-            TABLE_COLLATION AS collation,
-            ENGINE AS engine,
-            ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2) AS size_mb,
-            CONCAT(ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2), ' MB') AS size
-        FROM information_schema.TABLES
-        WHERE TABLE_SCHEMA = ?
-        ORDER BY TABLE_NAME
-    ", [$database]);
+    public function index()
+    {
+        $defaultConnection = config('database.default');
+        $database = config("database.connections.{$defaultConnection}.database");
 
-    // For compatibility with frontend expecting 'rows', map table_rows to rows
-    foreach ($tables as $table) {
-        $table->rows = (int) ($table->table_rows ?? 0);
+        if (DB::getDriverName() === 'sqlite') {
+            $tables = DB::select("
+            SELECT
+                name,
+                0 AS table_rows,
+                NULL AS created_at,
+                NULL AS updated_at,
+                NULL AS collation,
+                'SQLite' AS engine,
+                0 AS size_mb,
+                '0 MB' AS size
+            FROM sqlite_master
+            WHERE type = 'table'
+              AND name NOT LIKE 'sqlite_%'
+            ORDER BY name
+        ");
+        } else {
+            $tables = DB::select("
+            SELECT
+                TABLE_NAME AS name,
+                TABLE_ROWS AS table_rows,
+                CREATE_TIME AS created_at,
+                UPDATE_TIME AS updated_at,
+                TABLE_COLLATION AS collation,
+                ENGINE AS engine,
+                ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2) AS size_mb,
+                CONCAT(ROUND((DATA_LENGTH + INDEX_LENGTH) / 1024 / 1024, 2), ' MB') AS size
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA = ?
+            ORDER BY TABLE_NAME
+        ", [$database]);
+        }
+
+        foreach ($tables as $table) {
+            $table->rows = (int) ($table->table_rows ?? 0);
+        }
+
+        $totalTables = count($tables);
+        $totalRows = collect($tables)->sum(fn($table) => (int) ($table->rows ?? 0));
+        $totalSize = collect($tables)->sum(fn($table) => (float) ($table->size_mb ?? 0));
+        $mainEngine = collect($tables)
+            ->pluck('engine')
+            ->filter()
+            ->countBy()
+            ->sortDesc()
+            ->keys()
+            ->first();
+
+        return inertia('backend/config/database-index', [
+            'database' => $database,
+            'driver' => DB::getDriverName(),
+            'tables' => $tables,
+            'totalTables' => $totalTables,
+            'totalRows' => $totalRows,
+            'totalSize' => $totalSize,
+            'mainEngine' => $mainEngine,
+        ]);
     }
 
-    $totalTables = count($tables);
-    $totalRows = collect($tables)->sum(fn ($table) => (int) ($table->rows ?? 0));
-    $totalSize = collect($tables)->sum(fn ($table) => (float) ($table->size_mb ?? 0));
-    $mainEngine = collect($tables)
-        ->pluck('engine')
-        ->filter()
-        ->countBy()
-        ->sortDesc()
-        ->keys()
-        ->first();
-
-        
-
-    return inertia('backend/config/database-index', [
-        'database' => $database,
-        'driver' => config('database.default'),
-        'tables' => $tables,
-        'totalTables' => $totalTables,
-        'totalRows' => $totalRows,
-        'totalSize' => $totalSize,
-        'mainEngine' => $mainEngine,
-    ]);
-}
 
 
-
-public function system()
+    public function system()
     {
         return inertia('backend/config/system');
     }

@@ -73,10 +73,11 @@ class SendNewsletterChunk implements ShouldQueue
             }
         }
 
-        NewsletterCampaign::query()->whereKey($campaign->id)->update([
-            'sent_count' => DB::raw('sent_count + ' . $sent),
-            'failed_count' => DB::raw('failed_count + ' . $failed),
-        ]);
+        $campaignModel = NewsletterCampaign::query()->find($campaign->id);
+        if ($campaignModel) {
+            $campaignModel->increment('sent_count', $sent);
+            $campaignModel->increment('failed_count', $failed);
+        }
 
         $fresh = NewsletterCampaign::query()->find($campaign->id);
         if (!$fresh) {

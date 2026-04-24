@@ -27,6 +27,7 @@ use App\Http\Controllers\Frontend\FormationPaymentController;
 use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\WebController;
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
+use App\Http\Controllers\Frontend\NewsletterController as FrontendNewsletterController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -51,7 +52,7 @@ Route::get('/sitemap-services.xml', [SitemapController::class, 'services'])->nam
 
 // Static / public pages
 Route::get('/contact', [AppController::class, 'contact'])->name('contact');
-Route::post('/contact', [AppController::class, 'send_contact'])->name('contact.store');
+Route::post('/contact', [AppController::class, 'send_contact'])->middleware('throttle:5,1')->name('contact.store');
 
 Route::get('/faq', [AppController::class, 'faq'])->name('faq');
 Route::get('/about-me', [AppController::class, 'about'])->name('about');
@@ -60,12 +61,12 @@ Route::get('/services', [AppController::class, 'services'])->name('services');
 Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
 
 Route::get('/services-requests/{slug}', [AppController::class, 'service_request'])->name('services.requests');
-Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->name('service-requests.store');
+Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->middleware('throttle:3,1')->name('service-requests.store');
 
 // Formations
 Route::get('/formations', [WebController::class, 'formations'])->name('formations');
 Route::get('/formations/{slug}', [WebController::class, 'formation_detail'])->name('formations.details');
-Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->name('formations.register');
+Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->middleware('throttle:3,1')->name('formations.register');
 Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('formations.registration.confirmation');
 Route::delete('/formations/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration_formation'])->name('formations.registration.cancel');
 
@@ -84,7 +85,7 @@ Route::get('/blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.
 // Événements
 Route::get('/evenements', [WebController::class, 'events'])->name('evenements');
 Route::get('/evenements/{slug}', [WebController::class, 'evenement_detail'])->name('evenements.details');
-Route::post('/evenements/{slug}/inscription', [WebController::class, 'register'])->name('events.register');
+Route::post('/evenements/{slug}/inscription', [WebController::class, 'register'])->middleware('throttle:3,1')->name('events.register');
 Route::get('/evenements/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation'])->name('events.registration.confirmation');
 Route::delete('/evenements/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
@@ -101,11 +102,23 @@ Route::get('/termes-et-conditions', [AppController::class, 'terms'])->name('term
 Route::get('/politique-de-confidentialite', [AppController::class, 'policy'])->name('policy.show');
 Route::get('/politique-des-cookies', [AppController::class, 'cookies'])->name('cookies.show');
 
-// Newsletter
-Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletters.subscribe');
-Route::get('/newsletter/unsubscribe/{email}', [NewsletterController::class, 'unsubscribe'])
+// Newsletter publiques
+Route::post('/newsletter/subscribe', [FrontendNewsletterController::class, 'subscribe'])
+    ->middleware('throttle:5,1')
+    ->name('newsletter.subscribe');
+
+Route::get('/newsletter/confirm/{token}', [FrontendNewsletterController::class, 'confirm'])
+    ->name('newsletter.confirm');
+
+Route::get('/newsletter/unsubscribe/{email}', [FrontendNewsletterController::class, 'unsubscribe'])
     ->middleware('signed')
     ->name('newsletters.unsubscribe');
+
+Route::get('/newsletter/confirmation', function (Request $request) {
+    return inertia('newsletter/confirmation', [
+        'status' => $request->query('status'),
+    ]);
+})->name('newsletter.confirmation');
 
 // Public settings
 Route::get('/settings/public', [SettingController::class, 'publicFetch'])->name('settings.public');
@@ -116,7 +129,7 @@ Route::get('/settings/public', [SettingController::class, 'publicFetch'])->name(
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('guest')->group(function () {
+Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', [AuthController::class, 'show_auth'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
@@ -177,23 +190,10 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     // Dashboard search
     Route::get('/search/global', [SearchController::class, 'global'])->name('dashboard.search.global');
 
-    // Newsletters
-Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletters.index');
-Route::post('/newsletters/send', [NewsletterController::class, 'send'])->name('newsletters.send');
-Route::post('/newsletters/import-users', [NewsletterController::class, 'importUsers'])->name('newsletters.import-users');
-
-// ✅ ROUTE POUR S'INSCRIRE (formulaire)
-Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
-
-// ✅ ROUTE POUR CLIQUER DANS L'EMAIL
-Route::get('/newsletter/confirm/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
-
-// Page de confirmation (React / Inertia)
-Route::get('/newsletter/confirmation', function (Request $request) {
-    return inertia('newsletter/confirmation', [
-        'status' => $request->query('status'),
-    ]);
-})->name('newsletter.confirmation');
+    // Newsletters admin
+    Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletters.index');
+    Route::post('/newsletters/send', [NewsletterController::class, 'send'])->name('newsletters.send');
+    Route::post('/newsletters/import-users', [NewsletterController::class, 'importUsers'])->name('newsletters.import-users');
 
     // Services
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');

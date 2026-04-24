@@ -27,7 +27,17 @@ class BackupController
             escapeshellarg($db['database']),
             $path
         );
-        exec($command);
+        $output = [];
+        $returnVar = 0;
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            abort(500, 'Backup failed');
+        }
+
+        if (!file_exists($path)) {
+            abort(500, 'Backup file not created');
+        }
 
         return response()->download($path)->deleteFileAfterSend(true);
     }

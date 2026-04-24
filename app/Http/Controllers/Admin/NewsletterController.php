@@ -62,6 +62,44 @@ class NewsletterController extends Controller
                     ->count('email'),
             ],
 
+            'pendingSubscribersCount' => NewsletterSubscriber::query()
+                ->whereNotNull('email')
+                ->whereNull('confirmed_at')
+                ->distinct('email')
+                ->count('email'),
+
+            'confirmedSubscribersCount' => NewsletterSubscriber::query()
+                ->whereNotNull('email')
+                ->whereNotNull('confirmed_at')
+                ->distinct('email')
+                ->count('email'),
+
+            'pendingSubscribers' => NewsletterSubscriber::query()
+                ->whereNotNull('email')
+                ->whereNull('confirmed_at')
+                ->latest()
+                ->get([
+                    'id',
+                    'email',
+                    'source',
+                    'subscribed_at',
+                    'confirmation_sent_at',
+                    'created_at',
+                ]),
+
+            'confirmedSubscribers' => NewsletterSubscriber::query()
+                ->whereNotNull('email')
+                ->whereNotNull('confirmed_at')
+                ->latest()
+                ->get([
+                    'id',
+                    'email',
+                    'source',
+                    'subscribed_at',
+                    'confirmed_at',
+                    'created_at',
+                ]),
+
             'history' => NewsletterCampaign::query()
                 ->latest()
                 ->limit(20)

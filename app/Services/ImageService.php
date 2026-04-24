@@ -10,7 +10,14 @@ class ImageService
 {
     public function uploadImage(UploadedFile $file, string $path, array $sizes = []): array
     {
-        $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        // Validate file type
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!in_array($file->getMimeType(), $allowedMimes)) {
+            throw new \InvalidArgumentException('Invalid file type');
+        }
+
+        $extension = $this->getExtensionFromMime($file->getMimeType());
+        $filename = uniqid() . '_' . time() . '.' . $extension;
         $fullPath = $path . '/' . $filename;
 
         // Stocker l'image originale
@@ -73,5 +80,16 @@ class ImageService
             'large' => ['width' => 800, 'height' => 600],
             'banner' => ['width' => 1200, 'height' => 400],
         ];
+    }
+
+    private function getExtensionFromMime(string $mime): string
+    {
+        return match ($mime) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/gif' => 'gif',
+            'image/webp' => 'webp',
+            default => 'jpg',
+        };
     }
 }

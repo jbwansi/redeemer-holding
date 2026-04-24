@@ -29,7 +29,7 @@ const Footer = () => {
     const handleNewsletterSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        post(route('newsletters.subscribe'), {
+        post(route('newsletter.subscribe'), {
             preserveScroll: true,
             onSuccess: () => reset('email'),
         });

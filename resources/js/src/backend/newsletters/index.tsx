@@ -33,6 +33,24 @@ interface Props {
         created_at: string;
     }>;
     unsubscribedCount: number;
+    pendingSubscribersCount: number;
+    confirmedSubscribersCount: number;
+    pendingSubscribers: Array<{
+        id: number;
+        email: string;
+        source: string | null;
+        subscribed_at: string | null;
+        confirmation_sent_at: string | null;
+        created_at: string;
+    }>;
+    confirmedSubscribers: Array<{
+        id: number;
+        email: string;
+        source: string | null;
+        subscribed_at: string | null;
+        confirmed_at: string | null;
+        created_at: string;
+    }>;
 }
 
 interface NewsletterForm {
@@ -57,7 +75,15 @@ const segmentLabels: Record<Exclude<SegmentKey, 'custom'>, string> = {
     service_requests: 'Demandes de services',
 };
 
-export default function NewsletterIndex({ segments, history, unsubscribedCount }: Props) {
+export default function NewsletterIndex({
+    segments,
+    history,
+    unsubscribedCount,
+    pendingSubscribersCount,
+    confirmedSubscribersCount,
+    pendingSubscribers,
+    confirmedSubscribers,
+}: Props) {
     const { data, setData, post, processing, reset } = useForm<NewsletterForm>({
         subject: '',
         headline: '',
@@ -103,7 +129,7 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
     const onSubmit = (event: React.FormEvent) => {
         event.preventDefault();
 
-        post(route('newsletters.send'), {
+        post(route('admin.newsletters.send'), {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success(data.test_mode ? 'Email de test envoye.' : 'Newsletter envoyee avec succes.');
@@ -151,19 +177,39 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
                     </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-5">
                     <Card>
                         <CardContent className="p-4">
                             <p className="text-xs text-muted-foreground">Segments actifs</p>
                             <p className="mt-1 text-2xl font-semibold">{data.segments.length}</p>
                         </CardContent>
                     </Card>
+
+                    <Card>
+                        <CardContent className="p-4">
+                            <p className="text-xs text-muted-foreground">Abonnés confirmés</p>
+                            <p className="mt-1 text-2xl font-semibold text-emerald-600">
+                                {confirmedSubscribersCount}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardContent className="p-4">
+                            <p className="text-xs text-muted-foreground">En attente de confirmation</p>
+                            <p className="mt-1 text-2xl font-semibold text-orange-600">
+                                {pendingSubscribersCount}
+                            </p>
+                        </CardContent>
+                    </Card>
+
                     <Card>
                         <CardContent className="p-4">
                             <p className="text-xs text-muted-foreground">Desabonnes</p>
                             <p className="mt-1 text-2xl font-semibold text-amber-600">{unsubscribedCount}</p>
                         </CardContent>
                     </Card>
+
                     <Card>
                         <CardContent className="p-4">
                             <p className="text-xs text-muted-foreground">Campagnes historiques</p>
@@ -376,6 +422,80 @@ export default function NewsletterIndex({ segments, history, unsubscribedCount }
                             </CardContent>
                         </Card>
                     </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Abonnés confirmés</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {confirmedSubscribers.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                    Aucun abonné confirmé pour le moment.
+                                </p>
+                            ) : (
+                                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                                    {confirmedSubscribers.map((subscriber) => (
+                                        <div key={subscriber.id} className="rounded-lg border p-3">
+                                            <p className="font-medium">{subscriber.email}</p>
+                                            <div className="mt-1 space-y-1 text-xs text-muted-foreground">
+                                                <p>Source : {subscriber.source || 'non définie'}</p>
+                                                <p>
+                                                    Abonné le :{' '}
+                                                    {subscriber.subscribed_at
+                                                        ? new Date(subscriber.subscribed_at).toLocaleString()
+                                                        : '—'}
+                                                </p>
+                                                <p>
+                                                    Confirmé le :{' '}
+                                                    {subscriber.confirmed_at
+                                                        ? new Date(subscriber.confirmed_at).toLocaleString()
+                                                        : '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>En attente de confirmation</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {pendingSubscribers.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                    Aucun abonnement en attente.
+                                </p>
+                            ) : (
+                                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                                    {pendingSubscribers.map((subscriber) => (
+                                        <div key={subscriber.id} className="rounded-lg border p-3">
+                                            <p className="font-medium">{subscriber.email}</p>
+                                            <div className="mt-1 space-y-1 text-xs text-muted-foreground">
+                                                <p>Source : {subscriber.source || 'non définie'}</p>
+                                                <p>
+                                                    Inscrit le :{' '}
+                                                    {subscriber.subscribed_at
+                                                        ? new Date(subscriber.subscribed_at).toLocaleString()
+                                                        : '—'}
+                                                </p>
+                                                <p>
+                                                    Email de confirmation envoyé le :{' '}
+                                                    {subscriber.confirmation_sent_at
+                                                        ? new Date(subscriber.confirmation_sent_at).toLocaleString()
+                                                        : '—'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <Card>
