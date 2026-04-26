@@ -4,12 +4,13 @@ import {
     Users, Calendar, BookOpen, Newspaper,
     TrendingUp, DollarSign, Star, ArrowUpRight, ArrowDownRight, Activity
 } from 'lucide-react';
+
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 
-function Dashboard({ stats }: any) {
+function Dashboard({ stats, visitorsByCountry = [] }: any) {
     const pieColors = ['#DA2E29', '#F97316', '#2563EB', '#10B981', '#7C3AED'];
     const queueHealth = stats.queue_health;
 
@@ -123,6 +124,7 @@ function Dashboard({ stats }: any) {
                     </div>
                 </section>
 
+                {/* CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     {cards.map((card, index) => (
                         <Card key={index} className="group relative overflow-hidden border-slate-200/70 bg-white/95 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/70">
@@ -288,6 +290,30 @@ function Dashboard({ stats }: any) {
                                     </div>
                                 ))}
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Visiteurs par pays</CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            {visitorsByCountry.length === 0 ? (
+                                <p className="text-sm text-gray-500">Aucune donnée disponible</p>
+                            ) : (
+                                <div className="h-[300px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={visitorsByCountry}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="country" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Bar dataKey="users" fill="#dc2626" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

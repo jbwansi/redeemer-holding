@@ -7,6 +7,7 @@ use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Formation\FormationCollection;
 use App\Models\Event;
 use App\Models\Formation;
+use App\Services\GoogleAnalyticsService;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,28 +16,38 @@ class DashboardController extends Controller
 {
 
 
-    public function index()
+    public function index(GoogleAnalyticsService $ga)
     {
         $userId = Auth::user()->id;
         $now = now(); // Date actuelle
 
         // Récupérer les formations de l'utilisateur
-        $formations = Formation::with(['participants' => function ($query) {
-            $query->with('user')->orderBy('created_at', 'desc');
-        }])
+        $formations = Formation::with([
+            'participants' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc');
+            }
+        ])
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->get();
 
         // Récupérer les événements de l'utilisateur
-        $events = Event::with(['participants' => function ($query) {
-            $query->with('user')->orderBy('created_at', 'desc');
-        }])
+        $events = Event::with([
+            'participants' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc');
+            }
+        ])
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
             ->get();
+
+        try {
+            $visitorsByCountry = $ga->getVisitorsByCountry();
+        } catch (\Throwable $e) {
+            $visitorsByCountry = [];
+        }
 
         // Filtrage des formations par date
         $countCurrentFormations = $formations->filter(fn($formation) => $formation->start_date <= $now && $formation->end_date >= $now)->count();
@@ -56,6 +67,9 @@ class DashboardController extends Controller
             'countCurrentEvents' => $countCurrentEvents,
             'countUpGoingEvents' => $countUpGoingEvents,
             'CountPastEvents' => $CountPastEvents,
+
+            // Google Analytics
+            'visitorsByCountry' => $ga->getVisitorsByCountry(),
         ];
 
 
@@ -67,9 +81,11 @@ class DashboardController extends Controller
     {
         $userId = Auth::user()->id;
 
-        $formations = Formation::with(['participants' => function ($query) {
-            $query->with('user')->orderBy('created_at', 'desc');
-        }])
+        $formations = Formation::with([
+            'participants' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc');
+            }
+        ])
             ->whereHas('participants', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
@@ -81,9 +97,12 @@ class DashboardController extends Controller
     public function event()
     {
         $userId = Auth::user()->id;
-        $events = Event::with(["category", 'participants' => function ($query) {
-            $query->with('user')->orderBy('created_at', 'desc');
-        }])->whereHas('participants', function ($query) use ($userId) {
+        $events = Event::with([
+            "category",
+            'participants' => function ($query) {
+                $query->with('user')->orderBy('created_at', 'desc');
+            }
+        ])->whereHas('participants', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })->get();
 

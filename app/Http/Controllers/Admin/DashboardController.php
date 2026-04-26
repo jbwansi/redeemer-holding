@@ -14,57 +14,67 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Http\Request;
+use App\Services\GoogleAnalyticsService;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        // Calculer les statistiques
-        $stats = [
-            'events' => [
-                'active' => Event::where('end_date', '>=', now())->count(),
-                'total' => Event::count(),
-                'trend' => $this->calculateTrend('events'),
-            ],
-            'trainings' => [
-                'active' => Formation::where('is_published', true)->count(),
-                'total' => Formation::count(),
-                'trend' => $this->calculateTrend('trainings'),
-            ],
-            'services' => [
-                'active' => Service::where('status', true)->count(),
-                'total' => Service::count(),
-                'trend' => $this->calculateTrend('services'),
-            ],
-            'posts' => [
-                'published' => Post::where('published', true)->count(),
-                'total' => Post::count(),
-                'trend' => $this->calculateTrend('posts'),
-            ],
-            'users' => [
-                'total' => User::count(),
-                'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
-                'trend' => $this->calculateTrend('users'),
-            ],
-            'revenue' => [
-                'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
-                'last_month' => $this->calculateRevenue(
-                    now()->subMonth()->startOfMonth(),
-                    now()->subMonth()->endOfMonth()
-                ),
-                'trend' => $this->calculateRevenueTrend(),
-            ],
-            'monthly_revenue' => $this->getMonthlyRevenue(),
-            'revenue_distribution' => $this->getRevenueDistribution(),
-            'activity_by_type' => $this->getActivityByType(),
-            'top_content' => $this->getTopContent(),
-            'queue_health' => $this->getQueueHealth(),
-        ];
+   public function index(GoogleAnalyticsService $ga)
+{
+    // Calculer les statistiques
+    $stats = [
+        'events' => [
+            'active' => Event::where('end_date', '>=', now())->count(),
+            'total' => Event::count(),
+            'trend' => $this->calculateTrend('events'),
+        ],
+        'trainings' => [
+            'active' => Formation::where('is_published', true)->count(),
+            'total' => Formation::count(),
+            'trend' => $this->calculateTrend('trainings'),
+        ],
+        'services' => [
+            'active' => Service::where('status', true)->count(),
+            'total' => Service::count(),
+            'trend' => $this->calculateTrend('services'),
+        ],
+        'posts' => [
+            'published' => Post::where('published', true)->count(),
+            'total' => Post::count(),
+            'trend' => $this->calculateTrend('posts'),
+        ],
+        'users' => [
+            'total' => User::count(),
+            'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
+            'trend' => $this->calculateTrend('users'),
+        ],
+        'revenue' => [
+            'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
+            'last_month' => $this->calculateRevenue(
+                now()->subMonth()->startOfMonth(),
+                now()->subMonth()->endOfMonth()
+            ),
+            'trend' => $this->calculateRevenueTrend(),
+        ],
+        'monthly_revenue' => $this->getMonthlyRevenue(),
+        'revenue_distribution' => $this->getRevenueDistribution(),
+        'activity_by_type' => $this->getActivityByType(),
+        'top_content' => $this->getTopContent(),
+        'queue_health' => $this->getQueueHealth(),
+    ];
 
-        return inertia("backend/index", [
-            'stats' => $stats
-        ]);
+    // 🔥 Google Analytics
+    try {
+        $visitorsByCountry = $ga->getVisitorsByCountry();
+    } catch (\Throwable $e) {
+        $visitorsByCountry = [];
     }
+
+    // Retour vers React (Inertia)
+    return inertia("backend/index", [
+        'stats' => $stats,
+        'visitorsByCountry' => $visitorsByCountry,
+    ]);
+}
 
     private function getQueueHealth(): array
     {
