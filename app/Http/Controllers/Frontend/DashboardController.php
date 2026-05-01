@@ -7,7 +7,6 @@ use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Formation\FormationCollection;
 use App\Models\Event;
 use App\Models\Formation;
-use App\Services\GoogleAnalyticsService;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +15,7 @@ class DashboardController extends Controller
 {
 
 
-    public function index(GoogleAnalyticsService $ga)
+    public function index()
     {
         $userId = Auth::user()->id;
         $now = now(); // Date actuelle
@@ -43,11 +42,6 @@ class DashboardController extends Controller
             })
             ->get();
 
-        try {
-            $visitorsByCountry = $ga->getVisitorsByCountry();
-        } catch (\Throwable $e) {
-            $visitorsByCountry = [];
-        }
 
         // Filtrage des formations par date
         $countCurrentFormations = $formations->filter(fn($formation) => $formation->start_date <= $now && $formation->end_date >= $now)->count();
@@ -68,8 +62,6 @@ class DashboardController extends Controller
             'countUpGoingEvents' => $countUpGoingEvents,
             'CountPastEvents' => $CountPastEvents,
 
-            // Google Analytics
-            'visitorsByCountry' => $ga->getVisitorsByCountry(),
         ];
 
 

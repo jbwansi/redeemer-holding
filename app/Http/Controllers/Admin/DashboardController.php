@@ -18,63 +18,73 @@ use App\Services\GoogleAnalyticsService;
 
 class DashboardController extends Controller
 {
-   public function index(GoogleAnalyticsService $ga)
-{
-    // Calculer les statistiques
-    $stats = [
-        'events' => [
-            'active' => Event::where('end_date', '>=', now())->count(),
-            'total' => Event::count(),
-            'trend' => $this->calculateTrend('events'),
-        ],
-        'trainings' => [
-            'active' => Formation::where('is_published', true)->count(),
-            'total' => Formation::count(),
-            'trend' => $this->calculateTrend('trainings'),
-        ],
-        'services' => [
-            'active' => Service::where('status', true)->count(),
-            'total' => Service::count(),
-            'trend' => $this->calculateTrend('services'),
-        ],
-        'posts' => [
-            'published' => Post::where('published', true)->count(),
-            'total' => Post::count(),
-            'trend' => $this->calculateTrend('posts'),
-        ],
-        'users' => [
-            'total' => User::count(),
-            'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
-            'trend' => $this->calculateTrend('users'),
-        ],
-        'revenue' => [
-            'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
-            'last_month' => $this->calculateRevenue(
-                now()->subMonth()->startOfMonth(),
-                now()->subMonth()->endOfMonth()
-            ),
-            'trend' => $this->calculateRevenueTrend(),
-        ],
-        'monthly_revenue' => $this->getMonthlyRevenue(),
-        'revenue_distribution' => $this->getRevenueDistribution(),
-        'activity_by_type' => $this->getActivityByType(),
-        'top_content' => $this->getTopContent(),
-        'queue_health' => $this->getQueueHealth(),
-    ];
+    public function index(GoogleAnalyticsService $ga)
+    {
+        // Calculer les statistiques
+        $stats = [
+            'events' => [
+                'active' => Event::where('end_date', '>=', now())->count(),
+                'total' => Event::count(),
+                'trend' => $this->calculateTrend('events'),
+            ],
+            'trainings' => [
+                'active' => Formation::where('is_published', true)->count(),
+                'total' => Formation::count(),
+                'trend' => $this->calculateTrend('trainings'),
+            ],
+            'services' => [
+                'active' => Service::where('status', true)->count(),
+                'total' => Service::count(),
+                'trend' => $this->calculateTrend('services'),
+            ],
+            'posts' => [
+                'published' => Post::where('published', true)->count(),
+                'total' => Post::count(),
+                'trend' => $this->calculateTrend('posts'),
+            ],
+            'users' => [
+                'total' => User::count(),
+                'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
+                'trend' => $this->calculateTrend('users'),
+            ],
+            'revenue' => [
+                'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
+                'last_month' => $this->calculateRevenue(
+                    now()->subMonth()->startOfMonth(),
+                    now()->subMonth()->endOfMonth()
+                ),
+                'trend' => $this->calculateRevenueTrend(),
+            ],
+            'monthly_revenue' => $this->getMonthlyRevenue(),
+            'revenue_distribution' => $this->getRevenueDistribution(),
+            'activity_by_type' => $this->getActivityByType(),
+            'top_content' => $this->getTopContent(),
+            'queue_health' => $this->getQueueHealth(),
 
-    // 🔥 Google Analytics
-    try {
-        $visitorsByCountry = $ga->getVisitorsByCountry();
-    } catch (\Throwable $e) {
-        $visitorsByCountry = [];
+            'event_funnel' => $this->getEventFunnel(),
+            'event_funnel_current' => $this->getEventFunnelCurrent(),
+            'event_funnel_upcoming' => $this->getEventFunnelUpcoming(),
+        ];
+
+
+        // 🔥 Google Analytics
+        try {
+            $visitorsByCountry = $ga->getVisitorsByCountry();
+            $gaError = null;
+        } catch (\Throwable $e) {
+            $visitorsByCountry = [];
+            $gaError = $e->getMessage();
+        }
+
+        return inertia("backend/index", [
+            'stats' => $stats,
+            'visitorsByCountry' => $visitorsByCountry,
+            'visitorsByDay' => $ga->getVisitorsByDay(),
+            'topPages' => $ga->getTopPages(),
+            'trafficSources' => $ga->getTrafficSources(),
+            'gaError' => $gaError,
+        ]);
     }
-
-    // Retour vers React (Inertia)
-    return inertia("backend/index", [
-        'stats' => $stats,
-        'visitorsByCountry' => $visitorsByCountry,
-    ]);
-}
 
     private function getQueueHealth(): array
     {
@@ -151,7 +161,8 @@ class DashboardController extends Controller
             'users' => User::whereMonth('created_at', now()->subMonth()->month)->count(),
         };
 
-        if ($lastMonth == 0) return 100;
+        if ($lastMonth == 0)
+            return 100;
         return round((($currentMonth - $lastMonth) / $lastMonth) * 100, 1);
     }
 
@@ -174,7 +185,8 @@ class DashboardController extends Controller
             now()->subMonth()->endOfMonth()
         );
 
-        if ($lastRevenue == 0) return 100;
+        if ($lastRevenue == 0)
+            return 100;
         return round((($currentRevenue - $lastRevenue) / $lastRevenue) * 100, 1);
     }
 
@@ -465,5 +477,66 @@ class DashboardController extends Controller
             'revenue_distribution' => $this->getRevenueDistribution(),
             'activity_by_type' => $this->getActivityByType()
         ]);
+    }
+
+    private function getEventFunnel(): array
+    {
+        $views = Event::sum('views');
+
+        $created = EventParticipant::count();
+
+        $inProgress = EventParticipant::where('status', EventParticipant::STATUS_IN_PROGRESS)->count();
+
+        $completed = EventParticipant::where('status', EventParticipant::STATUS_COMPLETED)->count();
+
+        $cancelled = EventParticipant::where('status', EventParticipant::STATUS_CANCELLED)->count();
+
+        return [
+            ['name' => 'Vues événements', 'value' => $views],
+            ['name' => 'Inscriptions créées', 'value' => $created],
+            ['name' => 'Paiement commencé', 'value' => $inProgress],
+            ['name' => 'Paiement terminé', 'value' => $completed],
+            ['name' => 'Annulées / expirées', 'value' => $cancelled],
+        ];
+    }
+
+    private function getEventFunnelCurrent(): array
+    {
+        $now = now();
+
+        // IDs des événements en cours
+        $eventIds = Event::where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->pluck('id');
+
+        $views = Event::whereIn('id', $eventIds)->sum('views');
+
+        $created = EventParticipant::whereIn('event_id', $eventIds)->count();
+
+        $completed = EventParticipant::whereIn('event_id', $eventIds)
+            ->where('status', EventParticipant::STATUS_COMPLETED)
+            ->count();
+
+        $cancelled = EventParticipant::whereIn('event_id', $eventIds)
+            ->where('status', EventParticipant::STATUS_CANCELLED)
+            ->count();
+
+        return [
+            ['name' => 'Vues', 'value' => $views],
+            ['name' => 'Inscriptions', 'value' => $created],
+            ['name' => 'Paiements', 'value' => $completed],
+            ['name' => 'Annulations', 'value' => $cancelled],
+        ];
+    }
+
+    private function getEventFunnelUpcoming(): array
+    {
+        $eventIds = Event::where('start_date', '>', now())->pluck('id');
+
+        return [
+            ['name' => 'Vues', 'value' => Event::whereIn('id', $eventIds)->sum('views')],
+            ['name' => 'Inscriptions', 'value' => EventParticipant::whereIn('event_id', $eventIds)->count()],
+            ['name' => 'Paiements', 'value' => EventParticipant::whereIn('event_id', $eventIds)->where('status', 'completed')->count()],
+        ];
     }
 }

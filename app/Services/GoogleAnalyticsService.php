@@ -7,6 +7,7 @@ use Google\Analytics\Data\V1beta\DateRange;
 use Google\Analytics\Data\V1beta\Dimension;
 use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\RunReportRequest;
+use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 
 class GoogleAnalyticsService
@@ -22,6 +23,34 @@ class GoogleAnalyticsService
 
     public function getVisitorsByCountry(): array
     {
+        return Cache::remember('ga_visitors_country', 3600, function () {
+            return $this->runReport('country', 'activeUsers');
+        });
+    }
+
+    public function getVisitorsByDay(): array
+    {
+        return Cache::remember('ga_visitors_day', 3600, function () {
+            return $this->runReport('date', 'activeUsers');
+        });
+    }
+
+    public function getTopPages(): array
+    {
+        return Cache::remember('ga_top_pages', 3600, function () {
+            return $this->runReport('pageTitle', 'screenPageViews');
+        });
+    }
+
+    public function getTrafficSources(): array
+    {
+        return Cache::remember('ga_traffic_sources', 3600, function () {
+            return $this->runReport('sessionSource', 'sessions');
+        });
+    }
+
+    private function runReport(string $dimension, string $metric): array
+    {
         if (! file_exists($this->credentialsPath)) {
             throw new RuntimeException('Credentials file not found: ' . $this->credentialsPath);
         }
@@ -34,7 +63,6 @@ class GoogleAnalyticsService
             'credentials' => $this->credentialsPath,
         ]);
 
-        // Wrap your parameters in a RunReportRequest object
         $request = new RunReportRequest([
             'property' => 'properties/' . $this->propertyId,
             'date_ranges' => [
@@ -44,11 +72,12 @@ class GoogleAnalyticsService
                 ]),
             ],
             'dimensions' => [
-                new Dimension(['name' => 'country']),
+                new Dimension(['name' => $dimension]),
             ],
             'metrics' => [
-                new Metric(['name' => 'activeUsers']),
+                new Metric(['name' => $metric]),
             ],
+            'limit' => 10,
         ]);
 
         $response = $client->runReport($request);
@@ -57,8 +86,8 @@ class GoogleAnalyticsService
 
         foreach ($response->getRows() as $row) {
             $data[] = [
-                'country' => $row->getDimensionValues()[0]->getValue(),
-                'users' => (int) $row->getMetricValues()[0]->getValue(),
+                'name' => $row->getDimensionValues()[0]->getValue(),
+                'value' => (int) $row->getMetricValues()[0]->getValue(),
             ];
         }
 

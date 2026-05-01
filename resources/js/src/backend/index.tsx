@@ -2,15 +2,23 @@ import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Users, Calendar, BookOpen, Newspaper,
-    TrendingUp, DollarSign, Star, ArrowUpRight, ArrowDownRight, Activity
+    DollarSign, Star, ArrowUpRight, ArrowDownRight, Activity
 } from 'lucide-react';
+import { useState } from 'react';
 
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
 
-function Dashboard({ stats, visitorsByCountry = [] }: any) {
+function Dashboard({
+    stats,
+    visitorsByCountry = [],
+    visitorsByDay = [],
+    topPages = [],
+    trafficSources = [],
+    gaError = null
+}: any) {
     const pieColors = ['#DA2E29', '#F97316', '#2563EB', '#10B981', '#7C3AED'];
     const queueHealth = stats.queue_health;
 
@@ -38,6 +46,13 @@ function Dashboard({ stats, visitorsByCountry = [] }: any) {
         if (!Number.isFinite(value)) return '+0%';
         return `${value > 0 ? '+' : ''}${value}%`;
     };
+
+    const [funnelType, setFunnelType] = useState<'current' | 'upcoming'>('current');
+
+    const funnelData =
+        funnelType === 'current'
+            ? (stats.event_funnel_current ?? [])
+            : (stats.event_funnel_upcoming ?? []);
 
     const cards = [
         {
@@ -273,7 +288,7 @@ function Dashboard({ stats, visitorsByCountry = [] }: any) {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
-                                {stats.top_content.map((item, index) => (
+                                {(stats.top_content ?? []).map((item: any, index: number) => (
                                     <div key={index} className="flex items-center rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2.5 dark:border-slate-700/60 dark:bg-slate-800/30">
                                         <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center mr-3 text-sm font-semibold">
                                             {index + 1}
@@ -299,23 +314,201 @@ function Dashboard({ stats, visitorsByCountry = [] }: any) {
                         </CardHeader>
 
                         <CardContent>
-                            {visitorsByCountry.length === 0 ? (
+                            {gaError ? (
+                                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                                    <strong>Erreur Google Analytics :</strong> {gaError}
+                                </div>
+                            ) : visitorsByCountry.length === 0 ? (
                                 <p className="text-sm text-gray-500">Aucune donnée disponible</p>
                             ) : (
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={visitorsByCountry}>
                                             <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="country" />
+                                            <XAxis dataKey="name" />
                                             <YAxis />
                                             <Tooltip />
-                                            <Bar dataKey="users" fill="#dc2626" />
+                                            <Bar dataKey="value" fill="#dc2626" />
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Visiteurs par jour</CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            {visitorsByDay.length === 0 ? (
+                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                            ) : (
+                                <div className="h-[300px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <LineChart data={visitorsByDay}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Line type="monotone" dataKey="value" stroke="#dc2626" />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Sources de trafic</CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            {trafficSources.length === 0 ? (
+                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                            ) : (
+                                <div className="h-[300px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={trafficSources}
+                                                dataKey="value"
+                                                nameKey="name"
+                                                cx="50%"
+                                                cy="50%"
+                                                outerRadius={100}
+                                            >
+                                                {trafficSources.map((_: any, i: number) => (
+                                                    <Cell key={i} fill={pieColors[i % pieColors.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Top pages</CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            {topPages.length === 0 ? (
+                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {topPages.map((page: any, index: number) => (
+                                        <div key={index} className="flex justify-between text-sm">
+                                            <span className="truncate">{page.name}</span>
+                                            <span className="font-semibold">{page.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Funnel événements</CardTitle>
+                        </CardHeader>
+
+                        <CardContent>
+                            <div className="space-y-4">
+                                {(stats.event_funnel ?? []).map((step: any, index: number) => {
+                                    const firstValue = stats.event_funnel?.[0]?.value || 1;
+                                    const percent = Math.round((step.value / firstValue) * 100);
+
+                                    return (
+                                        <div key={index}>
+                                            <div className="mb-1 flex justify-between text-sm">
+                                                <span>{step.name}</span>
+                                                <span className="font-semibold">
+                                                    {step.value} ({percent}%)
+                                                </span>
+                                            </div>
+
+                                            <div className="h-3 rounded-full bg-slate-200">
+                                                <div
+                                                    className="h-3 rounded-full bg-red-600"
+                                                    style={{ width: `${Math.min(percent, 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <div className="flex items-center justify-between gap-3">
+                                <CardTitle>
+                                    Funnel événements {funnelType === 'current' ? '(en cours)' : '(à venir)'}
+                                </CardTitle>
+
+                                <div className="flex rounded-lg border bg-slate-100 p-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setFunnelType('current')}
+                                        className={`rounded-md px-3 py-1 text-xs font-semibold ${funnelType === 'current'
+                                                ? 'bg-white text-red-600 shadow-sm'
+                                                : 'text-slate-500'
+                                            }`}
+                                    >
+                                        En cours
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setFunnelType('upcoming')}
+                                        className={`rounded-md px-3 py-1 text-xs font-semibold ${funnelType === 'upcoming'
+                                                ? 'bg-white text-red-600 shadow-sm'
+                                                : 'text-slate-500'
+                                            }`}
+                                    >
+                                        À venir
+                                    </button>
+                                </div>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent>
+                            {funnelData.length === 0 ? (
+                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {funnelData.map((step: any, index: number) => {
+                                        const firstValue = funnelData[0]?.value || 1;
+                                        const percent = Math.round((step.value / firstValue) * 100);
+
+                                        return (
+                                            <div key={index}>
+                                                <div className="mb-1 flex justify-between text-sm">
+                                                    <span>{step.name}</span>
+                                                    <span className="font-semibold">
+                                                        {step.value} ({percent}%)
+                                                    </span>
+                                                </div>
+
+                                                <div className="h-3 rounded-full bg-slate-200">
+                                                    <div
+                                                        className="h-3 rounded-full bg-red-600 transition-all"
+                                                        style={{ width: `${Math.min(percent, 100)}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+
                 </div>
             </div>
         </>
