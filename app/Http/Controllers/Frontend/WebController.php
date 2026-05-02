@@ -31,6 +31,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Services\DynamicMailerService;
+use App\Models\PostViewLog;
 
 class WebController extends Controller
 {
@@ -73,26 +74,54 @@ class WebController extends Controller
 
     public function blog_detail($slug)
     {
-        $blog = PostResource::make(Post::with(['user', 'categories'])->published()->where('slug', $slug)->firstOrFail());
-        $relatedPosts = Post::with(['user', 'categories'])->published()->whereHas('categories', function ($query) use ($blog) {
-            $query->where('category_id', $blog->categories->first()->id);
-        });
-        $cacheKey = "viewed_page_{$blog->id}_" . request()->ip();
+        $post = Post::with(['user', 'categories'])
+            ->published()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $blog = PostResource::make($post);
+
+        $categoryids = $post->categories->pluck('id');
+
+
+        $relatedposts = post::with(['user', 'categories'])
+            ->published()
+            ->where('id', '!=', $post->id)
+            ->when($categoryids->isnotempty(), function ($query) use ($categoryids) {
+                $query->wherehas('categories', function ($q) use ($categoryids) {
+                    $q->wherein('categories.id', $categoryids);
+                });
+            })
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $cacheKey = "viewed_post_{$post->id}_" . request()->ip();
+
         if (!Cache::has($cacheKey)) {
-            $blog->increment('views');
+            PostViewLog::create([
+                'post_id' => $post->id,
+                'user_id' => auth()->id(),
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+
+            $post->increment('views');
+
             Cache::put($cacheKey, true, now()->addHours(1));
         }
-        $postModel = $blog->resource;
-        $postImage = SeoService::firstImageUrl($postModel->featured_image ?? []);
+
+        $postImage = SeoService::firstImageUrl($post->featured_image ?? []);
+
         return inertia('frontend/blogs/show', [
             'post' => $blog,
-            'relatedPosts' => new PostCollection($relatedPosts->get()),
+            'relatedPosts' => new PostCollection($relatedposts),
             'seo' => SeoService::article(
-                $postModel->title ?? $postModel->name ?? '',
-                $postModel->excerpt ?? $postModel->description ?? '',
+                $post->title ?? $post->name ?? '',
+                $post->excerpt ?? $post->description ?? '',
                 $postImage,
-                optional($postModel->published_at)->toIso8601String() ?? now()->toIso8601String(),
-                optional($postModel->user)->name ?? '',
+                optional($post->published_at)->toIso8601String() ?? now()->toIso8601String(),
+                optional($post->user)->name ?? '',
             ),
         ]);
     }

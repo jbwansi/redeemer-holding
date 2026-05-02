@@ -10,6 +10,7 @@ import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
+import { ca } from 'date-fns/locale';
 
 function Dashboard({
     stats,
@@ -20,7 +21,7 @@ function Dashboard({
     gaError = null
 }: any) {
     const pieColors = ['#DA2E29', '#F97316', '#2563EB', '#10B981', '#7C3AED'];
-    const queueHealth = stats.queue_health;
+    const queueHealth = stats?.queue_health;
 
     const queueStatusConfig: Record<string, { label: string; badge: string; border: string }> = {
         healthy: {
@@ -40,6 +41,19 @@ function Dashboard({
         }
     };
 
+    const formatGaDate = (date: string) => {
+        if (!date || date.length !== 8) return date;
+        return `${date.slice(6, 8)}.${date.slice(4, 6)}`;
+    };
+
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('fr-FR', {
+            weekday: 'short',
+            day: '2-digit',
+            month: 'short',
+        });
+    };
+
     const queueStatus = queueStatusConfig[queueHealth?.status] ?? queueStatusConfig.unavailable;
 
     const formatTrend = (value: number) => {
@@ -53,6 +67,57 @@ function Dashboard({
         funnelType === 'current'
             ? (stats.event_funnel_current ?? [])
             : (stats.event_funnel_upcoming ?? []);
+
+    const postHeatmapData = stats?.post_views_heatmap ?? [];
+
+    const maxPostHeatmapValue = Math.max(
+        ...postHeatmapData.map((item: any) => Number(item.value)),
+        1
+    );
+
+    const getPostHeatmapIntensity = (value: number) => {
+        const ratio = value / maxPostHeatmapValue;
+
+        if (ratio >= 0.75) return 'bg-blue-700 text-white';
+        if (ratio >= 0.5) return 'bg-blue-500 text-white';
+        if (ratio >= 0.25) return 'bg-blue-300 text-slate-900';
+        if (value > 0) return 'bg-blue-100 text-slate-900';
+        return 'bg-slate-100 text-slate-400 dark:bg-slate-800';
+    };
+
+    const heatmapData = stats?.event_registration_heatmap ?? [];
+
+    const maxHeatmapValue = Math.max(
+        ...heatmapData.map((item: any) => Number(item.value)),
+        1
+    );
+
+    const getHeatmapIntensity = (value: number) => {
+        const ratio = value / maxHeatmapValue;
+
+        if (ratio >= 0.75) return 'bg-red-700';
+        if (ratio >= 0.5) return 'bg-red-500';
+        if (ratio >= 0.25) return 'bg-red-300';
+        if (value > 0) return 'bg-red-100';
+        return 'bg-slate-100 dark:bg-slate-800';
+    };
+
+    const cardClass =
+        "border-slate-200/70 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70";
+
+    const cardHeaderClass = "pb-1";
+
+    const cardTitleClass = "text-base font-semibold";
+
+    const cardSubtitleClass = "text-xs text-muted-foreground";
+
+    const chartGridStroke = "rgba(148, 163, 184, 0.25)";
+
+    const EmptyState = ({ message = "Aucune donnée disponible" }: { message?: string }) => (
+        <div className="flex h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-muted-foreground dark:border-slate-700">
+            {message}
+        </div>
+    );
 
     const cards = [
         {
@@ -142,14 +207,16 @@ function Dashboard({
                 {/* CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     {cards.map((card, index) => (
-                        <Card key={index} className="group relative overflow-hidden border-slate-200/70 bg-white/95 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-700/70 dark:bg-slate-900/70">
+                        <Card key={index} className={cardClass}>
                             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#DA2E29] via-orange-500 to-amber-400 opacity-80" />
-                            <CardHeader className="flex flex-row items-start justify-between pb-2">
+                            <CardHeader className={cardHeaderClass}>
                                 <div>
-                                    <CardTitle className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    <CardTitle className={cardTitleClass}>
                                         {card.title}
                                     </CardTitle>
-                                    <p className="text-[11px] text-muted-foreground mt-1">Total: {card.total}</p>
+                                    <p className={cardSubtitleClass}>
+                                        Total: {card.total}
+                                    </p>
                                 </div>
                                 <div className={`rounded-xl p-2.5 ${card.iconBg}`}>
                                     <card.icon className={`h-4 w-4 ${card.iconColor}`} />
@@ -162,7 +229,7 @@ function Dashboard({
                                         {card.trend >= 0 ? <ArrowUpRight className="mr-1 h-3.5 w-3.5" /> : <ArrowDownRight className="mr-1 h-3.5 w-3.5" />}
                                         {formatTrend(card.trend)}
                                     </span>
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className={cardSubtitleClass}>
                                         evolution mensuelle
                                     </span>
                                 </div>
@@ -171,12 +238,14 @@ function Dashboard({
                     ))}
                 </div>
 
-                <Card className={`border ${queueStatus.border} bg-white/95 shadow-sm dark:bg-slate-900/70`}>
-                    <CardHeader className="pb-2">
+                {/* <Card className={`border ${queueStatus.border} bg-white/95 shadow-sm dark:bg-slate-900/70`}> */}
+                <Card className={`border ${queueStatus.border} {cardClass}`}>
+
+                    <CardHeader className={cardHeaderClass}>
                         <div className="flex items-center justify-between gap-3">
                             <div>
-                                <CardTitle className="text-base">Sante de la queue</CardTitle>
-                                <p className="text-xs text-muted-foreground">Surveillance en temps reel du traitement asynchrone</p>
+                                <CardTitle className={cardTitleClass}>Sante de la queue</CardTitle>
+                                <p className={cardSubtitleClass}>Surveillance en temps reel du traitement asynchrone</p>
                             </div>
                             <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${queueStatus.badge}`}>
                                 {queueStatus.label}
@@ -186,35 +255,35 @@ function Dashboard({
                     <CardContent>
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                             <div className="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2.5 dark:border-slate-700/60 dark:bg-slate-800/30">
-                                <p className="text-xs text-muted-foreground">Jobs en attente</p>
+                                <p className={cardSubtitleClass}>Jobs en attente</p>
                                 <p className="mt-1 text-xl font-semibold">{queueHealth?.pending_jobs ?? 0}</p>
                             </div>
                             <div className="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2.5 dark:border-slate-700/60 dark:bg-slate-800/30">
-                                <p className="text-xs text-muted-foreground">Jobs en echec</p>
+                                <p className={cardSubtitleClass}>Jobs en echec</p>
                                 <p className="mt-1 text-xl font-semibold">{queueHealth?.failed_jobs ?? 0}</p>
                             </div>
                             <div className="rounded-xl border border-slate-200/70 bg-slate-50/60 px-3 py-2.5 dark:border-slate-700/60 dark:bg-slate-800/30">
-                                <p className="text-xs text-muted-foreground">Plus ancien (min)</p>
+                                <p className={cardSubtitleClass}>Plus ancien (min)</p>
                                 <p className="mt-1 text-xl font-semibold">{queueHealth?.oldest_pending_minutes ?? 0}</p>
                             </div>
                         </div>
-                        <p className="mt-3 text-xs text-muted-foreground">
+                        <p className={cardSubtitleClass}>
                             Driver: {queueHealth?.driver ?? 'n/a'} | Seuils: {queueHealth?.thresholds?.max_pending ?? 0} pending, {queueHealth?.thresholds?.max_failed ?? 0} failed, {queueHealth?.thresholds?.max_oldest_minutes ?? 0} min
                         </p>
                     </CardContent>
                 </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card className="border-slate-200/70 dark:border-slate-700/70">
-                        <CardHeader className="pb-1">
-                            <CardTitle className="text-base">Revenus mensuels</CardTitle>
-                            <p className="text-xs text-muted-foreground">Evolution sur 12 mois</p>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Revenus mensuels</CardTitle>
+                            <p className={cardSubtitleClass}>Evolution sur 12 mois</p>
                         </CardHeader>
                         <CardContent>
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={stats.monthly_revenue}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
                                         <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                                         <YAxis tick={{ fontSize: 11 }} />
                                         <Tooltip />
@@ -232,10 +301,10 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="border-slate-200/70 dark:border-slate-700/70">
-                        <CardHeader className="pb-1">
-                            <CardTitle className="text-base">Distribution des revenus</CardTitle>
-                            <p className="text-xs text-muted-foreground">Repartition par source</p>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Distribution des revenus</CardTitle>
+                            <p className={cardSubtitleClass}>Repartition par source</p>
                         </CardHeader>
                         <CardContent>
                             <div className="h-[300px]">
@@ -261,16 +330,16 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="border-slate-200/70 dark:border-slate-700/70">
-                        <CardHeader className="pb-1">
-                            <CardTitle className="text-base">Activite par type</CardTitle>
-                            <p className="text-xs text-muted-foreground">Volumes actifs</p>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Activite par type</CardTitle>
+                            <p className={cardSubtitleClass}>Volumes actifs</p>
                         </CardHeader>
                         <CardContent>
                             <div className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={stats.activity_by_type}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.25)" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
                                         <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                                         <YAxis tick={{ fontSize: 11 }} />
                                         <Tooltip />
@@ -281,10 +350,10 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="border-slate-200/70 dark:border-slate-700/70">
-                        <CardHeader className="pb-1">
-                            <CardTitle className="text-base">Contenus les plus populaires</CardTitle>
-                            <p className="text-xs text-muted-foreground">Top 5 par vues</p>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Contenus les plus populaires</CardTitle>
+                            <p className={cardSubtitleClass}>Top 5 par vues</p>
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-4">
@@ -308,9 +377,9 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Visiteurs par pays</CardTitle>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Visiteurs par pays</CardTitle>
                         </CardHeader>
 
                         <CardContent>
@@ -324,7 +393,7 @@ function Dashboard({
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={visitorsByCountry}>
-                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <CartesianGrid strokeDasharray="3 3" stroke={chartGridStroke} />
                                             <XAxis dataKey="name" />
                                             <YAxis />
                                             <Tooltip />
@@ -335,37 +404,61 @@ function Dashboard({
                             )}
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Visiteurs par jour</CardTitle>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Visiteurs par jour</CardTitle>
+                            <p className={cardSubtitleClass}>
+                                Utilisateurs actifs sur les 30 derniers jours
+                            </p>
                         </CardHeader>
 
                         <CardContent>
                             {visitorsByDay.length === 0 ? (
-                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                                <EmptyState message="Aucune donnée visiteurs" />
                             ) : (
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <LineChart data={visitorsByDay}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="name" />
-                                            <YAxis />
-                                            <Tooltip />
-                                            <Line type="monotone" dataKey="value" stroke="#dc2626" />
+                                            <CartesianGrid
+                                                strokeDasharray="3 3"
+                                                stroke={chartGridStroke}
+                                            />
+
+                                            <XAxis
+                                                dataKey="name"
+                                                tick={{ fontSize: 11 }}
+                                                tickFormatter={(value) => formatGaDate(String(value))}
+                                            />
+
+                                            <YAxis tick={{ fontSize: 11 }} />
+
+                                            <Tooltip
+                                                labelFormatter={(value) => `Date : ${formatGaDate(String(value))}`}
+                                                formatter={(value) => [`${value} visiteurs`, 'Utilisateurs']}
+                                            />
+                                            <Line
+                                                type="monotone"
+                                                dataKey="value"
+                                                stroke="#dc2626"
+                                                strokeWidth={2.5}
+                                                dot={true}
+                                                activeDot={{ r: 5 }}
+                                            />
                                         </LineChart>
                                     </ResponsiveContainer>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Sources de trafic</CardTitle>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Sources de trafic</CardTitle>
+                            <p className={cardSubtitleClass}>Repartition par source</p>
                         </CardHeader>
 
                         <CardContent>
                             {trafficSources.length === 0 ? (
-                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                                <EmptyState message="Aucune donnée sur les sources de trafic" />
                             ) : (
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -389,14 +482,14 @@ function Dashboard({
                             )}
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Top pages</CardTitle>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Top pages</CardTitle>
                         </CardHeader>
 
                         <CardContent>
                             {topPages.length === 0 ? (
-                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                                <EmptyState message="Aucune donnée sur les pages les plus visitées" />
                             ) : (
                                 <div className="space-y-2">
                                     {topPages.map((page: any, index: number) => (
@@ -410,94 +503,62 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Funnel événements</CardTitle>
-                        </CardHeader>
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <CardTitle className={cardTitleClass}>
+                                        Funnel événements {funnelType === 'current' ? '(en cours)' : '(à venir)'}
+                                    </CardTitle>
+                                    <p className={cardSubtitleClass}>
+                                        Conversion des vues vers les inscriptions et paiements
+                                    </p>
+                                </div>
 
-                        <CardContent>
-                            <div className="space-y-4">
-                                {(stats.event_funnel ?? []).map((step: any, index: number) => {
-                                    const firstValue = stats.event_funnel?.[0]?.value || 1;
-                                    const percent = Math.round((step.value / firstValue) * 100);
-
-                                    return (
-                                        <div key={index}>
-                                            <div className="mb-1 flex justify-between text-sm">
-                                                <span>{step.name}</span>
-                                                <span className="font-semibold">
-                                                    {step.value} ({percent}%)
-                                                </span>
-                                            </div>
-
-                                            <div className="h-3 rounded-full bg-slate-200">
-                                                <div
-                                                    className="h-3 rounded-full bg-red-600"
-                                                    style={{ width: `${Math.min(percent, 100)}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between gap-3">
-                                <CardTitle>
-                                    Funnel événements {funnelType === 'current' ? '(en cours)' : '(à venir)'}
-                                </CardTitle>
-
-                                <div className="flex rounded-lg border bg-slate-100 p-1">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFunnelType('current')}
-                                        className={`rounded-md px-3 py-1 text-xs font-semibold ${funnelType === 'current'
-                                                ? 'bg-white text-red-600 shadow-sm'
-                                                : 'text-slate-500'
-                                            }`}
-                                    >
-                                        En cours
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => setFunnelType('upcoming')}
-                                        className={`rounded-md px-3 py-1 text-xs font-semibold ${funnelType === 'upcoming'
-                                                ? 'bg-white text-red-600 shadow-sm'
-                                                : 'text-slate-500'
-                                            }`}
-                                    >
-                                        À venir
-                                    </button>
+                                <div className="flex w-fit rounded-lg border bg-slate-100 p-1 dark:bg-slate-800">
+                                    {[
+                                        { key: 'current', label: 'En cours' },
+                                        { key: 'upcoming', label: 'À venir' },
+                                    ].map((item) => (
+                                        <button
+                                            key={item.key}
+                                            type="button"
+                                            onClick={() => setFunnelType(item.key as 'current' | 'upcoming')}
+                                            className={`rounded-md px-3 py-1 text-xs font-semibold transition ${funnelType === item.key
+                                                ? 'bg-white text-red-600 shadow-sm dark:bg-slate-900'
+                                                : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                                                }`}
+                                        >
+                                            {item.label}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
                         </CardHeader>
 
                         <CardContent>
                             {funnelData.length === 0 ? (
-                                <p className="text-sm text-gray-500">Aucune donnée</p>
+                                <EmptyState message="Aucune donnée funnel" />
                             ) : (
                                 <div className="space-y-4">
                                     {funnelData.map((step: any, index: number) => {
                                         const firstValue = funnelData[0]?.value || 1;
-                                        const percent = Math.round((step.value / firstValue) * 100);
+                                        const percent = Math.round((Number(step.value) / firstValue) * 100);
+                                        const safePercent = Math.min(Math.max(percent, 0), 100);
 
                                         return (
-                                            <div key={index}>
-                                                <div className="mb-1 flex justify-between text-sm">
-                                                    <span>{step.name}</span>
-                                                    <span className="font-semibold">
-                                                        {step.value} ({percent}%)
+                                            <div key={`${step.name}-${index}`}>
+                                                <div className="mb-1 flex justify-between gap-3 text-sm">
+                                                    <span className="truncate">{step.name}</span>
+                                                    <span className="shrink-0 font-semibold">
+                                                        {step.value} ({safePercent}%)
                                                     </span>
                                                 </div>
 
-                                                <div className="h-3 rounded-full bg-slate-200">
+                                                <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                                                     <div
-                                                        className="h-3 rounded-full bg-red-600 transition-all"
-                                                        style={{ width: `${Math.min(percent, 100)}%` }}
+                                                        className="h-full rounded-full bg-red-600 transition-all duration-500"
+                                                        style={{ width: `${safePercent}%` }}
                                                     />
                                                 </div>
                                             </div>
@@ -508,7 +569,169 @@ function Dashboard({
                         </CardContent>
                     </Card>
 
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Funnels par événement</CardTitle>
+                            <p className={cardSubtitleClass}>
+                                Conversion par événement actif ou à venir
+                            </p>
+                        </CardHeader>
 
+                        <CardContent>
+                            {(stats.event_funnels_by_event ?? []).length === 0 ? (
+                                <EmptyState message="Aucune donnée funnel par événement" />
+                            ) : (
+                                <div className="space-y-5">
+                                    {(stats.event_funnels_by_event ?? []).map((event: any) => (
+                                        <div
+                                            key={event.id}
+                                            className="rounded-xl border border-slate-200 p-4 dark:border-slate-700"
+                                        >
+                                            <div className="mb-3 flex items-start justify-between gap-3">
+                                                <div>
+                                                    <div className="font-semibold line-clamp-1">
+                                                        {event.title}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {event.start_date ?? 'Date inconnue'}
+                                                    </div>
+                                                </div>
+
+                                                <span
+                                                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${event.conversion_rate > 30
+                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                        : event.conversion_rate > 10
+                                                            ? 'bg-amber-100 text-amber-700'
+                                                            : 'bg-red-100 text-red-700'
+                                                        }`}
+                                                >
+                                                    {event.conversion_rate}% conversion
+                                                </span>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {(event.funnel ?? []).map((step: any, index: number) => {
+                                                    const firstValue = event.funnel?.[0]?.value || 1;
+                                                    const percent = Math.round((Number(step.value) / firstValue) * 100);
+                                                    const safePercent = Math.min(Math.max(percent, 0), 100);
+
+                                                    return (
+                                                        <div key={`${event.id}-${step.name}-${index}`}>
+                                                            <div className="mb-1 flex justify-between gap-3 text-sm">
+                                                                <span className="truncate">{step.name}</span>
+                                                                <span className="shrink-0 font-semibold">
+                                                                    {step.value} ({safePercent}%)
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="h-2.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                                                <div
+                                                                    className="h-full rounded-full bg-red-600 transition-all duration-500"
+                                                                    style={{ width: `${safePercent}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Heatmap inscriptions</CardTitle>
+                            <p className={cardSubtitleClass}>
+                                Activité des inscriptions événements sur les 30 derniers jours
+                            </p>
+                        </CardHeader>
+
+                        <CardContent>
+                            {heatmapData.length === 0 ? (
+                                <EmptyState message="Aucune donnée sur les inscriptions" />
+                            ) : (
+                                <div className="grid grid-cols-7 gap-2">
+                                    {heatmapData.map((day: any) => (
+                                        <div
+                                            key={day.date}
+                                            title={`${day.date} : ${day.value} inscription(s)`}
+                                            className={`flex h-12 items-center justify-center rounded-lg text-xs font-semibold ${getHeatmapIntensity(Number(day.value))}`}
+                                        >
+                                            {day.value}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Impact campagnes</CardTitle>
+                            <p className={cardSubtitleClass}>
+                                Pics de trafic sur 30 jours
+                            </p>
+                        </CardHeader>
+
+                        <CardContent>
+                            {postHeatmapData.length === 0 ? (
+                                <EmptyState message="Aucune donnée sur les impact campagnes" />
+                            ) : (
+                                <div className="space-y-2">
+                                    {postHeatmapData
+                                        .filter((d: any) => d.value > 0)
+                                        .map((day: any) => (
+                                            <div
+                                                key={day.date}
+                                                className="flex items-center justify-between rounded-lg border px-3 py-2"
+                                            >
+                                                <span className="text-sm">
+                                                    {formatDate(day.date)}
+                                                </span>
+
+                                                <span className="font-semibold">
+                                                    {day.value} vues
+                                                    {day.is_spike && ' 🔥'}
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className={cardClass}>
+                        <CardHeader className={cardHeaderClass}>
+                            <CardTitle className={cardTitleClass}>Insights automatiques</CardTitle>
+                            <p className={cardSubtitleClass}>
+                                Analyse des performances
+                            </p>
+                        </CardHeader>
+
+                        <CardContent>
+                            {(stats.insights ?? []).length === 0 ? (
+                                <EmptyState message="Aucun insight pour le moment" />
+                            ) : (
+                                <div className="space-y-3">
+                                    {(stats.insights ?? []).map((insight: any, index: number) => (
+                                        <div
+                                            key={index}
+                                            className={`rounded-xl border p-3 text-sm ${insight.type === 'positive'
+                                                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                                                : 'border-amber-200 bg-amber-50 text-amber-800'
+                                                }`}
+                                        >
+                                            <div className="font-semibold">{insight.title}</div>
+                                            <div>{insight.message}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </>

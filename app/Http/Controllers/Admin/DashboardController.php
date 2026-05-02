@@ -13,59 +13,61 @@ use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Http\Request;
 use App\Services\GoogleAnalyticsService;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
     public function index(GoogleAnalyticsService $ga)
     {
         // Calculer les statistiques
-        $stats = [
-            'events' => [
-                'active' => Event::where('end_date', '>=', now())->count(),
-                'total' => Event::count(),
-                'trend' => $this->calculateTrend('events'),
-            ],
-            'trainings' => [
-                'active' => Formation::where('is_published', true)->count(),
-                'total' => Formation::count(),
-                'trend' => $this->calculateTrend('trainings'),
-            ],
-            'services' => [
-                'active' => Service::where('status', true)->count(),
-                'total' => Service::count(),
-                'trend' => $this->calculateTrend('services'),
-            ],
-            'posts' => [
-                'published' => Post::where('published', true)->count(),
-                'total' => Post::count(),
-                'trend' => $this->calculateTrend('posts'),
-            ],
-            'users' => [
-                'total' => User::count(),
-                'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
-                'trend' => $this->calculateTrend('users'),
-            ],
-            'revenue' => [
-                'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
-                'last_month' => $this->calculateRevenue(
-                    now()->subMonth()->startOfMonth(),
-                    now()->subMonth()->endOfMonth()
-                ),
-                'trend' => $this->calculateRevenueTrend(),
-            ],
-            'monthly_revenue' => $this->getMonthlyRevenue(),
-            'revenue_distribution' => $this->getRevenueDistribution(),
-            'activity_by_type' => $this->getActivityByType(),
-            'top_content' => $this->getTopContent(),
-            'queue_health' => $this->getQueueHealth(),
+        $stats = Cache::remember('admin_dashboard_stats', now()->addMinutes(15), function () {
+            return [
+                'events' => [
+                    'active' => Event::where('end_date', '>=', now())->count(),
+                    'total' => Event::count(),
+                    'trend' => $this->calculateTrend('events'),
+                ],
+                'trainings' => [
+                    'active' => Formation::where('is_published', true)->count(),
+                    'total' => Formation::count(),
+                    'trend' => $this->calculateTrend('trainings'),
+                ],
+                'services' => [
+                    'active' => Service::where('status', true)->count(),
+                    'total' => Service::count(),
+                    'trend' => $this->calculateTrend('services'),
+                ],
+                'posts' => [
+                    'published' => Post::where('published', true)->count(),
+                    'total' => Post::count(),
+                    'trend' => $this->calculateTrend('posts'),
+                ],
+                'users' => [
+                    'total' => User::count(),
+                    'total_last_month' => User::where('created_at', '<', now()->subMonth())->count(),
+                    'trend' => $this->calculateTrend('users'),
+                ],
+                'revenue' => [
+                    'current' => $this->calculateRevenue(now()->startOfMonth(), now()),
+                    'last_month' => $this->calculateRevenue(now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()),
+                    'trend' => $this->calculateRevenueTrend(),
+                ],
+                'monthly_revenue' => $this->getMonthlyRevenue(),
+                'revenue_distribution' => $this->getRevenueDistribution(),
+                'activity_by_type' => $this->getActivityByType(),
+                'top_content' => $this->getTopContent(),
 
-            'event_funnel' => $this->getEventFunnel(),
-            'event_funnel_current' => $this->getEventFunnelCurrent(),
-            'event_funnel_upcoming' => $this->getEventFunnelUpcoming(),
-        ];
+                'event_funnel_current' => $this->getEventFunnelCurrent(),
+                'event_funnel_upcoming' => $this->getEventFunnelUpcoming(),
+                'event_funnels_by_event' => $this->getEventFunnelsByEvent(),
+                'event_registration_heatmap' => $this->getEventRegistrationHeatmap(),
+                'post_views_heatmap' => $this->getPostViewsHeatmap(),
+                'insights' => $this->getDashboardInsights(),
+            ];
+        });
 
+        $stats['queue_health'] = $this->getQueueHealth();
 
         // 🔥 Google Analytics
         try {
@@ -479,26 +481,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    private function getEventFunnel(): array
-    {
-        $views = Event::sum('views');
-
-        $created = EventParticipant::count();
-
-        $inProgress = EventParticipant::where('status', EventParticipant::STATUS_IN_PROGRESS)->count();
-
-        $completed = EventParticipant::where('status', EventParticipant::STATUS_COMPLETED)->count();
-
-        $cancelled = EventParticipant::where('status', EventParticipant::STATUS_CANCELLED)->count();
-
-        return [
-            ['name' => 'Vues événements', 'value' => $views],
-            ['name' => 'Inscriptions créées', 'value' => $created],
-            ['name' => 'Paiement commencé', 'value' => $inProgress],
-            ['name' => 'Paiement terminé', 'value' => $completed],
-            ['name' => 'Annulées / expirées', 'value' => $cancelled],
-        ];
-    }
 
     private function getEventFunnelCurrent(): array
     {
@@ -508,6 +490,10 @@ class DashboardController extends Controller
         $eventIds = Event::where('start_date', '<=', $now)
             ->where('end_date', '>=', $now)
             ->pluck('id');
+
+        if ($eventIds->isEmpty()) {
+            return [];
+        }
 
         $views = Event::whereIn('id', $eventIds)->sum('views');
 
@@ -531,12 +517,167 @@ class DashboardController extends Controller
 
     private function getEventFunnelUpcoming(): array
     {
+        // événements futurs
         $eventIds = Event::where('start_date', '>', now())->pluck('id');
 
+        if ($eventIds->isEmpty()) {
+            return [];
+        }
+
+        $views = Event::whereIn('id', $eventIds)->sum('views');
+
+        $created = EventParticipant::whereIn('event_id', $eventIds)->count();
+
+        $completed = EventParticipant::whereIn('event_id', $eventIds)
+            ->where('status', EventParticipant::STATUS_COMPLETED)
+            ->count();
+
         return [
-            ['name' => 'Vues', 'value' => Event::whereIn('id', $eventIds)->sum('views')],
-            ['name' => 'Inscriptions', 'value' => EventParticipant::whereIn('event_id', $eventIds)->count()],
-            ['name' => 'Paiements', 'value' => EventParticipant::whereIn('event_id', $eventIds)->where('status', 'completed')->count()],
+            ['name' => 'Vues', 'value' => $views],
+            ['name' => 'Inscriptions', 'value' => $created],
+            ['name' => 'Paiements', 'value' => $completed],
         ];
+    }
+
+    private function getEventFunnelsByEvent(): array
+    {
+        return Event::where('end_date', '>=', now())
+            ->orderBy('start_date')
+            ->take(10)
+            ->get()
+            ->map(function ($event) {
+                $views = (int) $event->views;
+
+                $registrations = EventParticipant::where('event_id', $event->id)->count();
+
+                $completed = EventParticipant::where('event_id', $event->id)
+                    ->where('status', EventParticipant::STATUS_COMPLETED)
+                    ->count();
+
+                $cancelled = EventParticipant::where('event_id', $event->id)
+                    ->where('status', EventParticipant::STATUS_CANCELLED)
+                    ->count();
+
+                $conversionRate = $views > 0
+                    ? round(($completed / $views) * 100, 1)
+                    : 0;
+
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'start_date' => optional($event->start_date)->format('d.m.Y'),
+                    'views' => $views,
+                    'registrations' => $registrations,
+                    'completed' => $completed,
+                    'cancelled' => $cancelled,
+                    'conversion_rate' => $conversionRate,
+                    'funnel' => [
+                        ['name' => 'Vues', 'value' => $views],
+                        ['name' => 'Inscriptions', 'value' => $registrations],
+                        ['name' => 'Paiements', 'value' => $completed],
+                        ['name' => 'Annulations', 'value' => $cancelled],
+                    ],
+                ];
+            })
+            ->values()
+            ->toArray();
+    }
+
+
+    private function getEventRegistrationHeatmap(): array
+    {
+        return EventParticipant::selectRaw('DATE(created_at) as date, COUNT(*) as value')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'value' => (int) $item->value,
+                ];
+            })
+            ->toArray();
+    }
+
+    private function getPostViewsHeatmap(): array
+    {
+        $viewsByDate = DB::table('post_view_logs')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as value')
+            ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+            ->groupBy('date')
+            ->pluck('value', 'date');
+
+        $data = [];
+
+        for ($i = 29; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+
+            $data[] = [
+                'date' => $date,
+                'value' => (int) ($viewsByDate[$date] ?? 0),
+            ];
+        }
+
+        // 🔥 calcul du max pour détecter les pics
+        $max = collect($data)->max('value') ?: 1;
+
+        return collect($data)->map(function ($item) use ($max) {
+            return [
+                ...$item,
+                'is_spike' => $item['value'] > ($max * 0.6), // top 40%
+            ];
+        })->toArray();
+    }
+
+    private function getDashboardInsights(): array
+    {
+        $insights = [];
+
+        $postViewsLast7Days = DB::table('post_view_logs')
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
+
+        $postViewsPrevious7Days = DB::table('post_view_logs')
+            ->whereBetween('created_at', [
+                now()->subDays(14),
+                now()->subDays(7),
+            ])
+            ->count();
+
+        if ($postViewsPrevious7Days > 0) {
+            $growth = round((($postViewsLast7Days - $postViewsPrevious7Days) / $postViewsPrevious7Days) * 100, 1);
+
+            if ($growth > 30) {
+                $insights[] = [
+                    'type' => 'positive',
+                    'title' => 'Trafic articles en hausse',
+                    'message' => "Les vues des articles ont augmenté de {$growth}% cette semaine.",
+                ];
+            }
+
+            if ($growth < -30) {
+                $insights[] = [
+                    'type' => 'warning',
+                    'title' => 'Trafic articles en baisse',
+                    'message' => "Les vues des articles ont baissé de {$growth}% cette semaine.",
+                ];
+            }
+        }
+
+        $lowConversionEvent = collect($this->getEventFunnelsByEvent())
+            ->where('views', '>', 20)
+            ->where('conversion_rate', '<', 5)
+            ->first();
+
+        if ($lowConversionEvent) {
+            $insights[] = [
+                'type' => 'warning',
+                'title' => 'Conversion faible',
+                'message' => "{$lowConversionEvent['title']} attire des visiteurs mais convertit peu ({$lowConversionEvent['conversion_rate']}%).",
+            ];
+        }
+
+        return $insights;
     }
 }
