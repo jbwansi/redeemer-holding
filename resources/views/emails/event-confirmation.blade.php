@@ -362,7 +362,7 @@
             <div class="contact-section">
                 <h3>Une question ? Contactez-nous</h3>
                 <div class="contact-item">📞 {{ get_setting('company_phone', '+212 123 456 789') }}</div>
-                <div class="contact-item">✉️ {{ get_setting('support_email', 'contact@redeemerholding.com') }}</div>
+                <div class="contact-item">✉️ {{ get_setting('support_email', 'info@redeemerholding.com') }}</div>
                 <p style="margin-top: 16px; color: #6B7280; font-size: 14px;">
                     Notre équipe est disponible du lundi au vendredi de 9h à 18h
                 </p>

@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\Admin\AccountController;
-use App\Http\Controllers\Admin\ActivityReminderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChatbotController;
 use App\Http\Controllers\Admin\ChatbotLeadController;
@@ -21,17 +20,24 @@ use App\Http\Controllers\Admin\ServiceRequestController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SearchController;
+use App\Http\Controllers\Admin\PageContentController;
+use App\Http\Controllers\Admin\TestimonialController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Frontend\AppController;
-use App\Http\Controllers\Frontend\FormationPaymentController;
-use App\Http\Controllers\Frontend\PaymentController;
-use App\Http\Controllers\Frontend\WebController;
+// use App\Http\Controllers\Frontend\FormationPaymentController;
+// use App\Http\Controllers\Frontend\PaymentController;
 use App\Http\Controllers\Frontend\DashboardController as FrontendDashboardController;
 use App\Http\Controllers\Frontend\NewsletterController as FrontendNewsletterController;
+use App\Http\Controllers\Frontend\FormationController as FrontendFormationController;
+use App\Http\Controllers\Frontend\EventController as FrontendEventController;
+use App\Http\Controllers\Frontend\BlogController as FrontendBlogController;
+use App\Http\Controllers\Frontend\ServiceController as FrontendServiceController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+
+require __DIR__ . '/payment.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -50,74 +56,63 @@ Route::get('/sitemap-formations.xml', [SitemapController::class, 'formations'])-
 Route::get('/sitemap-posts.xml', [SitemapController::class, 'posts'])->name('sitemap.posts');
 Route::get('/sitemap-services.xml', [SitemapController::class, 'services'])->name('sitemap.services');
 
-// Static / public pages
+// Static pages
 Route::get('/contact', [AppController::class, 'contact'])->name('contact');
 Route::post('/contact', [AppController::class, 'send_contact'])->middleware('throttle:5,1')->name('contact.store');
-
 Route::get('/faq', [AppController::class, 'faq'])->name('faq');
 Route::get('/about-me', [AppController::class, 'about'])->name('about');
 
-Route::get('/services', [AppController::class, 'services'])->name('services');
-Route::get('/services/{slug}', [AppController::class, 'service_detail'])->name('services.details');
-
-Route::get('/services-requests/{slug}', [AppController::class, 'service_request'])->name('services.requests');
-Route::post('/services-requests/store/{id}', [AppController::class, 'service_request_store'])->middleware('throttle:3,1')->name('service-requests.store');
+// Services
+Route::get('/services', [FrontendServiceController::class, 'services'])->name('services');
+Route::get('/services/{slug}', [FrontendServiceController::class, 'service_detail'])->name('services.details');
+Route::get('/services-requests/{slug}', [FrontendServiceController::class, 'service_request'])->name('services.requests');
+Route::post('/services-requests/store/{id}', [FrontendServiceController::class, 'service_request_store'])->middleware('throttle:3,1')->name('service-requests.store');
 
 // Formations
-Route::get('/formations', [WebController::class, 'formations'])->name('formations');
-Route::get('/formations/{slug}', [WebController::class, 'formation_detail'])->name('formations.details');
-Route::post('/formations/{slug}/inscription', [WebController::class, 'register_formation'])->middleware('throttle:3,1')->name('formations.register');
-Route::get('/formations/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation_formation'])->name('formations.registration.confirmation');
-Route::delete('/formations/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration_formation'])->name('formations.registration.cancel');
+Route::get('/formations', [FrontendFormationController::class, 'formations'])->name('formations');
+Route::get('/formations/{slug}', [FrontendFormationController::class, 'formation_detail'])->name('formations.details');
+Route::post('/formations/{slug}/inscription', [FrontendFormationController::class, 'register_formation'])->middleware('throttle:3,1')->name('formations.register');
+Route::get('/formations/{slug}/confirmation/{participant_id}', [FrontendFormationController::class, 'showConfirmation_formation'])->name('formations.registration.confirmation');
+Route::delete('/formations/{slug}/inscription/{participant_id}', [FrontendFormationController::class, 'cancelRegistration_formation'])->name('formations.registration.cancel');
 
 // Paiement formations
-Route::get('/formations/{slug}/paiement/{participant_id}', [FormationPaymentController::class, 'showPaymentForm'])->name('formations.payment');
-Route::post('/formations/{slug}/paiement/{participant_id}/process', [FormationPaymentController::class, 'processPayment'])->name('formations.payment.process');
-Route::get('/formations/paiement/succes', [FormationPaymentController::class, 'handleSuccess'])->name('formations.payment.success');
-Route::get('/formations/paiement/annulation', [FormationPaymentController::class, 'handleCancellation'])->name('formations.payment.cancel');
-Route::post('/stripe/webhook/formations', [FormationPaymentController::class, 'handleWebhook'])->name('formations.payment.webhook');
-Route::get('/formations/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
+// Route::get('/formations/{slug}/paiement/{participant_id}', [FormationPaymentController::class, 'showPaymentForm'])->name('formations.payment');
+// Route::post('/formations/{slug}/paiement/{participant_id}/process', [FormationPaymentController::class, 'processPayment'])->name('formations.payment.process');
+// Route::get('/formations/paiement/succes', [FormationPaymentController::class, 'handleSuccess'])->name('formations.payment.success');
+// Route::get('/formations/paiement/annulation', [FormationPaymentController::class, 'handleCancellation'])->name('formations.payment.cancel');
+// Route::post('/stripe/webhook/formations', [FormationPaymentController::class, 'handleWebhook'])->name('formations.payment.webhook');
+Route::get('/formations/{slug}/facture/{reference}', [FrontendFormationController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
 
 // Blogs
-Route::get('/blogs', [WebController::class, 'blogs'])->name('blogs');
-Route::get('/blogs/{slug}', [WebController::class, 'blog_detail'])->name('blogs.details');
+Route::get('/blogs', [FrontendBlogController::class, 'blogs'])->name('blogs');
+Route::get('/blogs/{slug}', [FrontendBlogController::class, 'blog_detail'])->name('blogs.details');
 
-// Événements
-Route::get('/evenements', [WebController::class, 'events'])->name('evenements');
-Route::get('/evenements/{slug}', [WebController::class, 'evenement_detail'])->name('evenements.details');
-Route::post('/evenements/{slug}/inscription', [WebController::class, 'register'])->middleware('throttle:3,1')->name('events.register');
-Route::get('/evenements/{slug}/confirmation/{participant_id}', [WebController::class, 'showConfirmation'])->name('events.registration.confirmation');
-Route::delete('/evenements/{slug}/inscription/{participant_id}', [WebController::class, 'cancelRegistration'])->name('events.registration.cancel');
+// Evenements
+Route::get('/evenements', [FrontendEventController::class, 'events'])->name('evenements');
+Route::get('/evenements/{slug}', [FrontendEventController::class, 'evenement_detail'])->name('evenements.details');
+Route::post('/evenements/{slug}/inscription', [FrontendEventController::class, 'register'])->middleware('throttle:3,1')->name('events.register');
+Route::get('/evenements/{slug}/confirmation/{participant_id}', [FrontendEventController::class, 'showConfirmation'])->name('events.registration.confirmation');
+Route::delete('/evenements/{slug}/inscription/{participant_id}', [FrontendEventController::class, 'cancelRegistration'])->name('events.registration.cancel');
 
-// Paiement événements
-Route::get('/evenements/{slug}/paiement/{participant_id}', [PaymentController::class, 'showPaymentForm'])->name('events.payment');
-Route::post('/evenements/{slug}/paiement/{participant_id}/process', [PaymentController::class, 'processPayment'])->name('events.payment.process');
-Route::get('/evenements/paiement/succes', [PaymentController::class, 'handleSuccess'])->name('events.payment.success');
-Route::get('/evenements/paiement/annulation', [PaymentController::class, 'handleCancellation'])->name('events.payment.cancel');
-Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook'])->name('events.payment.webhook');
-Route::get('/evenements/{slug}/facture/{reference}', [WebController::class, 'downloadInvoice'])->name('evenements.facture.download');
+// Paiement evenements
+// Route::get('/evenements/{slug}/paiement/{participant_id}', [PaymentController::class, 'showPaymentForm'])->name('events.payment');
+// Route::post('/evenements/{slug}/paiement/{participant_id}/process', [PaymentController::class, 'processPayment'])->name('events.payment.process');
+// Route::get('/evenements/paiement/succes', [PaymentController::class, 'handleSuccess'])->name('events.payment.success');
+// Route::get('/evenements/paiement/annulation', [PaymentController::class, 'handleCancellation'])->name('events.payment.cancel');
+// Route::post('/stripe/webhook', [PaymentController::class, 'handleWebhook'])->name('events.payment.webhook');
+Route::get('/evenements/{slug}/facture/{reference}', [FrontendEventController::class, 'downloadInvoice'])->name('evenements.facture.download');
 
 // Legal
 Route::get('/termes-et-conditions', [AppController::class, 'terms'])->name('terms.show');
 Route::get('/politique-de-confidentialite', [AppController::class, 'policy'])->name('policy.show');
 Route::get('/politique-des-cookies', [AppController::class, 'cookies'])->name('cookies.show');
 
-// Newsletter publiques
-Route::post('/newsletter/subscribe', [FrontendNewsletterController::class, 'subscribe'])
-    ->middleware('throttle:5,1')
-    ->name('newsletter.subscribe');
-
-Route::get('/newsletter/confirm/{token}', [FrontendNewsletterController::class, 'confirm'])
-    ->name('newsletter.confirm');
-
-Route::get('/newsletter/unsubscribe/{email}', [FrontendNewsletterController::class, 'unsubscribe'])
-    ->middleware('signed')
-    ->name('newsletters.unsubscribe');
-
+// Newsletter
+Route::post('/newsletter/subscribe', [FrontendNewsletterController::class, 'subscribe'])->middleware('throttle:5,1')->name('newsletter.subscribe');
+Route::get('/newsletter/confirm/{token}', [FrontendNewsletterController::class, 'confirm'])->name('newsletter.confirm');
+Route::get('/newsletter/unsubscribe/{email}', [FrontendNewsletterController::class, 'unsubscribe'])->middleware('signed')->name('newsletters.unsubscribe');
 Route::get('/newsletter/confirmation', function (Request $request) {
-    return inertia('newsletter/confirmation', [
-        'status' => $request->query('status'),
-    ]);
+    return inertia('newsletter/confirmation', ['status' => $request->query('status')]);
 })->name('newsletter.confirmation');
 
 // Public settings
@@ -132,29 +127,34 @@ Route::get('/settings/public', [SettingController::class, 'publicFetch'])->name(
 Route::middleware(['guest', 'throttle:10,1'])->group(function () {
     Route::get('/login', [AuthController::class, 'show_auth'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-
     Route::get('/inscription', [AuthController::class, 'show_auth'])->name('register.page');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
-
     Route::get('/password/request', [AuthController::class, 'password_request'])->name('password.request');
 });
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated user routes
+| Authenticated routes
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Logout via sendBeacon — prod uniquement
+    if (app()->isProduction()) {
+        Route::post('/logout-on-close', [AuthController::class, 'logoutOnClose'])
+            ->middleware('throttle:3,1')
+            ->name('logout.on.close');
+    }
+
     Route::get('/account/inactive', [AccountController::class, 'inactive'])->name('account.inactive');
 
-    // Shared profile routes
+    // Profil partage
     Route::post('/profile/update', [AccountController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [AccountController::class, 'updatePassword'])->name('profile.password.update');
 
-    // Client dashboard
+    // Dashboard client
     Route::get('/dashboard-client/profile', [FrontendDashboardController::class, 'index'])->name('dashboard.client.profile');
     Route::get('/dashboard-client/formations', [FrontendDashboardController::class, 'formation'])->name('dashboard.client.formations');
     Route::get('/dashboard-client/events', [FrontendDashboardController::class, 'event'])->name('dashboard.client.events');
@@ -167,16 +167,15 @@ Route::middleware(['auth', 'active'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['admin.access', 'active', 'throttle:6,1'])->get('/reminders/send/cron', function () {
-    Artisan::call('reminders:send');
+Route::middleware(['admin.access', 'active', 'throttle:6,1'])
+    ->get('/reminders/send/cron', function () {
+        Artisan::call('reminders:send');
+        return response()->json(['ok' => true, 'message' => 'Rappels envoyes']);
+    })->name('reminders.send.cron');
 
-    return response()->json([
-        'ok' => true,
-        'message' => 'Rappels envoyés',
-    ]);
-})->name('reminders.send.cron');
-
-Route::middleware(['admin.access', 'active'])->get('/settings/fetch', [SettingController::class, 'fetch'])->name('settings.fetch');
+Route::middleware(['admin.access', 'active'])
+    ->get('/settings/fetch', [SettingController::class, 'fetch'])
+    ->name('settings.fetch');
 
 /*
 |--------------------------------------------------------------------------
@@ -187,10 +186,14 @@ Route::middleware(['admin.access', 'active'])->get('/settings/fetch', [SettingCo
 Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Dashboard search
+    // Search
     Route::get('/search/global', [SearchController::class, 'global'])->name('dashboard.search.global');
 
-    // Newsletters admin
+    // Page contents (deplace depuis groupe auth seul)
+    Route::get('/page-contents', [PageContentController::class, 'index'])->name('page-contents.index');
+    Route::post('/page-contents', [PageContentController::class, 'update'])->name('page-contents.update');
+
+    // Newsletters
     Route::get('/newsletters', [NewsletterController::class, 'index'])->name('newsletters.index');
     Route::post('/newsletters/send', [NewsletterController::class, 'send'])->name('newsletters.send');
     Route::post('/newsletters/import-users', [NewsletterController::class, 'importUsers'])->name('newsletters.import-users');
@@ -199,6 +202,8 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
     Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create');
     Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+    Route::post('/services/reorder-home', [ServiceController::class, 'reorderHome'])->name('services.reorderHome');
+    Route::patch('/services/{service}/toggle-home', [ServiceController::class, 'toggleHome'])->name('services.toggleHome');
     Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
     Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name('services.edit');
     Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
@@ -223,7 +228,7 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     // Categories
     Route::resource('/categories', CategoryController::class);
 
-    // Account area
+    // Profil admin
     Route::get('/profile', [AccountController::class, 'account'])->name('profile.account');
     Route::get('/profile/security', [AccountController::class, 'security'])->name('profile.security');
     Route::get('/profile/activities', [AccountController::class, 'activities'])->name('profile.activities');
@@ -262,16 +267,16 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     // Event categories
     Route::resource('/event-categories', EventCategoryController::class);
 
-    // Events
+    // Events (toggle-publish deplace ici depuis routes publiques)
     Route::get('/events', [EventController::class, 'index'])->name('events.index');
     Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
     Route::post('/events', [EventController::class, 'store'])->name('events.store');
+    Route::patch('/events/{event}/toggle-publish', [EventController::class, 'togglePublish'])->name('events.toggle-publish');
     Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
     Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
     Route::post('/events/{event}', [EventController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [EventController::class, 'destroy'])->name('events.destroy');
     Route::get('/events/trash', [EventController::class, 'trash'])->name('events.trash');
-
     Route::get('/events/participants/{slug}', [EventController::class, 'participants'])->name('events.participants');
     Route::get('/events/{slug}/participants/{participant}', [EventController::class, 'showParticipant'])->name('events.participants.show');
     Route::get('/events/participants/{slug}/export', [EventController::class, 'exportParticipantsCsv'])->name('events.participants.export');
@@ -290,16 +295,12 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     // CMS pages
     Route::get('/a-propos', [AboutController::class, 'edit'])->name('about.edit');
     Route::put('/a-propos', [AboutController::class, 'update'])->name('about.update');
-
     Route::get('/accueil', [HomeController::class, 'edit'])->name('home.edit');
     Route::put('/accueil', [HomeController::class, 'update'])->name('home.update');
-
     Route::get('/contact-page', [ContactController::class, 'edit'])->name('contact-page.edit');
     Route::put('/contact-page', [ContactController::class, 'update'])->name('contact-page.update');
-
     Route::get('/chatbot', [ChatbotController::class, 'edit'])->name('chatbot.edit');
     Route::put('/chatbot', [ChatbotController::class, 'update'])->name('chatbot.update');
-
     Route::get('/chatbot/leads', [ChatbotLeadController::class, 'index'])->name('chatbot-leads.index');
     Route::get('/chatbot/leads/export', [ChatbotLeadController::class, 'export'])->name('chatbot-leads.export');
 
@@ -313,18 +314,29 @@ Route::middleware(['admin.access', 'active'])->prefix('dashboard')->group(functi
     Route::delete('/pages/{page}', [PageController::class, 'destroy'])->name('pages.destroy');
     Route::get('/pages/trash', [PageController::class, 'trash'])->name('pages.trash');
 
-    // Formations admin
+    // Formations (toggle-publish deplace ici depuis routes publiques)
     Route::get('/formations', [FormationController::class, 'index'])->name('formations.index');
     Route::get('/formations/create', [FormationController::class, 'create'])->name('formations.create');
     Route::post('/formations', [FormationController::class, 'store'])->name('formations.store');
+    Route::patch('/formations/{formation}/toggle-publish', [FormationController::class, 'togglePublish'])->name('formations.toggle-publish');
     Route::get('/formations/{formation}', [FormationController::class, 'show'])->name('formations.show');
     Route::get('/formations/{formation}/edit', [FormationController::class, 'edit'])->name('formations.edit');
     Route::post('/formations/{formation}', [FormationController::class, 'update'])->name('formations.update');
     Route::delete('/formations/{formation}', [FormationController::class, 'destroy'])->name('formations.destroy');
     Route::get('/formations/trash', [FormationController::class, 'trash'])->name('formations.trash');
-
     Route::get('/formations/participants/{slug}', [FormationController::class, 'participants'])->name('formations.participants');
     Route::get('/formations/{slug}/participants/{participant}', [FormationController::class, 'showParticipant'])->name('formations.participants.show');
     Route::get('/formations/participants/{slug}/export', [FormationController::class, 'exportParticipantsCsv'])->name('formations.participants.export');
     Route::get('/formations/{slug}/facture/{reference}', [FormationController::class, 'downloadInvoice'])->name('formations.participants.invoice');
+
+    // Testimonials
+    Route::get('/testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+    Route::get('/testimonials/create', [TestimonialController::class, 'create'])->name('testimonials.create');
+    Route::post('/testimonials', [TestimonialController::class, 'store'])->name('testimonials.store');
+    Route::get('/testimonials/{testimonial}/edit', [TestimonialController::class, 'edit'])->name('testimonials.edit');
+    Route::post('/testimonials/{testimonial}', [TestimonialController::class, 'update'])->name('testimonials.update');
+    Route::delete('/testimonials/{testimonial}', [TestimonialController::class, 'destroy'])->name('testimonials.destroy');
+    Route::patch('/testimonials/{testimonial}/toggle-home', [TestimonialController::class, 'toggleHome'])->name('testimonials.toggleHome');
+    Route::post('/testimonials/reorder-home', [TestimonialController::class, 'reorderHome'])->name('testimonials.reorderHome');
+    Route::patch('/testimonials/{testimonial}/toggle-featured', [TestimonialController::class, 'toggleFeatured'])->name('testimonials.toggleFeatured');
 });

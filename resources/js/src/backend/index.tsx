@@ -4,13 +4,12 @@ import {
     Users, Calendar, BookOpen, Newspaper,
     DollarSign, Star, ArrowUpRight, ArrowDownRight, Activity
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid,
     Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell
 } from 'recharts';
-import { ca } from 'date-fns/locale';
 
 function Dashboard({
     stats,
@@ -45,6 +44,12 @@ function Dashboard({
         if (!date || date.length !== 8) return date;
         return `${date.slice(6, 8)}.${date.slice(4, 6)}`;
     };
+
+    const sortedVisitorsByDay = useMemo(() => {
+        return [...visitorsByDay].sort((a, b) =>
+            a.name.localeCompare(b.name)
+        );
+    }, [visitorsByDay]);
 
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('fr-FR', {
@@ -238,7 +243,6 @@ function Dashboard({
                     ))}
                 </div>
 
-                {/* <Card className={`border ${queueStatus.border} bg-white/95 shadow-sm dark:bg-slate-900/70`}> */}
                 <Card className={`border ${queueStatus.border} {cardClass}`}>
 
                     <CardHeader className={cardHeaderClass}>
@@ -388,7 +392,7 @@ function Dashboard({
                                     <strong>Erreur Google Analytics :</strong> {gaError}
                                 </div>
                             ) : visitorsByCountry.length === 0 ? (
-                                <p className="text-sm text-gray-500">Aucune donnée disponible</p>
+                                <EmptyState message="Aucune donnée visiteurs par pays disponible" />
                             ) : (
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
@@ -414,11 +418,11 @@ function Dashboard({
 
                         <CardContent>
                             {visitorsByDay.length === 0 ? (
-                                <EmptyState message="Aucune donnée visiteurs" />
+                                <EmptyState message="Aucune donnée visiteurs par jour disponible" />
                             ) : (
                                 <div className="h-[300px]">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <LineChart data={visitorsByDay}>
+                                        <LineChart data={sortedVisitorsByDay}>
                                             <CartesianGrid
                                                 strokeDasharray="3 3"
                                                 stroke={chartGridStroke}

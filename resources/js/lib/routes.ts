@@ -17,6 +17,7 @@ import {
     School,
     Settings,
     Users,
+    Star,
 } from "lucide-react";
 
 // Types pour les mappings
@@ -164,6 +165,11 @@ export const dataRoutes = {
             icon: Mail,
         },
         {
+            title: "Contenus de pages",
+            url: route("page-contents.index"),
+            icon: LucideBookOpen,
+        },
+        {
             title: "A propos",
             url: route("about.edit"),
             icon: Info,
@@ -187,6 +193,21 @@ export const dataRoutes = {
             title: "Leads chatbot",
             url: route("chatbot-leads.index"),
             icon: Mail,
+        },
+        {
+            title: "Témoignages",
+            url: "#",
+            icon: Star,
+            items: [
+                {
+                    title: "Liste des témoignages",
+                    url: route("testimonials.index"),
+                },
+                {
+                    title: "Ajouter un témoignage",
+                    url: route("testimonials.create"),
+                },
+            ],
         },
         {
             title: "Page statique",

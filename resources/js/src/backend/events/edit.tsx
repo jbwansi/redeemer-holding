@@ -21,36 +21,40 @@ interface EditEventProps {
     event: {
         id: number
         title: string
-        description: string
-        content: string
-        location: string
-        category_id: number
-        start_date: string
-        end_date: string
-        price: number
-        max_participants: number
+        description: string | null
+        content: string | null
+        location: string | null
+        category_id: number | null
+        start_date: string | null
+        end_date: string | null
+        price: number | null
+        max_participants: number | null
         featured_image: any
         is_published: boolean
-        tags: string[],
+        tags: string[]
         is_featured: boolean
     }
     categories: Category[]
 }
 
+const toInputValue = (value: any) => {
+    return value !== null && value !== undefined ? value.toString() : "";
+};
+
 const EditEvent = ({ event, categories }: EditEventProps) => {
     const { data, setData, put, post, processing, errors } = useForm({
-        title: event.title,
-        description: event.description,
-        content: event.content,
-        location: event.location,
-        category_id: event.category_id.toString(),
-        start_date: event.start_date,
-        end_date: event.end_date,
-        price: event.price.toString(),
-        max_participants: event.max_participants.toString(),
+        title: event.title ?? "",
+        description: event.description ?? "",
+        content: event.content ?? "",
+        location: event.location ?? "",
+        category_id: toInputValue(event.category_id),
+        start_date: event.start_date ?? "",
+        end_date: event.end_date ?? "",
+        price: toInputValue(event.price),
+        max_participants: toInputValue(event.max_participants),
         featured_image: null,
-        is_published: event.is_published,
-        is_featured: event.is_featured,
+        is_published: event.is_published ?? false,
+        is_featured: event.is_featured ?? false,
         tags: event?.tags || [],
         _method: 'POST'
     })

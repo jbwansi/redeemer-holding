@@ -230,7 +230,6 @@ const HomeEdit = ({ page }: { page: Page }) => {
                         <TabsTrigger value="stats">Statistiques</TabsTrigger>
                         <TabsTrigger value="process">Processus</TabsTrigger>
                         <TabsTrigger value="for-whom">Pour qui</TabsTrigger>
-                        <TabsTrigger value="testimonials">Témoignages</TabsTrigger>
                         <TabsTrigger value="sections">Titres sections</TabsTrigger>
                         <TabsTrigger value="cta">CTA</TabsTrigger>
                     </TabsList>
@@ -1057,63 +1056,6 @@ const HomeEdit = ({ page }: { page: Page }) => {
                         </div>
                     </TabsContent>
 
-                    {/* ── Témoignages ───────────────────────────── */}
-                    <TabsContent value="testimonials">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
-                                <CardTitle>Témoignages</CardTitle>
-                                <Button type="button" size="sm" onClick={() =>
-                                    setMeta({ testimonials: [...m.testimonials, { content: '', author: '', position: '', image: '' }] })
-                                }>
-                                    <Plus className="h-4 w-4 mr-1" /> Ajouter
-                                </Button>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div>
-                                    <Label className="mb-2">Titre de la section</Label>
-                                    <Input value={m.testimonials_title}
-                                        onChange={e => setMeta({ testimonials_title: e.target.value })}
-                                        placeholder="Ce que disent mes clients" />
-                                </div>
-                                {m.testimonials.map((t, i) => (
-                                    <div key={i} className="border rounded-lg p-4 space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-medium text-sm">Témoignage {i + 1}</span>
-                                            <Button type="button" variant="ghost" size="sm"
-                                                onClick={() => setMeta({ testimonials: removeItem(m.testimonials, i) })}>
-                                                <Trash2 className="h-4 w-4 text-red-500" />
-                                            </Button>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                            <div>
-                                                <Label className="mb-1 text-xs">Auteur</Label>
-                                                <Input value={t.author}
-                                                    onChange={e => setMeta({ testimonials: updateItem(m.testimonials, i, { author: e.target.value }) })} />
-                                            </div>
-                                            <div>
-                                                <Label className="mb-1 text-xs">Poste / Rôle</Label>
-                                                <Input value={t.position}
-                                                    onChange={e => setMeta({ testimonials: updateItem(m.testimonials, i, { position: e.target.value }) })} />
-                                            </div>
-                                            <div>
-                                                <Label className="mb-1 text-xs">URL photo (optionnel)</Label>
-                                                <Input value={t.image}
-                                                    onChange={e => setMeta({ testimonials: updateItem(m.testimonials, i, { image: e.target.value }) })} />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <Label className="mb-1 text-xs">Contenu</Label>
-                                            <Textarea rows={3} value={t.content}
-                                                onChange={e => setMeta({ testimonials: updateItem(m.testimonials, i, { content: e.target.value }) })} />
-                                        </div>
-                                    </div>
-                                ))}
-                                {m.testimonials.length === 0 && (
-                                    <p className="text-muted-foreground text-sm text-center py-4">Aucun témoignage → section masquée. Cliquez sur Ajouter.</p>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
 
                     {/* ── Titres des sections DB ─────────────────── */}
                     <TabsContent value="sections">

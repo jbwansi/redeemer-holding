@@ -75,7 +75,13 @@ interface Props {
     };
 }
 
-const FormationCard: React.FC<{ formation: Formation; onEdit: (formation: Formation) => void; onView: (formation: Formation) => void; onDelete: (formation: Formation) => void }> = ({ formation, onEdit, onDelete, onView }) => {
+const FormationCard: React.FC<{
+    formation: Formation;
+    onEdit: (formation: Formation) => void;
+    onView: (formation: Formation) => void;
+    onDelete: (formation: Formation) => void;
+    onTogglePublish: (formation: Formation) => void;
+}> = ({ formation, onEdit, onDelete, onView, onTogglePublish }) => {
 
     return (
         <motion.div
@@ -167,6 +173,18 @@ const FormationCard: React.FC<{ formation: Formation; onEdit: (formation: Format
                                 </Button>
                             </motion.div>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => onTogglePublish(formation)}
+                            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${formation.is_published ? 'bg-green-600' : 'bg-slate-300'
+                                }`}
+                            title={formation.is_published ? 'Dépublier' : 'Publier'}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formation.is_published ? 'translate-x-5' : 'translate-x-1'
+                                    }`}
+                            />
+                        </button>
                     </div>
                 </div>
             </Card>
@@ -207,6 +225,28 @@ export default function FormationsIndex({ formations }: Props) {
                 toast.error('Erreur lors de la suppression de la formation');
             }
         });
+    };
+
+    const handleTogglePublish = (formation: Formation) => {
+        router.patch(
+            route('formations.toggle-publish', formation.id),
+            {
+                is_published: !formation.is_published,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(
+                        !formation.is_published
+                            ? 'Formation publiée avec succès'
+                            : 'Formation dépubliée avec succès'
+                    );
+                },
+                onError: () => {
+                    toast.error('Erreur lors du changement de statut');
+                },
+            }
+        );
     };
 
     const handleEdit = (formation: Formation) => {
@@ -267,36 +307,37 @@ export default function FormationsIndex({ formations }: Props) {
             </div>
 
             <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70">
-                    <AnimatePresence>
-                        <motion.div
-                            layout
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                        >
-                            {filteredFormations.map(formation => (
-                                <FormationCard
-                                    key={formation.id}
-                                    formation={formation}
-                                    onEdit={handleEdit}
-                                    onView={handleView}
-                                    onDelete={(formation) => {
-                                        setSelectedFormation(formation);
-                                        setIsDeleteOpen(true);
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
+                <AnimatePresence>
+                    <motion.div
+                        layout
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                    >
+                        {filteredFormations.map(formation => (
+                            <FormationCard
+                                key={formation.id}
+                                formation={formation}
+                                onEdit={handleEdit}
+                                onView={handleView}
+                                onDelete={(formation) => {
+                                    setSelectedFormation(formation);
+                                    setIsDeleteOpen(true);
+                                }}
+                                onTogglePublish={handleTogglePublish}
+                            />
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
 
-                    {filteredFormations.length === 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="rounded-xl border border-dashed border-slate-300/80 bg-slate-50/70 py-12 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-400"
-                        >
-                            Aucune formation trouvée.
-                        </motion.div>
-                    )}
-                </div>
+                {filteredFormations.length === 0 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="rounded-xl border border-dashed border-slate-300/80 bg-slate-50/70 py-12 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-400"
+                    >
+                        Aucune formation trouvée.
+                    </motion.div>
+                )}
+            </div>
 
             {/* Delete confirmation dialog */}
             <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

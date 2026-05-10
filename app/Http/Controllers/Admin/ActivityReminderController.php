@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Mail\EventReminderMail;
-use App\Mail\FormationReminderMail;
+// use App\Mail\EventReminderMail;
+use App\Mail\ReminderMail;
 use App\Models\EventParticipant;
 use App\Models\FormationParticipant;
 use Illuminate\Http\JsonResponse;
@@ -42,7 +42,7 @@ class ActivityReminderController extends Controller
             $eventReminders = 0;
             foreach ($eventParticipants as $participant) {
                 try {
-                    $this->dynamicMailerService->queue(new EventReminderMail($participant), $participant->email);
+                    $this->dynamicMailerService->queue(new ReminderMail('event', $participant), $participant->email);
                     $eventReminders++;
                 } catch (\Exception $e) {
                     Log::error('Erreur lors de l\'envoi du rappel d\'événement', [
@@ -63,7 +63,7 @@ class ActivityReminderController extends Controller
             $formationReminders = 0;
             foreach ($formationParticipants as $participant) {
                 try {
-                    $this->dynamicMailerService->queue(new FormationReminderMail($participant), $participant->email);
+                    $this->dynamicMailerService->queue(new ReminderMail('formation', $participant), $participant->email);
                     $formationReminders++;
                 } catch (\Exception $e) {
                     Log::error('Erreur lors de l\'envoi du rappel de formation', [

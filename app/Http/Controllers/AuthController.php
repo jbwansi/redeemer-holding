@@ -16,7 +16,8 @@ class AuthController extends Controller
     public function __construct(
         private readonly AuthenticationService $authService,
         private readonly SettingsService $settingsService,
-    ) {}
+    ) {
+    }
 
 
     public function show_auth()
@@ -68,6 +69,19 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
+    }
+
+    public function logoutOnClose(Request $request)
+    {
+        if (!Auth::check()) {
+            return response()->noContent();
+        }
+
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        return response()->noContent();
     }
 
     private function isRegistrationEnabled(): bool

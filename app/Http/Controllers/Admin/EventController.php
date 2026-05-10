@@ -237,10 +237,13 @@ class EventController extends Controller
     }
     public function show($slug)
     {
-        $event = Event::with(['category', 'participants' => function ($query) {
-            $query->where('status', '!=', 'cancelled')
-                ->select('id', 'event_id', 'name', 'status', 'qty', 'created_at');
-        }])->where('slug', $slug)->firstOrFail();
+        $event = Event::with([
+            'category',
+            'participants' => function ($query) {
+                $query->where('status', '!=', 'cancelled')
+                    ->select('id', 'event_id', 'name', 'status', 'qty', 'created_at');
+            }
+        ])->where('slug', $slug)->firstOrFail();
 
         // Ajouter l'information pour déterminer quel bouton afficher
         $event->participant_count = $event->participants->sum('qty');
@@ -254,10 +257,12 @@ class EventController extends Controller
 
     public function participants($slug)
     {
-        $event = Event::with(['participants' => function ($query) {
-            $query->with(['user'])
-                ->orderBy('created_at', 'desc');
-        }])->where('slug', $slug)->firstOrFail();
+        $event = Event::with([
+            'participants' => function ($query) {
+                $query->with(['user'])
+                    ->orderBy('created_at', 'desc');
+            }
+        ])->where('slug', $slug)->firstOrFail();
 
         $participants = $event->participants()
             ->when(request('search'), function ($query, $search) {
@@ -416,6 +421,19 @@ class EventController extends Controller
                 'canBeCancelled' => $this->canBeCancelled($participant, $event),
             ])
         ]);
+    }
+
+    public function togglePublish(Request $request, Event $event)
+    {
+        $validated = $request->validate([
+            'is_published' => ['required', 'boolean'],
+        ]);
+
+        $event->update([
+            'is_published' => $validated['is_published'],
+        ]);
+
+        return back();
     }
 
     /**

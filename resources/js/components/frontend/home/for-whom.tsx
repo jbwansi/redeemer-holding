@@ -82,7 +82,7 @@ export default function ForWhom({
                         href="/services"
                         className="inline-flex items-center rounded-xl bg-[#DA2E29] px-6 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#c02824]"
                     >
-                        <span>Découvrir mes accompagnements</span>
+                        <span>Découvrir Nos accompagnements</span>
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                 </div>

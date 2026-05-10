@@ -16,7 +16,7 @@ import EventCard from '@/components/frontend/events/event-card';
 const resolveImage = (image: any): string => {
     if (!image) return '/assets/images/coaching-session.jpg';
     if (typeof image === 'string') return image;
-    return image?.large || image?.medium || image?.original || image?.thumbnail || '/assets/images/coaching-session.jpg';
+    return image?.original || image?.large || image?.medium || image?.thumbnail || '/assets/images/coaching-session.jpg';
 };
 
 const toDate = (value: any): Date | null => {
@@ -25,7 +25,7 @@ const toDate = (value: any): Date | null => {
     return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const EventsPage = ({ events, categories, featuredEvent }: any) => {
+const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any) => {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [showPast, setShowPast] = useState(false);
@@ -85,13 +85,14 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
         <FrontLayout>
             <Head title="Événements" />
 
-            <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pb-20 pt-28 dark:bg-slate-950">
+            <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pb-20 pt-36 dark:bg-slate-950">
                 <div className="pointer-events-none absolute -left-16 -top-20 h-72 w-72 rounded-full bg-[#da2e29]/15 blur-3xl" />
                 <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#0f766e]/10 blur-3xl" />
 
                 <section className="relative mx-auto max-w-[1320px] px-6 md:px-8">
-                    <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+                    <div className={`grid gap-12 lg:items-center ${activeFeatured ? 'lg:grid-cols-[0.9fr_1.1fr]' : 'lg:grid-cols-1'}`}>
                         <motion.div
+                            className="relative lg:-mt-8"
                             initial={{ opacity: 0, y: 14 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
@@ -101,12 +102,12 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                 Événements & webinaires
                             </span>
 
-                            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-tight text-slate-900 md:text-6xl dark:text-white">
-                                Rencontrez, apprenez et avancez avec une communauté qui partage vos ambitions
+                            <h1 className={`${activeFeatured ? 'max-w-4xl' : 'max-w-5xl'} mt-6 text-4xl font-black leading-tight text-slate-900 md:text-6xl dark:text-white`}>
+                                {pageContent.hero_title || "Rencontrez, apprenez et avancez avec une communauté qui partage vos ambitions"}
                             </h1>
 
                             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
-                                Des expériences en présentiel et en ligne pour accélérer votre progression personnelle et professionnelle.
+                                {pageContent.hero_subtitle || "Des expériences en présentiel et en ligne pour accélérer votre progression personnelle et professionnelle."}
                             </p>
 
                             {activeFeatured && (
@@ -150,29 +151,30 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                 transition={{ duration: 0.55 }}
                                 className="relative lg:mt-10"
                             >
-                                <div className="pointer-events-none absolute -inset-4 rounded-[3rem] bg-[#da2e29]/10 blur-3xl" />
-
+                                <div className="pointer-events-none absolute -inset-4 rounded-[3rem] bg-[#da2e29]/5 blur-2xl" />
                                 <span className="absolute left-6 top-0 z-20 inline-flex -translate-y-1/2 items-center gap-2 rounded-full bg-[#da2e29] px-3 py-1 text-xs font-bold text-white shadow-lg shadow-[#da2e29]/30">
                                     ✨ À la une
                                 </span>
 
                                 <Link
                                     href={route('evenements.details', activeFeatured?.slug)}
-                                    className="group relative block overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur transition hover:-translate-y-1 dark:border-slate-700 dark:bg-slate-900/70"
+                                    className="group relative block overflow-hidden rounded-[2.25rem] border border-slate-200/70 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur transition duration-300 hover:-translate-y-1 dark:border-slate-700/70 dark:bg-slate-900/70"
                                 >
-                                    <div className="relative flex items-center justify-center rounded-[2rem] bg-slate-950 p-6">
+                                    <div className="w-full min-h-fit overflow-visible">
                                         <img
                                             src={resolveImage(activeFeatured?.featured_image)}
                                             alt={activeFeatured?.title}
-                                            className="mx-auto max-h-[600px] w-full object-contain object-bottom"
+                                            className="w-full h-auto object-contain transition duration-700"
+                                            loading="eager"
+                                            decoding="async"
                                         />
                                     </div>
-
-                                    <div className="mt-3 flex flex-col gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700 dark:bg-slate-950">
+                                    <div className="mt-3 flex flex-col gap-4 rounded-[1.5rem] border border-slate-200/70 bg-white/90 p-5 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700/70 dark:bg-slate-950/95">
                                         <span className="inline-flex w-fit items-center gap-2 rounded-2xl bg-slate-100 px-5 py-3 text-sm font-black uppercase tracking-wide text-[#da2e29] dark:bg-slate-800">
                                             {Number(activeFeatured?.price ?? 0) <= 0 ? '🎁 100% offert' : `${activeFeatured.price} CHF`}
                                         </span>
 
+                                        {/* <span className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#da2e29] px-6 py-4 font-black text-white shadow-lg shadow-[#da2e29]/25 transition group-hover:bg-[#c62823]"> */}
                                         <span className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 font-black text-[#da2e29] shadow transition group-hover:bg-slate-50 dark:bg-slate-900">
                                             Voir l’événement
                                             <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
@@ -211,11 +213,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                             <button
                                 type="button"
                                 onClick={() => setSelectedCategory(null)}
-                                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${
-                                    selectedCategory === null
-                                        ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/20'
-                                        : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-300 dark:ring-slate-700'
-                                }`}
+                                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold transition ${selectedCategory === null
+                                    ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/20'
+                                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-300 dark:ring-slate-700'
+                                    }`}
                             >
                                 <Filter className="h-3.5 w-3.5" />
                                 Tous
@@ -226,11 +227,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                                     key={category.id}
                                     type="button"
                                     onClick={() => setSelectedCategory(category.name)}
-                                    className={`rounded-full px-4 py-2 text-xs font-bold transition ${
-                                        selectedCategory === category.name
-                                            ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/20'
-                                            : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
-                                    }`}
+                                    className={`rounded-full px-4 py-2 text-xs font-bold transition ${selectedCategory === category.name
+                                        ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/20'
+                                        : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-950 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
+                                        }`}
                                 >
                                     {category.name}
                                 </button>
@@ -276,11 +276,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
                         <div className="mt-10 flex items-center justify-center gap-3">
                             <Link
                                 href={route('evenements', { page: currentPage - 1 })}
-                                className={`rounded-xl px-5 py-3 text-sm font-bold ${
-                                    currentPage <= 1
-                                        ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
-                                        : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                                }`}
+                                className={`rounded-xl px-5 py-3 text-sm font-bold ${currentPage <= 1
+                                    ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
+                                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                                    }`}
                             >
                                 Précédent
                             </Link>
@@ -291,11 +290,10 @@ const EventsPage = ({ events, categories, featuredEvent }: any) => {
 
                             <Link
                                 href={route('evenements', { page: currentPage + 1 })}
-                                className={`rounded-xl px-5 py-3 text-sm font-bold ${
-                                    currentPage >= lastPage
-                                        ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
-                                        : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                                }`}
+                                className={`rounded-xl px-5 py-3 text-sm font-bold ${currentPage >= lastPage
+                                    ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
+                                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                                    }`}
                             >
                                 Suivant
                             </Link>

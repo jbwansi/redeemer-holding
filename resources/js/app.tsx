@@ -1,16 +1,24 @@
 import "./bootstrap"
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { Page, PageProps } from '@inertiajs/core'
+import { router } from '@inertiajs/react'
 import MainLayout from "./components/layouts/main-layout";
 import { ThemeProvider } from "./components/theme-provider";
 
-// Type pour la fonction layout
+// ─────────────────────────────────────────────
+//  Config
+// ─────────────────────────────────────────────
+const IS_PROD = import.meta.env.PROD;
+const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+
+// ─────────────────────────────────────────────
+//  Types
+// ─────────────────────────────────────────────
 type LayoutFunction = (page: React.ReactNode) => React.ReactNode;
 
-// Type pour les composants de page
 interface PageComponent extends Page<PageProps> {
     layout?: LayoutFunction;
     default: {
@@ -18,39 +26,86 @@ interface PageComponent extends Page<PageProps> {
     };
 }
 
+// ─────────────────────────────────────────────
+//  Composant AutoLogout (prod uniquement)
+// ─────────────────────────────────────────────
+const AutoLogout = () => {
+    const inactivityTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    useEffect(() => {
+        if (!IS_PROD) return; // ← rien en localhost
+
+        // ── 1. Logout après inactivité ──────────────────
+        const resetInactivityTimer = () => {
+            clearTimeout(inactivityTimer.current);
+            inactivityTimer.current = setTimeout(() => {
+                router.post('/logout');
+            }, INACTIVITY_TIMEOUT);
+        };
+
+        const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+        activityEvents.forEach(e => window.addEventListener(e, resetInactivityTimer));
+        resetInactivityTimer();
+
+        // ── 2. Logout quand l'utilisateur quitte le site ─
+        let beaconSent = false;
+
+        const handleClose = () => {
+            if (beaconSent) return;
+            beaconSent = true;
+
+            navigator.sendBeacon('/logout-on-close');
+        };
+
+        window.addEventListener('pagehide', handleClose);
+
+        // ── Nettoyage ────────────────────────────────────
+        return () => {
+            clearTimeout(inactivityTimer.current);
+            activityEvents.forEach(e => window.removeEventListener(e, resetInactivityTimer));
+            window.removeEventListener('pagehide', handleClose);
+            window.removeEventListener('beforeunload', handleClose);
+        };
+    }, []);
+
+    return null;
+};
+
+// ─────────────────────────────────────────────
+//  Inertia App
+// ─────────────────────────────────────────────
 createInertiaApp({
     title: (title: string) => `${title || "Transformer des vies, une personne à la fois"} - Redeemer Holding`,
+
     resolve: (name: string) => resolvePageComponent<PageComponent>(
         `./src/${name}.tsx`,
         import.meta.glob<PageComponent>('./src/**/*.tsx')
     ).then((page) => {
-        // Vérifier si le composant a déjà défini son propre layout
-        if (page.default.layout) {
-            return page;
-        }
+        if (page.default.layout) return page;
 
-        // Vérifier si la page fait partie du tableau de bord
         const isDashboardPage = name.startsWith('backend/');
 
         if (isDashboardPage) {
-            // Appliquer le MainLayout uniquement aux pages du tableau de bord
             page.default.layout = (page: React.ReactNode) => (
                 <MainLayout>
                     {page}
                 </MainLayout>
             );
         } else {
-            // Pour les autres pages, pas de layout par défaut
             page.default.layout = (page: React.ReactNode) => page;
         }
 
         return page;
     }),
-    setup({ el, App, props }: {
-        el: HTMLElement,
-        App: React.ComponentType,
-        props: Record<string, unknown>
-    }) {
-        createRoot(el).render(<App {...props} />)
+
+    setup({ el, App, props }) {
+        const root = createRoot(el);
+
+        root.render(
+            <>
+                <AutoLogout />
+                <App {...props} />
+            </>
+        );
     },
-})
+});

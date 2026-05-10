@@ -382,6 +382,19 @@ class FormationController extends Controller
         ]);
     }
 
+    public function togglePublish(Request $request, Formation $formation)
+    {
+      $validated = $request->validate([
+            'is_published' => ['required', 'boolean'],
+        ]);
+
+        $formation->update([
+            'is_published' => $validated['is_published'],
+        ]);
+
+        return back();
+    }
+    
     private function getStatusLabel($status)
     {
         return [

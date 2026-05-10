@@ -1,95 +1,79 @@
-import React from 'react'
-import { motion } from 'framer-motion'
-import { Quote, Star } from 'lucide-react'
-import SectionHeader from '@/components/frontend/layouts/section-header'
+import 'keen-slider/keen-slider.min.css'
+import { useKeenSlider } from 'keen-slider/react'
+import { useEffect } from 'react'
 
-interface TestimonialItem {
-    content: string
-    author: string
-    position: string
-    image?: string
-}
+export default function TestimonialsSection({ testimonials }: any) {
+    const [sliderRef, instanceRef] = useKeenSlider({
+        loop: true,
+        slides: {
+            perView: 1.2,
+            spacing: 16,
+        },
+        breakpoints: {
+            "(min-width: 768px)": {
+                slides: { perView: 2, spacing: 20 },
+            },
+            "(min-width: 1280px)": {
+                slides: { perView: 3, spacing: 24 },
+            },
+        },
+    })
 
-export default function TestimonialsSection({
-    testimonials,
-    title,
-}: {
-    testimonials: TestimonialItem[]
-    title?: string
-}) {
+    // autoplay
+    useEffect(() => {
+        const interval = setInterval(() => {
+            instanceRef.current?.next()
+        }, 3500)
+
+        return () => clearInterval(interval)
+    }, [instanceRef])
+
     if (!testimonials?.length) return null
 
     return (
-        <section className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <motion.div
-                    className="mx-auto mb-12 max-w-3xl"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    <SectionHeader
-                        label="Témoignages"
-                        title={title ?? 'Ce que disent mes clients'}
-                        subtitle="Des retours d’expérience concrets sur les transformations vécues et les résultats obtenus."
-                    />
-                </motion.div>
+        <section className="py-20 bg-[#020817] text-white">
+            <div className="max-w-7xl mx-auto px-6">
 
-                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                    {testimonials.map((t, i) => (
-                        <motion.div
-                            key={i}
-                            className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-gray-800 dark:bg-gray-950 flex flex-col"
-                            initial={{ opacity: 0, y: 24 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.3 }}
-                            transition={{ delay: i * 0.12, duration: 0.6 }}
-                        >
-                            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-[#DA2E29] dark:bg-red-500/10">
-                                <Quote className="h-5 w-5" />
-                            </div>
+                <h2 className="text-3xl font-bold mb-10 text-center">
+                    Ce que disent mes clients
+                </h2>
 
-                            <p className="flex-grow text-sm leading-7 text-gray-600 dark:text-gray-400 italic">
-                                “{t.content}”
-                            </p>
+                <div ref={sliderRef} className="keen-slider">
+                    {testimonials.map((t: any) => (
+                        <div key={t.id} className="keen-slider__slide">
+                            <div className="rounded-2xl bg-white/5 border border-white/10 p-6 h-full flex flex-col">
 
-                            <div className="mt-6 flex items-center gap-3">
-                                {t.image ? (
-                                    <img
-                                        src={t.image}
-                                        alt={t.author}
-                                        className="h-11 w-11 rounded-full object-cover flex-shrink-0"
-                                        loading="lazy"
-                                        decoding="async"
-                                    />
-                                ) : (
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#DA2E29]/15 flex-shrink-0">
-                                        <span className="text-sm font-semibold text-[#DA2E29]">
-                                            {t.author?.charAt(0)}
-                                        </span>
-                                    </div>
-                                )}
+                                <p className="text-sm text-slate-300 italic mb-6">
+                                    “{t.message}”
+                                </p>
 
-                                <div className="min-w-0">
-                                    <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {t.author}
-                                    </div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                        {t.position}
-                                    </div>
-                                </div>
-
-                                <div className="ml-auto flex items-center gap-0.5">
-                                    {[...Array(5)].map((_, j) => (
-                                        <Star
-                                            key={j}
-                                            className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400"
+                                <div className="mt-auto flex items-center gap-3">
+                                    {t.photo ? (
+                                        <img
+                                            src={t.photo}
+                                            className="h-10 w-10 rounded-full object-cover"
                                         />
-                                    ))}
+                                    ) : (
+                                        <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                                            {t.name?.charAt(0)}
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <p className="font-semibold">{t.name}</p>
+                                        <p className="text-xs text-slate-400">
+                                            {[t.role, t.company].filter(Boolean).join(' · ')}
+                                        </p>
+                                    </div>
+
+                                    <div className="ml-auto flex">
+                                        {[...Array(t.rating || 5)].map((_, i) => (
+                                            <span key={i}>⭐</span>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     ))}
                 </div>
             </div>

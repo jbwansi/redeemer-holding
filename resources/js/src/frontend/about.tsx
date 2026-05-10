@@ -40,6 +40,13 @@ type TestimonialItem = {
     author: string
     position: string
     image?: string
+    name?: string
+    message?: string
+    photo?: string
+    role?: string
+    company?: string
+    rating?: number
+
 }
 
 type AboutMeta = {
@@ -96,12 +103,13 @@ const sectionReveal = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 }
 
+
 function iconFromName(name?: string): LucideIcon {
     if (!name) return Award
     return ICONS[name] ?? Award
 }
 
-function AboutPage({ page }: { page?: AboutPageData }) {
+function AboutPage({ page, testimonials = [] }: { page?: AboutPageData, testimonials?: TestimonialItem[] }) {
     const meta = page?.meta ?? {}
 
     const rootRef = useRef<HTMLDivElement>(null)
@@ -129,7 +137,7 @@ function AboutPage({ page }: { page?: AboutPageData }) {
     const values = meta.values ?? []
     const stats = meta.stats ?? []
     const journey = meta.journey ?? []
-    const testimonials = meta.testimonials ?? []
+
     const certifications = meta.certifications ?? []
 
     const safeContent = useMemo(
@@ -529,31 +537,30 @@ function AboutPage({ page }: { page?: AboutPageData }) {
                                         </div>
 
                                         <p className="text-sm leading-7 text-slate-700 dark:text-slate-300">
-                                            “{item.content}”
+                                            “{item.message}”
                                         </p>
 
                                         <div className="mt-6 flex items-center gap-3">
-                                            {item.image ? (
+                                            {item.photo ? (
                                                 <img
-                                                    src={item.image}
-                                                    alt={item.author}
+                                                    src={item.photo}
+                                                    alt={item.name}
                                                     className="h-11 w-11 rounded-full object-cover"
                                                 />
                                             ) : (
                                                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#da2e29]/15">
                                                     <span className="text-sm font-semibold text-[#da2e29]">
-                                                        {item.author?.charAt(0)}
+                                                        {item.name?.charAt(0)}
                                                     </span>
                                                 </div>
                                             )}
 
-                                            <div>
-                                                <div className="text-sm font-semibold">
-                                                    {item.author}
-                                                </div>
-                                                <div className="text-xs text-slate-500 dark:text-slate-400">
-                                                    {item.position}
-                                                </div>
+                                            <div className="text-sm font-semibold">
+                                                {item.name}
+                                            </div>
+
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                                {[item.role, item.company].filter(Boolean).join(' · ')}
                                             </div>
                                         </div>
                                     </motion.article>

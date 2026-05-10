@@ -81,7 +81,13 @@ interface Props {
     categories: Category[];
 }
 
-const EventCard: React.FC<{ event: Event; onEdit: (event: Event) => void; onView: (event: Event) => void; onDelete: (event: Event) => void }> = ({ event, onEdit, onDelete, onView }) => {
+const EventCard: React.FC<{
+    event: Event;
+    onEdit: (event: Event) => void;
+    onView: (event: Event) => void;
+    onDelete: (event: Event) => void;
+    onTogglePublish: (event: Event) => void;
+}> = ({ event, onEdit, onDelete, onView, onTogglePublish }) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -181,10 +187,19 @@ const EventCard: React.FC<{ event: Event; onEdit: (event: Event) => void; onView
                                 </Button>
                             </motion.div>
                         </div>
-                        {/* <div className="flex items-center text-muted-foreground">
-                            <Eye className="h-3 w-3 mr-1" />
-                            <span className="text-xs">{event.views}</span>
-                        </div> */}
+
+                        <button
+                            type="button"
+                            onClick={() => onTogglePublish(event)}
+                            className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${event.is_published ? 'bg-green-600' : 'bg-slate-300'
+                                }`}
+                            title={event.is_published ? 'Dépublier' : 'Publier'}
+                        >
+                            <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${event.is_published ? 'translate-x-5' : 'translate-x-1'
+                                    }`}
+                            />
+                        </button>
                     </div>
                 </div>
             </Card>
@@ -227,6 +242,28 @@ export default function EventsIndex({ events, categories }: Props) {
                 toast.error('Erreur lors de la suppression de l\'événement');
             }
         });
+    };
+
+    const handleTogglePublish = (event: Event) => {
+        router.patch(
+            route('events.toggle-publish', event.id),
+            {
+                is_published: !event.is_published,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(
+                        !event.is_published
+                            ? 'Événement publié avec succès'
+                            : 'Événement dépublié avec succès'
+                    );
+                },
+                onError: () => {
+                    toast.error('Erreur lors du changement de statut');
+                },
+            }
+        );
     };
 
     const handleEdit = (event: Event) => {
@@ -308,36 +345,37 @@ export default function EventsIndex({ events, categories }: Props) {
             </div>
 
             <div className="rounded-2xl border border-slate-200/80 bg-white/95 p-6 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70">
-                    <AnimatePresence>
-                        <motion.div
-                            layout
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-                        >
-                            {filteredEvents.map(event => (
-                                <EventCard
-                                    key={event.id}
-                                    event={event}
-                                    onEdit={handleEdit}
-                                    onView={handleView}
-                                    onDelete={(event) => {
-                                        setSelectedEvent(event);
-                                        setIsDeleteOpen(true);
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
+                <AnimatePresence>
+                    <motion.div
+                        layout
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                    >
+                        {filteredEvents.map(event => (
+                            <EventCard
+                                key={event.id}
+                                event={event}
+                                onEdit={handleEdit}
+                                onView={handleView}
+                                onDelete={(event) => {
+                                    setSelectedEvent(event);
+                                    setIsDeleteOpen(true);
+                                }}
+                                onTogglePublish={handleTogglePublish}
+                            />
+                        ))}
+                    </motion.div>
+                </AnimatePresence>
 
-                    {filteredEvents.length === 0 && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="rounded-xl border border-dashed border-slate-300/80 bg-slate-50/70 py-12 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-400"
-                        >
-                            Aucun événement trouvé.
-                        </motion.div>
-                    )}
-                </div>
+                {filteredEvents.length === 0 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="rounded-xl border border-dashed border-slate-300/80 bg-slate-50/70 py-12 text-center text-slate-600 dark:border-slate-700 dark:bg-slate-900/30 dark:text-slate-400"
+                    >
+                        Aucun événement trouvé.
+                    </motion.div>
+                )}
+            </div>
 
             {/* Delete confirmation dialog */}
             <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

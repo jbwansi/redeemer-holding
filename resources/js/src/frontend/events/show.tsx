@@ -15,10 +15,16 @@ import FrontLayout from '@/components/frontend/layouts/front-layout';
 import EventJoin from '@/components/frontend/events/event-join';
 import DOMPurify from 'dompurify';
 
+// const resolveImage = (image: any): string => {
+//     if (!image) return '/assets/images/coaching-session.jpg';
+//     if (typeof image === 'string') return image;
+//     return image?.large || image?.medium || image?.original || image?.thumbnail || '/assets/images/coaching-session.jpg';
+// };
+
 const resolveImage = (image: any): string => {
     if (!image) return '/assets/images/coaching-session.jpg';
     if (typeof image === 'string') return image;
-    return image?.large || image?.medium || image?.original || image?.thumbnail || '/assets/images/coaching-session.jpg';
+    return image?.original || image?.large || image?.medium || image?.thumbnail || '/assets/images/coaching-session.jpg';
 };
 
 const formatDate = (value: any) => {
@@ -50,23 +56,23 @@ const EventDetailPage = ({ event }: any) => {
     const canRegister = !isPast && !event?.is_full && (event?.available_seats ?? 0) > 0;
 
     const formatEventDate = (start: any, end: any) => {
-    if (!start) return '-';
+        if (!start) return '-';
 
-    const startDate = new Date(start);
-    const endDate = end ? new Date(end) : null;
+        const startDate = new Date(start);
+        const endDate = end ? new Date(end) : null;
 
-    // même jour
-    if (endDate && startDate.toDateString() === endDate.toDateString()) {
+        // même jour
+        if (endDate && startDate.toDateString() === endDate.toDateString()) {
+            return formatDate(startDate);
+        }
+
+        // plusieurs jours
+        if (endDate) {
+            return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+        }
+
         return formatDate(startDate);
-    }
-
-    // plusieurs jours
-    if (endDate) {
-        return `${formatDate(startDate)} – ${formatDate(endDate)}`;
-    }
-
-    return formatDate(startDate);
-};
+    };
 
     return (
         <FrontLayout>
@@ -131,12 +137,13 @@ const EventDetailPage = ({ event }: any) => {
                         <div className="relative">
                             <div className="absolute -inset-4 rounded-[3rem] bg-[#da2e29]/10 blur-3xl" />
 
-                            <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 bg-white/80 p-3 shadow-2xl shadow-slate-900/10 backdrop-blur dark:border-slate-700 dark:bg-slate-900/70">
-                                <div className="overflow-hidden rounded-[2rem] bg-slate-950">
+                            <div className="relative mx-auto w-full max-w-[520px] lg:max-w-[560px]">
+                                <div className="rounded-[2rem] bg-black p-2 shadow-2xl shadow-slate-900/20">
                                     <img
                                         src={resolveImage(event?.featured_image)}
                                         alt={event?.title}
-                                        className="mx-auto max-h-[520px] w-full object-contain"
+                                        className="w-full h-auto object-contain transition duration-500 hover:scale-[1.02]"
+                                        loading='lazy'
                                     />
                                 </div>
                             </div>

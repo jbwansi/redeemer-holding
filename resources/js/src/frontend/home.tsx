@@ -204,7 +204,7 @@ const defaultHomeMeta = {
     ],
 }
 
-function Home({ services, home, posts, formations }: any) {
+function Home({ services, home, posts, formations, testimonials }: any) {
     const meta = { ...defaultHomeMeta, ...(home?.meta ?? {}) }
 
     const pageTitle = [
@@ -265,10 +265,7 @@ function Home({ services, home, posts, formations }: any) {
 
             <StatsBand stats={meta.stats ?? []} />
 
-            <TestimonialsSection
-                testimonials={meta.testimonials ?? []}
-                title={meta.testimonials_title}
-            />
+            <TestimonialsSection testimonials={testimonials} />
 
             <FeaturedFormations
                 formations={formations ?? []}
