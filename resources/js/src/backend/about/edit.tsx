@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -44,6 +44,7 @@ interface Meta {
     hero_title_before: string
     hero_title_highlight: string
     hero_title_after: string
+    hero_image: string
 
     story_author: string
     story_role: string
@@ -62,6 +63,14 @@ interface Meta {
     journey: JourneyItem[]
     testimonials: TestimonialItem[]
     certifications: string[]
+
+    cta_title: string
+    cta_subtitle: string
+    cta_primary_button_text: string
+    cta_primary_button_link: string
+    cta_secondary_button_text: string
+    cta_secondary_button_link: string
+
 }
 
 interface Page {
@@ -95,7 +104,7 @@ const defaultMeta: Meta = {
     hero_title_before: 'Transformer des',
     hero_title_highlight: 'vies',
     hero_title_after: ', une personne à la fois',
-
+    hero_image: '',
     story_author: '',
     story_role: '',
     story_years: '',
@@ -113,6 +122,13 @@ const defaultMeta: Meta = {
     journey: [],
     testimonials: [],
     certifications: [],
+
+    cta_title: '',
+    cta_subtitle: '',
+    cta_primary_button_text: 'Prendre contact',
+    cta_primary_button_link: '/contact',
+    cta_secondary_button_text: 'Explorer les services',
+    cta_secondary_button_link: '/services',
 }
 
 function updateItem<T>(arr: T[], index: number, patch: Partial<T>): T[] {
@@ -124,10 +140,17 @@ function removeItem<T>(arr: T[], index: number): T[] {
 }
 
 const AboutEdit = ({ page }: { page: Page }) => {
-    const { data, setData, put, processing, errors } = useForm({
+
+    const [preview, setPreview] = useState<string | null>(
+        page.meta?.hero_image || null
+    )
+
+    const { data, setData, post, processing, errors } = useForm({
+        _method: 'put',
         title: page.title,
         content: page.content,
         meta: page.meta ?? defaultMeta,
+        hero_file: null as File | null,
     })
 
     const m = data.meta
@@ -135,7 +158,10 @@ const AboutEdit = ({ page }: { page: Page }) => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        put(route('about.update'))
+
+        post(route('about.update'), {
+            forceFormData: true,
+        })
     }
 
     return (
@@ -164,6 +190,7 @@ const AboutEdit = ({ page }: { page: Page }) => {
                             <TabsTrigger value="journey">Parcours</TabsTrigger>
                             <TabsTrigger value="testimonials">Témoignages</TabsTrigger>
                             <TabsTrigger value="certifications">Certifications</TabsTrigger>
+                            <TabsTrigger value="cta">Appel à l'action</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="hero">
@@ -220,6 +247,32 @@ const AboutEdit = ({ page }: { page: Page }) => {
                                             }
                                             placeholder="Découvrez mon parcours, ma philosophie et les valeurs qui guident ma mission d’aider les autres à révéler leur plein potentiel."
                                         />
+                                    </div>
+
+                                    {/*Download image from URL and show preview  */}
+                                    <div>
+                                        <Label className="mb-2">Image de fond</Label>
+
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0]
+
+                                                if (!file) return
+
+                                                setPreview(URL.createObjectURL(file))
+                                                setData('hero_file', file)
+                                            }}
+                                        />
+
+                                        {preview && (
+                                            <img
+                                                src={preview}
+                                                alt="Preview"
+                                                className="mt-4 h-48 w-full rounded-md object-cover"
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -935,6 +988,98 @@ const AboutEdit = ({ page }: { page: Page }) => {
                                             Aucune certification. Cliquez sur Ajouter.
                                         </p>
                                     )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                        <TabsContent value="cta">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Appel à l'action</CardTitle>
+                                </CardHeader>
+
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label className="mb-2">Titre</Label>
+                                        <Input
+                                            value={m.cta_title}
+                                            onChange={e =>
+                                                setMeta({ cta_title: e.target.value })
+                                            }
+                                            placeholder="Prêt à transformer votre entreprise ?"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="mb-2">Sous-titre</Label>
+                                        <Input
+                                            value={m.cta_subtitle}
+                                            onChange={e =>
+                                                setMeta({
+                                                    cta_subtitle: e.target.value,
+                                                })
+                                            }
+                                            placeholder="Contactez-moi pour une consultation gratuite."
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        <div>
+                                            <Label className="mb-2">Texte du bouton</Label>
+                                            <Input
+                                                value={m.cta_primary_button_text}
+                                                onChange={e =>
+                                                    setMeta({
+                                                        cta_primary_button_text: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Contactez-moi"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Lien du bouton</Label>
+                                            <Input
+                                                value={m.cta_primary_button_link}
+                                                onChange={e =>
+                                                    setMeta({
+                                                        cta_primary_button_link: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="/contact"
+                                            />
+                                        </div>
+
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        <div>
+                                            <Label className="mb-2">Texte du bouton secondaire</Label>
+                                            <Input
+                                                value={m.cta_secondary_button_text}
+                                                onChange={e =>
+                                                    setMeta({
+                                                        cta_secondary_button_text: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="Découvrez mes services"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <Label className="mb-2">Lien du bouton secondaire</Label>
+                                            <Input
+                                                value={m.cta_secondary_button_link}
+                                                onChange={e =>
+                                                    setMeta({
+                                                        cta_secondary_button_link: e.target.value,
+                                                    })
+                                                }
+                                                placeholder="/services"
+                                            />
+                                        </div>
+                                    </div>
+
+
+
                                 </CardContent>
                             </Card>
                         </TabsContent>

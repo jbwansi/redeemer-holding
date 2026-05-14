@@ -3,7 +3,6 @@ import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'fra
 import { Link, usePage } from '@inertiajs/react';
 import {
     Search,
-    Bell,
     Sun,
     Moon,
     ChevronRight,
@@ -78,6 +77,16 @@ const Navbar = () => {
             "rgba(255,255,255,0)",
             theme === "dark" ? "rgba(10,10,18,0.6)" : "rgba(255,255,255,0.6)",
             theme === "dark" ? "rgba(10,10,18,0.9)" : "rgba(255,255,255,0.95)"
+        ]
+    );
+
+    // Ajouter avec les autres useTransform
+    const smoothBorder = useTransform(
+        scrollY,
+        [0, 100],
+        [
+            'rgba(255,255,255,0)',
+            theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
         ]
     );
 
@@ -260,6 +269,7 @@ const Navbar = () => {
                 height: smoothHeight,
                 backgroundColor: smoothBackground,
                 backdropFilter: "blur(12px)",
+                borderBottomColor: smoothBorder, // ← ajouter
             }}
             className="fixed top-0 left-0 right-0 z-50 border-b border-transparent dark:border-gray-800/20 shadow-sm dark:shadow-gray-950/10"
         >

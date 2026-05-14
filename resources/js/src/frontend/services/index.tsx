@@ -7,8 +7,6 @@ import {
     Calendar,
     ChevronRight,
     Compass,
-    MessageCircle,
-    Sparkles,
     Target,
     Users,
     Zap,
@@ -17,6 +15,7 @@ import {
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import IconComponent from '@/components/ui/icon';
 import { normalizeServiceIconName } from '@/lib/service-icon';
+import FaqAccordion from '@/components/frontend/faq/faq-accordion';
 
 type Service = {
     id: number;
@@ -95,10 +94,10 @@ function ServicesPage({
     const processRef = useRef<HTMLDivElement>(null);
     const faqRef = useRef<HTMLDivElement>(null);
 
-    const inHero = useInView(heroRef, { once: false, amount: 0.2 });
-    const inCards = useInView(cardsRef, { once: false, amount: 0.2 });
-    const inProcess = useInView(processRef, { once: false, amount: 0.2 });
-    const inFaq = useInView(faqRef, { once: false, amount: 0.2 });
+    const inHero = useInView(heroRef, { once: true, amount: 0.2 });
+    const inCards = useInView(cardsRef, { once: true, amount: 0.2 });
+    const inProcess = useInView(processRef, { once: true, amount: 0.2 });
+    const inFaq = useInView(faqRef, { once: true, amount: 0.2 });
 
     const { scrollYProgress } = useScroll({
         target: containerRef,
@@ -115,7 +114,7 @@ function ServicesPage({
         'coaching', 'consultation', 'formation', 'webinaire', 'ressources',
     ].includes(queryFocus) ? queryFocus : 'all';
 
-    const [openIndex, setOpenIndex] = useState<number>(0);
+    // const [openIndex, setOpenIndex] = useState<number>(0);
     const [focus, setFocus] = useState<ServiceFocus>(initialFocus);
 
     const serviceCount = services?.length ?? 0;
@@ -161,7 +160,6 @@ function ServicesPage({
         <FrontLayout>
             <Head title="Services" />
 
-            {/* ── MAIN ── light: #f7f6f2 / dark: #020817 */}
             <main
                 ref={containerRef}
                 className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pb-20 pt-28 text-slate-900 dark:bg-[#020817] dark:text-white"
@@ -182,16 +180,18 @@ function ServicesPage({
                         initial={{ opacity: 0, y: 20 }}
                         animate={inHero ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                         transition={{ duration: 0.6 }}
-                        className="relative min-h-[560px] overflow-hidden rounded-[2.75rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 dark:border-white/10 dark:bg-slate-900"
+                        className="relative min-h-[620px] overflow-hidden rounded-[2.75rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 dark:border-white/10 dark:bg-slate-900"
                     >
+                        {/* FIX 1 : object-top pour ne pas couper le visage */}
                         <img
                             src={pageContent.hero_image || "/assets/images/coach-hero.jpg"}
                             alt="Accompagnement coaching"
-                            className="absolute inset-0 h-full w-full object-cover object-center"
+                            className="absolute inset-0 h-full w-full object-cover object-top"
                         />
 
-                        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/10 dark:from-[#020817] dark:via-[#020817]/85 dark:to-[#020817]/10" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-[#020817]" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/65 dark:from-[#020817]/80 dark:via-[#020817]/25 dark:to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-white/40 via-transparent to-transparent dark:from-[#020817]/20 dark:via-transparent" />
+                        <div className="relative z-[3] items-center px-8 py-14 md:px-12 lg:px-16"></div>
 
                         <div className="relative z-10 flex min-h-[560px] items-center px-8 py-14 md:px-12 lg:px-16">
                             <div className="max-w-3xl">
@@ -199,29 +199,29 @@ function ServicesPage({
                                     {pageContent.hero_badge || 'Nos accompagnements'}
                                 </p>
 
-                                <h1 className="mt-5 text-4xl font-black leading-[1.05] text-slate-900 md:text-6xl lg:text-7xl dark:text-white">
+                                <h1 className="mt-6 max-w-[680px] text-4xl font-black leading-[0.95] text-slate-900 md:text-6xl lg:text-5xl dark:text-white">
                                     {pageContent.hero_title || 'Des accompagnements pensés pour vous faire avancer concrètement.'}
                                 </h1>
 
-                                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+                                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-gray-300">
                                     {pageContent.hero_subtitle || "Des formats adaptés à votre situation, vos objectifs et votre manière d'apprendre."}
                                 </p>
 
-                                <div className="mt-9 flex flex-wrap items-center gap-5">
+                                <div className="mt-14 flex flex-wrap items-center gap-6">
                                     <Link
                                         href={pageContent.hero_primary_cta_url || route('contact')}
                                         className="inline-flex items-center gap-3 rounded-2xl bg-[#da2e29] px-7 py-4 font-bold text-white shadow-xl shadow-[#da2e29]/30 transition hover:-translate-y-0.5 hover:bg-[#c62823]"
                                     >
                                         <Calendar className="h-5 w-5" />
-                                        {pageContent.hero_primary_cta_label || 'Réserver'}
+                                        {pageContent.hero_primary_cta_label || 'Réserver un appel'}
                                     </Link>
 
                                     <a
                                         href={pageContent.hero_secondary_cta_url || '#liste-services'}
-                                        className="inline-flex items-center gap-3 rounded-2xl px-5 py-4 font-bold text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+                                        className="group inline-flex items-center gap-3 rounded-2xl px-5 py-4 font-bold text-slate-600 transition hover:text-white-900 dark:text-slate-300 dark:hover:text-white"
                                     >
-                                        {pageContent.hero_secondary_cta_label || 'Découvrir les accompagnements'}
-                                        <ArrowRight className="h-4 w-4" />
+                                        {pageContent.hero_secondary_cta_label || 'Découvrir nos accompagnements'}
+                                        <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                                     </a>
                                 </div>
                             </div>
@@ -233,9 +233,9 @@ function ServicesPage({
                                     <Users className="h-6 w-6" />
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-black text-slate-900 dark:text-white">120+</p>
+                                    <p className="text-2xl font-black text-slate-900 dark:text-white">150+</p>
                                     <p className="max-w-[170px] text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                        personnes accompagnées vers leurs objectifs
+                                        accompagnements réalisés
                                     </p>
                                 </div>
                             </div>
@@ -267,7 +267,7 @@ function ServicesPage({
                             {pageContent.section_subtitle || 'Chaque service est conçu pour vous faire avancer avec clarté, méthode et impact.'}
                         </p>
 
-                        {/* Filtres */}
+                        {/* FIX 2 : Filtres — meilleur contraste dark */}
                         <div className="mt-7 flex flex-wrap gap-3">
                             {[
                                 { key: 'all', label: 'Tous' },
@@ -281,11 +281,10 @@ function ServicesPage({
                                     key={item.key}
                                     type="button"
                                     onClick={() => setFocus(item.key as ServiceFocus)}
-                                    className={`rounded-full px-6 py-3 text-sm font-bold transition ${
-                                        focus === item.key
-                                            ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/25'
-                                            : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
-                                    }`}
+                                    className={`rounded-full px-6 py-3 text-sm font-bold transition ${focus === item.key
+                                        ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/25'
+                                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 dark:hover:text-white'
+                                        }`}
                                 >
                                     {item.label}
                                 </button>
@@ -313,15 +312,23 @@ function ServicesPage({
                                 </div>
 
                                 <div className="px-5 pb-6">
-                                    <div className="-mt-8 relative z-10 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
-                                        {service.icon ? (
-                                            <IconComponent
-                                                name={normalizeServiceIconName(service.icon) || 'users'}
-                                                color="white"
-                                            />
-                                        ) : (
-                                            <Users className="h-5 w-5" />
-                                        )}
+                                    {/* FIX 3 : Icône flottante avec tooltip */}
+                                    <div className="group/icon -mt-8 relative z-10 inline-flex">
+                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
+                                            {service.icon ? (
+                                                <IconComponent
+                                                    name={normalizeServiceIconName(service.icon) || 'users'}
+                                                    color="white"
+                                                />
+                                            ) : (
+                                                <Users className="h-5 w-5" />
+                                            )}
+                                        </div>
+                                        {/* Tooltip */}
+                                        <div className="pointer-events-none absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover/icon:opacity-100 dark:bg-white dark:text-slate-900">
+                                            {service.name}
+                                            <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-white" />
+                                        </div>
                                     </div>
 
                                     <h3 className="mt-5 text-2xl font-black text-slate-900 dark:text-white">
@@ -489,41 +496,7 @@ function ServicesPage({
                                 Aucune question fréquente n'est disponible pour le moment.
                             </div>
                         ) : (
-                            mergedFaqs.map((faq, idx) => {
-                                const open = openIndex === idx;
-                                return (
-                                    <motion.div
-                                        key={faq.question}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={inFaq ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-                                        transition={{ duration: 0.45, delay: idx * 0.06 }}
-                                        className={`rounded-3xl border transition-all ${
-                                            open
-                                                ? 'border-[#da2e29]/40 bg-white dark:bg-white/[0.07]'
-                                                : 'border-slate-200 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/[0.06]'
-                                        }`}
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => setOpenIndex(open ? -1 : idx)}
-                                            className="flex w-full items-center justify-between px-6 py-5 text-left focus:outline-none"
-                                        >
-                                            <span className="text-base font-bold text-slate-900 dark:text-white">
-                                                {faq.question}
-                                            </span>
-                                            <span className="ml-4 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                                                {open ? '–' : '+'}
-                                            </span>
-                                        </button>
-
-                                        {open && (
-                                            <div className="px-6 pb-6 text-[15px] leading-8 text-slate-600 dark:text-slate-300">
-                                                {faq.answer}
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                );
-                            })
+                            <FaqAccordion faqs={mergedFaqs} defaultOpenIndex={0} />
                         )}
                     </div>
                 </section>
@@ -554,10 +527,10 @@ function ServicesPage({
                             <div className="flex flex-wrap gap-3">
                                 <Link
                                     href={pageContent.final_cta_primary_url || route('contact')}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 font-bold text-[#da2e29] transition hover:bg-slate-100"
+                                    className="group inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 font-bold text-[#da2e29] transition hover:bg-slate-100"
                                 >
                                     {pageContent.final_cta_primary_label || 'Prendre contact'}
-                                    <ArrowRight className="h-4 w-4" />
+                                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
                                 </Link>
 
                                 <a

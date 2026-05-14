@@ -9,11 +9,12 @@ import {
     Calendar,
     MessageSquare,
     User,
-    ChevronDown,
+    ArrowRight,
 } from 'lucide-react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { fetchSettings } from '@/api/settings';
-import { router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import FaqAccordion from '@/components/frontend/faq/faq-accordion';
 
 const defaultContactMeta = {
     badge: 'Contact',
@@ -72,7 +73,6 @@ const ContactPage = ({ page }: any) => {
     const isInfoInView = useInView(infoRef, { once: false, amount: 0.3 });
 
     const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-    const [openFaqIndex, setOpenFaqIndex] = useState<number>(0);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -168,6 +168,7 @@ const ContactPage = ({ page }: any) => {
 
     return (
         <FrontLayout>
+            <Head title="Contact" />
             <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 pt-32 pb-20">
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#DA2E29]/30 to-transparent"></div>
                 <div className="absolute top-40 left-10 w-80 h-80 bg-[#DA2E29]/5 dark:bg-[#DA2E29]/10 rounded-full blur-[100px]"></div>
@@ -317,6 +318,12 @@ const ContactPage = ({ page }: any) => {
                                     </motion.div>
                                 ) : (
                                     <motion.form onSubmit={handleSubmit} className="space-y-6" variants={containerVariants}>
+                                        {/* ← ICI le bloc error, en premier dans le formulaire */}
+                                        {formStatus === 'error' && (
+                                            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/30 dark:bg-red-900/20 dark:text-red-400">
+                                                Une erreur est survenue. Veuillez réessayer ou nous contacter directement.
+                                            </div>
+                                        )}
                                         <motion.div variants={itemVariants}>
                                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nom complet</label>
                                             <div className="relative">
@@ -382,68 +389,28 @@ const ContactPage = ({ page }: any) => {
                         <iframe title="Localisation du bureau" src={meta.map_embed_url} width="100%" height="100%" style={{ border: 0 }} allowFullScreen loading="lazy" />
                     </motion.div>
 
-                    <motion.div id="faq" className="mt-20" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 0.8 }} viewport={{ once: true, amount: 0.2 }}>
-                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">{meta.faq_title}</h2>
+                    <motion.div
+                        id="faq"
+                        className="mt-20"
+                        initial={{ opacity: 0 }}
+                        whileInView={{ opacity: 1 }}
+                        transition={{ duration: 0.8 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                    >
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
+                            {meta.faq_title}
+                        </h2>
 
-                                                <div className="space-y-4">
-                                                    {faqs.map((faq: any, index: number) => {
-                                                        const open = openFaqIndex === index;
-                                                        return (
-                                                            <motion.div
-                                                                key={index}
-                                                                className={`rounded-2xl border transition-all ${
-                                                                    open
-                                                                        ? 'bg-slate-50 border-slate-200/80 shadow-lg'
-                                                                        : 'bg-white border-slate-200/80 hover:shadow-md'
-                                                                } dark:border-slate-700 dark:bg-slate-900`}
-                                                                initial={{ opacity: 0, y: 20 }}
-                                                                whileInView={{ opacity: 1, y: 0 }}
-                                                                transition={{ duration: 0.5, delay: index * 0.08 }}
-                                                                viewport={{ once: true, amount: 0.2 }}
-                                                            >
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setOpenFaqIndex(open ? -1 : index)}
-                                                                    className="w-full px-6 py-5 flex items-center justify-between text-left group focus:outline-none"
-                                                                >
-                                                                    <span className="font-semibold text-base text-gray-900 dark:text-white">{faq.question}</span>
-                                                                    <span
-                                                                        className={`flex items-center justify-center rounded-full border-2 transition-all ${
-                                                                            open
-                                                                                ? 'bg-white border-slate-300 text-slate-700'
-                                                                                : 'bg-white border-slate-300 text-slate-400 group-hover:bg-slate-100'
-                                                                        } h-8 w-8 ml-4`}
-                                                                    >
-                                                                        {open ? (
-                                                                            <span className="text-2xl leading-none">–</span>
-                                                                        ) : (
-                                                                            <span className="text-2xl leading-none">+</span>
-                                                                        )}
-                                                                    </span>
-                                                                </button>
-                                                                {open && (
-                                                                    <div className="px-6 pb-6 text-[15px] text-slate-700 dark:text-slate-300 leading-relaxed animate-fade-in">
-                                                                        {faq.answer}
-                                                                    </div>
-                                                                )}
-                                                            </motion.div>
-                                                        );
-                                                    })}
-                                                </div>
+                        <FaqAccordion faqs={faqs} defaultOpenIndex={-1} />
 
                         <div className="text-center mt-10">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    window.location.href = '/faq';
-                                }}
-                                className="inline-flex items-center text-[#DA2E29] hover:text-rose-700 font-medium transition-colors duration-200"
+                            <Link
+                                href={meta.faq_link_url || '/faq'}
+                                className="group inline-flex items-center gap-2 text-[#DA2E29] hover:text-rose-700 font-medium transition-colors duration-200"
                             >
                                 {meta.faq_link_label}
-                                <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </button>
+                                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                            </Link>
                         </div>
                     </motion.div>
                 </div>

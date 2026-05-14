@@ -138,15 +138,16 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
+  // Logout via sendBeacon — prod uniquement
+if (app()->isProduction()) {
+    Route::post('/logout-on-close', [AuthController::class, 'logoutOnClose'])
+        ->middleware(['auth', 'throttle:3,1'])
+        ->name('logout.on.close');
+}
+
 Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Logout via sendBeacon — prod uniquement
-    if (app()->isProduction()) {
-        Route::post('/logout-on-close', [AuthController::class, 'logoutOnClose'])
-            ->middleware('throttle:3,1')
-            ->name('logout.on.close');
-    }
 
     Route::get('/account/inactive', [AccountController::class, 'inactive'])->name('account.inactive');
 

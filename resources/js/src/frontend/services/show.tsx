@@ -6,7 +6,7 @@ import parse from 'html-react-parser'; // Pour analyser le contenu HTML
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import IconComponent from '@/components/ui/icon';
 import { normalizeServiceIconName } from '@/lib/service-icon';
-import TestimonialsSection from '@/components/frontend/home/testimonials-section'
+import TestimonialsSection from '@/components/frontend/home/testimonials-section';
 
 // Interface pour le type de service
 interface Service {
@@ -20,6 +20,8 @@ interface Service {
     status: number;
     created_at: string | null;
     updated_at: string | null;
+    hero_image?: string | null;
+    image?: string |null;
 }
 
 // Interface pour les props de la page
@@ -40,6 +42,16 @@ const ServiceDetail = ({ service, relatedServices = [], testimonials = [] }: Ser
     const isHeroInView = useInView(heroRef, { once: false, amount: 0.3 });
     const isContentInView = useInView(contentRef, { once: false, amount: 0.3 });
     const isCtaInView = useInView(ctaRef, { once: false, amount: 0.3 });
+
+
+    const serviceImage =
+        service.image || service.existing_image || service.hero_image || null;
+
+    const heroImage = serviceImage
+        ? serviceImage.startsWith('/')
+            ? serviceImage
+            : `/storage/${serviceImage}`
+        : '/assets/images/coach-hero.jpg';
 
     // Effet parallax pour le héro
     const { scrollYProgress } = useScroll({
@@ -85,7 +97,7 @@ const ServiceDetail = ({ service, relatedServices = [], testimonials = [] }: Ser
                     <motion.div
                         className="absolute inset-0 bg-cover bg-center"
                         style={{
-                            backgroundImage: `url('/assets/images/services-bg.jpg')`,
+                            backgroundImage: `url("${heroImage}")`,
                             y: backgroundY,
                         }}
                     >

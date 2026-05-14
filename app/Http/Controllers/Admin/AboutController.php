@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
 
 class AboutController extends Controller
 {
@@ -16,9 +17,9 @@ class AboutController extends Controller
         $page = Page::query()->firstOrCreate(
             ['slug' => 'a-propos'],
             [
-                'title'   => 'A propos',
+                'title' => 'A propos',
                 'content' => '',
-                'status'  => true,
+                'status' => true,
                 'user_id' => Auth::id() ?? User::query()->value('id'),
             ]
         );
@@ -28,17 +29,31 @@ class AboutController extends Controller
         ]);
     }
 
-    public function update(Request $request)
-    {
-        $validated = $request->validate([
-            'title'   => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'meta'    => 'nullable|array',
-        ]);
+   public function update(Request $request)
+{
+    $validated = $request->validate([
+        'title'      => 'required|string|max:255',
+        'content'    => 'nullable|string',
+        'meta'       => 'nullable|array',
+        'hero_file'  => 'nullable|image|max:4096',
+    ]);
 
-        $page = Page::where('slug', 'a-propos')->firstOrFail();
-        $page->update($validated);
+    $page = Page::where('slug', 'a-propos')->firstOrFail();
 
-        return back()->with('success', 'A propos mis à jour avec succès.');
+    $meta = $validated['meta'] ?? [];
+
+    if ($request->hasFile('hero_file')) {
+        $path = $request->file('hero_file')->store('about', 'public');
+
+        $meta['hero_image'] = $path;
     }
+
+    $page->update([
+        'title'   => $validated['title'],
+        'content' => $validated['content'] ?? '',
+        'meta'    => $meta,
+    ]);
+
+    return back()->with('success', 'A propos mis à jour avec succès.');
+}
 }

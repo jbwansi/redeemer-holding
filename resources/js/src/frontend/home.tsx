@@ -1,57 +1,47 @@
+import React, { Suspense, lazy } from 'react'
 import Hero from '@/components/frontend/home/hero'
-import Services from '@/components/frontend/home/services'
-import StatsBand from '@/components/frontend/home/stats-band'
-import HowItWorks from '@/components/frontend/home/how-it-works'
-import ForWhom from '@/components/frontend/home/for-whom'
-import FeaturedFormations from '@/components/frontend/home/featured-formations'
-import WelcomeVideo from '@/components/frontend/home/welcome-video'
-import TestimonialsSection from '@/components/frontend/home/testimonials-section'
-import BlogPreview from '@/components/frontend/home/blog-preview'
 import ClarityActionBlock from '@/components/frontend/home/clarity-action-block'
-import CalendlyCTA from '@/components/frontend/layouts/calendly-cta'
 import FrontLayout from '@/components/frontend/layouts/front-layout'
+import { SectionSkeleton } from '@/components/ui/section-skeleton'
 import { Head } from '@inertiajs/react'
-import React from 'react'
+import { route } from 'ziggy-js'
+
+const Services = lazy(() => import('@/components/frontend/home/services'))
+const StatsBand = lazy(() => import('@/components/frontend/home/stats-band'))
+const HowItWorks = lazy(() => import('@/components/frontend/home/how-it-works'))
+const ForWhom = lazy(() => import('@/components/frontend/home/for-whom'))
+const FeaturedFormations = lazy(() => import('@/components/frontend/home/featured-formations'))
+const WelcomeVideo = lazy(() => import('@/components/frontend/home/welcome-video'))
+const TestimonialsSection = lazy(() => import('@/components/frontend/home/testimonials-section'))
+const BlogPreview = lazy(() => import('@/components/frontend/home/blog-preview'))
+const CalendlyCTA = lazy(() => import('@/components/frontend/layouts/calendly-cta'))
 
 const defaultHomeMeta = {
-    // ── HERO ─────────────────────────────────────────────
     hero_badge: 'Coaching • Formation • Accompagnement',
-
     hero_title_line1: 'Structurez vos actions',
     hero_title_line2: 'et développez des résultats',
     hero_title_line3: 'durables',
-
     hero_subtitle:
         'J’accompagne les entrepreneurs, les leaders et les professionnels en évolution à clarifier leurs priorités, renforcer leur posture et avancer avec méthode.',
 
     hero_cta_text: 'Réserver un appel découverte',
     hero_cta_url: '/contact',
-
     hero_secondary_cta_text: 'Découvrir les accompagnements',
     hero_secondary_cta_url: '/services',
-
     hero_image: '/assets/images/portrait.jpg',
     hero_images: [] as string[],
-
     hero_reassurance_items: [
         { text: 'Sans engagement' },
         { text: '30 minutes' },
         { text: 'En visio ou en présentiel' },
     ],
-
     hero_floating_stat_enabled: true,
     hero_floating_stat_value: '97%',
     hero_floating_stat_label: 'Satisfaction',
-
-
-    // ── Preuve sociale Hero ──────────────────────────────────
     hero_social_proof_text: 'Des professionnels accompagnés avec méthode et bienveillance',
     hero_social_rating: 'Retours très positifs',
     hero_social_platform: 'Accompagnements appréciés',
-
-    // ── Preuve sociale Formulaire / CTA ──────────────────────
-    clarity_action_social_proof_text:
-        'Un accompagnement structuré et orienté résultats',
+    clarity_action_social_proof_text: 'Un accompagnement structuré et orienté résultats',
     clarity_action_urgency_text:
         'Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.',
 
@@ -71,7 +61,6 @@ const defaultHomeMeta = {
         { text: 'Vous avez du mal à garder un cap dans la durée' },
         { text: 'Vous ressentez le besoin de structurer votre progression' },
     ],
-
     clarity_action_right_title: 'Vous repartez avec :',
     clarity_action_right_items: [
         { text: 'Des priorités claires et une direction plus nette' },
@@ -79,20 +68,11 @@ const defaultHomeMeta = {
         { text: 'Des habitudes plus solides et plus durables' },
         { text: 'Une progression visible, mesurable et cohérente' },
     ],
-
-    clarity_action_final_cta_title:
-        'Réservez un échange pour clarifier vos prochaines étapes',
-
+    clarity_action_final_cta_title: 'Réservez un échange pour clarifier vos prochaines étapes',
     clarity_action_final_cta_subtitle:
         'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.',
-
-    clarity_action_final_cta_button_text:
-        'Réserver mon appel découverte',
-
-    // ── PROCESS / MÉTHODE ────────────────────────────────
-    process_title:
-        'Une méthode claire, humaine et orientée résultats',
-
+    clarity_action_final_cta_button_text: 'Réserver mon appel découverte',
+    process_title: 'Une méthode claire, humaine et orientée résultats',
     process_subtitle:
         'Chaque accompagnement s’appuie sur un cadre structuré pour transformer vos intentions en avancées concrètes.',
 
@@ -150,18 +130,13 @@ const defaultHomeMeta = {
                 'Retrouver un cap clair, reprendre confiance et construire la suite avec méthode.',
         },
     ],
-
-    // ── STATS ────────────────────────────────────────────
     stats: [
         { value: '150+', label: 'Personnes accompagnées' },
         { value: '10+', label: "Années d’expérience" },
         { value: '40+', label: 'Formations et ateliers' },
         { value: '97%', label: 'Taux de satisfaction' },
     ],
-
-    // ── TESTIMONIALS ─────────────────────────────────────
     testimonials_title: 'Ce que disent les personnes accompagnées',
-
     testimonials: [
         {
             content:
@@ -178,12 +153,8 @@ const defaultHomeMeta = {
             image: '',
         },
     ],
-
-    // ── DYNAMIQUE ────────────────────────────────────────
     formations_title: 'Formations & ateliers à découvrir',
     blog_title: 'Articles & réflexions',
-
-    // ── VIDÉO ────────────────────────────────────────────
     video_enabled: false,
     video_url: '',
     video_title: 'Bienvenue',
@@ -195,8 +166,6 @@ const defaultHomeMeta = {
     events_gallery_title: 'En images',
     events_gallery_images: [] as string[],
     events_gallery_captions: [] as string[],
-
-    // ── CTA FINAL (Calendly) ─────────────────────────────
     cta_benefits: [
         { text: 'Clarifier votre situation actuelle et vos priorités' },
         { text: 'Identifier les leviers les plus utiles pour avancer' },
@@ -227,6 +196,7 @@ function Home({ services, home, posts, formations, testimonials }: any) {
                 <meta property="twitter:description" content={pageDescription} />
             </Head>
 
+            {/* Above the fold — chargement immédiat */}
             <Hero meta={meta} />
 
             <ClarityActionBlock
@@ -249,44 +219,63 @@ function Home({ services, home, posts, formations, testimonials }: any) {
                 submitUrl={route('contact.store')}
             />
 
-            <Services services={services} />
+            {/* Below the fold — lazy loaded */}
+            <Suspense fallback={<SectionSkeleton />}>
+                <Services services={services} />
+            </Suspense>
 
-            <HowItWorks
-                steps={meta.process ?? []}
-                title={meta.process_title}
-                subtitle={meta.process_subtitle}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <HowItWorks
+                    steps={meta.process ?? []}
+                    title={meta.process_title}
+                    subtitle={meta.process_subtitle}
+                />
+            </Suspense>
 
-            <ForWhom
-                cards={meta.for_whom ?? []}
-                title={meta.for_whom_title}
-                subtitle={meta.for_whom_subtitle}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <ForWhom
+                    cards={meta.for_whom ?? []}
+                    title={meta.for_whom_title}
+                    subtitle={meta.for_whom_subtitle}
+                />
+            </Suspense>
 
-            <StatsBand stats={meta.stats ?? []} />
+            <Suspense fallback={<SectionSkeleton />}>
+                <StatsBand stats={meta.stats ?? []} />
+            </Suspense>
 
-            <TestimonialsSection testimonials={testimonials} />
+            <Suspense fallback={<SectionSkeleton />}>
+                <TestimonialsSection testimonials={testimonials} />
+            </Suspense>
 
-            <FeaturedFormations
-                formations={formations ?? []}
-                title={meta.formations_title}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <FeaturedFormations
+                    formations={formations ?? []}
+                    title={meta.formations_title}
+                />
+            </Suspense>
 
-            <WelcomeVideo
-                enabled={meta.video_enabled !== false && !!meta.video_url}
-                videoUrl={meta.video_url}
-                title={meta.video_title}
-                subtitle={meta.video_subtitle}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <WelcomeVideo
+                    enabled={meta.video_enabled !== false && !!meta.video_url}
+                    videoUrl={meta.video_url}
+                    title={meta.video_title}
+                    subtitle={meta.video_subtitle}
+                />
+            </Suspense>
 
-            <BlogPreview
-                posts={posts ?? []}
-                title={meta.blog_title}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <BlogPreview
+                    posts={posts ?? []}
+                    title={meta.blog_title}
+                />
+            </Suspense>
 
-            <CalendlyCTA
-                benefits={meta.cta_benefits?.map((b: any) => b.text).filter(Boolean)}
-            />
+            <Suspense fallback={<SectionSkeleton />}>
+                <CalendlyCTA
+                    benefits={meta.cta_benefits?.map((b: any) => b.text).filter(Boolean)}
+                />
+            </Suspense>
         </FrontLayout>
     )
 }
