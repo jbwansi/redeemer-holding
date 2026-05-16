@@ -212,7 +212,7 @@ class DashboardController extends Controller
     {
         return [
             ['name' => 'Événements', 'value' => EventParticipant::where('status', 'completed')->sum('payment_amount')],
-            ['name' => 'Trainings', 'value' => TrainingParticipant::where('status', 'completed')->sum('payment_amount')],
+            ['name' => 'Formations', 'value' => TrainingParticipant::where('status', 'completed')->sum('payment_amount')],
             ['name' => 'Services', 'value' => ServiceRequest::where('status', 'completed')->sum('views')],
         ];
     }
@@ -221,7 +221,7 @@ class DashboardController extends Controller
     {
         return [
             ['name' => 'Événements', 'value' => Event::where('end_date', '>=', now())->count()],
-            ['name' => 'Trainings', 'value' => Training::where('is_published', true)->count()],
+            ['name' => 'Formations', 'value' => Training::where('is_published', true)->count()],
             ['name' => 'Services', 'value' => Service::where('status', true)->count()],
             ['name' => 'Articles', 'value' => Post::where('published', true)->count()],
         ];
@@ -244,14 +244,14 @@ class DashboardController extends Controller
                 ]);
             });
 
-        // Ajouter les trainings
+        // Ajouter les formations
         Training::orderBy('views', 'desc')
             ->limit(3)
             ->get()
             ->each(function ($training) use ($content) {
                 $content->push([
                     'title' => $training->title,
-                    'type' => 'Training',
+                    'type' => 'Formation',
                     'views' => $training->views,
                     'trend' => $this->calculateViewsTrend($training),
                 ]);

@@ -14,7 +14,7 @@ type SegmentKey =
   | 'newsletter_subscribers'
   | 'users'
   | 'event_participants'
-  | 'formation_participants'
+  | 'training_participants'
   | 'service_requests'
   | 'custom';
 
@@ -23,7 +23,7 @@ interface Props {
     newsletter_subscribers: number;
     users: number;
     event_participants: number;
-    formation_participants: number;
+    training_participants: number;
     service_requests: number;
   };
   history: Array<{
@@ -77,7 +77,7 @@ const segmentLabels: Record<Exclude<SegmentKey, 'custom'>, string> = {
   newsletter_subscribers: 'Abonnes newsletter',
   users: 'Utilisateurs',
   event_participants: 'Participants evenements',
-  formation_participants: 'Participants trainings',
+  training_participants: 'Participants formations',
   service_requests: 'Demandes de services',
 };
 

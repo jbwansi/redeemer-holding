@@ -13,11 +13,11 @@ class TrainingParticipant extends Model
 {
     use Notifiable;
 
-    protected $table = 'formation_participants';
+    protected $table = 'training_participants';
 
     protected $fillable = [
         'user_id',
-        'formation_id',
+        'training_id',
         'name',
         'qty',
         'email',
@@ -54,17 +54,17 @@ class TrainingParticipant extends Model
      */
     public function training(): BelongsTo
     {
-        return $this->belongsTo(Training::class, 'formation_id');
+        return $this->belongsTo(Training::class, 'training_id');
     }
 
     public function getTrainingIdAttribute()
     {
-        return $this->formation_id;
+        return $this->training_id;
     }
 
     public function setTrainingIdAttribute($value)
     {
-        $this->attributes['formation_id'] = $value;
+        $this->attributes['training_id'] = $value;
     }
 
     /**

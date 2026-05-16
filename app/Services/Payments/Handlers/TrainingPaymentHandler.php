@@ -26,7 +26,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
         $participant = TrainingParticipant::findOrFail($participantId);
 
-        if ($participant->formation_id !== $formation->id) {
+        if ($participant->training_id !== $formation->id) {
             abort(404);
         }
 
@@ -85,7 +85,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                 'metadata' => [
                     'payment_type' => 'formation',
                     'participant_id' => $participant->id,
-                    'formation_id' => $formation->id,
+                    'training_id' => $formation->id,
                     'formation_title' => $formation->title,
                     'qty' => $participant->qty,
                 ],
@@ -94,7 +94,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                     'metadata' => [
                         'payment_type' => 'formation',
                         'participant_id' => $participant->id,
-                        'formation_id' => $formation->id,
+                        'training_id' => $formation->id,
                     ],
                 ],
 
@@ -124,7 +124,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         } catch (ApiErrorException $e) {
             Log::error('Erreur Stripe lors de la création de la session de formation.', [
                 'message' => $e->getMessage(),
-                'formation_id' => $formation->id,
+                'training_id' => $formation->id,
                 'participant_id' => $participant->id,
             ]);
 

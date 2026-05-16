@@ -462,7 +462,7 @@ class NewsletterController extends Controller
                 continue;
             }
 
-            if ($segment === 'formation_participants') {
+            if ($segment === 'training_participants') {
                 $emails = $emails->merge(
                     TrainingParticipant::query()
                         ->whereNotNull('email')

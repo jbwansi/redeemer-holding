@@ -53,7 +53,7 @@ class Training extends Model
 
     public function participants(): HasMany
     {
-        return $this->hasMany(TrainingParticipant::class, 'formation_id');
+        return $this->hasMany(TrainingParticipant::class, 'training_id');
     }
 
     public function scopePublished($query)

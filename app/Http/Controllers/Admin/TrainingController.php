@@ -214,7 +214,7 @@ class TrainingController extends Controller
     {
         $formation = Training::with(['participants' => function ($query) {
             $query->where('status', '!=', 'cancelled')
-                ->select('id', 'formation_id', 'name', 'status', 'qty', 'created_at');
+                ->select('id', 'training_id', 'name', 'status', 'qty', 'created_at');
         }])->where('slug', $slug)->firstOrFail();
 
         $formation->participant_count = $formation->participants->sum('qty');

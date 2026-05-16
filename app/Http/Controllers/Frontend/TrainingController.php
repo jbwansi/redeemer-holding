@@ -123,7 +123,7 @@ class TrainingController extends Controller
 
                 // Création du participant
                 $participant = new TrainingParticipant();
-                $participant->formation_id = $training->id; // Ajout explicite
+                $participant->training_id = $training->id; // Ajout explicite
                 $participant->user_id = auth()->id();
                 $participant->name = trim($validated['first_name'] . ' ' . $validated['last_name']);
                 $participant->email = $validated['email'];
@@ -158,7 +158,7 @@ class TrainingController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur lors de l\'inscription à la formation', [
                 'error' => $e->getMessage(),
-                'formation_id' => $training->id,
+                'training_id' => $training->id,
                 'user_id' => auth()->id(),
                 'data' => $validated
             ]);
@@ -172,14 +172,14 @@ class TrainingController extends Controller
     /**
      * Envoi des emails de confirmation
      */
-   protected function sendTrainingConfirmationEmails($formation, $participant)
+   protected function sendTrainingConfirmationEmails($training, $participant)
 {
     try {
         if ((bool) get_setting('formation_confirmation_enabled', true)) {
             $this->dynamicMailerService->queue(
                 new RegistrationConfirmationMail(
                     type: 'formation',
-                    item: $formation,
+                    item: $training,
                     participant: $participant,
                 ),
                 $participant->email
@@ -201,13 +201,13 @@ class TrainingController extends Controller
 
         Log::info('Emails de confirmation formation envoyés', [
             'participant_id' => $participant->id,
-            'formation_id' => $formation->id,
+            'training_id' => $formation->id,
         ]);
     } catch (\Exception $e) {
         Log::error('Erreur lors de l’envoi des emails formation', [
             'error' => $e->getMessage(),
             'participant_id' => $participant->id,
-            'formation_id' => $formation->id,
+            'training_id' => $formation->id,
         ]);
     }
 }
@@ -289,7 +289,7 @@ class TrainingController extends Controller
 
             logger()->error('Erreur lors de l\'annulation de l\'inscription à la formation:', [
                 'message' => $e->getMessage(),
-                'formation_id' => $training->id,
+                'training_id' => $training->id,
                 'participant_id' => $participant->id
             ]);
 
