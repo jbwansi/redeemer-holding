@@ -13,7 +13,7 @@ return new class extends Migration
     {
        Schema::create('page_contents', function (Blueprint $table) {
     $table->id();
-    $table->string('page'); // services, formations, events
+    $table->string('page'); // services, trainings, events
     $table->string('key');  // hero_title, hero_subtitle...
     $table->text('value')->nullable();
     $table->timestamps();

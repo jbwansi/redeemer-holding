@@ -44,7 +44,7 @@ class BlogController extends Controller
             }
         }
 
-        return inertia('frontend/blogs/index', [
+        return inertia('Frontend/blogs/index', [
             'tags' => $tags,
             'posts' => $posts,
             'categories' => $categories,
@@ -94,7 +94,7 @@ class BlogController extends Controller
 
         $postImage = SeoService::firstImageUrl($post->featured_image ?? []);
 
-        return inertia('frontend/blogs/show', [
+        return inertia('Frontend/blogs/show', [
             'post' => $blog,
             'relatedPosts' => new PostCollection($relatedposts),
             'seo' => SeoService::article(

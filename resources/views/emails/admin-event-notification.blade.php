@@ -284,7 +284,7 @@
 
             <div class="participant-card">
                 <div class="participant-header">
-                    <h3>👤 Informations du participant</h3>
+                    <h3>👤 Intrainings du participant</h3>
                 </div>
 
                 <div class="detail-row">

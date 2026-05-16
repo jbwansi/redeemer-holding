@@ -7,7 +7,7 @@ use App\Jobs\SendNewsletterChunk;
 use App\Mail\ConfirmNewsletterSubscriptionMail;
 use App\Mail\NewsletterCampaignMail;
 use App\Models\EventParticipant;
-use App\Models\FormationParticipant;
+use App\Models\TrainingParticipant;
 use App\Models\NewsletterCampaign;
 use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterUnsubscribe;
@@ -51,7 +51,7 @@ class NewsletterController extends Controller
                     ->distinct('email')
                     ->count('email'),
 
-                'formation_participants' => FormationParticipant::query()
+                'formation_participants' => TrainingParticipant::query()
                     ->whereNotNull('email')
                     ->distinct('email')
                     ->count('email'),
@@ -464,7 +464,7 @@ class NewsletterController extends Controller
 
             if ($segment === 'formation_participants') {
                 $emails = $emails->merge(
-                    FormationParticipant::query()
+                    TrainingParticipant::query()
                         ->whereNotNull('email')
                         ->pluck('email')
                 );
@@ -495,3 +495,5 @@ class NewsletterController extends Controller
             ->values();
     }
 }
+
+

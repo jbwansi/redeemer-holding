@@ -9,7 +9,7 @@ use App\Http\Controllers\AuthController;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['guest', 'throttle:10,1'])->group(function () {
+Route::middleware(['guest'])->group(function () {
 
     // =========================
     // Login
@@ -21,6 +21,7 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
             ->name('login');
 
         Route::post('/login', 'login')
+            ->middleware('throttle:10,1')
             ->name('login.submit');
     });
 
@@ -35,6 +36,7 @@ Route::middleware(['guest', 'throttle:10,1'])->group(function () {
             ->name('register.page');
 
         Route::post('/register', 'register')
+            ->middleware('throttle:5,1')
             ->name('register');
     });
 

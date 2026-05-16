@@ -336,7 +336,7 @@
             @endif
 
             <div class="important-info">
-                <h4 style="margin-bottom: 12px; color: #92400E;">⚠️ Informations importantes</h4>
+                <h4 style="margin-bottom: 12px; color: #92400E;">⚠️ Intrainings importantes</h4>
                 <ul style="padding-left: 20px; color: #92400E;">
                     <li>Présentez-vous 15 minutes avant le début de l'événement</li>
                     <li>Munissez-vous de votre référence de réservation</li>

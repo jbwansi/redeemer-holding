@@ -1,37 +1,25 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "ESNext", // Changé pour supporter import.meta
-        "moduleResolution": "bundler", // Important pour Vite
-        "jsx": "react-jsx",
-        "strict": true,
-        "skipLibCheck": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "lib": [
-            "DOM",
-            "DOM.Iterable",
-            "ESNext"
-        ],
-        "types": [
-            "vite/client",
-            "laravel-vite-plugin"
-        ],
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "resources/js/*"
-            ]
-        }
-    },
-    "include": [
-        "resources/js/**/*.ts",
-        "resources/js/**/*.tsx"
-    ],
-    "references": [
-        {
-            "path": "./tsconfig.node.json"
-        }
-    ]
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext", // Changé pour supporter import.meta
+    "moduleResolution": "bundler", // Important pour Vite
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["vite/client", "laravel-vite-plugin"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["resources/js/*"]
+    }
+  },
+  "include": ["resources/js/**/*.ts", "resources/js/**/*.tsx"],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }

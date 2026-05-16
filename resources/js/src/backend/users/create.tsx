@@ -1,19 +1,14 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { ChevronLeft, Loader2, RefreshCw, Copy, Check, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
@@ -21,295 +16,279 @@ type UserRole = 'admin' | 'coach' | 'client';
 type UserStatus = 0 | 1;
 
 interface FormData {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-    role: UserRole;
-    is_active: UserStatus;
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+  role: UserRole;
+  is_active: UserStatus;
 }
 
 const roleOptions = [
-    { id: 'admin', name: 'Administrateur', value: 'admin' as UserRole },
-    { id: 'coach', name: 'Éditeur', value: 'coach' as UserRole },
-    { id: 'client', name: 'Utilisateur', value: 'client' as UserRole },
+  { id: 'admin', name: 'Administrateur', value: 'admin' as UserRole },
+  { id: 'coach', name: 'Éditeur', value: 'coach' as UserRole },
+  { id: 'client', name: 'Utilisateur', value: 'client' as UserRole },
 ] as const;
 
 const statusOptions = [
-    { id: 'active', name: 'Actif', value: 1 as UserStatus },
-    { id: 'inactive', name: 'Inactif', value: 0 as UserStatus },
+  { id: 'active', name: 'Actif', value: 1 as UserStatus },
+  { id: 'inactive', name: 'Inactif', value: 0 as UserStatus },
 ] as const;
 
 export default function Create() {
-    const { data, setData, post, processing, errors } = useForm<any>({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        role: 'client',
-        is_active: 1,
-    });
+  const { data, setData, post, processing, errors } = useForm<any>({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    role: 'client',
+    is_active: 1,
+  });
 
-    const [copied, setCopied] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-    const generatePassword = () => {
-        const length = 12;
-        const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
-        let password = '';
+  const generatePassword = () => {
+    const length = 12;
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
+    let password = '';
 
-        password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-        password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-        password += '0123456789'[Math.floor(Math.random() * 10)];
-        password += '!@#$%^&*()_+'[Math.floor(Math.random() * 12)];
+    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
+    password += '0123456789'[Math.floor(Math.random() * 10)];
+    password += '!@#$%^&*()_+'[Math.floor(Math.random() * 12)];
 
-        for (let i = 4; i < length; i++) {
-            password += charset[Math.floor(Math.random() * charset.length)];
-        }
+    for (let i = 4; i < length; i++) {
+      password += charset[Math.floor(Math.random() * charset.length)];
+    }
 
-        password = password.split('').sort(() => Math.random() - 0.5).join('');
+    password = password
+      .split('')
+      .sort(() => Math.random() - 0.5)
+      .join('');
 
-        setData((data: any) => ({
-            ...data,
-            password: password,
-            password_confirmation: password
-        }));
-    };
+    setData((data: any) => ({
+      ...data,
+      password: password,
+      password_confirmation: password,
+    }));
+  };
 
-    const copyToClipboard = async () => {
-        await navigator.clipboard.writeText(data.password);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(data.password);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        post(route('users.store'));
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    post(route('users.store'));
+  };
 
-    return (
-        <>
-            <Head title="Créer un utilisateur" />
+  return (
+    <>
+      <Head title="Créer un utilisateur" />
 
-            <div className="flex flex-col min-h-screen bg-background">
-                <div className="border-b bg-gradient-to-r from-slate-50 to-white">
-                    <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
-                        <div className="flex flex-1 items-center">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="mr-4"
-                                asChild
-                            >
-                                <Link href={route('users.index')}>
-                                    <ChevronLeft className="h-6 w-6" />
-                                </Link>
-                            </Button>
-                            <div>
-                                <h1 className="text-2xl font-semibold">
-                                    Créer un utilisateur
-                                </h1>
-                                <p className="text-sm text-muted-foreground">
-                                    Ajoutez un nouvel utilisateur au système
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex-1 py-8">
-                    <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-                        <Card className="shadow-sm">
-                            <CardHeader>
-                                <CardTitle>Informations de l'utilisateur</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <form onSubmit={handleSubmit} className="space-y-6">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label htmlFor="name" className="block text-sm font-medium mb-2">
-                                                Nom complet
-                                            </label>
-                                            <Input
-                                                id="name"
-                                                value={data.name}
-                                                onChange={e => setData('name', e.target.value)}
-                                                placeholder="John Doe"
-                                                className={`h-12 px-4 rounded-xl ${errors.name ? 'border-red-500' : ''}`}
-                                            />
-                                            {errors.name && (
-                                                <p className="text-sm text-red-500 mt-1">{errors.name}</p>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="email" className="block text-sm font-medium mb-2">
-                                                Adresse email
-                                            </label>
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={data.email}
-                                                onChange={e => setData('email', e.target.value)}
-                                                placeholder="john@example.com"
-                                                className={`h-12 px-4 rounded-xl ${errors.email ? 'border-red-500' : ''}`}
-                                            />
-                                            {errors.email && (
-                                                <p className="text-sm text-red-500 mt-1">{errors.email}</p>
-                                            )}
-                                        </div>
-
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="password" className="block text-sm font-medium mb-2">
-                                                    Mot de passe
-                                                </label>
-                                                <div className="relative">
-                                                    <Input
-                                                        id="password"
-                                                        type={showPassword ? "text" : "password"}
-                                                        value={data.password}
-                                                        onChange={e => setData('password', e.target.value)}
-                                                        className={`h-12 px-4 rounded-xl ${errors.password ? 'border-red-500' : ''} pr-28`}
-                                                    />
-                                                    <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-1">
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={() => setShowPassword(!showPassword)}
-                                                        >
-                                                            {showPassword ? (
-                                                                <EyeOff className="h-4 w-4" />
-                                                            ) : (
-                                                                <Eye className="h-4 w-4" />
-                                                            )}
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={copyToClipboard}
-                                                        >
-                                                            {copied ? (
-                                                                <Check className="h-4 w-4 text-green-500" />
-                                                            ) : (
-                                                                <Copy className="h-4 w-4" />
-                                                            )}
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-8 w-8"
-                                                            onClick={generatePassword}
-                                                        >
-                                                            <RefreshCw className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                                {errors.password && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.password}</p>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor="password_confirmation" className="block text-sm font-medium mb-2">
-                                                    Confirmer le mot de passe
-                                                </label>
-                                                <Input
-                                                    id="password_confirmation"
-                                                    type={showPassword ? "text" : "password"}
-                                                    value={data.password_confirmation}
-                                                    onChange={e => setData('password_confirmation', e.target.value)}
-                                                    className='h-12 px-4 rounded-xl'
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div>
-                                                <label htmlFor="role" className="block text-sm font-medium mb-2">
-                                                    Rôle
-                                                </label>
-                                                <Select
-                                                    value={data.role}
-                                                    onValueChange={(value: UserRole) => setData('role', value)}
-                                                >
-                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.role ? 'border-red-500' : ''}`}>
-                                                        <SelectValue placeholder="Sélectionnez un rôle" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {roleOptions.map((option) => (
-                                                            <SelectItem
-                                                                key={option.id}
-                                                                value={option.value}
-                                                            >
-                                                                {option.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.role && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.role}</p>
-                                                )}
-                                            </div>
-
-                                            <div>
-                                                <label htmlFor="status" className="block text-sm font-medium mb-2">
-                                                    Statut
-                                                </label>
-                                                <Select
-                                                    value={String(data.is_active) as "0" | "1"}
-                                                    onValueChange={(value) => setData('is_active', Number(value) as UserStatus)}
-                                                >
-                                                    <SelectTrigger className={`h-12 px-4 rounded-xl ${errors.is_active ? 'border-red-500' : ''}`}>
-                                                        <SelectValue placeholder="Sélectionnez un statut" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {statusOptions.map((option) => (
-                                                            <SelectItem
-                                                                key={option.id}
-                                                                value={String(option.value)}
-                                                            >
-                                                                {option.name}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                {errors.is_active && (
-                                                    <p className="text-sm text-red-500 mt-1">{errors.is_active}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center justify-end gap-4">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => window.history.back()}
-                                            type="button"
-                                        >
-                                            Annuler
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                        >
-                                            {processing && (
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            )}
-                                            Créer l'utilisateur
-                                        </Button>
-                                    </div>
-                                </form>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+      <div className="flex flex-col min-h-screen bg-background">
+        <div className="border-b bg-gradient-to-r from-slate-50 to-white">
+          <div className="mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="flex flex-1 items-center">
+              <Button variant="ghost" size="icon" className="mr-4" asChild>
+                <Link href={route('users.index')}>
+                  <ChevronLeft className="h-6 w-6" />
+                </Link>
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold">Créer un utilisateur</h1>
+                <p className="text-sm text-muted-foreground">
+                  Ajoutez un nouvel utilisateur au système
+                </p>
+              </div>
             </div>
-        </>
-    );
+          </div>
+        </div>
+
+        <div className="flex-1 py-8">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle>Intrainings de l'utilisateur</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium mb-2">
+                        Nom complet
+                      </label>
+                      <Input
+                        id="name"
+                        value={data.name}
+                        onChange={(e) => setData('name', e.target.value)}
+                        placeholder="John Doe"
+                        className={`h-12 px-4 rounded-xl ${errors.name ? 'border-red-500' : ''}`}
+                      />
+                      {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium mb-2">
+                        Adresse email
+                      </label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
+                        placeholder="john@example.com"
+                        className={`h-12 px-4 rounded-xl ${errors.email ? 'border-red-500' : ''}`}
+                      />
+                      {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="password" className="block text-sm font-medium mb-2">
+                          Mot de passe
+                        </label>
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            className={`h-12 px-4 rounded-xl ${errors.password ? 'border-red-500' : ''} pr-28`}
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Eye className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={copyToClipboard}
+                            >
+                              {copied ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : (
+                                <Copy className="h-4 w-4" />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={generatePassword}
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {errors.password && (
+                          <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="password_confirmation"
+                          className="block text-sm font-medium mb-2"
+                        >
+                          Confirmer le mot de passe
+                        </label>
+                        <Input
+                          id="password_confirmation"
+                          type={showPassword ? 'text' : 'password'}
+                          value={data.password_confirmation}
+                          onChange={(e) => setData('password_confirmation', e.target.value)}
+                          className="h-12 px-4 rounded-xl"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <label htmlFor="role" className="block text-sm font-medium mb-2">
+                          Rôle
+                        </label>
+                        <Select
+                          value={data.role}
+                          onValueChange={(value: UserRole) => setData('role', value)}
+                        >
+                          <SelectTrigger
+                            className={`h-12 px-4 rounded-xl ${errors.role ? 'border-red-500' : ''}`}
+                          >
+                            <SelectValue placeholder="Sélectionnez un rôle" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roleOptions.map((option) => (
+                              <SelectItem key={option.id} value={option.value}>
+                                {option.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.role && <p className="text-sm text-red-500 mt-1">{errors.role}</p>}
+                      </div>
+
+                      <div>
+                        <label htmlFor="status" className="block text-sm font-medium mb-2">
+                          Statut
+                        </label>
+                        <Select
+                          value={String(data.is_active) as '0' | '1'}
+                          onValueChange={(value) =>
+                            setData('is_active', Number(value) as UserStatus)
+                          }
+                        >
+                          <SelectTrigger
+                            className={`h-12 px-4 rounded-xl ${errors.is_active ? 'border-red-500' : ''}`}
+                          >
+                            <SelectValue placeholder="Sélectionnez un statut" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statusOptions.map((option) => (
+                              <SelectItem key={option.id} value={String(option.value)}>
+                                {option.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.is_active && (
+                          <p className="text-sm text-red-500 mt-1">{errors.is_active}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-4">
+                    <Button variant="outline" onClick={() => window.history.back()} type="button">
+                      Annuler
+                    </Button>
+                    <Button type="submit" disabled={processing}>
+                      {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Créer l'utilisateur
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }

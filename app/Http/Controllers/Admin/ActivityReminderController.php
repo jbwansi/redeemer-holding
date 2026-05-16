@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 // use App\Mail\EventReminderMail;
 use App\Mail\ReminderMail;
 use App\Models\EventParticipant;
-use App\Models\FormationParticipant;
+use App\Models\TrainingParticipant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -53,11 +53,11 @@ class ActivityReminderController extends Controller
             }
 
             // Rappels pour les formations
-            $formationParticipants = FormationParticipant::with('formation', 'user')
+            $formationParticipants = TrainingParticipant::with('formation', 'user')
                 ->whereHas('formation', function ($query) use ($tomorrow) {
                     $query->whereDate('start_date', $tomorrow);
                 })
-                ->where('status', FormationParticipant::STATUS_COMPLETED)
+                ->where('status', TrainingParticipant::STATUS_COMPLETED)
                 ->get();
 
             $formationReminders = 0;
@@ -77,7 +77,7 @@ class ActivityReminderController extends Controller
 
             Log::info('Exécution des rappels API terminée', [
                 'total_events' => $eventReminders,
-                'total_formations' => $formationReminders,
+                'total_trainings' => $formationReminders,
                 'execution_time' => $executionTime
             ]);
 

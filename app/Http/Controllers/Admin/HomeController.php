@@ -62,7 +62,7 @@ class HomeController extends Controller
                 ['content' => 'Un accompagnement puissant, pragmatique et profondément humain.', 'author' => 'Aline K.', 'position' => 'Cheffe d\'entreprise', 'image' => ''],
                 ['content' => 'En quelques semaines, j\'ai gagné en clarté, en discipline et en sérénité.', 'author' => 'Samuel T.', 'position' => 'Cadre dirigeant', 'image' => ''],
             ],
-            'formations_title' => 'Prochaines formations',
+            'trainings_title' => 'Prochaines formations',
             'video_enabled'  => false,
             'video_url'      => '',
             'video_title'    => 'Bienvenue dans mon univers',

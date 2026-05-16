@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\{
     DashboardController,
     EventCategoryController,
     EventController,
-    FormationController,
+    TrainingController,
     HomeController,
     NewsletterController,
     PageController,
@@ -246,34 +246,7 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         Route::resource('event-categories', EventCategoryController::class);
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Events
-        |--------------------------------------------------------------------------
-        */
 
-        Route::prefix('events')
-            ->name('events.')
-            ->controller(EventController::class)
-            ->group(function () {
-                Route::get('/trash', 'trash')->name('trash');
-
-                Route::get('/participants/{slug}', 'participants')->name('participants');
-                Route::get('/participants/{slug}/export', 'exportParticipantsCsv')->name('participants.export');
-                Route::get('/{slug}/participants/{participant}', 'showParticipant')->name('participants.show');
-                Route::get('/{slug}/facture/{reference}', 'downloadInvoice')->name('participants.invoice');
-
-                Route::get('/', 'index')->name('index');
-                Route::get('/create', 'create')->name('create');
-                Route::post('/', 'store')->name('store');
-
-                Route::patch('/{event}/toggle-publish', 'togglePublish')->name('toggle-publish');
-
-                Route::get('/{event}', 'show')->name('show');
-                Route::get('/{event}/edit', 'edit')->name('edit');
-                Route::post('/{event}', 'update')->name('update');
-                Route::delete('/{event}', 'destroy')->name('destroy');
-            });
 
 
         /*
@@ -354,15 +327,17 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             });
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Formations
-        |--------------------------------------------------------------------------
-        */
 
-        Route::prefix('formations')
-            ->name('formations.')
-            ->controller(FormationController::class)
+
+        /*
+|--------------------------------------------------------------------------
+| Events
+|--------------------------------------------------------------------------
+*/
+
+        Route::prefix('events')
+            ->name('events.')
+            ->controller(EventController::class)
             ->group(function () {
                 Route::get('/trash', 'trash')->name('trash');
 
@@ -375,12 +350,42 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
 
-                Route::patch('/{formation}/toggle-publish', 'togglePublish')->name('toggle-publish');
+                Route::patch('/{event}/toggle-publish', 'togglePublish')->name('toggle-publish');
 
-                Route::get('/{formation}', 'show')->name('show');
-                Route::get('/{formation}/edit', 'edit')->name('edit');
-                Route::post('/{formation}', 'update')->name('update');
-                Route::delete('/{formation}', 'destroy')->name('destroy');
+                Route::get('/{event}', 'show')->name('show');
+                Route::get('/{event}/edit', 'edit')->name('edit');
+                Route::post('/{event}', 'update')->name('update');
+                Route::delete('/{event}', 'destroy')->name('destroy');
+            });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Trainings
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('trainings')
+            ->name('trainings.')
+            ->controller(TrainingController::class)
+            ->group(function () {
+                Route::get('/trash', 'trash')->name('trash');
+
+                Route::get('/participants/{slug}', 'participants')->name('participants');
+                Route::get('/participants/{slug}/export', 'exportParticipantsCsv')->name('participants.export');
+                Route::get('/{slug}/participants/{participant}', 'showParticipant')->name('participants.show');
+                Route::get('/{slug}/facture/{reference}', 'downloadInvoice')->name('participants.invoice');
+
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/', 'store')->name('store');
+
+                Route::patch('/{training}/toggle-publish', 'togglePublish')->name('toggle-publish');
+
+                Route::get('/{training}', 'show')->name('show');
+                Route::get('/{training}/edit', 'edit')->name('edit');
+                Route::post('/{training}', 'update')->name('update');
+                Route::delete('/{training}', 'destroy')->name('destroy');
             });
 
 

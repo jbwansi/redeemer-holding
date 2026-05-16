@@ -22,14 +22,14 @@ class AuthController extends Controller
 
     public function show_auth()
     {
-        return inertia("frontend/auth", [
+        return inertia("Frontend/auth", [
             'registrationEnabled' => $this->isRegistrationEnabled(),
         ]);
     }
 
     public function password_request()
     {
-        return inertia("frontend/auth", [
+        return inertia("Frontend/auth", [
             'registrationEnabled' => $this->isRegistrationEnabled(),
         ]);
     }

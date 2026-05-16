@@ -191,7 +191,7 @@
             </div>
 
             <div class="user-info">
-                <strong>Vos informations :</strong>
+                <strong>Vos intrainings :</strong>
                 <p>Email : {{ $user->email }}</p>
                 @if ($user->phone)
                     <p>Téléphone : {{ $user->phone }}</p>
@@ -206,7 +206,7 @@
                 </div>
                 <div class="feature-item">
                     <span class="feature-icon">📚</span>
-                    <span>Découvrir nos formations et événements disponibles</span>
+                    <span>Découvrir nos trainings et événements disponibles</span>
                 </div>
                 <div class="feature-item">
                     <span class="feature-icon">🎯</span>

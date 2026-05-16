@@ -167,13 +167,7 @@ class UserController extends Controller
                 'last_login_at' => $user->last_login_at,
                 'last_login_ip' => $user->last_login_ip,
 
-                // Si vous avez des relations chargées
-                // 'posts_count' => $user->posts_count,
-                // 'posts' => $user->posts->map(fn ($post) => [
-                //     'id' => $post->id,
-                //     'title' => $post->title,
-                //     'created_at' => $post->created_at,
-                // ]),
+             
             ],
         ]);
     }
@@ -190,11 +184,7 @@ class UserController extends Controller
 
         $user->sendEmailVerificationNotification();
 
-        // activity()
-        //     ->performedOn($user)
-        //     ->causedBy(request()->user())
-        //     ->log('verification_email_sent');
-
+      
         return back()->with('success', 'Email de vérification envoyé avec succès.');
     }
 
@@ -236,16 +226,7 @@ class UserController extends Controller
         $user->is_active = 1;
         $user->save();
 
-        // Enregistrer l'action dans l'historique
-        // activity()
-        //     ->performedOn($user)
-        //     ->causedBy(Auth::user())
-        //     ->withProperties([
-        //         'old_status' => $oldStatus,
-        //         'new_status' => 'active',
-        //         'action' => 'reactivation'
-        //     ])
-        //     ->log('user_reactivated');
+      
 
         // Envoyer une notification à l'utilisateur
         $user->notify(new AccountReactivatedNotification());

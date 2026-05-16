@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Event;
-use App\Models\Formation;
+use App\Models\Training;
 use App\Models\Post;
 use App\Models\Service;
 use App\Models\User;
@@ -21,7 +21,7 @@ class SearchController extends Controller
             return response()->json([
                 'users' => [],
                 'events' => [],
-                'formations' => [],
+                'trainings' => [],
                 'posts' => [],
                 'services' => [],
             ]);
@@ -56,7 +56,7 @@ class SearchController extends Controller
                 'type' => 'Evenement',
             ]);
 
-        $formations = Formation::query()
+        $trainings = Training::query()
             ->select(['id', 'slug', 'title'])
             ->where('title', 'like', "%{$q}%")
             ->limit(5)
@@ -64,9 +64,9 @@ class SearchController extends Controller
             ->map(fn ($formation) => [
                 'id' => $formation->id,
                 'title' => $formation->title,
-                'subtitle' => 'Formation',
-                'url' => route('formations.show', $formation->slug),
-                'type' => 'Formation',
+                'subtitle' => 'Training',
+                'url' => route('trainings.show', $formation->slug),
+                'type' => 'Training',
             ]);
 
         $posts = Post::query()
@@ -98,9 +98,11 @@ class SearchController extends Controller
         return response()->json([
             'users' => $users,
             'events' => $events,
-            'formations' => $formations,
+            'trainings' => $trainings,
             'posts' => $posts,
             'services' => $services,
         ]);
     }
 }
+
+

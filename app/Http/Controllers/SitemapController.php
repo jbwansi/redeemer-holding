@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use App\Models\Formation;
+use App\Models\Training;
 use App\Models\Post;
 use App\Models\Service;
 use App\Services\SeoService;
@@ -19,7 +19,7 @@ class SitemapController extends Controller
         $sitemaps = [
             ['loc' => route('sitemap.static'),     'lastmod' => now()->toAtomString()],
             ['loc' => route('sitemap.events'),     'lastmod' => optional(Event::published()->latest('updated_at')->value('updated_at'))->toAtomString() ?? now()->toAtomString()],
-            ['loc' => route('sitemap.formations'), 'lastmod' => optional(Formation::published()->latest('updated_at')->value('updated_at'))->toAtomString() ?? now()->toAtomString()],
+            ['loc' => route('sitemap.trainings'), 'lastmod' => optional(Training::published()->latest('updated_at')->value('updated_at'))->toAtomString() ?? now()->toAtomString()],
             ['loc' => route('sitemap.posts'),      'lastmod' => optional(Post::published()->latest('updated_at')->value('updated_at'))->toAtomString() ?? now()->toAtomString()],
             ['loc' => route('sitemap.services'),   'lastmod' => optional(Service::where('status', 1)->latest('updated_at')->value('updated_at'))->toAtomString() ?? now()->toAtomString()],
         ];
@@ -97,11 +97,11 @@ class SitemapController extends Controller
     /**
      * Formations sitemap with image support.
      */
-    public function formations()
+    public function trainings()
     {
-        $formations = Formation::published()->select(['slug', 'title', 'description', 'featured_image', 'updated_at'])->get();
+        $trainings = Training::published()->select(['slug', 'title', 'description', 'featured_image', 'updated_at'])->get();
 
-        $urls = $formations->map(function ($formation) {
+        $urls = $trainings->map(function ($formation) {
             $image = SeoService::firstImageUrl($formation->featured_image ?? []);
             return [
                 'loc'        => route('formations.details', ['slug' => $formation->slug]),
@@ -200,7 +200,7 @@ class SitemapController extends Controller
             ];
         });
 
-        Formation::published()->select(['slug', 'title', 'featured_image', 'updated_at'])->get()->each(function ($formation) use (&$urls) {
+        Training::published()->select(['slug', 'title', 'featured_image', 'updated_at'])->get()->each(function ($formation) use (&$urls) {
             $image = SeoService::firstImageUrl($formation->featured_image ?? []);
             $urls[] = [
                 'loc'        => route('formations.details', ['slug' => $formation->slug]),

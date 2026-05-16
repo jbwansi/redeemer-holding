@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventParticipant;
-use App\Models\Formation;
-use App\Models\FormationParticipant;
+use App\Models\Training;
+use App\Models\TrainingParticipant;
 use App\Models\Post;
 use App\Models\Service;
 use App\Models\ServiceRequest;
@@ -29,8 +29,8 @@ class DashboardController extends Controller
                     'trend' => $this->calculateTrend('events'),
                 ],
                 'trainings' => [
-                    'active' => Formation::where('is_published', true)->count(),
-                    'total' => Formation::count(),
+                    'active' => Training::where('is_published', true)->count(),
+                    'total' => Training::count(),
                     'trend' => $this->calculateTrend('trainings'),
                 ],
                 'services' => [
@@ -149,7 +149,7 @@ class DashboardController extends Controller
         // Calcul basique du trend : comparer ce mois avec le mois dernier
         $currentMonth = match ($type) {
             'events' => Event::whereMonth('created_at', now()->month)->count(),
-            'trainings' => Formation::whereMonth('created_at', now()->month)->count(),
+            'trainings' => Training::whereMonth('created_at', now()->month)->count(),
             'services' => Service::whereMonth('created_at', now()->month)->count(),
             'posts' => Post::whereMonth('created_at', now()->month)->count(),
             'users' => User::whereMonth('created_at', now()->month)->count(),
@@ -157,7 +157,7 @@ class DashboardController extends Controller
 
         $lastMonth = match ($type) {
             'events' => Event::whereMonth('created_at', now()->subMonth()->month)->count(),
-            'trainings' => Formation::whereMonth('created_at', now()->subMonth()->month)->count(),
+            'trainings' => Training::whereMonth('created_at', now()->subMonth()->month)->count(),
             'services' => Service::whereMonth('created_at', now()->subMonth()->month)->count(),
             'posts' => Post::whereMonth('created_at', now()->subMonth()->month)->count(),
             'users' => User::whereMonth('created_at', now()->subMonth()->month)->count(),
@@ -212,7 +212,7 @@ class DashboardController extends Controller
     {
         return [
             ['name' => 'Événements', 'value' => EventParticipant::where('status', 'completed')->sum('payment_amount')],
-            ['name' => 'Formations', 'value' => FormationParticipant::where('status', 'completed')->sum('payment_amount')],
+            ['name' => 'Trainings', 'value' => TrainingParticipant::where('status', 'completed')->sum('payment_amount')],
             ['name' => 'Services', 'value' => ServiceRequest::where('status', 'completed')->sum('views')],
         ];
     }
@@ -221,7 +221,7 @@ class DashboardController extends Controller
     {
         return [
             ['name' => 'Événements', 'value' => Event::where('end_date', '>=', now())->count()],
-            ['name' => 'Formations', 'value' => Formation::where('is_published', true)->count()],
+            ['name' => 'Trainings', 'value' => Training::where('is_published', true)->count()],
             ['name' => 'Services', 'value' => Service::where('status', true)->count()],
             ['name' => 'Articles', 'value' => Post::where('published', true)->count()],
         ];
@@ -244,14 +244,14 @@ class DashboardController extends Controller
                 ]);
             });
 
-        // Ajouter les formations
-        Formation::orderBy('views', 'desc')
+        // Ajouter les trainings
+        Training::orderBy('views', 'desc')
             ->limit(3)
             ->get()
             ->each(function ($training) use ($content) {
                 $content->push([
                     'title' => $training->title,
-                    'type' => 'Formation',
+                    'type' => 'Training',
                     'views' => $training->views,
                     'trend' => $this->calculateViewsTrend($training),
                 ]);
@@ -345,14 +345,14 @@ class DashboardController extends Controller
         ];
     }
 
-    // Méthode pour obtenir les statistiques des formations
+    // Méthode pour obtenir les statistiques des trainings
     private function getTrainingStats()
     {
         return [
-            'active' => Formation::where('is_published', true)->count(),
-            'total_participants' => FormationParticipant::count(),
-            'revenue' => FormationParticipant::where('status', 'completed')->sum('amount'),
-            'popular' => Formation::withCount('participants')
+            'active' => Training::where('is_published', true)->count(),
+            'total_participants' => TrainingParticipant::count(),
+            'revenue' => TrainingParticipant::where('status', 'completed')->sum('amount'),
+            'popular' => Training::withCount('participants')
                 ->orderBy('participants_count', 'desc')
                 ->take(5)
                 ->get()
@@ -423,8 +423,8 @@ class DashboardController extends Controller
                 ]);
             });
 
-        // Ajouter les inscriptions aux formations
-        FormationParticipant::with('training')
+        // Ajouter les inscriptions aux trainings
+        TrainingParticipant::with('training')
             ->latest()
             ->take(5)
             ->get()
@@ -462,11 +462,11 @@ class DashboardController extends Controller
             'general' => [
                 'total_users' => User::count(),
                 'total_events' => Event::count(),
-                'total_trainings' => Formation::count(),
+                'total_trainings' => Training::count(),
                 'total_services' => Service::count(),
                 'total_posts' => Post::count(),
                 'total_revenue' => EventParticipant::where('status', 'completed')->sum('payment_amount') +
-                    FormationParticipant::where('status', 'completed')->sum('amount') +
+                    TrainingParticipant::where('status', 'completed')->sum('amount') +
                     ServiceRequest::where('status', 'completed')->sum('amount')
             ],
             'payments' => $this->getPaymentStats(),
@@ -681,3 +681,5 @@ class DashboardController extends Controller
         return $insights;
     }
 }
+
+

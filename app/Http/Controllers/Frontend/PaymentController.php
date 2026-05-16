@@ -44,31 +44,31 @@ class PaymentController extends Controller
     }
 
 
-    public function showFormationPayment($slug, $participant_id)
+    public function showTrainingPayment($slug, $participant_id)
     {
         return $this->paymentManager
-            ->handler('formation')
+            ->handler('training')
             ->show($slug, $participant_id);
     }
 
-    public function processFormationPayment($slug, $participant_id)
+    public function processTrainingPayment($slug, $participant_id)
     {
         return $this->paymentManager
-            ->handler('formation')
+            ->handler('training')
             ->process($slug, $participant_id);
     }
 
-    public function formationSuccess(Request $request)
+    public function trainingSuccess(Request $request)
     {
         return $this->paymentManager
-            ->handler('formation')
+            ->handler('training')
             ->success($request);
     }
 
-    public function formationCancel(Request $request)
+    public function trainingCancel(Request $request)
     {
         return $this->paymentManager
-            ->handler('formation')
+            ->handler('training')
             ->cancel($request);
     }
 

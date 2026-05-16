@@ -53,8 +53,11 @@
     <link rel="canonical" href="{{ $seoCanon }}">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('sitemap') }}">
     <link rel="sitemap" type="application/xml" title="Sitemap Index" href="{{ route('sitemap.index') }}">
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/logo.png') }}">
@@ -92,7 +95,7 @@
     <!-- Main content -->
     @inertia
 
-    <!-- Noscript avec plus d'informations -->
+    <!-- Noscript avec plus d'intrainings -->
     <noscript>
         <div class="flex items-center justify-center min-h-screen text-center p-4">
             <div>

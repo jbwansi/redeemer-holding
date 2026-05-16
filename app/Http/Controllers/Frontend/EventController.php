@@ -58,7 +58,7 @@ class EventController extends Controller
         $pageContent = PageContent::where('page', 'events')
             ->pluck('value', 'key');
 
-        return inertia('frontend/events/index', [
+        return inertia('Frontend/events/index', [
             'events' => $events,
             'categories' => $categories,
             'featuredEvent' => $featuredEvent,
@@ -75,7 +75,7 @@ class EventController extends Controller
         $event = Event::with(['category'])->published()->where('slug', $slug)->firstOrFail();
         $event->incrementViews();
         $eventImage = SeoService::firstImageUrl($event->featured_image ?? []);
-        return inertia('frontend/events/show', [
+        return inertia('Frontend/events/show', [
             'event' => $event,
             'seo' => SeoService::event(
                 $event->title ?? $event->name ?? '',
@@ -259,7 +259,7 @@ class EventController extends Controller
         // Préparer les données pour la vue
         $participant->load('event');
 
-        return inertia('frontend/events/registration-confirmation', [
+        return inertia('Frontend/events/registration-confirmation', [
             'event' => $event,
             'registration' => $participant,
             'total' => $event->price * $participant->qty

@@ -50,8 +50,8 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/profile', 'index')
                 ->name('profile');
 
-            Route::get('/formations', 'formation')
-                ->name('formations');
+            Route::get('/trainings', 'training')
+                ->name('trainings');
 
             Route::get('/events', 'event')
                 ->name('events');

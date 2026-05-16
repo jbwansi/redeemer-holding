@@ -103,7 +103,7 @@ class ServicePaymentHandler implements PaymentHandlerInterface
                 'stripe_session_id' => $session->id,
             ]);
 
-            return inertia('frontend/services/payment', [
+            return inertia('Frontend/services/payment', [
                 'service' => $service,
                 'serviceRequest' => $serviceRequest,
                 'subtotal' => $subtotal,

@@ -13,7 +13,7 @@ class VisitorChatbotService
 
         if ($message === '') {
             return [
-                'reply' => 'Je suis la pour vous aider. Posez-moi votre question sur nos formations, evenements, services ou contacts.',
+                'reply' => 'Je suis la pour vous aider. Posez-moi votre question sur nos trainings, evenements, services ou contacts.',
                 'source' => 'fallback',
             ];
         }
@@ -46,7 +46,7 @@ class VisitorChatbotService
 
             $systemPrompt = "Tu es l'assistant virtuel du site {$siteName}. "
                 . "Reponds en francais, de maniere concise, professionnelle et chaleureuse. "
-                . "Tu aides les visiteurs sur les formations, evenements, services, inscriptions, paiements et prise de contact. "
+                . "Tu aides les visiteurs sur les trainings, evenements, services, inscriptions, paiements et prise de contact. "
                 . "Si une information precise n'est pas certaine, propose de contacter l'equipe";
 
             if (!empty($email) || !empty($phone)) {
@@ -96,8 +96,8 @@ class VisitorChatbotService
             }
         }
 
-        if ($this->containsAny($m, ['formation', 'formations', 'coaching'])) {
-            return 'Nous proposons plusieurs formations et accompagnements. Je peux vous orienter vers la page Formations pour voir les sessions disponibles et vous inscrire.';
+        if ($this->containsAny($m, ['formation', 'trainings', 'coaching'])) {
+            return 'Nous proposons plusieurs trainings et accompagnements. Je peux vous orienter vers la page Trainings pour voir les sessions disponibles et vous inscrire.';
         }
 
         if ($this->containsAny($m, ['evenement', 'event', 'atelier', 'conference'])) {
@@ -125,10 +125,10 @@ class VisitorChatbotService
         }
 
         if ($this->containsAny($m, ['bonjour', 'salut', 'hello'])) {
-            return 'Bonjour et bienvenue. Je peux vous aider pour les formations, evenements, tarifs, inscriptions et prise de contact.';
+            return 'Bonjour et bienvenue. Je peux vous aider pour les trainings, evenements, tarifs, inscriptions et prise de contact.';
         }
 
-        return 'Merci pour votre message. Je peux vous aider sur les formations, evenements, services, tarifs et contact. Que souhaitez-vous savoir en priorite ?';
+        return 'Merci pour votre message. Je peux vous aider sur les trainings, evenements, services, tarifs et contact. Que souhaitez-vous savoir en priorite ?';
     }
 
     private function containsAny(string $haystack, array $keywords): bool

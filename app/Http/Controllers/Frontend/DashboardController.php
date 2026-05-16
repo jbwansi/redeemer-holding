@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Event\EventCollection;
-use App\Http\Resources\Formation\FormationCollection;
+use App\Http\Resources\Training\TrainingCollection;
 use App\Models\Event;
-use App\Models\Formation;
+use App\Models\Training;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +20,8 @@ class DashboardController extends Controller
         $userId = Auth::user()->id;
         $now = now(); // Date actuelle
 
-        // Récupérer les formations de l'utilisateur
-        $formations = Formation::with([
+        // Récupérer les trainings de l'utilisateur
+        $trainings = Training::with([
             'participants' => function ($query) {
                 $query->with('user')->orderBy('created_at', 'desc');
             }
@@ -43,10 +43,10 @@ class DashboardController extends Controller
             ->get();
 
 
-        // Filtrage des formations par date
-        $countCurrentFormations = $formations->filter(fn($formation) => $formation->start_date <= $now && $formation->end_date >= $now)->count();
-        $countUpGoingFormations = $formations->filter(fn($formation) => $formation->start_date > $now)->count();
-        $CountPastFormations = $formations->filter(fn($formation) => $formation->end_date < $now)->count();
+        // Filtrage des trainings par date
+        $countCurrentTrainings = $trainings->filter(fn($formation) => $formation->start_date <= $now && $formation->end_date >= $now)->count();
+        $countUpGoingTrainings = $trainings->filter(fn($formation) => $formation->start_date > $now)->count();
+        $CountPastTrainings = $trainings->filter(fn($formation) => $formation->end_date < $now)->count();
 
         // Filtrage des événements par date
         $countCurrentEvents = $events->filter(fn($event) => $event->start_date <= $now && $event->end_date >= $now)->count();
@@ -55,9 +55,9 @@ class DashboardController extends Controller
 
         // Résultats à retourner
         $data = [
-            'countCurrentFormations' => $countCurrentFormations,
-            'countUpGoingFormations' => $countUpGoingFormations,
-            'CountPastFormations' => $CountPastFormations,
+            'countCurrentTrainings' => $countCurrentTrainings,
+            'countUpGoingTrainings' => $countUpGoingTrainings,
+            'CountPastTrainings' => $CountPastTrainings,
             'countCurrentEvents' => $countCurrentEvents,
             'countUpGoingEvents' => $countUpGoingEvents,
             'CountPastEvents' => $CountPastEvents,
@@ -66,14 +66,14 @@ class DashboardController extends Controller
 
 
 
-        return inertia('frontend/dashboard/index', $data);
+        return inertia('Frontend/dashboard/index', $data);
     }
 
     public function formation()
     {
         $userId = Auth::user()->id;
 
-        $formations = Formation::with([
+        $trainings = Training::with([
             'participants' => function ($query) {
                 $query->with('user')->orderBy('created_at', 'desc');
             }
@@ -82,8 +82,8 @@ class DashboardController extends Controller
                 $query->where('user_id', $userId);
             })
             ->get();
-        return inertia('frontend/dashboard/clientFormation', [
-            'formations' => new FormationCollection($formations),
+        return inertia('Frontend/dashboard/clientTraining', [
+            'trainings' => new TrainingCollection($trainings),
         ]);
     }
     public function event()
@@ -98,10 +98,12 @@ class DashboardController extends Controller
             $query->where('user_id', $userId);
         })->get();
 
-        return inertia('frontend/dashboard/clientEvent', ["events" => new EventCollection($events)]);
+        return inertia('Frontend/dashboard/clientEvent', ["events" => new EventCollection($events)]);
     }
     public function account()
     {
-        return inertia('frontend/dashboard/clientAccount');
+        return inertia('Frontend/dashboard/clientAccount');
     }
 }
+
+

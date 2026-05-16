@@ -7,7 +7,7 @@ use App\Mail\SendMailContact;
 use App\Models\Page;
 use App\Models\Service;
 use App\Models\Post;
-use App\Models\Formation;
+use App\Models\Training;
 use App\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -39,24 +39,24 @@ class AppController extends Controller
 
         $home = Page::where('slug', 'accueil')->first();
         $posts = Post::where('published', 1)->latest('published_at')->take(3)->get();
-        $formations = Formation::where('is_published', 1)
+        $trainings = Training::where('is_published', 1)
             ->where('is_featured', 1)
             ->where('start_date', '>', now())
             ->orderBy('start_date')
             ->take(3)
             ->get();
-        if ($formations->isEmpty()) {
-            $formations = Formation::where('is_published', 1)
+        if ($trainings->isEmpty()) {
+            $trainings = Training::where('is_published', 1)
                 ->where('start_date', '>', now())
                 ->orderBy('start_date')
                 ->take(3)
                 ->get();
         }
-        return inertia("frontend/home", [
+        return inertia("Frontend/home", [
             'services' => $services,
             'home' => $home,
             'posts' => $posts,
-            'formations' => $formations,
+            'trainings' => $trainings,
             'testimonials' => $testimonials,
             'seo' => SeoService::defaults(),
 
@@ -67,7 +67,7 @@ class AppController extends Controller
     {
         $page = Page::where('slug', 'contact')->first();
 
-        return inertia("frontend/contact", [
+        return inertia("Frontend/contact", [
             'page' => $page,
             'seo' => SeoService::page(
                 'Contact',
@@ -80,11 +80,11 @@ class AppController extends Controller
     {
         $page = Page::where('slug', 'contact')->first();
 
-        return inertia('frontend/faq', [
+        return inertia('Frontend/faq', [
             'page' => $page,
             'seo' => SeoService::page(
                 'FAQ',
-                data_get($page, 'meta.meta_description') ?: 'Retrouvez les reponses aux questions frequentes sur nos services, formations et evenements.',
+                data_get($page, 'meta.meta_description') ?: 'Retrouvez les reponses aux questions frequentes sur nos services, trainings et evenements.',
             ),
         ]);
     }
@@ -99,7 +99,7 @@ class AppController extends Controller
 
         $page = Page::where('slug', 'a-propos')->first();
 
-        return inertia("frontend/about", [
+        return inertia("Frontend/about", [
             'page' => $page,
             'testimonials' => $testimonials,
             'seo' => SeoService::page(
@@ -180,16 +180,17 @@ class AppController extends Controller
 
     public function terms()
     {
-        return inertia("frontend/policies/terms");
+        return inertia("Frontend/policies/terms");
     }
 
     public function policy()
     {
-        return inertia("frontend/policies/policy");
+        return inertia("Frontend/policies/policy");
     }
 
     public function cookies()
     {
-        return inertia("frontend/policies/cookies");
+        return inertia("Frontend/policies/cookies");
     }
 }
+

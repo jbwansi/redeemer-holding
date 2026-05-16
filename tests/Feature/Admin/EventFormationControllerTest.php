@@ -6,13 +6,13 @@ use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\RequireAdminAccess;
 use App\Models\Category;
 use App\Models\Event;
-use App\Models\Formation;
+use App\Models\Training;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-class EventFormationControllerTest extends TestCase
+class EventTrainingControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -179,8 +179,8 @@ class EventFormationControllerTest extends TestCase
             'is_active' => 1,
         ]);
 
-        $formation = Formation::create([
-            'title' => 'Formation initiale',
+        $formation = Training::create([
+            'title' => 'Training initiale',
             'slug' => 'formation-initiale',
             'excerpt' => 'Extrait',
             'content' => 'Contenu',
@@ -196,7 +196,7 @@ class EventFormationControllerTest extends TestCase
             'tags' => ['init'],
         ]);
 
-        $response = $this->actingAs($admin)->post(route('formations.update', $formation->id), [
+        $response = $this->actingAs($admin)->post(route('trainings.update', $formation->id), [
             'title' => 'Formation modifiee',
             'excerpt' => 'Extrait modifie',
             'content' => 'Contenu modifie',

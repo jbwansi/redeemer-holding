@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ServiceSeeder::class,
             PostSeeder::class,
             EventSeeder::class,
-            FormationSeeder::class,
+            TrainingSeeder::class,
         ]);
 
         if (app()->environment(['local', 'staging', 'testing'])) {

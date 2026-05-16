@@ -86,7 +86,7 @@ class EventPaymentHandler implements PaymentHandlerInterface
             'stripe_session_id' => $session->id,
         ]);
 
-        return inertia('frontend/events/payment', [
+        return inertia('Frontend/events/payment', [
             'event' => $event,
             'participant' => $participant,
             'subtotal' => $subtotal,

@@ -1,0 +1,200 @@
+﻿D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:6: use App\Models\NewsletterCampaign;
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:7: use App\Models\NewsletterUnsubscribe;
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:55: \App\Models\NewsletterSubscriber::query()
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:65: \App\Models\User::query()
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:74: \App\Models\EventParticipant::query()
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:83: \App\Models\TrainingParticipant::query()
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\DispatchScheduledNewsletters.php:92: \App\Models\ServiceRequest::query()
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\SendActivityReminders.php:7: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Console\Commands\SendActivityReminders.php:8: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\helpers.php:3: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\SitemapController.php:5: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\SitemapController.php:6: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\SitemapController.php:7: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\SitemapController.php:8: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\AboutController.php:6: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\AboutController.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ActivityReminderController.php:8: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ActivityReminderController.php:9: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\CategoryController.php:6: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\CategoryController.php:7: use App\Models\EventCategory;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ChatbotController.php:6: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ChatbotController.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ChatbotLeadController.php:6: use App\Models\ChatbotLead;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ContactController.php:6: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ContactController.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:6: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:7: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:8: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:9: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:10: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:11: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:12: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\DashboardController.php:13: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventCategoryController.php:6: use App\Models\EventCategory;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventController.php:6: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventController.php:7: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventController.php:8: use App\Models\EventCategory;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventController.php:9: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\EventController.php:10: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\HomeController.php:6: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\HomeController.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:9: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:10: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:11: use App\Models\NewsletterCampaign;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:12: use App\Models\NewsletterSubscriber;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:13: use App\Models\NewsletterUnsubscribe;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:14: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\NewsletterController.php:15: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PageContentController.php:6: use App\Models\PageContent;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PageController.php:7: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PageController.php:8: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PageController.php:9: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PostController.php:7: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PostController.php:8: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\PostController.php:9: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\SearchController.php:6: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\SearchController.php:7: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\SearchController.php:8: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\SearchController.php:9: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\SearchController.php:10: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ServiceController.php:7: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\ServiceRequestController.php:7: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\TestimonialController.php:6: use App\Models\Testimonial;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\TestimonialController.php:7: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\TrainingController.php:6: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\TrainingController.php:7: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Admin\UserController.php:6: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\AppController.php:7: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\AppController.php:8: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\AppController.php:9: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\AppController.php:10: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\AppController.php:15: use App\Models\Testimonial;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\BlogController.php:9: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\BlogController.php:10: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\BlogController.php:15: use App\Models\PostViewLog;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ChatbotController.php:7: use App\Models\ChatbotLead;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ChatbotController.php:8: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\DashboardController.php:8: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\DashboardController.php:9: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\EventController.php:10: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\EventController.php:11: use App\Models\EventCategory;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\EventController.php:12: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\EventController.php:13: use App\Models\PageContent;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\NewsletterController.php:7: use App\Models\NewsletterSubscriber;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\NewsletterController.php:8: use App\Models\NewsletterUnsubscribe;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\PaymentController_OLD.php:6: // use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\PaymentController_OLD.php:7: // use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:7: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:8: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:9: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:10: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:18: use App\Models\PageContent;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\ServiceController.php:19: use App\Models\Testimonial;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\TrainingController.php:6: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\TrainingController.php:7: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\TrainingController.php:8: use App\Models\PageContent;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\TrainingPaymentController.php:6: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Controllers\Frontend\TrainingPaymentController.php:7: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Http\Middleware\RespectMaintenanceMode.php:5: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\app\Jobs\SendNewsletterChunk.php:6: use App\Models\NewsletterCampaign;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\AdminEventNotificationMail.php:5: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\AdminEventNotificationMail.php:6: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\ChatbotLeadConfirmationMail.php:5: use App\Models\ChatbotLead;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\ChatbotLeadNotification.php:5: use App\Models\ChatbotLead;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\ConfirmNewsletterSubscriptionMail.php:5: use App\Models\NewsletterSubscriber;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\ConfirmNewsletterSubscriptionMail.php:6: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\EventReminderMail.php:5: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\TrainingRegistrationAdminNotification.php:5: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\TrainingRegistrationAdminNotification.php:6: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\TrainingReminderMail.php:5: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Mail\WelcomeMail.php:5: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Category.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\ChatbotLead.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Event.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\EventCategory.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\EventParticipant.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\NewsletterCampaign.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\NewsletterSubscriber.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\NewsletterUnsubscribe.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Page.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\PageContent.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Post.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\PostViewLog.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Service.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\ServiceRequest.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Setting.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Testimonial.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\Training.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\TrainingParticipant.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Models\User.php:3: namespace App\Models;
+D:\DEV\redeemerholding\redeemer-holding\app\Notifications\NewServiceRequestNotification.php:5: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Notifications\ServiceRequestConfirmationNotification.php:5: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\AuthenticationService.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\SettingsService.php:5: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\VisitorChatbotService.php:5: use App\Models\Page;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\EventPaymentHandler.php:5: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\EventPaymentHandler.php:6: use App\Models\EventParticipant;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\ServicePaymentHandler.php:5: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\ServicePaymentHandler.php:6: use App\Models\ServiceRequest;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\TrainingPaymentHandler.php:5: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\app\Services\Payments\Handlers\TrainingPaymentHandler.php:6: use App\Models\TrainingParticipant;
+D:\DEV\redeemerholding\redeemer-holding\config\auth.php:65: 'model' => env('AUTH_MODEL', App\Models\User::class),
+D:\DEV\redeemerholding\redeemer-holding\database\factories\UserFactory.php:10: * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\AdminSeeder.php:5: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\CategorySeeder.php:5: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\DatabaseSeeder.php:5: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\EventSeeder.php:5: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\EventSeeder.php:6: use App\Models\EventCategory;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\EventSeeder.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\PostSeeder.php:5: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\PostSeeder.php:6: use App\Models\Post;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\PostSeeder.php:7: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\ServiceSeeder.php:5: use App\Models\Service;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\ServiceSeeder.php:6: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\SettingsSeeder.php:5: use App\Models\Setting;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\TestUsersSeeder.php:5: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\TrainingSeeder.php:5: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\database\seeders\TrainingSeeder.php:6: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\resources\views\emails\mail-tester.blade.php:202: @php($landing_data =\App\Models\DataSetting::where('type', 'admin_landing_page')->whereIn('key',
+D:\DEV\redeemerholding\redeemer-holding\resources\views\emails\mail-tester.blade.php:225: @php($social_media = \App\Models\SocialMedia::active()->get())
+D:\DEV\redeemerholding\redeemer-holding\tests\Feature\Admin\EventTrainingControllerTest.php:7: use App\Models\Category;
+D:\DEV\redeemerholding\redeemer-holding\tests\Feature\Admin\EventTrainingControllerTest.php:8: use App\Models\Event;
+D:\DEV\redeemerholding\redeemer-holding\tests\Feature\Admin\EventTrainingControllerTest.php:9: use App\Models\Training;
+D:\DEV\redeemerholding\redeemer-holding\tests\Feature\Admin\EventTrainingControllerTest.php:10: use App\Models\User;
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:84: 'App\Models\Category' => $baseDir . '/app/Models/Category.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:85: 'App\Models\ChatbotLead' => $baseDir . '/app/Models/ChatbotLead.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:86: 'App\Models\Event' => $baseDir . '/app/Models/Event.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:87: 'App\Models\EventCategory' => $baseDir . '/app/Models/EventCategory.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:88: 'App\Models\EventParticipant' => $baseDir . '/app/Models/EventParticipant.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:89: 'App\Models\Training' => $baseDir . '/app/Models/Training.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:90: 'App\Models\TrainingParticipant' => $baseDir . '/app/Models/TrainingParticipant.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:91: 'App\Models\NewsletterCampaign' => $baseDir . '/app/Models/NewsletterCampaign.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:92: 'App\Models\NewsletterSubscriber' => $baseDir . '/app/Models/NewsletterSubscriber.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:93: 'App\Models\NewsletterUnsubscribe' => $baseDir . '/app/Models/NewsletterUnsubscribe.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:94: 'App\Models\Page' => $baseDir . '/app/Models/Page.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:95: 'App\Models\PageContent' => $baseDir . '/app/Models/PageContent.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:96: 'App\Models\Post' => $baseDir . '/app/Models/Post.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:97: 'App\Models\PostViewLog' => $baseDir . '/app/Models/PostViewLog.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:98: 'App\Models\Service' => $baseDir . '/app/Models/Service.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:99: 'App\Models\ServiceRequest' => $baseDir . '/app/Models/ServiceRequest.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:100: 'App\Models\Setting' => $baseDir . '/app/Models/Setting.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:101: 'App\Models\Testimonial' => $baseDir . '/app/Models/Testimonial.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:102: 'App\Models\User' => $baseDir . '/app/Models/User.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_classmap.php:2565: 'Illuminate\\Database\\Events\\ModelsPruned' => $vendorDir . '/laravel/framework/src/Illuminate/Database/Events/ModelsPruned.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:806: 'App\Models\Category' => __DIR__ . '/../..' . '/app/Models/Category.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:807: 'App\Models\ChatbotLead' => __DIR__ . '/../..' . '/app/Models/ChatbotLead.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:808: 'App\Models\Event' => __DIR__ . '/../..' . '/app/Models/Event.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:809: 'App\Models\EventCategory' => __DIR__ . '/../..' . '/app/Models/EventCategory.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:810: 'App\Models\EventParticipant' => __DIR__ . '/../..' . '/app/Models/EventParticipant.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:811: 'App\Models\Training' => __DIR__ . '/../..' . '/app/Models/Training.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:812: 'App\Models\TrainingParticipant' => __DIR__ . '/../..' . '/app/Models/TrainingParticipant.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:813: 'App\Models\NewsletterCampaign' => __DIR__ . '/../..' . '/app/Models/NewsletterCampaign.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:814: 'App\Models\NewsletterSubscriber' => __DIR__ . '/../..' . '/app/Models/NewsletterSubscriber.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:815: 'App\Models\NewsletterUnsubscribe' => __DIR__ . '/../..' . '/app/Models/NewsletterUnsubscribe.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:816: 'App\Models\Page' => __DIR__ . '/../..' . '/app/Models/Page.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:817: 'App\Models\PageContent' => __DIR__ . '/../..' . '/app/Models/PageContent.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:818: 'App\Models\Post' => __DIR__ . '/../..' . '/app/Models/Post.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:819: 'App\Models\PostViewLog' => __DIR__ . '/../..' . '/app/Models/PostViewLog.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:820: 'App\Models\Service' => __DIR__ . '/../..' . '/app/Models/Service.php',
+D:\DEV\redeemerholding\redeemer-holding\vendor\composer\autoload_static.php:821: 'App\Models\ServiceRequest' => __DIR__ . '/../..' . '/app/Models/ServiceRequest.php',

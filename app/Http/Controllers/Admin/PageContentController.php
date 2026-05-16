@@ -11,7 +11,7 @@ class PageContentController extends Controller
 {
     public function index()
     {
-        $pages = ['services', 'formations', 'events'];
+        $pages = ['services', 'trainings', 'events'];
 
         $contents = PageContent::whereIn('page', $pages)
             ->get()
@@ -26,7 +26,7 @@ class PageContentController extends Controller
     public function update(Request $request)
 {
     $request->validate([
-        'page' => 'required|string|in:services,formations,events',
+        'page' => 'required|string|in:services,trainings,events',
         'data' => 'required|array',
         'data.*' => 'nullable',
     ]);

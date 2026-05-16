@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('formations', function (Blueprint $table) {
+        Schema::table('trainings', function (Blueprint $table) {
             $table->string('meeting_link')->nullable()->after('max_participants');
         });
     }
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('formations', function (Blueprint $table) {
+        Schema::table('trainings', function (Blueprint $table) {
             $table->dropColumn('meeting_link');
         });
     }

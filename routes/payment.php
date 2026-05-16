@@ -32,21 +32,21 @@ Route::controller(PaymentController::class)->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Formations Payments
+    | Trainings Payments
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/formations/{slug}/paiement/{participant_id}', 'showFormationPayment')
-        ->name('formations.payment');
+    Route::get('/formations/{slug}/paiement/{participant_id}', 'showTrainingPayment')
+        ->name('trainings.payment');
 
-    Route::post('/formations/{slug}/paiement/{participant_id}/process', 'processFormationPayment')
-        ->name('formations.payment.process');
+    Route::post('/formations/{slug}/paiement/{participant_id}/process', 'processTrainingPayment')
+        ->name('trainings.payment.process');
 
-    Route::get('/formations/paiement/succes', 'formationSuccess')
-        ->name('formations.payment.success');
+    Route::get('/formations/paiement/succes', 'trainingSuccess')
+        ->name('trainings.payment.success');
 
-    Route::get('/formations/paiement/annulation', 'formationCancel')
-        ->name('formations.payment.cancel');
+    Route::get('/formations/paiement/annulation', 'trainingCancel')
+        ->name('trainings.payment.cancel');
 
 
     /*

@@ -54,7 +54,7 @@ class ServiceController extends Controller
             ->filter(fn($faq) => $faq['question'] !== '' && $faq['answer'] !== '')
             ->values();
 
-        return inertia("frontend/services/index", [
+        return inertia("Frontend/services/index", [
             'services' => $services,
             'contactFaqs' => $contactFaqs,
             'pageContent' => $pageContent,
@@ -73,7 +73,7 @@ class ServiceController extends Controller
             ->latest()
             ->take(6)
             ->get();
-        return inertia('frontend/services/show', [
+        return inertia('Frontend/services/show', [
             'service' => $service,
             'testimonials' => $testimonials,
             'seo' => SeoService::page(
@@ -86,7 +86,7 @@ class ServiceController extends Controller
     public function service_request($slug)
     {
         $service = Service::where('status', 1)->where('slug', $slug)->firstOrFail();
-        return inertia("frontend/services/request", [
+        return inertia("Frontend/services/request", [
             'service' => $service
         ]);
     }

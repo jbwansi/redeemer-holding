@@ -23,8 +23,8 @@ Route::controller(SitemapController::class)
         Route::get('/events.xml', 'events')
             ->name('events');
 
-        Route::get('/formations.xml', 'formations')
-            ->name('formations');
+        Route::get('/trainings.xml', 'trainings')
+            ->name('trainings');
 
         Route::get('/posts.xml', 'posts')
             ->name('posts');

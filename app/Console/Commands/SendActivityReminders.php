@@ -2,13 +2,10 @@
 
 namespace App\Console\Commands;
 
-// use App\Mail\EventReminderMail;
-// use App\Mail\FormationReminderMail;
 use App\Models\EventParticipant;
-use App\Models\FormationParticipant;
+use App\Models\TrainingParticipant;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-// use Illuminate\Support\Facades\Mail;
 use App\Services\DynamicMailerService;
 use App\Mail\ReminderMail;
 
@@ -37,21 +34,21 @@ class SendActivityReminders extends Command
         $daysBefore = max(1, (int) get_setting('reminder_days_before', 1));
         $targetDate = now()->addDays($daysBefore)->format('Y-m-d');
         $eventRemindersEnabled = (bool) get_setting('event_reminder_enabled', true);
-        $formationRemindersEnabled = (bool) get_setting('formation_reminder_enabled', true);
+        $trainingRemindersEnabled = (bool) get_setting('formation_reminder_enabled', true);
         $eventZoomLink = get_setting('event_reminder_zoom_link');
-        $formationZoomLink = get_setting('formation_reminder_zoom_link');
+        $trainingZoomLink = get_setting('formation_reminder_zoom_link');
 
         Log::info('Démarrage de l\'envoi des rappels d\'activités', [
             'date' => now()->format('Y-m-d H:i:s'),
             'target_date' => $targetDate,
             'days_before' => $daysBefore,
             'event_enabled' => $eventRemindersEnabled,
-            'formation_enabled' => $formationRemindersEnabled,
+            'training_enabled' => $trainingRemindersEnabled,
         ]);
 
         try {
             $eventParticipants = collect();
-            $formationParticipants = collect();
+            $trainingParticipants = collect();
 
             // Rappels pour les événements
             if ($eventRemindersEnabled) {
@@ -94,30 +91,30 @@ class SendActivityReminders extends Command
             }
 
             // Rappels pour les formations
-            if ($formationRemindersEnabled) {
+            if ($trainingRemindersEnabled) {
                 Log::info('Recherche des participants aux formations...');
 
-                $formationParticipants = FormationParticipant::with('formation', 'user')
-                    ->whereHas('formation', function ($query) use ($targetDate) {
+                $trainingParticipants = TrainingParticipant::with('training', 'user')
+                    ->whereHas('training', function ($query) use ($targetDate) {
                         $query->whereDate('start_date', $targetDate);
                     })
-                    ->where('status', FormationParticipant::STATUS_COMPLETED)
+                    ->where('status', TrainingParticipant::STATUS_COMPLETED)
                     ->get();
 
                 Log::info('Participants aux formations trouvés', [
-                    'count' => $formationParticipants->count()
+                    'count' => $trainingParticipants->count()
                 ]);
 
-                foreach ($formationParticipants as $participant) {
+                foreach ($trainingParticipants as $participant) {
                     try {
                         Log::info('Envoi du rappel de formation', [
                             'participant_id' => $participant->id,
-                            'formation_id' => $participant->formation_id,
+                            'training_id' => $participant->training_id,
                             'email' => $participant->email,
                             'days_before' => $daysBefore,
                         ]);
 
-                        $this->dynamicMailerService->queue(new ReminderMail('formation', $participant, $daysBefore, $formationZoomLink), $participant->email);
+                        $this->dynamicMailerService->queue(new ReminderMail('training', $participant, $daysBefore, $trainingZoomLink), $participant->email);
 
                         Log::info('Rappel de formation envoyé avec succès', [
                             'participant_id' => $participant->id
@@ -137,7 +134,7 @@ class SendActivityReminders extends Command
             // Résumé de l'exécution
             Log::info('Exécution des rappels terminée', [
                 'total_events' => $eventParticipants->count(),
-                'total_formations' => $formationParticipants->count(),
+                'total_trainings' => $trainingParticipants->count(),
                 'days_before' => $daysBefore,
             ]);
 
@@ -146,7 +143,7 @@ class SendActivityReminders extends Command
                 ['Type', 'Nombre de rappels envoyés'],
                 [
                     ['Événements', $eventParticipants->count()],
-                    ['Formations', $formationParticipants->count()]
+                    ['Formations', $trainingParticipants->count()]
                 ]
             );
         } catch (\Exception $e) {

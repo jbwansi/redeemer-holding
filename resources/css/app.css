@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*, ::after, ::before {
-    font-family: "DM Sans", sans-serif;
+*,
+::after,
+::before {
+  font-family: 'DM Sans', sans-serif;
 }
 
 @layer base {
@@ -16,7 +16,7 @@
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 350 82% 50%;  /* #DF213F */
+    --primary: 350 82% 50%; /* #DF213F */
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
@@ -28,8 +28,8 @@
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 350 82% 50%;  /* #DF213F */
-    --chart-1: 350 82% 50%;  /* #DF213F */
+    --ring: 350 82% 50%; /* #DF213F */
+    --chart-1: 350 82% 50%; /* #DF213F */
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
@@ -37,21 +37,21 @@
     --radius: 0.5rem;
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 350 82% 50%;  /* #DF213F */
+    --sidebar-primary: 350 82% 50%; /* #DF213F */
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 350 82% 50%;  /* #DF213F */
+    --sidebar-ring: 350 82% 50%; /* #DF213F */
 
     /* Tailles de texte uniformisées */
-    --text-xs: 12px;    /* Petit texte (disclaimers, notes) */
-    --text-sm: 14px;    /* Texte secondaire */
-    --text-base: 16px;  /* Texte normal */
-    --text-lg: 18px;    /* Titres de sections */
-    --text-xl: 20px;    /* Sous-titres */
-    --text-2xl: 24px;   /* Titres principaux */
-    --text-3xl: 30px;   /* Grands titres */
+    --text-xs: 12px; /* Petit texte (disclaimers, notes) */
+    --text-sm: 14px; /* Texte secondaire */
+    --text-base: 16px; /* Texte normal */
+    --text-lg: 18px; /* Titres de sections */
+    --text-xl: 20px; /* Sous-titres */
+    --text-2xl: 24px; /* Titres principaux */
+    --text-3xl: 30px; /* Grands titres */
   }
 
   .dark {
@@ -61,7 +61,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 350 82% 50%;  /* #DF213F */
+    --primary: 350 82% 50%; /* #DF213F */
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
@@ -73,20 +73,20 @@
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 350 82% 60%;  /* Lighter #DF213F for dark mode */
-    --chart-1: 350 82% 60%;  /* Lighter #DF213F for dark mode */
+    --ring: 350 82% 60%; /* Lighter #DF213F for dark mode */
+    --chart-1: 350 82% 60%; /* Lighter #DF213F for dark mode */
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 350 82% 60%;  /* Lighter #DF213F for dark mode */
+    --sidebar-primary: 350 82% 60%; /* Lighter #DF213F for dark mode */
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 350 82% 60%;  /* Lighter #DF213F for dark mode */
+    --sidebar-ring: 350 82% 60%; /* Lighter #DF213F for dark mode */
   }
 }
 

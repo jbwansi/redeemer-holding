@@ -80,7 +80,7 @@ class DispatchScheduledNewsletters extends Command
 
             if ($segment === 'formation_participants') {
                 $emails = $emails->merge(
-                    \App\Models\FormationParticipant::query()
+                    \App\Models\TrainingParticipant::query()
                         ->whereNotNull('email')
                         ->pluck('email')
                 );

@@ -3,7 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Services\Payments\Handlers\EventPaymentHandler;
-use App\Services\Payments\Handlers\FormationPaymentHandler;
+use App\Services\Payments\Handlers\TrainingPaymentHandler;
 use App\Services\Payments\Handlers\ServicePaymentHandler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +17,7 @@ class PaymentManager
     {
         return match ($type) {
             'event' => app(EventPaymentHandler::class),
-            'formation' => app(FormationPaymentHandler::class),
+            'formation' => app(TrainingPaymentHandler::class),
             'service' => app(ServicePaymentHandler::class),
             default => abort(404, 'Type de paiement invalide.'),
         };
