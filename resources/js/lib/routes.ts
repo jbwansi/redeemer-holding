@@ -81,7 +81,7 @@ export const dataRoutes = {
       icon: GraduationCap,
       items: [
         {
-          title: 'Liste des trainings',
+          title: 'Liste des formations',
           url: route('trainings.index'),
         },
         {
