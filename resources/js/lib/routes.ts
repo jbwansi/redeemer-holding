@@ -76,7 +76,7 @@ export const dataRoutes = {
       isActive: true,
     },
     {
-      title: 'Trainings',
+      title: 'Formations',
       url: '#',
       icon: GraduationCap,
       items: [
