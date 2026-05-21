@@ -34,7 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { AlertTriangle, Trash2, RefreshCw, AlertCircle } from 'lucide-react';
+import { AlertTriangle, Trash2, RefreshCw } from 'lucide-react';
 import { useForm } from '@inertiajs/react';
 import { toast } from 'sonner';
 
@@ -172,7 +172,7 @@ const DatabaseIndex: React.FC<Props> = ({
               <CardDescription>Exporter la base avant migration ou maintenance.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href={route('database.backup')}>
+              <Link href={route('config.database.backup')}>
                 <Button variant="outline" className="w-full">
                   Accéder aux sauvegardes
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -192,7 +192,7 @@ const DatabaseIndex: React.FC<Props> = ({
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link href={route('database.logs')}>
+              <Link href={route('config.database.logs')}>
                 <Button variant="outline" className="w-full">
                   Voir les journaux
                   <ArrowRight className="h-4 w-4 ml-2" />

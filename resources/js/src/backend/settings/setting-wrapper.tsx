@@ -8,7 +8,7 @@ function SettingWrapper({ children }: any) {
   const tabs = [
     {
       title: 'Application',
-      href: 'settings',
+      href: 'settings.index',
     },
     {
       title: 'SMTP',

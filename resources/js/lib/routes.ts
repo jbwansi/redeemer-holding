@@ -41,7 +41,7 @@ export const LABEL_MAPPING: LabelMappingType = {
   'profile.activities': 'Activités',
   'profile.notifications': 'Notifications',
   'profile.integrations': 'Intégrations',
-  settings: 'Paramètres généraux',
+  'settings.index': 'Paramètres généraux',
 };
 
 // Mapping des routes nommées
@@ -52,7 +52,7 @@ export const ROUTE_MAPPING: RouteMappingType = {
   'profile.activities': 'profile.activities',
   'profile.notifications': 'profile.notifications',
   'profile.integrations': 'profile.integrations',
-  settings: 'settings',
+  'settings.index': 'settings.index',
 };
 
 export const dataRoutes = {
