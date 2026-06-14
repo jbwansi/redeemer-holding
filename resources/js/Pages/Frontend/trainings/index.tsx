@@ -76,7 +76,7 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
 
   return (
     <FrontLayout>
-      <Head title="Trainings" />
+      <Head title="Formations" />
 
       <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pb-20 pt-28 dark:bg-slate-950">
         <div className="pointer-events-none absolute -left-16 -top-20 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
@@ -94,14 +94,13 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-[#0f766e]/30 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-wide text-[#0f766e] shadow-sm dark:bg-slate-900/70">
                 <Sparkles className="h-3.5 w-3.5" />
-                {pageContent.hero_badge || 'Trainings'}
+                {pageContent.hero_badge || 'Formations'}
               </span>
-
               <h1
                 className={`${activeFeatured ? 'max-w-4xl' : 'max-w-5xl'} mt-6 text-4xl font-black leading-tight text-slate-900 md:text-6xl dark:text-white`}
               >
                 {pageContent.hero_title ||
-                  'Passez au niveau supérieur avec des trainings concrètes et actionnables'}
+                  'Passez au niveau supérieur avec des formations concrètes et actionnables'}
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
@@ -114,7 +113,7 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
                   href="#trainings"
                   className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#0f766e]/40 bg-white/80 px-7 py-4 font-bold text-[#0f766e] shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-[#0f766e] hover:text-white dark:bg-slate-900/70"
                 >
-                  Découvrir les trainings
+                  Découvrir les formations
                   <ArrowRight className="h-4 w-4" />
                 </a>
 
@@ -201,7 +200,7 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <h2 className="text-3xl font-black text-slate-900 md:text-4xl dark:text-white">
-                {pageContent.section_title || 'Trainings à venir'}
+                {pageContent.section_title || 'Formations à venir'}
               </h2>
 
               {pageContent.section_subtitle && (
@@ -268,7 +267,7 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
           <section className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8">
             <div className="mb-8 flex items-end justify-between gap-4">
               <h2 className="text-3xl font-black text-slate-900 dark:text-white">
-                Trainings passées
+                Formations passées
               </h2>
 
               <p className="text-sm text-slate-500 dark:text-slate-400">

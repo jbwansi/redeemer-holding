@@ -179,12 +179,12 @@ const WHOM_ICONS = [
 
 // ── Default meta ─────────────────────────────────────────────────────────────
 const defaultMeta: Meta = {
-  hero_badge: 'Training • Coaching • Conseil',
+  hero_badge: 'Formation • Coaching • Conseil',
   hero_title_line1: 'La vie que vous méritez',
   hero_title_line2: 'à portée de main !',
   hero_subtitle:
     'Bienvenue sur le chemin de la transformation par les valeurs. Je vous aide à découvrir votre véritable potentiel et à vivre une vie épanouie.',
-  hero_cta_text: 'Découvrir mes trainings',
+  hero_cta_text: 'Découvrir mes formations',
   hero_cta_url: '',
   hero_images: [],
 
@@ -225,7 +225,7 @@ const defaultMeta: Meta = {
   testimonials_title: 'Ce que disent mes clients',
   testimonials: [],
   blog_title: 'Derniers articles',
-  trainings_title: 'Prochaines trainings',
+  trainings_title: 'Prochaines formations',
   video_enabled: false,
   video_url: '',
   video_title: 'Bienvenue dans mon univers',
@@ -334,7 +334,7 @@ const HomeEdit = ({ page }: { page: Page }) => {
                     <Input
                       value={m.hero_badge ?? ''}
                       onChange={(e) => setMeta({ hero_badge: e.target.value })}
-                      placeholder="Coaching • Training • Accompagnement"
+                      placeholder="Coaching • Formation • Accompagnement"
                     />
                   </div>
 
@@ -1233,15 +1233,15 @@ const HomeEdit = ({ page }: { page: Page }) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground text-sm">
-                  Ces sections affichent des données de la base de données (trainings publiées,
+                  Ces sections affichent des données de la base de données (formations publiées,
                   articles). Vous pouvez personnaliser leur titre.
                 </p>
                 <div>
-                  <Label className="mb-2">Titre section Trainings</Label>
+                  <Label className="mb-2">Titre section Formations</Label>
                   <Input
                     value={m.trainings_title}
                     onChange={(e) => setMeta({ trainings_title: e.target.value })}
-                    placeholder="Prochaines trainings"
+                    placeholder="Prochaines formations"
                   />
                 </div>
                 <div>

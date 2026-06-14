@@ -179,16 +179,16 @@ class TrainingController extends Controller
         }
     }
 
-    public function destroy(Training $formation)
+    public function destroy(Training $training)
     {
         DB::beginTransaction();
         try {
-            if ($formation->featured_image) {
-                $this->imageService->deleteImages($formation->featured_image);
+            if ($training->featured_image) {
+                $this->imageService->deleteImages($training->featured_image);
             }
 
-            $formation->participants()->delete();
-            $formation->delete();
+            $training->participants()->delete();
+            $training->delete();
 
             DB::commit();
             return redirect()->route('trainings.index')->with('success', 'Training supprimée avec succès.');
@@ -212,17 +212,17 @@ class TrainingController extends Controller
 
     public function show($slug)
     {
-        $formation = Training::with(['participants' => function ($query) {
+        $training = Training::with(['participants' => function ($query) {
             $query->where('status', '!=', 'cancelled')
                 ->select('id', 'training_id', 'name', 'status', 'qty', 'created_at');
         }])->where('slug', $slug)->firstOrFail();
 
-        $formation->participant_count = $formation->participants->sum('qty');
-        $formation->is_full = $formation->max_participants !== null && $formation->participant_count >= $formation->max_participants;
+        $training->participant_count = $training->participants->sum('qty');
+        $training->is_full = $training->max_participants !== null && $training->participant_count >= $training->max_participants;
 
         return inertia('backend/trainings/show', [
-            'formation' => $formation,
-            'canRegister' => !$formation->is_full && $formation->is_published && new DateTime($formation->end_date) > new DateTime(),
+            'training' => $training,
+            'canRegister' => !$training->is_full && $training->is_published && new DateTime($training->end_date) > new DateTime(),
         ]);
     }
 

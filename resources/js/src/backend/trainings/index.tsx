@@ -214,7 +214,7 @@ export default function TrainingsIndex({ trainings }: Props) {
       onSuccess: () => {
         setIsDeleteOpen(false);
         setSelectedTraining(null);
-        toast.success('Training supprimée avec succès');
+        toast.success('Formation supprimée avec succès');
       },
       onError: () => {
         toast.error('Erreur lors de la suppression de la formation');
@@ -233,8 +233,8 @@ export default function TrainingsIndex({ trainings }: Props) {
         onSuccess: () => {
           toast.success(
             !training.is_published
-              ? 'Training publiée avec succès'
-              : 'Training dépubliée avec succès'
+              ? 'Formation publiée avec succès'
+              : 'Formation dépubliée avec succès'
           );
         },
         onError: () => {
@@ -258,8 +258,8 @@ export default function TrainingsIndex({ trainings }: Props) {
         <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Trainings</h1>
-            <p className="mt-2 text-white/80">Gérer vos trainings et votre catalogue</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Formations</h1>
+            <p className="mt-2 text-white/80">Gérer vos formations et votre catalogue</p>
           </div>
           <Link href={route('trainings.create')}>
             <Button
@@ -293,14 +293,14 @@ export default function TrainingsIndex({ trainings }: Props) {
               <SelectItem value="all">Tous les statuts</SelectItem>
               <SelectItem value="published">Publié</SelectItem>
               <SelectItem value="draft">Brouillon</SelectItem>
-              <SelectItem value="past">Trainings terminées</SelectItem>
-              <SelectItem value="upcoming">Trainings à venir</SelectItem>
+              <SelectItem value="past">Formations terminées</SelectItem>
+              <SelectItem value="upcoming">Formations à venir</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-          {filteredTrainings.length} résultat{filteredTrainings.length > 1 ? 's' : ''}
+          {filteredTrainings.length} formation{filteredTrainings.length > 1 ? 's' : ''}
         </div>
       </div>
 

@@ -201,7 +201,7 @@ const DashboardContent = ({
         </h2>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Card Trainings */}
+          {/* Card Formations */}
           <motion.div
             className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6"
             initial={{ scale: 0.95, opacity: 0 }}
@@ -209,7 +209,7 @@ const DashboardContent = ({
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Trainings</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Formations</h3>
               <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                 <GraduationCap className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>

@@ -147,7 +147,7 @@ function Dashboard({
       iconColor: 'text-blue-600',
     },
     {
-      title: 'Trainings',
+      title: 'Formations',
       value: stats.trainings.active,
       total: stats.trainings.total,
       icon: BookOpen,

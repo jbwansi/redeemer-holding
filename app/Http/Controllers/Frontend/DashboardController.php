@@ -7,6 +7,7 @@ use App\Http\Resources\Event\EventCollection;
 use App\Http\Resources\Training\TrainingCollection;
 use App\Models\Event;
 use App\Models\Training;
+use App\Models\TrainingParticipant;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -86,6 +87,27 @@ class DashboardController extends Controller
             'trainings' => new TrainingCollection($trainings),
         ]);
     }
+
+    public function trainingAccess($slug)
+    {
+        $training = Training::published()->where('slug', $slug)->firstOrFail();
+
+        $participant = TrainingParticipant::where('training_id', $training->id)
+            ->where('user_id', Auth::id())
+            ->whereNotIn('status', [TrainingParticipant::STATUS_CANCELLED])
+            ->latest('created_at')
+            ->first();
+
+        if (!$participant) {
+            abort(403, 'Accès réservé aux participants inscrits.');
+        }
+
+        return inertia('Frontend/dashboard/clientTrainingAccess', [
+            'training' => $training,
+            'participant' => $participant,
+        ]);
+    }
+
     public function event()
     {
         $userId = Auth::user()->id;

@@ -60,7 +60,7 @@ const TrainingPaymentPage = ({
 
   return (
     <FrontLayout>
-      <Head title={`Paiement - ${formation?.title || 'Training'}`} />
+      <Head title={`Paiement - ${formation?.title || 'Formation'}`} />
 
       <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-24 pb-20 dark:bg-slate-950">
         <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
@@ -116,11 +116,11 @@ const TrainingPaymentPage = ({
 
               <div className="mt-6 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/50">
                 <h3 className="text-sm font-medium uppercase tracking-wide text-slate-500">
-                  Resume
+                  Résumé
                 </h3>
                 <div className="mt-3 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>Training</span>
+                    <span>Formation</span>
                     <span>{formatCurrency(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-slate-500">

@@ -8,8 +8,8 @@ type ChatMessage = {
 };
 
 const quickQuestions = [
-  'Quelles trainings sont disponibles ?',
-  'Comment participer a un evenement ?',
+  'Quelles formations sont disponibles ?',
+  'Comment participer à une formation ?',
   'Comment vous contacter ?',
 ];
 
@@ -33,7 +33,7 @@ const VisitorChatbot = () => {
     {
       id: 'welcome',
       role: 'bot',
-      text: "Bonjour. Je suis l'assistant Redeemer. Je peux vous aider 24h/24 sur les trainings, evenements, services et contacts.",
+      text: "Bonjour. Je suis l'assistant Redeemer. Je peux vous aider 24h/24 sur les formations, evenements, services et contacts.",
     },
   ]);
 

@@ -35,7 +35,7 @@ const TrainingJoin = ({ training, auth }: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    post(route('trainings.register', formation.slug));
+    post(route('trainings.register', training.slug));
   };
 
   // Rendu si la formation est complète
@@ -46,7 +46,7 @@ const TrainingJoin = ({ training, auth }: any) => {
           <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400 mr-3 flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="text-lg font-medium text-red-800 dark:text-red-300 mb-2">
-              Training complète
+              Formation complète
             </h3>
             <p className="text-red-700 dark:text-red-300">
               Toutes les places pour cette formation ont été réservées. Vous pouvez vous inscrire

@@ -21,7 +21,7 @@ const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) 
     ? {
         rows: [
           {
-            label: 'Training',
+            label: 'Formation',
             amount: formatCurrency(formation.price),
           },
           {
@@ -74,7 +74,7 @@ const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) 
 
   return (
     <RegistrationConfirmation
-      pageTitle={`Confirmation - ${formation?.title || 'Training'}`}
+      pageTitle={`Confirmation - ${formation?.title || 'Formation'}`}
       eventTypeLabel="Inscription"
       backHref={route('formations.details', formation.slug)}
       backLabel="Retour formation"

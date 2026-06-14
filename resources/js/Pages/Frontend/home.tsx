@@ -16,7 +16,7 @@ const BlogPreview = lazy(() => import('@/components/frontend/home/blog-preview')
 const CalendlyCTA = lazy(() => import('@/components/frontend/layouts/calendly-cta'));
 
 const defaultHomeMeta = {
-  hero_badge: 'Coaching • Training • Accompagnement',
+  hero_badge: 'Coaching • Formation • Accompagnement',
   hero_title_line1: 'Structurez vos actions',
   hero_title_line2: 'et développez des résultats',
   hero_title_line3: 'durables',
@@ -127,7 +127,7 @@ const defaultHomeMeta = {
   stats: [
     { value: '150+', label: 'Personnes accompagnées' },
     { value: '10+', label: 'Années d’expérience' },
-    { value: '40+', label: 'Trainings et ateliers' },
+    { value: '40+', label: 'Formations et ateliers' },
     { value: '97%', label: 'Taux de satisfaction' },
   ],
   testimonials_title: 'Ce que disent les personnes accompagnées',
@@ -147,7 +147,7 @@ const defaultHomeMeta = {
       image: '',
     },
   ],
-  trainings_title: 'Trainings & ateliers à découvrir',
+  trainings_title: 'Formations & ateliers à découvrir',
   blog_title: 'Articles & réflexions',
   video_enabled: false,
   video_url: '',

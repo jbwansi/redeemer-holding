@@ -31,7 +31,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     {
       id: 'trainings',
       icon: <GraduationCap className="w-5 h-5" />,
-      text: 'Trainings',
+      text: 'Formations',
       href: route('dashboard.client.trainings'),
     },
     {

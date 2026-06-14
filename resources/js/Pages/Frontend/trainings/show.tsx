@@ -4,7 +4,6 @@ import {
   Calendar,
   ChevronLeft,
   Clock,
-  GraduationCap,
   MapPin,
   Users,
   ArrowRight,
@@ -50,10 +49,11 @@ const TrainingDetailPage = ({ training }: any) => {
   const endDate = training?.end_date ? new Date(training.end_date) : null;
   const isPast = endDate ? endDate < now : false;
   const canRegister = !isPast && !training?.is_full && (training?.available_seats ?? 0) > 0;
+  const hasTrainingAccess = !!training?.participant && training.participant.status !== 'cancelled';
 
   return (
     <FrontLayout>
-      <Head title={training?.title || 'Training'} />
+      <Head title={training?.title || 'Formation'} />
 
       <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-24 pb-20 dark:bg-slate-950">
         <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
@@ -64,7 +64,7 @@ const TrainingDetailPage = ({ training }: any) => {
             className="inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-[#0f766e] dark:text-slate-300"
           >
             <ChevronLeft className="h-4 w-4" />
-            Retour aux trainings
+            Retour aux formations
           </Link>
 
           <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
@@ -81,7 +81,7 @@ const TrainingDetailPage = ({ training }: any) => {
 
               <div className="absolute bottom-0 left-0 z-10 w-full p-7 md:p-10">
                 <span className="inline-flex rounded-full bg-[#0f766e] px-3 py-1 text-xs font-medium text-white">
-                  Training
+                  Formation
                 </span>
                 <h1 className="mt-4 max-w-3xl text-3xl font-semibold text-white md:text-5xl">
                   {training?.title}
@@ -147,6 +147,42 @@ const TrainingDetailPage = ({ training }: any) => {
                     {training?.price > 0 ? `${training.price} CHF` : 'Gratuit'}
                   </p>
                 </div>
+
+                {training?.meeting_link && (
+                  <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+                    <p className="text-xs uppercase tracking-wide text-slate-500">Accès en ligne</p>
+                    <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">
+                      Cette formation propose un accès en ligne. Rejoignez la session avec le lien ci-dessous.
+                    </p>
+                    <a
+                      href={training.meeting_link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-4 inline-flex items-center rounded-xl bg-[#0f766e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#115e59]"
+                    >
+                      Rejoindre la session
+                    </a>
+                  </div>
+                )}
+
+                {hasTrainingAccess && (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/30">
+                    <p className="text-xs uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
+                      E-learning réservé
+                    </p>
+                    <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">
+                      Vous êtes inscrit à cette formation. Accédez aux contenus exclusifs et aux ressources en ligne.
+                    </p>
+                    <Link
+                      href={route('dashboard.client.trainings.access', {
+                        slug: training.slug,
+                      })}
+                      className="mt-4 inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                    >
+                      Accéder au e-learning
+                    </Link>
+                  </div>
+                )}
 
                 {isPast && (
                   <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300">

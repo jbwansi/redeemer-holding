@@ -65,7 +65,7 @@ const Footer = () => {
       links: [
         { name: 'Coaching individuel', href: route('services', { focus: 'coaching' }) },
         { name: 'Consultation', href: route('services', { focus: 'consultation' }) },
-        { name: 'Training en groupe', href: route('services', { focus: 'formation' }) },
+        { name: 'Formation en groupe', href: route('services', { focus: 'formation' }) },
         { name: 'Webinaires', href: route('services', { focus: 'webinaire' }) },
         { name: 'Ressources gratuites', href: route('services', { focus: 'ressources' }) },
       ],
@@ -168,7 +168,7 @@ const Footer = () => {
                     {settings?.app_name || 'Redeemer Holding'}
                   </span>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 tracking-wider uppercase">
-                    Training & Coaching
+                    Formation & Coaching
                   </span>
                 </div>
               </div>

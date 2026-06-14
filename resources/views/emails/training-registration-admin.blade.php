@@ -10,7 +10,7 @@
 <body>
     <h2>Nouvelle inscription à la formation</h2>
 
-    <p><strong>Training :</strong> {{ $formation->title }}</p>
+    <p><strong>Formation :</strong> {{ $formation->title }}</p>
     <p><strong>Participant :</strong> {{ $participant->name }} ({{ $participant->email }})</p>
     <p><strong>Téléphone :</strong> {{ $participant->phone ?? 'Non renseigné' }}</p>
     <p><strong>Nombre de places :</strong> {{ $participant->qty }}</p>

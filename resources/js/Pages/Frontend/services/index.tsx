@@ -284,7 +284,7 @@ function ServicesPage({
                 { key: 'all', label: 'Tous' },
                 { key: 'coaching', label: 'Coaching' },
                 { key: 'consultation', label: 'Consultation' },
-                { key: 'formation', label: 'Training groupe' },
+              { key: 'formation', label: 'Formation en groupe' },
                 { key: 'webinaire', label: 'Webinaires' },
                 { key: 'ressources', label: 'Ressources' },
               ].map((item) => (

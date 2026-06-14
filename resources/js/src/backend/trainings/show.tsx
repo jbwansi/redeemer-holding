@@ -27,9 +27,10 @@ interface Training {
 }
 
 const ShowTraining = ({ training }: { training: Training }) => {
+  const displayedTraining = training;
   const safeContent = React.useMemo(
-    () => DOMPurify.sanitize(training.content || ''),
-    [training.content]
+    () => DOMPurify.sanitize(displayedTraining.content || ''),
+    [displayedTraining?.content]
   );
 
   const formatDate = (date: string) => {
@@ -56,12 +57,12 @@ const ShowTraining = ({ training }: { training: Training }) => {
           <div>
             <p className="text-xs uppercase tracking-wide text-white/75">Détail formation</p>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight mt-1">
-              {training.title}
+              {displayedTraining.title}
             </h1>
-            <p className="mt-2 text-white/80 max-w-2xl">{training.excerpt}</p>
+            <p className="mt-2 text-white/80 max-w-2xl">{displayedTraining.excerpt}</p>
           </div>
           <Badge variant="secondary" className="w-fit text-slate-900 bg-white/95">
-            {training.is_published ? 'Publié' : 'Brouillon'}
+            {displayedTraining.is_published ? 'Publié' : 'Brouillon'}
           </Badge>
         </div>
       </div>
@@ -70,8 +71,8 @@ const ShowTraining = ({ training }: { training: Training }) => {
         <div className="lg:col-span-2 space-y-6">
           <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-100 dark:border-slate-700/60 dark:bg-slate-900/50">
             <img
-              src={training.featured_image.large}
-              alt={training.title}
+              src={displayedTraining.featured_image.large}
+              alt={displayedTraining.title}
               className="object-cover w-full h-full"
             />
           </div>
@@ -81,7 +82,7 @@ const ShowTraining = ({ training }: { training: Training }) => {
               <div className="flex items-center gap-2 mb-4">
                 <GraduationCap className="h-5 w-5 text-red-600" />
                 <Badge variant="outline" className="text-red-600 border-red-200">
-                  Training
+                  Formation
                 </Badge>
               </div>
               <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
@@ -105,30 +106,30 @@ const ShowTraining = ({ training }: { training: Training }) => {
             <CardContent className="p-6 space-y-6">
               <div className="flex items-center justify-between">
                 <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                  {parseInt(training.price).toLocaleString()} CHF
+                  {parseInt(displayedTraining.price).toLocaleString()} CHF
                 </span>
                 <Badge variant="outline" className="text-xs">
-                  {training.is_full ? 'Complet' : 'Ouvert'}
+                  {displayedTraining.is_full ? 'Complet' : 'Ouvert'}
                 </Badge>
               </div>
 
               <Button
                 className="w-full rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700"
                 size="lg"
-                variant={training.is_full ? 'outline' : 'default'}
+                variant={displayedTraining.is_full ? 'outline' : 'default'}
                 asChild
               >
-                <InertiaLink href={route('trainings.participants', training.slug)}>
-                  Voir les inscrits ({training.participant_count || 0} /{' '}
-                  {training.max_participants})
+                <InertiaLink href={route('trainings.participants', displayedTraining.slug)}>
+                  Voir les inscrits ({displayedTraining.participant_count || 0} /{' '}
+                  {displayedTraining.max_participants})
                 </InertiaLink>
               </Button>
 
               {/* Bouton pour rejoindre le meeting si le lien existe */}
-              {training.meeting_link && (
+              {displayedTraining.meeting_link && (
                 <Button className="w-full rounded-xl" size="lg" variant="outline" asChild>
                   <a
-                    href={training.meeting_link}
+                    href={displayedTraining.meeting_link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2"
@@ -147,7 +148,7 @@ const ShowTraining = ({ training }: { training: Training }) => {
                   <div>
                     <p className="font-medium">Date de début</p>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {formatDate(training.start_date)}
+                      {formatDate(displayedTraining.start_date)}
                     </p>
                   </div>
                 </div>
@@ -157,7 +158,7 @@ const ShowTraining = ({ training }: { training: Training }) => {
                   <div>
                     <p className="font-medium">Date de fin</p>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {formatDate(training.end_date)}
+                      {formatDate(displayedTraining.end_date)}
                     </p>
                   </div>
                 </div>
@@ -167,7 +168,7 @@ const ShowTraining = ({ training }: { training: Training }) => {
                   <div>
                     <p className="font-medium">Horaires</p>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {formatTime(training.start_date)} -{formatTime(training.end_date)}
+                      {formatTime(displayedTraining.start_date)} -{formatTime(displayedTraining.end_date)}
                     </p>
                   </div>
                 </div>
@@ -176,7 +177,7 @@ const ShowTraining = ({ training }: { training: Training }) => {
                   <MapPin className="h-5 w-5 text-slate-500 mt-1" />
                   <div>
                     <p className="font-medium">Lieu</p>
-                    <p className="text-slate-600 dark:text-slate-400">{training.location}</p>
+                    <p className="text-slate-600 dark:text-slate-400">{displayedTraining.location}</p>
                   </div>
                 </div>
 
@@ -185,24 +186,24 @@ const ShowTraining = ({ training }: { training: Training }) => {
                   <div>
                     <p className="font-medium">Participants</p>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {training.max_participants} places maximum
+                      {displayedTraining.max_participants} places maximum
                     </p>
                   </div>
                 </div>
 
                 {/* Affichage du lien de meeting s'il existe */}
-                {training.meeting_link && (
+                {displayedTraining.meeting_link && (
                   <div className="flex items-start gap-3">
                     <Link className="h-5 w-5 text-slate-500 mt-1" />
                     <div>
                       <p className="font-medium">Lien de meeting</p>
                       <a
-                        href={training.meeting_link}
+                        href={displayedTraining.meeting_link}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-slate-600 dark:text-slate-400 hover:text-red-600 underline break-all"
                       >
-                        {training.meeting_link}
+                        {displayedTraining.meeting_link}
                       </a>
                     </div>
                   </div>

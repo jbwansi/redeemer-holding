@@ -62,9 +62,19 @@ class TrainingController extends Controller
         $training = Training::published()->where('slug', $slug)->firstOrFail();
         $training->incrementViews();
 
+        $participant = null;
+        if (auth()->check()) {
+            $participant = TrainingParticipant::where('training_id', $training->id)
+                ->where('user_id', auth()->id())
+                ->whereNotIn('status', [TrainingParticipant::STATUS_CANCELLED])
+                ->latest('created_at')
+                ->first();
+        }
+
         $trainingImage = SeoService::firstImageUrl($training->featured_image ?? []);
         return inertia('Frontend/trainings/show', [
             'training' => $training,
+            'participant' => $participant,
             'seo' => SeoService::page(
                 $training->title ?? $training->name ?? '',
                 $training->description ?? $training->excerpt ?? '',

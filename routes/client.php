@@ -56,6 +56,9 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/events', 'event')
                 ->name('events');
 
+            Route::get('/trainings/{slug}/acces', 'trainingAccess')
+                ->name('trainings.access');
+
             Route::get('/account', 'account')
                 ->name('account');
         });

@@ -738,7 +738,7 @@ const AboutEdit = ({ page }: { page: Page }) => {
                         <div className="md:col-span-3">
                           <Label className="mb-1 text-xs">Titre</Label>
                           <Input
-                            placeholder="Training initiale"
+                            placeholder="Formation initiale"
                             value={j.title}
                             onChange={(e) =>
                               setMeta({

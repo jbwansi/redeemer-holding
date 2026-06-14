@@ -44,7 +44,7 @@ const defaultContactMeta = {
   subjects: [
     { value: 'coaching', label: 'Coaching individuel' },
     { value: 'consultation', label: 'Consultation' },
-    { value: 'formation', label: 'Training en groupe' },
+    { value: 'formation', label: 'Formation en groupe' },
     { value: 'partenariat', label: 'Partenariat' },
     { value: 'autre', label: 'Autre demande' },
   ],

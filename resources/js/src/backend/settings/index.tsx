@@ -400,9 +400,9 @@ const Settings = () => {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label className="text-base font-semibold">Rappels trainings</Label>
+                        <Label className="text-base font-semibold">Rappels formations</Label>
                         <p className="text-sm text-muted-foreground">
-                          Envoyer des rappels avant les trainings
+                          Envoyer des rappels avant les formations
                         </p>
                       </div>
                       <Switch

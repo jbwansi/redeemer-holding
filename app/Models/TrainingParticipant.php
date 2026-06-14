@@ -57,16 +57,6 @@ class TrainingParticipant extends Model
         return $this->belongsTo(Training::class, 'training_id');
     }
 
-    public function getTrainingIdAttribute()
-    {
-        return $this->training_id;
-    }
-
-    public function setTrainingIdAttribute($value)
-    {
-        $this->attributes['training_id'] = $value;
-    }
-
     /**
      * Relation avec l'utilisateur (si connecté)
      */

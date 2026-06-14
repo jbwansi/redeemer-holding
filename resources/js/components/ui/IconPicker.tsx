@@ -36,7 +36,7 @@ const COACHING_OPTIONS = [
   { value: 'lightbulb', label: 'Idees' },
   { value: 'heart', label: 'Bien-etre' },
   { value: 'handshake', label: 'Partenariat' },
-  { value: 'graduationCap', label: 'Training' },
+  { value: 'graduationCap', label: 'Formation' },
   { value: 'lineChart', label: 'Progression' },
   { value: 'compass', label: 'Orientation' },
   { value: 'rocket', label: 'Croissance' },

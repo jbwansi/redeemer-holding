@@ -372,7 +372,7 @@ export function Navbar({ title }: NavbarProps) {
               )}
 
               {globalResults.trainings.length > 0 && (
-                <CommandGroup heading="Trainings">
+                <CommandGroup heading="Formations">
                   {globalResults.trainings.map((item) => (
                     <CommandItem key={`formation-${item.id}`}>
                       <Link

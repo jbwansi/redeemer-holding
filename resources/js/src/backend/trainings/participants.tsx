@@ -104,7 +104,7 @@ const TrainingParticipants = ({
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Participants Training
+              Participants de la formation
             </h1>
             <p className="mt-2 text-white/80">
               {formation.title} • {formation.participant_count} participant

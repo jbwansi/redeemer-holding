@@ -33,9 +33,9 @@ const defaultMeta: Meta = {
   enabled: true,
   title: 'Assistant Redeemer',
   welcome_message:
-    "Bonjour. Je suis l'assistant Redeemer. Je peux vous aider 24h/24 sur les trainings, evenements, services et contacts.",
+    "Bonjour. Je suis l'assistant Redeemer. Je peux vous aider 24h/24 sur les formations, evenements, services et contacts.",
   quick_questions: [
-    'Quelles trainings sont disponibles ?',
+    'Quelles formations sont disponibles ?',
     'Comment participer a un evenement ?',
     'Comment vous contacter ?',
   ],

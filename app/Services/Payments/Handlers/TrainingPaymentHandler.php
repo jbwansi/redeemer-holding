@@ -151,10 +151,10 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                 throw new \Exception("Le paiement n'a pas été effectué.");
             }
 
-            $participant = TrainingParticipant::with('formation')
+            $participant = TrainingParticipant::with('training')
                 ->findOrFail($session->client_reference_id);
 
-            $formation = $participant->formation;
+            $formation = $participant->training;
 
             $this->markAsPaid($participant, $session);
             $this->sendInvoice($formation, $participant);
@@ -179,16 +179,15 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         $participantId = $request->get('participant_id');
 
         if ($participantId) {
-            $participant = TrainingParticipant::with('formation')->find($participantId);
+            $participant = TrainingParticipant::with('training')->find($participantId);
 
             if ($participant) {
-                if ($participant->status === TrainingParticipant::STATUS_IN_PROGRESS) {
                     $participant->update([
                         'status' => TrainingParticipant::STATUS_PENDING,
                     ]);
                 }
 
-                return redirect()->route('formations.details', $participant->formation->slug)
+                return redirect()->route('formations.details', $participant->training->slug)
                     ->with('info', 'Votre paiement a été annulé. Vous pouvez réessayer à tout moment.');
             }
         }
@@ -211,7 +210,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             return;
         }
 
-        $participant = TrainingParticipant::with('formation')->find($participantId);
+        $participant = TrainingParticipant::with('training')->find($participantId);
 
         if (!$participant) {
             Log::error('Participant formation introuvable.', [
@@ -227,7 +226,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
             // Optionnel : éviter double envoi si success() a déjà envoyé la facture.
             if (!$participant->wasRecentlyCreated) {
-                $this->sendInvoice($participant->formation, $participant);
+                $this->sendInvoice($participant->training, $participant);
             }
         }
     }

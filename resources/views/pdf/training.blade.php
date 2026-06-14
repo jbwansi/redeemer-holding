@@ -259,7 +259,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>Training - {{ $formation->title }}</td>
+                    <td>Formation - {{ $formation->title }}</td>
                     <td>1</td>
                     <td>{{ number_format($formation->price, 2, '.', "'") }} CHF</td>
                     <td>{{ number_format($subtotal, 2, '.', "'") }} CHF</td>

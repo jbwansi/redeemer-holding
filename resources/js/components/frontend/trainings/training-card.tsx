@@ -79,7 +79,7 @@ const TrainingCard = ({ formation }: any) => {
           <div className="absolute top-4 left-4">
             <span className="px-3 py-1 bg-white/90 dark:bg-gray-900/90 text-primary text-sm font-medium rounded-full flex items-center">
               <GraduationCap className="w-3 h-3 mr-1" />
-              Training
+              Formation
             </span>
           </div>
 

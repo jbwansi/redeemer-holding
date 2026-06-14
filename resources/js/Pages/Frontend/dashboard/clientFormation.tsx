@@ -223,10 +223,10 @@ const ClientTrainings = ({ trainings }: any) => {
             </p>
             <h1 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight flex items-center">
               <GraduationCap className="w-6 h-6 mr-3 text-red-300" />
-              Mes Trainings
+              Mes Formations
             </h1>
             <p className="mt-2 text-sm md:text-base text-white/80 max-w-2xl">
-              Suivez vos trainings en cours, les sessions a venir et votre historique depuis une
+              Suivez vos formations en cours, les sessions à venir et votre historique depuis une
               interface claire.
             </p>
           </div>
@@ -340,7 +340,7 @@ const ClientTrainings = ({ trainings }: any) => {
               href={route('trainings')}
               className="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
             >
-              Explorer toutes les trainings
+              Explorer toutes les formations
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>

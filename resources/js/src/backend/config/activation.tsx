@@ -72,8 +72,8 @@ const Activation = () => {
       icon: <Home className="h-5 w-5" />,
       features: [
         {
-          name: 'Trainings',
-          description: 'Module principal des trainings',
+          name: 'Formations',
+          description: 'Module principal des formations',
           enabled: data.enable_radio,
           key: 'enable_radio',
           icon: <BookOpen className="h-4 w-4" />,

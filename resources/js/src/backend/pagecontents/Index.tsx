@@ -9,7 +9,7 @@ import { Save } from 'lucide-react';
 
 const pages = [
   { key: 'services', label: 'Services' },
-  { key: 'trainings', label: 'Trainings' },
+  { key: 'trainings', label: 'Formations' },
   { key: 'events', label: 'Événements' },
 ];
 
