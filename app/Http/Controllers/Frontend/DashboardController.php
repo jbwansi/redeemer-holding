@@ -70,7 +70,7 @@ class DashboardController extends Controller
         return inertia('Frontend/dashboard/index', $data);
     }
 
-    public function formation()
+    public function training()
     {
         $userId = Auth::user()->id;
 
@@ -80,7 +80,14 @@ class DashboardController extends Controller
             }
         ])
             ->whereHas('participants', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
+                $query->where('user_id', $userId)
+                    ->where('status', TrainingParticipant::STATUS_COMPLETED)
+                    ->where(function ($participantQuery) {
+                        $participantQuery->where('payment_confirmed', true)
+                            ->orWhereHas('training', function ($trainingQuery) {
+                                $trainingQuery->where('price', '<=', 0);
+                            });
+                    });
             })
             ->get();
         return inertia('Frontend/dashboard/clientTraining', [
@@ -92,14 +99,20 @@ class DashboardController extends Controller
     {
         $training = Training::published()->where('slug', $slug)->firstOrFail();
 
-        $participant = TrainingParticipant::where('training_id', $training->id)
+        $participantQuery = TrainingParticipant::where('training_id', $training->id)
             ->where('user_id', Auth::id())
-            ->whereNotIn('status', [TrainingParticipant::STATUS_CANCELLED])
+            ->where('status', TrainingParticipant::STATUS_COMPLETED);
+
+        if ((float) $training->price > 0) {
+            $participantQuery->where('payment_confirmed', true);
+        }
+
+        $participant = $participantQuery
             ->latest('created_at')
             ->first();
 
         if (!$participant) {
-            abort(403, 'Accès réservé aux participants inscrits.');
+            abort(403, 'Accès réservé aux participants ayant finalisé le paiement.');
         }
 
         return inertia('Frontend/dashboard/clientTrainingAccess', [

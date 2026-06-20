@@ -21,6 +21,10 @@ class DatabaseSeeder extends Seeder
             PostSeeder::class,
             EventSeeder::class,
             TrainingSeeder::class,
+            TrainingLessonSeeder::class,
+            TrainingResourceSeeder::class,
+            TrainingProgressSeeder::class,
+            TrainingEnrollmentSeeder::class,
         ]);
 
         if (app()->environment(['local', 'staging', 'testing'])) {

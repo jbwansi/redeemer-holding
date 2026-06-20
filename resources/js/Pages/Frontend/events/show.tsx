@@ -7,7 +7,6 @@ import {
   MapPin,
   Users,
   ArrowRight,
-  CheckCircle,
   Ticket,
 } from 'lucide-react';
 import { route } from 'ziggy-js';

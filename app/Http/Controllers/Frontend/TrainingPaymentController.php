@@ -144,6 +144,7 @@ class TrainingPaymentController extends Controller
                 'payment_id' => $session->payment_intent,
                 'payment_amount' => $session->amount_total / 100,
                 'payment_date' => now(),
+                'payment_confirmed' => true,
             ]);
 
             $invoiceData = [
@@ -256,6 +257,7 @@ class TrainingPaymentController extends Controller
                 'payment_id' => $session->payment_intent,
                 'payment_amount' => $session->amount_total / 100,
                 'payment_date' => now(),
+                'payment_confirmed' => true,
             ]);
         }
     }

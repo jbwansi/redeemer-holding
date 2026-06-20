@@ -88,6 +88,12 @@ class DashboardController extends Controller
         ]);
     }
 
+      public function training()
+    {
+         return redirect()->route('learning.index');
+    }   
+
+
     private function getQueueHealth(): array
     {
         $driver = (string) config('queue.default');

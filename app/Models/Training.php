@@ -206,5 +206,38 @@ class Training extends Model
     {
         $this->increment('views');
     }
+
+    public function lessons()
+    {
+        return $this->hasMany(TrainingLesson::class)
+            ->orderBy('sort_order');
+    }
+
+    public function sections()
+    {
+        return $this->hasMany(TrainingSection::class)
+            ->orderBy('sort_order');
+    }
+
+    public function progressPercentage(User $user): int
+    {
+        $totalLessons = $this->lessons()->count();
+
+        if ($totalLessons === 0) {
+            return 0;
+        }
+
+        $completedLessons = TrainingProgress::where('user_id', $user->id)
+            ->where('training_id', $this->id)
+            ->where(
+                'completed',
+                true
+            )
+            ->count();
+
+        return (int) round(
+            ($completedLessons / $totalLessons) * 100
+        );
+    }
 }
 

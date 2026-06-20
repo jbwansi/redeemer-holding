@@ -1,6 +1,5 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Link } from '@inertiajs/react';
-import { ArrowLeft, Download, Mail, Phone, Eye, GraduationCap } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowLeft, Download, Mail, Phone, Eye } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -56,11 +55,11 @@ interface Meta {
 }
 
 const TrainingParticipants = ({
-  formation,
+  training,
   participants,
   meta,
 }: {
-  formation: Training;
+  training: Training;
   participants: Participant[];
   meta: Meta;
 }) => {
@@ -91,8 +90,8 @@ const TrainingParticipants = ({
   };
 
   const getPaymentAmount = (participant: Participant) => {
-    if (participant.status !== 'completed' || !formation.price) return '-';
-    const subtotal = formation.price * participant.qty;
+    if (participant.status !== 'completed' || !training.price) return '-';
+    const subtotal = training.price * participant.qty;
     const serviceFee = subtotal * 0.05;
     return `${(subtotal + serviceFee).toLocaleString('fr-CH')} CHF`;
   };
@@ -107,8 +106,8 @@ const TrainingParticipants = ({
               Participants de la formation
             </h1>
             <p className="mt-2 text-white/80">
-              {formation.title} • {formation.participant_count} participant
-              {formation.participant_count > 1 ? 's' : ''}
+              {training.title} • {training.participant_count} participant
+              {training.participant_count > 1 ? 's' : ''}
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -124,7 +123,7 @@ const TrainingParticipants = ({
               variant="outline"
               className="rounded-xl bg-white text-slate-900 hover:bg-slate-100"
               onClick={() =>
-                (window.location.href = route('trainings.participants.export', formation.slug))
+                (window.location.href = route('trainings.participants.export', training.slug))
               }
             >
               <Download className="h-4 w-4 mr-2" />
@@ -137,7 +136,7 @@ const TrainingParticipants = ({
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{formation.participant_count}</div>
+            <div className="text-2xl font-bold">{training.participant_count}</div>
             <div className="text-sm text-muted-foreground">Total participants</div>
           </CardContent>
         </Card>
@@ -160,7 +159,7 @@ const TrainingParticipants = ({
         <Card className="border-slate-200/80 bg-white/95 dark:border-slate-700/60 dark:bg-slate-900/70">
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">
-              {formation.max_participants - formation.participant_count}
+              {training.max_participants - training.participant_count}
             </div>
             <div className="text-sm text-muted-foreground">Places restantes</div>
           </CardContent>
@@ -256,7 +255,7 @@ const TrainingParticipants = ({
                         <DropdownMenuItem
                           onClick={() =>
                             (window.location.href = route('trainings.participants.show', [
-                              formation.slug,
+                              training.slug,
                               participant.id,
                             ]))
                           }
@@ -268,7 +267,7 @@ const TrainingParticipants = ({
                           <DropdownMenuItem
                             onClick={() =>
                               (window.location.href = route('trainings.participants.invoice', [
-                                formation.slug,
+                                training.slug,
                                 participant.reference,
                               ]))
                             }

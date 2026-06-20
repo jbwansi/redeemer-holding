@@ -8,6 +8,7 @@ import { Link as InertiaLink } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 interface Training {
+  id: number;
   title: string;
   excerpt: string;
   content: string;
@@ -26,7 +27,7 @@ interface Training {
   is_full?: boolean;
 }
 
-const ShowTraining = ({ training }: { training: Training }) => {
+const ShowTraining = ({ training, }: { training: Training }) => {
   const displayedTraining = training;
   const safeContent = React.useMemo(
     () => DOMPurify.sanitize(displayedTraining.content || ''),
@@ -122,6 +123,28 @@ const ShowTraining = ({ training }: { training: Training }) => {
                 <InertiaLink href={route('trainings.participants', displayedTraining.slug)}>
                   Voir les inscrits ({displayedTraining.participant_count || 0} /{' '}
                   {displayedTraining.max_participants})
+                </InertiaLink>
+              </Button>
+
+              <Button variant="outline" className="w-full rounded-xl" size="lg" asChild>
+                <InertiaLink
+                  href={route('trainings.sections.index', {
+                    training: displayedTraining.id,
+                  })}
+                >
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Gérer les modules
+                </InertiaLink>
+              </Button>
+
+              <Button variant="outline" className="w-full rounded-xl" size="lg" asChild>
+                <InertiaLink
+                  href={route('trainings.lessons.index', {
+                    training: displayedTraining.id,
+                  })}
+                >
+                  <GraduationCap className="h-4 w-4 mr-2" />
+                  Gérer les leçons
                 </InertiaLink>
               </Button>
 

@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LearningController;
+use App\Http\Controllers\LearningQuizController;
+use App\Http\Controllers\LearningResourceController;
+use App\Http\Controllers\TrainingProgressController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +62,25 @@ Route::middleware(['guest'])->group(function () {
 | Authenticated Routes
 |--------------------------------------------------------------------------
 */
+
+Route::middleware(['auth', 'active'])
+    ->prefix('learning')
+    ->name('learning.')
+    ->group(function () {
+        Route::get('/', [LearningController::class, 'index'])->name('index');
+        Route::get('/{training}', [LearningController::class, 'show'])->name('show');
+        Route::get('/{training}/lessons/{lesson}', [LearningController::class, 'lesson'])->name('lesson');
+        Route::get('/{training}/sections/{section}/quiz', [LearningQuizController::class, 'show'])->name('quiz.show');
+        Route::post('/{training}/sections/{section}/quiz', [LearningQuizController::class, 'submit'])->name('quiz.submit');
+
+        Route::post('/{training}/lessons/{lesson}/complete', [TrainingProgressController::class, 'complete'])
+            ->name('lessons.complete');
+        Route::post('/{training}/lessons/{lesson}/uncomplete', [TrainingProgressController::class, 'uncomplete'])
+            ->name('lessons.uncomplete');
+
+        Route::get('/resources/{resource}/download', [LearningResourceController::class, 'download'])
+            ->name('resources.download');
+    });
 
 Route::middleware(['auth'])->group(function () {
 

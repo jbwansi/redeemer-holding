@@ -19,5 +19,4 @@ Route::post('/chatbot/lead', [ChatbotController::class, 'lead'])
     ->middleware('throttle:20,1')
     ->name('api.chatbot.lead');
 
-// Google Analytics visitors by country
-Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::class, 'visitorsByCountry']);
+
