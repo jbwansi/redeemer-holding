@@ -309,8 +309,8 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::get('/export', 'export')->name('export');
             });
 
-            // Google Analytics visitors by country
-Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::class, 'visitorsByCountry']);
+        // Google Analytics visitors by country
+        Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::class, 'visitorsByCountry']);
 
 
         /*
@@ -383,6 +383,12 @@ Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::c
                 Route::get('/{slug}/participants/{participant}', [TrainingController::class, 'showParticipant'])->name('participants.show');
                 Route::get('/{slug}/facture/{reference}', [TrainingController::class, 'downloadInvoice'])->name('participants.invoice');
 
+                Route::post('/import-json', [TrainingController::class, 'importJson'])
+                    ->name('import-json');
+
+                Route::post('/{training}/import-sections', [TrainingController::class, 'importSections'])
+                    ->name('import-sections');
+
                 Route::get('/{training}/sections', [TrainingSectionController::class, 'index'])
                     ->name('sections.index');
 
@@ -408,20 +414,28 @@ Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::c
                 Route::put('/{training}/sections/{section}/quiz', [TrainingQuizController::class, 'update'])
                     ->name('sections.quiz.update');
 
-                Route::post('/trainings/{training}/lessons/{lesson}/complete', [TrainingProgressController::class, 'complete'])
-                    ->name('trainings.lessons.complete');
+                Route::post('/{training}/lessons/{lesson}/complete', [TrainingProgressController::class, 'complete'])
+                    ->name('lessons.complete');
 
-                Route::post('/trainings/{training}/lessons/{lesson}/uncomplete', [TrainingProgressController::class, 'uncomplete'])
-                    ->name('trainings.lessons.uncomplete');
+                Route::post('/{training}/lessons/{lesson}/uncomplete', [TrainingProgressController::class, 'uncomplete'])
+                    ->name('lessons.uncomplete');
 
-                Route::get('/{training}/lessons', [TrainingLessonController::class, 'index'])->name('lessons.index');
-                Route::get('/{training}/lessons/create', [TrainingLessonController::class, 'create'])->name('lessons.create');
-                Route::post('/{training}/lessons', [TrainingLessonController::class, 'store'])->name('lessons.store');
-                Route::get('/{training}/lessons/{lesson}', [TrainingLessonController::class, 'show'])->name('lessons.show');
-                Route::get('/{training}/lessons/{lesson}/edit', [TrainingLessonController::class, 'edit'])->name('lessons.edit');
-                Route::put('/{training}/lessons/{lesson}', [TrainingLessonController::class, 'update'])->name('lessons.update');
-                Route::delete('/{training}/lessons/{lesson}', [TrainingLessonController::class, 'destroy'])->name('lessons.destroy');
+                Route::prefix('/{training}/sections/{section}/lessons')
+                    ->name('sections.lessons.')
+                    ->group(function () {
+                        Route::get('/create', [TrainingLessonController::class, 'create'])->name('create');
+                        Route::post('/', [TrainingLessonController::class, 'store'])->name('store');
+                        Route::get('/{lesson}', [TrainingLessonController::class, 'show'])->name('show');
+                        Route::get('/{lesson}/edit', [TrainingLessonController::class, 'edit'])->name('edit');
+                        Route::put('/{lesson}', [TrainingLessonController::class, 'update'])->name('update');
+                        Route::delete('/{lesson}', [TrainingLessonController::class, 'destroy'])->name('destroy');
+                    });
 
+                Route::post('/{training}/sections/reorder', [TrainingSectionController::class, 'reorder'])
+                    ->name('sections.reorder');
+
+                Route::post('/{training}/sections/{section}/lessons/reorder', [TrainingLessonController::class, 'reorder'])
+                    ->name('sections.lessons.reorder');
                 Route::get('/{training}/lessons/{lesson}/resources', [TrainingResourceController::class, 'index'])->name('lessons.resources.index');
                 Route::get('/{training}/lessons/{lesson}/resources/create', [TrainingResourceController::class, 'create'])->name('lessons.resources.create');
                 Route::post('/{training}/lessons/{lesson}/resources', [TrainingResourceController::class, 'store'])->name('lessons.resources.store');
@@ -440,49 +454,7 @@ Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::c
                 Route::get('/{training}/edit', [TrainingController::class, 'edit'])->name('edit');
                 Route::post('/{training}', [TrainingController::class, 'update'])->name('update');
                 Route::delete('/{training}', [TrainingController::class, 'destroy'])->name('destroy');
-
             });
-
-        // Route::prefix('trainings')
-        //     ->name('trainings.')
-        //     ->controller(TrainingController::class)
-        //     ->group(function () {
-        //         Route::get('/trash', 'trash')->name('trash');
-
-        //         Route::get('/participants/{slug}', 'participants')->name('participants');
-        //         Route::get('/participants/{slug}/export', 'exportParticipantsCsv')->name('participants.export');
-        //         Route::get('/{slug}/participants/{participant}', 'showParticipant')->name('participants.show');
-        //         Route::get('/{slug}/facture/{reference}', 'downloadInvoice')->name('participants.invoice');
-
-        //         Route::get('/', 'index')->name('index');
-        //         Route::get('/create', 'create')->name('create');
-        //         Route::post('/', 'store')->name('store');
-
-        //         Route::patch('/{training}/toggle-publish', 'togglePublish')->name('toggle-publish');
-
-        //         Route::get('/{training}', 'show')->name('show');
-        //         Route::get('/{training}/edit', 'edit')->name('edit');
-        //         Route::post('/{training}', 'update')->name('update');
-        //         Route::delete('/{training}', 'destroy')->name('destroy');
-
-        //         Route::get('{training}/lessons', [TrainingLessonController::class, 'index'])
-        //             ->name('lessons.index');
-
-        //         Route::get('{training}/lessons/create', [TrainingLessonController::class, 'create'])
-        //             ->name('lessons.create');
-
-        //         Route::post('{training}/lessons', [TrainingLessonController::class, 'store'])
-        //             ->name('lessons.store');
-
-        //         Route::get('{training}/lessons/{lesson}/edit', [TrainingLessonController::class, 'edit'])
-        //             ->name('lessons.edit');
-
-        //         Route::put('{training}/lessons/{lesson}', [TrainingLessonController::class, 'update'])
-        //             ->name('lessons.update');
-
-        //         Route::delete('{training}/lessons/{lesson}', [TrainingLessonController::class, 'destroy'])
-        //             ->name('lessons.destroy');
-        //     });
 
 
         /*

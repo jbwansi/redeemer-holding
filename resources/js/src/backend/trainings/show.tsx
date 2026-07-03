@@ -1,11 +1,13 @@
 import React from 'react';
 import DOMPurify from 'dompurify';
+import { useForm } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, GraduationCap, Link } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, GraduationCap, Link, Upload, Loader2 } from 'lucide-react';
 import { Link as InertiaLink } from '@inertiajs/react';
-import { route } from 'ziggy-js';
+import { cn } from '@/lib/utils';
 
 interface Training {
   id: number;
@@ -27,7 +29,7 @@ interface Training {
   is_full?: boolean;
 }
 
-const ShowTraining = ({ training, }: { training: Training }) => {
+const ShowTraining = ({ training }: { training: Training }) => {
   const displayedTraining = training;
   const safeContent = React.useMemo(
     () => DOMPurify.sanitize(displayedTraining.content || ''),
@@ -133,13 +135,13 @@ const ShowTraining = ({ training, }: { training: Training }) => {
                   })}
                 >
                   <GraduationCap className="h-4 w-4 mr-2" />
-                  Gérer les modules
+                  Constructeur de formation
                 </InertiaLink>
               </Button>
 
               <Button variant="outline" className="w-full rounded-xl" size="lg" asChild>
                 <InertiaLink
-                  href={route('trainings.lessons.index', {
+                  href={route('trainings.sections.index', {
                     training: displayedTraining.id,
                   })}
                 >
@@ -191,7 +193,8 @@ const ShowTraining = ({ training, }: { training: Training }) => {
                   <div>
                     <p className="font-medium">Horaires</p>
                     <p className="text-slate-600 dark:text-slate-400">
-                      {formatTime(displayedTraining.start_date)} -{formatTime(displayedTraining.end_date)}
+                      {formatTime(displayedTraining.start_date)} -
+                      {formatTime(displayedTraining.end_date)}
                     </p>
                   </div>
                 </div>
@@ -200,7 +203,9 @@ const ShowTraining = ({ training, }: { training: Training }) => {
                   <MapPin className="h-5 w-5 text-slate-500 mt-1" />
                   <div>
                     <p className="font-medium">Lieu</p>
-                    <p className="text-slate-600 dark:text-slate-400">{displayedTraining.location}</p>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {displayedTraining.location}
+                    </p>
                   </div>
                 </div>
 
@@ -236,7 +241,158 @@ const ShowTraining = ({ training, }: { training: Training }) => {
           </Card>
         </div>
       </div>
+
+      <ImportSectionsForm trainingId={training.id} />
     </div>
+  );
+};
+
+const ImportSectionsForm = ({ trainingId }: { trainingId: number }) => {
+  const {
+    data: importData,
+    setData: setImportData,
+    post: postImport,
+    processing: importProcessing,
+    errors: importErrors,
+  } = useForm({
+    file: null as File | null,
+  });
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setImportData('file', file);
+  };
+
+  const submitImport = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    postImport(route('trainings.import-sections', { training: trainingId }), {
+      forceFormData: true,
+      preserveScroll: true,
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  return (
+    <Card className="border-slate-200/80 bg-white/95 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/70 max-w-4xl mx-auto">
+      <CardContent className="p-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
+            Importer des modules et leçons
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Chargez un fichier JSON contenant les sections, leçons et ressources pour cette
+            formation
+          </p>
+        </div>
+
+        <form onSubmit={submitImport} className="space-y-4">
+          <div
+            className={cn(
+              'relative aspect-auto rounded-lg border-2 border-dashed border-muted-foreground/25 transition-colors hover:border-muted-foreground/50',
+              'flex cursor-pointer flex-col items-center justify-center overflow-hidden p-8 text-center',
+              importData.file && 'border-blue-500 bg-blue-50 dark:bg-blue-950/20'
+            )}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,.txt"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+            {importData.file ? (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {importData.file.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {(importData.file.size / 1024).toFixed(2)} KB
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  Cliquez pour télécharger un fichier JSON
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Formats acceptés : .json, .txt (max 5 MB)
+                </p>
+              </div>
+            )}
+          </div>
+
+          {importErrors.file && (
+            <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-4 border border-red-200 dark:border-red-900">
+              <p className="text-sm text-red-700 dark:text-red-400">{importErrors.file}</p>
+            </div>
+          )}
+
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              disabled={importProcessing || !importData.file}
+              className="flex-1 rounded-xl bg-blue-600 text-white hover:bg-blue-700"
+            >
+              {importProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Importer
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setImportData('file', null);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+              className="rounded-xl"
+            >
+              Annuler
+            </Button>
+          </div>
+
+          <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg space-y-3">
+            <h3 className="font-medium text-sm text-slate-900 dark:text-slate-100">
+              Format JSON attendu :
+            </h3>
+            <pre className="text-xs bg-slate-100 dark:bg-slate-900 p-3 rounded overflow-auto max-h-64 text-slate-700 dark:text-slate-300">
+              {`{
+  "sections": [
+    {
+      "title": "Module 1",
+      "sort_order": 1,
+      "lessons": [
+        {
+          "title": "Leçon 1",
+          "excerpt": "Description",
+          "content": "<p>HTML content</p>",
+          "video_url": "https://...",
+          "video_duration": 600,
+          "sort_order": 1,
+          "is_published": true,
+          "resources": [
+            {
+              "title": "Resource",
+              "file_type": "pdf",
+              "external_url": "https://...",
+              "is_downloadable": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}`}
+            </pre>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTrainingResourceRequest;
 use App\Models\Training;
 use App\Models\TrainingLesson;
 use App\Models\TrainingResource;
+use App\Models\TrainingSection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -33,20 +35,11 @@ class TrainingResourceController extends Controller
         ]);
     }
 
-    public function store(Request $request, Training $training, TrainingLesson $lesson)
+    public function store(StoreTrainingResourceRequest $request, Training $training, TrainingLesson $lesson)
     {
         $this->ensureLessonBelongsToTraining($training, $lesson);
 
-        $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'external_url' => ['nullable', 'url', 'max:2000'],
-            'file' => ['nullable', 'file', 'max:10240'],
-            'file_type' => ['nullable', 'string', 'max:50'],
-            'is_downloadable' => ['boolean'],
-            'is_public' => ['boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-        ]);
+        $validated = $request->validated();
 
         if (empty($validated['external_url']) && !$request->hasFile('file')) {
             throw ValidationException::withMessages([
@@ -59,8 +52,21 @@ class TrainingResourceController extends Controller
             $filePath = $request->file('file')->store('training-resources', 'public');
         }
 
+        $resourceTitle = trim((string) ($validated['title'] ?? ''));
+        if ($resourceTitle === '') {
+            if ($request->hasFile('file')) {
+                $resourceTitle = pathinfo((string) $request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
+            } elseif (!empty($validated['external_url'])) {
+                $resourceTitle = (string) parse_url((string) $validated['external_url'], PHP_URL_HOST);
+            }
+
+            if (trim($resourceTitle) === '') {
+                $resourceTitle = 'Ressource';
+            }
+        }
+
         $lesson->resources()->create([
-            'title' => $validated['title'],
+            'title' => $resourceTitle,
             'description' => $validated['description'] ?? null,
             'external_url' => $validated['external_url'] ?? null,
             'file_path' => $filePath,
@@ -68,33 +74,39 @@ class TrainingResourceController extends Controller
             'file_type' => $validated['file_type'] ?? null,
             'is_downloadable' => (bool) ($validated['is_downloadable'] ?? true),
             'is_public' => (bool) ($validated['is_public'] ?? false),
-            'sort_order' => $validated['sort_order'] ?? 0,
+            'sort_order' => (int) ($validated['sort_order'] ?? 0),
         ]);
 
         return back()->with('success', 'Ressource créée avec succès.');
     }
 
-    public function edit(Training $training, TrainingLesson $lesson, TrainingResource $resource)
+    public function edit(Training $training, TrainingSection $section, TrainingLesson $lesson, TrainingResource $resource)
     {
         $this->ensureResourceBelongsToLesson($training, $lesson, $resource);
 
         return inertia('backend/trainings/resources/edit', [
             'training' => $training,
+            'section' => $section,
             'lesson' => $lesson,
             'resource' => $resource,
         ]);
     }
 
-    public function update(Request $request, Training $training, TrainingLesson $lesson, TrainingResource $resource)
-    {
+    public function update(
+        Request $request,
+        Training $training,
+        TrainingSection $section,
+        TrainingLesson $lesson,
+        TrainingResource $resource
+    ) {
         $this->ensureResourceBelongsToLesson($training, $lesson, $resource);
 
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'external_url' => ['nullable', 'url', 'max:2000'],
-            'file' => ['nullable', 'file', 'max:10240'],
-            'file_type' => ['nullable', 'string', 'max:50'],
+            'file' => ['nullable', 'file', 'max:52428800'],
+            'file_type' => ['required', 'in:pdf,video,image,document,audio,link'],
             'is_downloadable' => ['boolean'],
             'is_public' => ['boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
@@ -107,6 +119,7 @@ class TrainingResourceController extends Controller
         }
 
         $filePath = $resource->file_path;
+
         if ($request->hasFile('file')) {
             if (!empty($resource->file_path)) {
                 Storage::disk($resource->file_disk ?: 'public')->delete($resource->file_path);
@@ -124,23 +137,29 @@ class TrainingResourceController extends Controller
             'file_type' => $validated['file_type'] ?? null,
             'is_downloadable' => (bool) ($validated['is_downloadable'] ?? true),
             'is_public' => (bool) ($validated['is_public'] ?? false),
-            'sort_order' => $validated['sort_order'] ?? 0,
+            'sort_order' => (int) ($validated['sort_order'] ?? 0),
         ]);
 
         return back()->with('success', 'Ressource mise à jour avec succès.');
     }
 
-    public function destroy(Training $training, TrainingLesson $lesson, TrainingResource $resource)
-    {
-        $this->ensureResourceBelongsToLesson($training, $lesson, $resource);
+    public function destroy(
+        Training $training,
+        TrainingSection $section,
+        TrainingLesson $lesson,
+        TrainingResource $resource
+    ) {
+        if ($resource->training_lesson_id !== $lesson->id) {
+            abort(404);
+        }
 
-        if (!empty($resource->file_path)) {
-            Storage::disk($resource->file_disk ?: 'public')->delete($resource->file_path);
+        if ($resource->file_path) {
+            Storage::disk('public')->delete($resource->file_path);
         }
 
         $resource->delete();
 
-        return back()->with('success', 'Ressource supprimée avec succès.');
+        return redirect()->back()->with('success', 'Ressource supprimée avec succès.');
     }
 
     public function reorder(Request $request, Training $training, TrainingLesson $lesson)

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useForm } from '@inertiajs/react';
+import { Link,} from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
   Facebook,
@@ -10,30 +10,19 @@ import {
   Mail,
   Phone,
   MapPin,
-  ArrowUpRight,
   ChevronRight,
   Twitter,
 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
+import NewsletterForm from '../NewsletterForm';
 
 const Footer = () => {
   const { settings } = useSettings();
-  const { data, setData, post, processing, errors, reset } = useForm({
-    email: '',
-  });
 
   const isEnabled = (value: unknown) => {
     return value === true || value === 1 || value === '1' || value === 'true';
   };
 
-  const handleNewsletterSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-
-    post(route('newsletter.subscribe'), {
-      preserveScroll: true,
-      onSuccess: () => reset('email'),
-    });
-  };
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -183,30 +172,7 @@ const Footer = () => {
               <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
                 Restez informé
               </h4>
-              <form onSubmit={handleNewsletterSubmit} className="flex max-w-md">
-                <input
-                  type="email"
-                  placeholder="Votre adresse email"
-                  value={data.email}
-                  onChange={(e) => setData('email', e.target.value)}
-                  required
-                  className="flex-1 px-4 py-3 rounded-l-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50"
-                />
-                <button
-                  type="submit"
-                  disabled={processing}
-                  className="px-4 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-r-lg transition-colors duration-300 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  <span className="hidden sm:inline mr-2">
-                    {processing ? 'En cours...' : "S'abonner"}
-                  </span>
-                  <ArrowUpRight size={18} />
-                </button>
-              </form>
-              {errors.email && <p className="text-xs text-red-500 mt-2">{errors.email}</p>}
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                Je respecte votre vie privée. Désabonnez-vous à tout moment.
-              </p>
+              <NewsletterForm source="footer" />
             </div>
 
             {socialLinks.length > 0 && (

@@ -48,6 +48,8 @@ class TrainingParticipant extends Model
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_CANCELLED = 'cancelled';
+    public const STATUS_REGISTERED = 'registered';
+    public const STATUS_CONFIRMED = 'confirmed';
 
     /**
      * Relation avec la formation
@@ -314,10 +316,7 @@ class TrainingParticipant extends Model
      */
     public static function purgeExpiredRegistrations(): int
     {
-        $expiredRegistrations = self::where(function ($query) {
-            $query->where('status', self::STATUS_PENDING)
-                ->orWhere('status', self::STATUS_IN_PROGRESS);
-        })
+        $expiredRegistrations = self::whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS])
             ->where('created_at', '<', now()->subMinutes(30))
             ->get();
 

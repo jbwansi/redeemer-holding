@@ -7,14 +7,21 @@ use App\Models\TrainingParticipant;
 use App\Models\TrainingQuiz;
 use App\Models\TrainingQuizAttempt;
 use App\Models\TrainingSection;
+use App\Services\LearningProgressService;
 use Illuminate\Http\Request;
 
 class LearningQuizController extends Controller
 {
     public function show(Training $training, TrainingSection $section)
     {
-        $this->authorizeAccess($training);
+        app(LearningProgressService::class)->ensureTrainingAccess($training, auth()->user());
         abort_unless((int) $section->training_id === (int) $training->id, 404);
+
+         app(LearningProgressService::class)->ensureCanTakeQuiz(
+            $training,
+            $section,
+            auth()->id()
+        );
 
         $quiz = TrainingQuiz::with('questions')
             ->where('training_section_id', $section->id)
@@ -53,8 +60,14 @@ class LearningQuizController extends Controller
 
     public function submit(Request $request, Training $training, TrainingSection $section)
     {
-        $this->authorizeAccess($training);
+          app(LearningProgressService::class)->ensureTrainingAccess($training, auth()->user());
         abort_unless((int) $section->training_id === (int) $training->id, 404);
+
+        app(LearningProgressService::class)->ensureCanTakeQuiz(
+            $training,
+            $section,
+            auth()->id()
+        );
 
         $quiz = TrainingQuiz::with('questions')
             ->where('training_section_id', $section->id)
@@ -100,18 +113,5 @@ class LearningQuizController extends Controller
             ->with('success', $passed
                 ? 'Quiz reussi! Bravo.'
                 : 'Quiz termine. Vous pouvez reessayer pour atteindre le score requis.');
-    }
-
-    private function authorizeAccess(Training $training): void
-    {
-        $query = TrainingParticipant::where('training_id', $training->id)
-            ->where('user_id', auth()->id())
-            ->where('status', TrainingParticipant::STATUS_COMPLETED);
-
-        if ((float) $training->price > 0) {
-            $query->where('payment_confirmed', true);
-        }
-
-        abort_unless($query->exists(), 403);
     }
 }

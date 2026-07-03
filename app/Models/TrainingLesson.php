@@ -6,29 +6,33 @@ use Illuminate\Database\Eloquent\Model;
 
 class TrainingLesson extends Model
 {
-    protected  $fillable = [
-       'id',
-       'training_id',
-       'training_section_id',
-       'title',
-       'slug',
-       'excerpt',
-       'content',
-       'video_url',
-       'video_duration',
-       'thumbnail',
-       'sort_order',
-       'is_free',
-       'is_published',
-       'created_at',
-       'updated_at',
+    protected $fillable = [
+        'training_id',
+        'training_section_id',
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'video_url',
+        'video_duration',
+        'thumbnail',
+        'sort_order',
+        'is_free',
+        'is_published',
+    ];
+
+    protected $casts = [
+        'is_free' => 'boolean',
+        'is_published' => 'boolean',
+        'video_duration' => 'integer',
+        'sort_order' => 'integer',
     ];
 
     public function training()
     {
         return $this->belongsTo(Training::class);
     }
-    
+
     public function section()
     {
         return $this->belongsTo(TrainingSection::class, 'training_section_id');

@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-const ResourceEdit = ({ training, lesson, resource }: any) => {
+const ResourceEdit = ({ training, section, lesson, resource }: any) => {
   const { data, setData, post, processing, errors } = useForm({
     _method: 'put',
     title: resource.title || '',
@@ -21,6 +21,7 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
     post(
       route('trainings.lessons.resources.update', {
         training: training.id,
+        section: section.id,
         lesson: lesson.id,
         resource: resource.id,
       }),
@@ -35,7 +36,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
       <h1 className="text-2xl font-bold">Modifier ressource</h1>
 
       <div>
-        <label htmlFor="title" className="block text-sm mb-1">Titre</label>
+        <label htmlFor="title" className="block text-sm mb-1">
+          Titre
+        </label>
         <input
           id="title"
           title="Titre"
@@ -48,7 +51,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm mb-1">Description</label>
+        <label htmlFor="description" className="block text-sm mb-1">
+          Description
+        </label>
         <textarea
           id="description"
           title="Description"
@@ -60,7 +65,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
       </div>
 
       <div>
-        <label htmlFor="file" className="block text-sm mb-1">Remplacer le fichier (optionnel)</label>
+        <label htmlFor="file" className="block text-sm mb-1">
+          Remplacer le fichier (optionnel)
+        </label>
         <input
           id="file"
           title="Fichier"
@@ -71,7 +78,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
       </div>
 
       <div>
-        <label htmlFor="external_url" className="block text-sm mb-1">URL externe (optionnel)</label>
+        <label htmlFor="external_url" className="block text-sm mb-1">
+          URL externe (optionnel)
+        </label>
         <input
           id="external_url"
           title="URL externe"
@@ -84,7 +93,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label htmlFor="file_type" className="block text-sm mb-1">Type de fichier</label>
+          <label htmlFor="file_type" className="block text-sm mb-1">
+            Type de fichier
+          </label>
           <input
             id="file_type"
             title="Type de fichier"
@@ -96,7 +107,9 @@ const ResourceEdit = ({ training, lesson, resource }: any) => {
         </div>
 
         <div>
-          <label htmlFor="sort_order" className="block text-sm mb-1">Ordre</label>
+          <label htmlFor="sort_order" className="block text-sm mb-1">
+            Ordre
+          </label>
           <input
             id="sort_order"
             title="Ordre"

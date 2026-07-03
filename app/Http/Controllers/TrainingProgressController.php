@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Training;
 use App\Models\TrainingLesson;
 use App\Models\TrainingProgress;
-use Illuminate\Http\Request;
+use App\Models\TrainingParticipant;
+use App\Services\LearningProgressService;
 
 class TrainingProgressController extends Controller
 {
@@ -16,6 +17,7 @@ class TrainingProgressController extends Controller
         TrainingProgress::updateOrCreate(
             [
                 'user_id' => auth()->id(),
+                'training_id' => $training->id,
                 'training_lesson_id' => $lesson->id,
             ],
             [
@@ -23,6 +25,12 @@ class TrainingProgressController extends Controller
                 'completed' => true,
                 'completed_at' => now(),
             ]
+        );
+
+        app(LearningProgressService::class)->clearSectionProgressCache(
+            auth()->id(),
+            $training->id,
+            $lesson->training_section_id
         );
 
         return back()->with('success', 'Leçon marquée comme terminée.');
@@ -33,11 +41,18 @@ class TrainingProgressController extends Controller
         $this->authorizeAccess($training, $lesson);
 
         TrainingProgress::where('user_id', auth()->id())
+            ->where('training_id', $training->id)
             ->where('training_lesson_id', $lesson->id)
             ->update([
                 'completed' => false,
                 'completed_at' => null,
             ]);
+
+        app(LearningProgressService::class)->clearSectionProgressCache(
+            auth()->id(),
+            $training->id,
+            $lesson->training_section_id
+        );
 
         return back()->with('success', 'Leçon marquée comme non terminée.');
     }
@@ -46,16 +61,19 @@ class TrainingProgressController extends Controller
     {
         abort_unless((int) $lesson->training_id === (int) $training->id, 404);
 
-        $query = \App\Models\TrainingParticipant::where('training_id', $training->id)
+        $query = TrainingParticipant::where('training_id', $training->id)
             ->where('user_id', auth()->id())
-            ->where('status', \App\Models\TrainingParticipant::STATUS_COMPLETED);
+            ->whereIn('status', [
+                TrainingParticipant::STATUS_REGISTERED,
+                TrainingParticipant::STATUS_CONFIRMED,
+                TrainingParticipant::STATUS_IN_PROGRESS,
+                TrainingParticipant::STATUS_COMPLETED,
+            ]);
 
         if ((float) $training->price > 0) {
             $query->where('payment_confirmed', true);
         }
 
-        $hasAccess = $query->exists();
-
-        abort_unless($hasAccess, 403);
+        abort_unless($query->exists(), 403);
     }
 }

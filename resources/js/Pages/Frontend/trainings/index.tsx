@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Calendar, GraduationCap, Search, Sparkles, ArrowRight, History } from 'lucide-react';
+import { GraduationCap, Search, Sparkles, ArrowRight, History } from 'lucide-react';
 import { route } from 'ziggy-js';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import TrainingCard from '@/components/frontend/trainings/training-card';
@@ -94,7 +94,7 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-[#0f766e]/30 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-wide text-[#0f766e] shadow-sm dark:bg-slate-900/70">
                 <Sparkles className="h-3.5 w-3.5" />
-                {pageContent.hero_badge || 'Formations'}
+                Formations
               </span>
               <h1
                 className={`${activeFeatured ? 'max-w-4xl' : 'max-w-5xl'} mt-6 text-4xl font-black leading-tight text-slate-900 md:text-6xl dark:text-white`}
