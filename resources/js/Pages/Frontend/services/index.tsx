@@ -93,9 +93,6 @@ function ServicesPage({
   const faqRef = useRef<HTMLDivElement>(null);
 
   const inHero = useInView(heroRef, { once: true, amount: 0.2 });
-  const inCards = useInView(cardsRef, { once: true, amount: 0.2 });
-  const inProcess = useInView(processRef, { once: true, amount: 0.2 });
-  const inFaq = useInView(faqRef, { once: true, amount: 0.2 });
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -142,6 +139,16 @@ function ServicesPage({
     });
   }, [focus, services]);
 
+  const resolvedHeroImage = useMemo(() => {
+    const heroImage = String(pageContent?.hero_image || '').trim();
+
+    if (!heroImage || heroImage.includes('coach-hero.jpg')) {
+      return '/assets/images/services-bg.jpg';
+    }
+
+    return heroImage;
+  }, [pageContent]);
+
   const mergedFaqs = useMemo(() => {
     const externalFaqs = Array.isArray(contactFaqs)
       ? contactFaqs
@@ -180,7 +187,12 @@ function ServicesPage({
         />
 
         {/* ── HERO ── */}
-        <section ref={heroRef} className="relative mx-auto max-w-[1320px] px-6 md:px-8">
+        <section
+          ref={heroRef}
+          className="relative mx-auto max-w-[1320px] px-6 md:px-8"
+          id="services-hero"
+          data-progress-label="Intro"
+        >
           <motion.div
             initial={false}
             animate={inHero ? { opacity: 1, y: 0 } : {}}
@@ -189,11 +201,16 @@ function ServicesPage({
           >
             {/* FIX 1 : object-top pour ne pas couper le visage */}
             <img
-              src={pageContent.hero_image || '/assets/images/coach-hero.jpg'}
+              src={resolvedHeroImage}
               alt="Accompagnement coaching"
               loading="eager"
               decoding="async"
-              fetchpriority="high"
+              onError={(event) => {
+                const target = event.currentTarget;
+                if (!target.src.includes('/assets/images/services-bg.jpg')) {
+                  target.src = '/assets/images/services-bg.jpg';
+                }
+              }}
               width={1600}
               height={620}
               className="absolute inset-0 h-full w-full object-cover object-top"
@@ -207,12 +224,12 @@ function ServicesPage({
                   {pageContent.hero_badge || 'Services'}
                 </span>
 
-                <h1 className="mt-6 max-w-[680px] text-4xl font-black leading-[0.95] text-slate-900 md:text-6xl lg:text-5xl dark:text-white">
+                <h1 className="ux-page-title mt-6 max-w-[680px] md:text-6xl lg:text-5xl">
                   {pageContent.hero_title ||
                     'Des accompagnements pensés pour vous faire avancer concrètement.'}
                 </h1>
 
-                <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-gray-300">
+                <p className="ux-page-subtitle max-w-xl">
                   {pageContent.hero_subtitle ||
                     "Des formats adaptés à votre situation, vos objectifs et votre manière d'apprendre."}
                 </p>
@@ -220,7 +237,7 @@ function ServicesPage({
                 <div className="mt-14 flex flex-wrap items-center gap-6">
                   <Link
                     href={pageContent.hero_primary_cta_url || route('contact')}
-                    className="inline-flex items-center gap-3 rounded-2xl bg-[#da2e29] px-7 py-4 font-bold text-white shadow-xl shadow-[#da2e29]/30 transition hover:-translate-y-0.5 hover:bg-[#c62823]"
+                    className="ux-btn-primary"
                   >
                     <Calendar className="h-5 w-5" />
                     {pageContent.hero_primary_cta_label || 'Réserver un appel'}
@@ -228,7 +245,7 @@ function ServicesPage({
 
                   <a
                     href={pageContent.hero_secondary_cta_url || '#liste-services'}
-                    className="group inline-flex items-center gap-3 rounded-2xl px-5 py-4 font-bold text-slate-600 transition hover:text-white-900 dark:text-slate-300 dark:hover:text-white"
+                    className="ux-btn-secondary group"
                   >
                     {pageContent.hero_secondary_cta_label || 'Découvrir nos accompagnements'}
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -257,11 +274,12 @@ function ServicesPage({
         <section
           id="liste-services"
           ref={cardsRef}
+          data-progress-label="Services"
           className="relative mx-auto mt-12 max-w-[1320px] px-6 md:mt-16 md:px-8"
         >
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={inCards ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="mb-10"
           >
@@ -269,11 +287,11 @@ function ServicesPage({
               Accompagnements
             </p>
 
-            <h2 className="mt-3 text-3xl font-black text-slate-900 md:text-5xl dark:text-white">
+            <h2 className="ux-section-title mt-3 md:text-5xl">
               {pageContent.section_title || 'Choisissez le format qui vous correspond'}
             </h2>
 
-            <p className="mt-4 max-w-2xl text-slate-600 dark:text-slate-300">
+            <p className="ux-section-subtitle mt-4 max-w-2xl">
               {pageContent.section_subtitle ||
                 'Chaque service est conçu pour vous faire avancer avec clarté, méthode et impact.'}
             </p>
@@ -309,8 +327,8 @@ function ServicesPage({
             {filteredServices.map((service, idx) => (
               <motion.article
                 key={service.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={inCards ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+                initial={false}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: idx * 0.08 }}
                 className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 hover:border-[#da2e29]/40 dark:border-white/10 dark:bg-[#0b1424] dark:shadow-black/25"
               >
@@ -419,7 +437,11 @@ function ServicesPage({
         </section>
 
         {/* ── PROOF ── */}
-        <section className="relative mx-auto mt-20 max-w-[1320px] px-6 md:px-8">
+        <section
+          className="relative mx-auto mt-20 max-w-[1320px] px-6 md:px-8"
+          id="services-proof"
+          data-progress-label="Preuves"
+        >
           <div className="grid gap-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-white/10 dark:bg-white/[0.04] md:grid-cols-4">
             {keyFigures.map((item) => (
               <div key={item.label}>
@@ -440,19 +462,21 @@ function ServicesPage({
         {/* ── PROCESS ── */}
         <section
           ref={processRef}
+          id="services-process"
+          data-progress-label="Méthode"
           className="relative mx-auto mt-20 max-w-[1320px] px-6 md:mt-24 md:px-8"
         >
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={inProcess ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-white/10 dark:bg-white/[0.04] md:p-10"
           >
-            <h2 className="text-3xl font-black text-slate-900 md:text-4xl dark:text-white">
+            <h2 className="ux-section-title md:text-4xl">
               {pageContent.process_title || "Comment se passe l'accompagnement ?"}
             </h2>
 
-            <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-300">
+            <p className="ux-section-subtitle mt-3 max-w-2xl">
               {pageContent.process_subtitle ||
                 "Un processus simple en trois étapes pour garantir l'alignement et l'exécution."}
             </p>
@@ -463,8 +487,8 @@ function ServicesPage({
                 return (
                   <motion.div
                     key={step.title}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={inProcess ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+                    initial={false}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, delay: idx * 0.08 }}
                     className="rounded-3xl border border-slate-100 bg-slate-50 p-6 transition hover:border-[#da2e29]/40 dark:border-white/10 dark:bg-[#020817]/60"
                   >
@@ -487,19 +511,21 @@ function ServicesPage({
         {/* ── FAQ ── */}
         <section
           ref={faqRef}
+          id="services-faq"
+          data-progress-label="FAQ"
           className="relative mx-auto mt-20 max-w-[1320px] px-6 md:mt-24 md:px-8"
         >
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={inFaq ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="mb-8"
           >
-            <h2 className="text-3xl font-black text-slate-900 md:text-4xl dark:text-white">
+            <h2 className="ux-section-title md:text-4xl">
               {pageContent.faq_title || 'Questions fréquentes'}
             </h2>
 
-            <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-300">
+            <p className="ux-section-subtitle mt-3 max-w-2xl">
               {pageContent.faq_subtitle ||
                 'Les réponses rapides aux questions les plus posées avant de démarrer.'}
             </p>
@@ -517,7 +543,11 @@ function ServicesPage({
         </section>
 
         {/* ── FINAL CTA ── */}
-        <section className="relative mx-auto mt-20 max-w-[1320px] px-6 md:mt-24 md:px-8">
+        <section
+          className="relative mx-auto mt-20 max-w-[1320px] px-6 md:mt-24 md:px-8"
+          id="services-cta"
+          data-progress-label="Contact"
+        >
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -543,7 +573,7 @@ function ServicesPage({
               <div className="flex flex-wrap gap-3">
                 <Link
                   href={pageContent.final_cta_primary_url || route('contact')}
-                  className="group inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 font-bold text-[#da2e29] transition hover:bg-slate-100"
+                  className="ux-btn-secondary group !bg-white !text-[#da2e29]"
                 >
                   {pageContent.final_cta_primary_label || 'Prendre contact'}
                   <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />

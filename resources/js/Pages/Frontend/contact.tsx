@@ -80,6 +80,7 @@ const ContactPage = ({ page }: any) => {
   const isInfoInView = useInView(infoRef, { once: false, amount: 0.3 });
 
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -145,10 +146,54 @@ const ContactPage = ({ page }: any) => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    const message = validateField(name, value);
+    setFormErrors((prev) => {
+      if (!message) {
+        const { [name]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return { ...prev, [name]: message };
+    });
+  };
+
+  const validateField = (field: string, value: string): string => {
+    const trimmed = value.trim();
+
+    if (['name', 'email', 'subject', 'message'].includes(field) && !trimmed) {
+      return 'Ce champ est obligatoire.';
+    }
+
+    if (field === 'email' && trimmed && !/\S+@\S+\.\S+/.test(trimmed)) {
+      return 'Veuillez saisir une adresse email valide.';
+    }
+
+    if (field === 'message' && trimmed && trimmed.length < 20) {
+      return 'Ajoutez au moins 20 caractères pour préciser votre besoin.';
+    }
+
+    return '';
+  };
+
+  const validateForm = () => {
+    const nextErrors: Record<string, string> = {};
+    (['name', 'email', 'subject', 'message'] as const).forEach((field) => {
+      const message = validateField(field, formData[field]);
+      if (message) {
+        nextErrors[field] = message;
+      }
+    });
+    setFormErrors(nextErrors);
+
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     setFormStatus('submitting');
 
     router.post('/contact', formData, {
@@ -156,6 +201,7 @@ const ContactPage = ({ page }: any) => {
         setFormStatus('success');
         setTimeout(() => {
           setFormStatus('idle');
+          setFormErrors({});
           setFormData({ name: '', email: '', subject: '', message: '', website: '' });
         }, 3000);
       },
@@ -188,7 +234,11 @@ const ContactPage = ({ page }: any) => {
         <div className="absolute bottom-40 right-10 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[120px]"></div>
 
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div
+            className="text-center max-w-3xl mx-auto mb-16"
+            id="contact-hero"
+            data-progress-label="Intro"
+          >
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -200,7 +250,7 @@ const ContactPage = ({ page }: any) => {
             </motion.div>
 
             <motion.h1
-              className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6"
+              className="ux-page-title mb-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
@@ -209,7 +259,7 @@ const ContactPage = ({ page }: any) => {
             </motion.h1>
 
             <motion.p
-              className="text-lg text-gray-600 dark:text-gray-300"
+              className="ux-page-subtitle"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
@@ -218,7 +268,7 @@ const ContactPage = ({ page }: any) => {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16" id="contact-form" data-progress-label="Formulaire">
             <motion.div
               ref={infoRef}
               className="lg:col-span-2"
@@ -232,7 +282,7 @@ const ContactPage = ({ page }: any) => {
                   variants={itemVariants}
                   className="text-2xl font-bold text-slate-50 mb-8"
                 >
-                  Intrainings de contact
+                  Informations de contact
                 </motion.h2>
 
                 <div className="space-y-8">
@@ -307,7 +357,7 @@ const ContactPage = ({ page }: any) => {
                   href={settings?.calendly_link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full py-3 px-4 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium text-center transition-colors duration-300 shadow-md shadow-[#DA2E29]/20"
+                  className="ux-btn-primary w-full"
                 >
                   {meta.calendly_button}
                 </a>
@@ -392,10 +442,19 @@ const ContactPage = ({ page }: any) => {
                           type="text"
                           value={formData.name}
                           onChange={handleChange}
+                          onBlur={(e) => {
+                            const message = validateField('name', e.target.value);
+                            setFormErrors((prev) => ({ ...prev, name: message }));
+                          }}
                           required
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50 text-gray-800 dark:text-gray-200"
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-gray-200 ${formErrors.name ? 'border-red-300 focus:ring-red-500/40' : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29]/50'}`}
                           placeholder="Votre nom"
                         />
+                        {formErrors.name ? (
+                          <p className="ux-field-error">{formErrors.name}</p>
+                        ) : (
+                          <p className="ux-field-help">Nom et prénom pour personnaliser la réponse.</p>
+                        )}
                       </div>
                     </motion.div>
 
@@ -416,10 +475,19 @@ const ContactPage = ({ page }: any) => {
                           type="email"
                           value={formData.email}
                           onChange={handleChange}
+                          onBlur={(e) => {
+                            const message = validateField('email', e.target.value);
+                            setFormErrors((prev) => ({ ...prev, email: message }));
+                          }}
                           required
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50 text-gray-800 dark:text-gray-200"
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-gray-200 ${formErrors.email ? 'border-red-300 focus:ring-red-500/40' : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29]/50'}`}
                           placeholder="votre.email@exemple.com"
                         />
+                        {formErrors.email ? (
+                          <p className="ux-field-error">{formErrors.email}</p>
+                        ) : (
+                          <p className="ux-field-help">Utilisé uniquement pour vous répondre.</p>
+                        )}
                       </div>
                     </motion.div>
 
@@ -439,8 +507,12 @@ const ContactPage = ({ page }: any) => {
                           name="subject"
                           value={formData.subject}
                           onChange={handleChange}
+                          onBlur={(e) => {
+                            const message = validateField('subject', e.target.value);
+                            setFormErrors((prev) => ({ ...prev, subject: message }));
+                          }}
                           required
-                          className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50 text-gray-800 dark:text-gray-200 appearance-none"
+                          className={`w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-gray-200 appearance-none ${formErrors.subject ? 'border-red-300 focus:ring-red-500/40' : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29]/50'}`}
                         >
                           <option value="" disabled>
                             Selectionnez un sujet
@@ -451,6 +523,7 @@ const ContactPage = ({ page }: any) => {
                             </option>
                           ))}
                         </select>
+                        {formErrors.subject && <p className="ux-field-error">{formErrors.subject}</p>}
                       </div>
                     </motion.div>
 
@@ -466,11 +539,20 @@ const ContactPage = ({ page }: any) => {
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
+                        onBlur={(e) => {
+                          const message = validateField('message', e.target.value);
+                          setFormErrors((prev) => ({ ...prev, message: message }));
+                        }}
                         required
                         rows={6}
-                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#DA2E29]/50 text-gray-800 dark:text-gray-200"
+                        className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-gray-200 ${formErrors.message ? 'border-red-300 focus:ring-red-500/40' : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29]/50'}`}
                         placeholder="Detaillez votre demande ici..."
                       />
+                      {formErrors.message ? (
+                        <p className="ux-field-error">{formErrors.message}</p>
+                      ) : (
+                        <p className="ux-field-help">Minimum conseillé: 20 caractères.</p>
+                      )}
                     </motion.div>
 
                     {Boolean(meta.honeypot_enabled) && (
@@ -490,7 +572,7 @@ const ContactPage = ({ page }: any) => {
                       <button
                         type="submit"
                         disabled={formStatus === 'submitting'}
-                        className={`w-full flex items-center justify-center py-3 px-6 rounded-lg text-white font-medium text-lg transition-all duration-300 ${formStatus === 'submitting' ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-[#DA2E29] to-rose-600 hover:shadow-lg hover:shadow-[#DA2E29]/20'}`}
+                        className={`ux-btn-primary w-full !text-base ${formStatus === 'submitting' ? '!bg-gray-400 !cursor-not-allowed hover:!translate-y-0' : ''}`}
                       >
                         {formStatus === 'submitting' ? (
                           'Envoi en cours...'
@@ -517,6 +599,8 @@ const ContactPage = ({ page }: any) => {
 
           <motion.div
             className="mt-16 rounded-2xl overflow-hidden shadow-xl h-[400px] border border-gray-200 dark:border-gray-700/30"
+            id="contact-map"
+            data-progress-label="Localisation"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -535,13 +619,14 @@ const ContactPage = ({ page }: any) => {
 
           <motion.div
             id="faq"
+            data-progress-label="FAQ"
             className="mt-20"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true, amount: 0.2 }}
           >
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">
+            <h2 className="ux-section-title text-center mb-12">
               {meta.faq_title}
             </h2>
 

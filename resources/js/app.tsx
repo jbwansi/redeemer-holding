@@ -12,6 +12,7 @@ import MainLayout from './components/layouts/main-layout';
 // ─────────────────────────────────────────────
 const IS_PROD = import.meta.env.PROD;
 const INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1']);
 
 // ─────────────────────────────────────────────
 // Types
@@ -48,7 +49,10 @@ const AutoLogout = () => {
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const isLocalHost = LOCAL_HOSTS.has(window.location.hostname);
+
     if (!IS_PROD) return;
+    if (isLocalHost) return;
     if (!auth?.user) return;
     if (!isDashboardPage) return;
 
@@ -71,7 +75,14 @@ const AutoLogout = () => {
     const handleClose = () => {
       if (!isDashboardPage || !auth?.user) return;
 
-      navigator.sendBeacon('/logout-on-close');
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+      if (!csrfToken) return;
+
+      const payload = new FormData();
+      payload.append('_token', csrfToken);
+
+      navigator.sendBeacon('/logout-on-close', payload);
     };
 
     window.addEventListener('pagehide', handleClose);
@@ -100,14 +111,8 @@ createInertiaApp({
     const backendPages = import.meta.glob<PageComponent>('./src/backend/**/*.tsx');
 
     const pagePromise = name.startsWith('backend/')
-      ? resolvePageComponent<PageComponent>(
-          `./src/${name}.tsx`,
-          backendPages
-        )
-      : resolvePageComponent<PageComponent>(
-          `./Pages/${name}.tsx`,
-          pages
-        );
+      ? resolvePageComponent<PageComponent>(`./src/${name}.tsx`, backendPages)
+      : resolvePageComponent<PageComponent>(`./Pages/${name}.tsx`, pages);
 
     return pagePromise.then((page) => {
       if (page.default.layout) {

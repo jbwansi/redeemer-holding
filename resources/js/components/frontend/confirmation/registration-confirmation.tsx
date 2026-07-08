@@ -159,7 +159,7 @@ const RegistrationConfirmation = ({
             <div className="lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <div className="flex flex-col gap-5 md:flex-row">
                 <img
-                  src={resolveImage(itemImage, placeholderImage ?? '/assets/images/event-placeholder.jpg')}
+                  src={resolveImage(itemImage, placeholderImage ?? '/assets/images/coaching-session.jpg')}
                   alt={itemTitle}
                   className="h-44 w-full rounded-xl object-cover md:w-56"
                 />

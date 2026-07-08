@@ -147,7 +147,6 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                   alt={featured?.title}
                   loading="eager"
                   decoding="async"
-                  fetchPriority="high"
                   className="h-full min-h-[320px] w-full object-cover object-center transition duration-700 group-hover:scale-105 md:min-h-[430px]"
                 />
               </Link>

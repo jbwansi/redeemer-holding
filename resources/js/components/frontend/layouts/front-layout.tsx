@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect, useMemo } from 'react';
 import Navbar from './navbar';
 import { ThemeProvider } from '@/components/theme-provider';
 import Footer from './footer';
+import PageProgress from './page-progress';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toast, Toaster } from 'sonner';
 import { usePage } from '@inertiajs/react';
@@ -52,6 +53,7 @@ function FrontLayout({ children }: { children: React.ReactNode }) {
           </div>
         )}
         <Navbar />
+        <PageProgress />
         {children}
         <Toaster />
         <Suspense fallback={null}>

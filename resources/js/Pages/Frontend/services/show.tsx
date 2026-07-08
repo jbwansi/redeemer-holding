@@ -61,7 +61,11 @@ const ServiceDetail = ({
     ? serviceImage.startsWith('/')
       ? serviceImage
       : `/storage/${serviceImage}`
-    : '/assets/images/coach-hero.jpg';
+    : '/assets/images/services-bg.jpg';
+
+  const resolvedHeroImage = heroImage.includes('coach-hero.jpg')
+    ? '/assets/images/services-bg.jpg'
+    : heroImage;
 
   // Effet parallax pour le héro
   const { scrollYProgress } = useScroll({
@@ -108,7 +112,7 @@ const ServiceDetail = ({
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url("${heroImage}")`,
+              backgroundImage: `url("${resolvedHeroImage}")`,
               y: backgroundY,
             }}
           >

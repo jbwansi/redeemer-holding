@@ -16,14 +16,14 @@ import CountdownTimer from '@/components/frontend/CountdownTimer';
 import { formatCurrency, formatDate, formatTime } from '@/lib/utils';
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/event-placeholder.jpg';
+  if (!image) return '/assets/images/coaching-session.jpg';
   if (typeof image === 'string') return image;
   return (
     image?.large ||
     image?.medium ||
     image?.original ||
     image?.thumbnail ||
-    '/assets/images/event-placeholder.jpg'
+    '/assets/images/coaching-session.jpg'
   );
 };
 

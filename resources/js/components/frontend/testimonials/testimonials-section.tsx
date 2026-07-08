@@ -116,7 +116,7 @@ const TestimonialsSection = ({ testimonials = [] }: { testimonials: Testimonial[
                         ? testimonial.photo.startsWith('/storage/')
                           ? testimonial.photo
                           : `/storage/${testimonial.photo}`
-                        : '/assets/images/avatar-placeholder.jpg'
+                        : '/assets/images/avatar.jpg'
                     }
                     alt={testimonial.name}
                     className="h-14 w-14 rounded-full border border-white/10 object-cover"

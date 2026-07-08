@@ -100,6 +100,54 @@
 }
 
 @layer components {
+  .ux-kicker {
+    @apply text-xs font-extrabold uppercase tracking-[0.22em] text-[#DA2E29];
+  }
+
+  .ux-page-title {
+    @apply text-3xl font-black leading-tight tracking-tight text-slate-900 md:text-5xl dark:text-white;
+  }
+
+  .ux-page-subtitle {
+    @apply mt-4 text-base leading-7 text-slate-600 md:text-lg dark:text-slate-300;
+  }
+
+  .ux-section-title {
+    @apply text-2xl font-black tracking-tight text-slate-900 md:text-4xl dark:text-white;
+  }
+
+  .ux-section-subtitle {
+    @apply mt-3 text-sm leading-7 text-slate-600 md:text-base dark:text-slate-300;
+  }
+
+  .ux-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-[#DA2E29] px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-[#DA2E29]/20 transition hover:-translate-y-0.5 hover:bg-[#c02824] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .ux-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white/85 px-6 py-3.5 text-sm font-bold text-slate-800 backdrop-blur transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100;
+  }
+
+  .ux-input {
+    @apply w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm outline-none transition focus:border-[#DA2E29] focus:ring-2 focus:ring-[#DA2E29]/35 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-100;
+  }
+
+  .ux-input-with-icon {
+    @apply ux-input pl-10;
+  }
+
+  .ux-input-invalid {
+    @apply border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500/35;
+  }
+
+  .ux-field-help {
+    @apply mt-1 text-xs text-slate-500 dark:text-slate-400;
+  }
+
+  .ux-field-error {
+    @apply mt-1 text-xs font-medium text-red-600 dark:text-red-400;
+  }
+
   .dashboard-content h1,
   .dashboard-content h2,
   .dashboard-content h3,

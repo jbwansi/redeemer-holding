@@ -174,11 +174,13 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
     loginPost(route('login'));
   };
 
+  const hasValidLoginEmail = data.email.trim().length > 0 && /\S+@\S+\.\S+/.test(data.email);
+
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Bienvenue</h2>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <h2 className="ux-section-title !text-2xl">Bienvenue</h2>
+        <p className="ux-section-subtitle mt-1 !text-sm">
           Connectez-vous pour accéder à votre compte
         </p>
       </div>
@@ -194,6 +196,8 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
           placeholder="Adresse email"
           icon={Mail}
           error={loginErrors.email}
+          isValid={hasValidLoginEmail}
+          helperText={!hasValidLoginEmail && data.email ? 'Format attendu: nom@domaine.com' : ''}
         />
 
         <InputField
@@ -242,7 +246,7 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
           <button
             type="submit"
             disabled={processing}
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#DA2E29] hover:bg-[#c02824] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DA2E29] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            className="ux-btn-primary w-full"
           >
             {processing ? (
               <>
@@ -325,11 +329,17 @@ const RegisterForm = ({ setActiveTab }: any) => {
     post(route('register'));
   };
 
+  const passwordLength = data.password.length;
+  const hasStrongPassword = passwordLength >= 8;
+  const passwordMismatch =
+    data.password_confirmation.length > 0 && data.password !== data.password_confirmation;
+  const hasValidRegisterEmail = data.email.trim().length > 0 && /\S+@\S+\.\S+/.test(data.email);
+
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Créer un compte</h2>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <h2 className="ux-section-title !text-2xl">Créer un compte</h2>
+        <p className="ux-section-subtitle mt-1 !text-sm">
           Rejoignez-nous pour commencer votre transformation
         </p>
       </div>
@@ -373,6 +383,8 @@ const RegisterForm = ({ setActiveTab }: any) => {
           placeholder="Adresse email"
           icon={Mail}
           error={errors.email}
+          isValid={hasValidRegisterEmail}
+          helperText={!hasValidRegisterEmail && data.email ? 'Format attendu: nom@domaine.com' : ''}
         />
 
         <InputField
@@ -385,9 +397,15 @@ const RegisterForm = ({ setActiveTab }: any) => {
           autoComplete="new-password"
           placeholder="Mot de passe"
           icon={Lock}
-          error={errors.password}
+          error={errors.password || (!hasStrongPassword && data.password ? 'Minimum 8 caractères.' : '')}
           showPassword={showPassword}
           togglePasswordVisibility={() => setShowPassword(!showPassword)}
+          isValid={hasStrongPassword && data.password.length > 0}
+          helperText={
+            data.password
+              ? `${passwordLength} caractères saisis`
+              : 'Utilisez au moins 8 caractères.'
+          }
         />
 
         <InputField
@@ -400,9 +418,17 @@ const RegisterForm = ({ setActiveTab }: any) => {
           autoComplete="new-password"
           placeholder="Confirmer le mot de passe"
           icon={Lock}
-          error={errors.password_confirmation}
+          error={errors.password_confirmation || (passwordMismatch ? 'Les mots de passe ne correspondent pas.' : '')}
           showPassword={showPasswordConfirmation}
           togglePasswordVisibility={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
+          isValid={
+            data.password_confirmation.length > 0 && !passwordMismatch && hasStrongPassword
+          }
+          helperText={
+            data.password_confirmation.length > 0 && !passwordMismatch
+              ? 'Confirmation valide.'
+              : ''
+          }
         />
 
         <div className="flex items-start">
@@ -440,8 +466,8 @@ const RegisterForm = ({ setActiveTab }: any) => {
         <div className="pt-2">
           <button
             type="submit"
-            disabled={processing || !data.terms}
-            className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#DA2E29] hover:bg-[#c02824] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#DA2E29] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            disabled={processing || !data.terms || !hasStrongPassword || passwordMismatch}
+            className="ux-btn-primary w-full"
           >
             {processing ? (
               <>

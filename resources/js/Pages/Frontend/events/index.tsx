@@ -88,7 +88,11 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
         <div className="pointer-events-none absolute -left-16 -top-20 h-72 w-72 rounded-full bg-[#da2e29]/15 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#0f766e]/10 blur-3xl" />
 
-        <section className="relative mx-auto max-w-[1320px] px-6 md:px-8">
+        <section
+          className="relative mx-auto max-w-[1320px] px-6 md:px-8"
+          id="events-hero"
+          data-progress-label="Intro"
+        >
           <div
             className={`grid gap-12 lg:items-center ${activeFeatured ? 'lg:grid-cols-[0.9fr_1.1fr]' : 'lg:grid-cols-1'}`}
           >
@@ -103,14 +107,12 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
                 Événements & webinaires
               </span>
 
-              <h1
-                className={`${activeFeatured ? 'max-w-4xl' : 'max-w-5xl'} mt-6 text-4xl font-black leading-tight text-slate-900 md:text-6xl dark:text-white`}
-              >
+              <h1 className={`${activeFeatured ? 'max-w-4xl' : 'max-w-5xl'} ux-page-title mt-6`}>
                 {pageContent.hero_title ||
                   'Rencontrez, apprenez et avancez avec une communauté qui partage vos ambitions'}
               </h1>
 
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+              <p className="ux-page-subtitle max-w-2xl">
                 {pageContent.hero_subtitle ||
                   'Des expériences en présentiel et en ligne pour accélérer votre progression personnelle et professionnelle.'}
               </p>
@@ -134,7 +136,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#events"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#da2e29] px-7 py-4 font-bold text-white shadow-lg shadow-[#da2e29]/20 transition hover:-translate-y-0.5 hover:bg-[#c62823]"
+                  className="ux-btn-primary"
                 >
                   Découvrir les événements
                   <ArrowRight className="h-4 w-4" />
@@ -142,7 +144,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
 
                 <Link
                   href={route('contact')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white/80 px-7 py-4 font-bold text-slate-800 backdrop-blur transition hover:bg-white dark:border-slate-700 dark:bg-slate-900/70 dark:text-white"
+                  className="ux-btn-secondary"
                 >
                   Organiser un événement
                 </Link>
@@ -193,7 +195,11 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           </div>
         </section>
 
-        <section id="events" className="relative mx-auto mt-14 max-w-[1320px] px-6 md:px-8">
+        <section
+          id="events"
+          data-progress-label="Filtres"
+          className="relative mx-auto mt-14 max-w-[1320px] px-6 md:px-8"
+        >
           <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-5 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="relative w-full md:max-w-xl">
@@ -248,11 +254,15 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           </div>
         </section>
 
-        <section className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8">
+        <section
+          className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8"
+          id="events-list"
+          data-progress-label="À venir"
+        >
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#da2e29]">Agenda</p>
-              <h2 className="mt-2 text-3xl font-black text-slate-900 md:text-4xl dark:text-white">
+              <h2 className="ux-section-title mt-2">
                 Événements à venir
               </h2>
             </div>
@@ -311,9 +321,13 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
         </section>
 
         {showPast && (
-          <section className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8">
+          <section
+            className="mx-auto mt-16 max-w-[1320px] px-6 md:px-8"
+            id="events-past"
+            data-progress-label="Passés"
+          >
             <div className="mb-8 flex items-end justify-between gap-4">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-white">
+              <h2 className="ux-section-title">
                 Événements passés
               </h2>
 
@@ -341,7 +355,11 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           </section>
         )}
 
-        <section className="mx-auto mt-20 max-w-[1320px] px-6 md:px-8">
+        <section
+          className="mx-auto mt-20 max-w-[1320px] px-6 md:px-8"
+          id="events-cta"
+          data-progress-label="Contact"
+        >
           <div className="rounded-[2rem] bg-gradient-to-r from-[#da2e29] to-[#c62823] p-10 text-white shadow-xl shadow-[#da2e29]/20 md:p-12">
             <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
               <div>
@@ -356,7 +374,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
 
               <Link
                 href={route('contact')}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-4 font-bold text-[#da2e29]"
+                className="ux-btn-secondary !bg-white !text-[#da2e29]"
               >
                 Nous contacter
                 <ArrowRight className="h-4 w-4" />

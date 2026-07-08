@@ -89,17 +89,22 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
   }, [meta?.hero_images, meta?.hero_image]);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (images.length <= 1) return;
+    if (images.length <= 1) return;
 
-      const interval = setInterval(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % images.length);
       }, 5000);
-
-      return () => clearInterval(interval);
     }, 2500);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
   }, [images.length]);
 
   const containerVariants = {
@@ -269,12 +274,13 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                     loading={currentIndex === 0 ? 'eager' : 'lazy'}
                     fetchpriority={currentIndex === 0 ? 'high' : 'auto'}
                     decoding="async"
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     width={600}
                     height={520}
                   />
 
-                  <div className="absolute inset-0 bg-slate-950/35" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/60 to-transparent" />
+                  <div className="absolute inset-0 bg-slate-950/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-black/35 to-transparent" />
                 </div>
               </div>
 

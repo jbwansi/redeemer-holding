@@ -106,7 +106,6 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
               alt={postData?.title || 'Image de couverture'}
               loading="eager"
               decoding="async"
-              fetchPriority="high"
               className="w-full object-contain"
             />
           </div>

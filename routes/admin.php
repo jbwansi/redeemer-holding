@@ -39,7 +39,7 @@ use App\Http\Controllers\Admin\{
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['admin.access', 'active'])->group(function () {
     Route::get('/admin/page-contents', [PageContentController::class, 'index'])
         ->name('page-contents.index');
 

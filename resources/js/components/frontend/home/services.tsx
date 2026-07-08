@@ -61,11 +61,14 @@ const Services = ({ services }: any) => {
               variants={cardVariants}
               className="group overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1424] p-3 shadow-xl shadow-black/25 backdrop-blur transition hover:-translate-y-1 hover:border-[#ef2d2d]/40"
             >
-              <div className="relative overflow-hidden rounded-[1.5rem]">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem]">
                 <img
                   src={service.image || '/assets/images/coaching-session.jpg'}
                   alt={service.name}
-                  className="h-48 w-full object-cover transition duration-700 group-hover:scale-105"
+                  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-[#020817]/80 via-[#020817]/10 to-transparent" />

@@ -20,6 +20,10 @@ Verifier au minimum dans `.env` de production:
 - `DB_*` correct
 - `QUEUE_CONNECTION=database`
 - `MAIL_*` correct
+- `SESSION_SECURE_COOKIE=true`
+- `SESSION_SAME_SITE=lax` (ou `strict` selon vos besoins)
+- `FORCE_HTTPS=true` si HTTPS est termine au niveau app/reverse-proxy
+- `REMINDER_CRON_TOKEN` fort et unique
 - `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` valides
 - `ONLY_TEST_USERS_ENABLED=false` en production ouverte
 - `TEST_USER_EMAILS` vide ou strictement maitrise

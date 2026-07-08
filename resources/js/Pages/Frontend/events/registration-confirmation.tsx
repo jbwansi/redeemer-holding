@@ -61,7 +61,7 @@ const EventRegistrationConfirmationPage = ({ event, registration }: any) => {
       backLabel="Retour evenement"
       itemTitle={event?.title}
       itemImage={event?.featured_image}
-      placeholderImage="/assets/images/event-placeholder.jpg"
+      placeholderImage="/assets/images/coaching-session.jpg"
       fields={[
         {
           icon: <Calendar className="h-4 w-4" />,

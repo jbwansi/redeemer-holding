@@ -20,13 +20,13 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
     public function process(string $slug, int $participantId)
     {
-        $formation = Training::where('slug', $slug)
+        $training = Training::where('slug', $slug)
             ->published()
             ->firstOrFail();
 
         $participant = TrainingParticipant::findOrFail($participantId);
 
-        if ($participant->training_id !== $formation->id) {
+        if ($participant->training_id !== $training->id) {
             abort(404);
         }
 
@@ -35,7 +35,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         if ($participant->status !== TrainingParticipant::STATUS_PENDING) {
             if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
                 return redirect()->route('trainings.registration.confirmation', [
-                    'slug' => $formation->slug,
+                    'slug' => $training->slug,
                     'participant_id' => $participant->id,
                 ])->with('error', 'Cette formation a déjà été payée.');
             }
@@ -43,7 +43,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             abort(400, "Cette inscription ne peut pas être payée actuellement.");
         }
 
-        $subtotal = $formation->price * $participant->qty;
+        $subtotal = $training->price * $participant->qty;
         $serviceFee = $subtotal * 0.05;
         $total = $subtotal + $serviceFee;
 
@@ -56,13 +56,13 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                         'price_data' => [
                             'currency' => 'chf',
                             'product_data' => [
-                                'name' => $formation->title,
+                                'name' => $training->title,
                                 'description' => "Places: {$participant->qty}",
-                                'images' => $formation->featured_image
-                                    ? [$formation->featured_image['original']]
+                                'images' => $training->featured_image
+                                    ? [$training->featured_image['original']]
                                     : [],
                             ],
-                            'unit_amount' => round($formation->price * 100),
+                            'unit_amount' => round($training->price * 100),
                         ],
                         'quantity' => $participant->qty,
                     ],
@@ -83,18 +83,18 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                 'client_reference_id' => $participant->id,
 
                 'metadata' => [
-                    'payment_type' => 'formation',
+                    'payment_type' => 'training',
                     'participant_id' => $participant->id,
-                    'training_id' => $formation->id,
-                    'formation_title' => $formation->title,
+                    'training_id' => $training->id,
+                    'training_title' => $training->title,
                     'qty' => $participant->qty,
                 ],
 
                 'payment_intent_data' => [
                     'metadata' => [
-                        'payment_type' => 'formation',
+                        'payment_type' => 'training',
                         'participant_id' => $participant->id,
-                        'training_id' => $formation->id,
+                        'training_id' => $training->id,
                     ],
                 ],
 
@@ -114,7 +114,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             ]);
 
             return inertia('Frontend/trainings/payment', [
-                'formation' => $formation,
+                'training' => $training,
                 'participant' => $participant,
                 'subtotal' => $subtotal,
                 'serviceFee' => $serviceFee,
@@ -124,11 +124,11 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         } catch (ApiErrorException $e) {
             Log::error('Erreur Stripe lors de la création de la session de formation.', [
                 'message' => $e->getMessage(),
-                'training_id' => $formation->id,
+                'training_id' => $training->id,
                 'participant_id' => $participant->id,
             ]);
 
-            return redirect()->route('formations.details', $formation->slug)
+            return redirect()->route('formations.details', $training->slug)
                 ->with('error', "Une erreur s'est produite lors de la préparation du paiement. Veuillez réessayer.");
         }
     }
@@ -154,13 +154,13 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             $participant = TrainingParticipant::with('training')
                 ->findOrFail($session->client_reference_id);
 
-            $formation = $participant->training;
+            $training = $participant->training;
 
             $this->markAsPaid($participant, $session);
-            $this->sendInvoice($formation, $participant);
+            $this->sendInvoice($training, $participant);
 
             return redirect()->route('trainings.registration.confirmation', [
-                'slug' => $formation->slug,
+                'slug' => $training->slug,
                 'participant_id' => $participant->id,
             ])->with('success', 'Votre paiement a été effectué avec succès !');
         } catch (\Throwable $e) {
@@ -182,10 +182,9 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             $participant = TrainingParticipant::with('training')->find($participantId);
 
             if ($participant) {
-                    $participant->update([
-                        'status' => TrainingParticipant::STATUS_PENDING,
-                    ]);
-                }
+                $participant->update([
+                    'status' => TrainingParticipant::STATUS_PENDING,
+                ]);
 
                 return redirect()->route('formations.details', $participant->training->slug)
                     ->with('info', 'Votre paiement a été annulé. Vous pouvez réessayer à tout moment.');
@@ -302,20 +301,20 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         ]);
     }
 
-    private function sendInvoice(Training $formation, TrainingParticipant $participant): void
+    private function sendInvoice(Training $training, TrainingParticipant $participant): void
     {
         $invoiceData = [
-            'formation' => $formation,
+            'formation' => $training,
             'registration' => $participant,
-            'subtotal' => $formation->price * $participant->qty,
-            'serviceFee' => $formation->price * $participant->qty * 0.05,
-            'total' => $formation->price * $participant->qty * 1.05,
+            'subtotal' => $training->price * $participant->qty,
+            'serviceFee' => $training->price * $participant->qty * 0.05,
+            'total' => $training->price * $participant->qty * 1.05,
             'date' => $participant->payment_date ?? $participant->created_at,
             'invoice_number' => 'FORM-' . date('Y') . '-' . str_pad($participant->id, 6, '0', STR_PAD_LEFT),
         ];
 
         $participant->notify(
-            new TrainingInvoiceNotification($formation, $participant, $invoiceData)
+            new TrainingInvoiceNotification($training, $participant, $invoiceData)
         );
     }
 }

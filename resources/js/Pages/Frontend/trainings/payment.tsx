@@ -16,19 +16,19 @@ import CountdownTimer from '@/components/frontend/CountdownTimer';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/formation-placeholder.jpg';
+  if (!image) return '/assets/images/coaching-session.jpg';
   if (typeof image === 'string') return image;
   return (
     image?.large ||
     image?.medium ||
     image?.original ||
     image?.thumbnail ||
-    '/assets/images/formation-placeholder.jpg'
+    '/assets/images/coaching-session.jpg'
   );
 };
 
 const TrainingPaymentPage = ({
-  formation,
+  training,
   participant,
   subtotal,
   serviceFee,
@@ -60,14 +60,14 @@ const TrainingPaymentPage = ({
 
   return (
     <FrontLayout>
-      <Head title={`Paiement - ${formation?.title || 'Formation'}`} />
+      <Head title={`Paiement - ${training?.title || 'Formation'}`} />
 
       <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-24 pb-20 dark:bg-slate-950">
         <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
 
         <section className="mx-auto max-w-[1200px] px-6 md:px-8">
           <Link
-            href={route('formations.details', formation.slug)}
+            href={route('formations.details', training.slug)}
             className="inline-flex items-center text-sm text-slate-600 hover:text-[#0f766e] dark:text-slate-300"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -85,30 +85,30 @@ const TrainingPaymentPage = ({
             <div className="lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <div className="flex flex-col gap-5 md:flex-row">
                 <img
-                  src={resolveImage(formation?.featured_image)}
-                  alt={formation?.title}
+                  src={resolveImage(training?.featured_image)}
+                  alt={training?.title}
                   className="h-44 w-full rounded-xl object-cover md:w-56"
                 />
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                    {formation?.title}
+                    {training?.title}
                   </h2>
                   <div className="mt-4 space-y-2 text-sm text-slate-600 dark:text-slate-300">
                     <p className="inline-flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      {formatDate(formation?.start_date)}
+                      {formatDate(training?.start_date)}
                     </p>
                     <p className="inline-flex items-center gap-2">
                       <Clock className="h-4 w-4" />
-                      {formation?.duration || '-'} heures
+                      {training?.duration || '-'} heures
                     </p>
                     <p className="inline-flex items-center gap-2">
                       <Monitor className="h-4 w-4" />
-                      {formation?.format || 'Format standard'}
+                      {training?.format || 'Format standard'}
                     </p>
                     <p className="inline-flex items-center gap-2">
                       <GraduationCap className="h-4 w-4" />
-                      {formation?.level || 'Tous niveaux'}
+                      {training?.level || 'Tous niveaux'}
                     </p>
                   </div>
                 </div>

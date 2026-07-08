@@ -298,7 +298,7 @@ const Navbar = () => {
         {/* Action Buttons with enhanced visual effects */}
         <div className="flex items-center space-x-1 md:space-x-3">
           {/* Search */}
-          <div className="relative flex items-center">
+          <div className="relative hidden items-center sm:flex">
             <motion.button
               variants={buttonHoverEffect}
               initial="rest"
@@ -338,7 +338,7 @@ const Navbar = () => {
             rel={settings?.calendly_link ? 'noopener noreferrer' : undefined}
             title={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
             aria-label={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
-            className="group relative"
+            className="group relative hidden sm:block"
           >
             <motion.button
               variants={buttonHoverEffect}
@@ -367,7 +367,7 @@ const Navbar = () => {
             whileHover="hover"
             whileTap="tap"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700/90 transition-colors duration-300 backdrop-blur-sm"
+            className="hidden h-10 w-10 items-center justify-center rounded-full bg-gray-100/80 text-gray-700 backdrop-blur-sm transition-colors duration-300 hover:bg-gray-200 dark:bg-gray-800/80 dark:text-gray-200 dark:hover:bg-gray-700/90 sm:flex"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -397,7 +397,7 @@ const Navbar = () => {
             </Link>
           )}
 
-          <Link href={!auth?.user ? route('login') : accountRoute}>
+          <Link href={!auth?.user ? route('login') : accountRoute} className="hidden sm:block">
             <motion.div
               variants={buttonHoverEffect}
               initial="rest"
@@ -420,6 +420,7 @@ const Navbar = () => {
               as="button"
               title="Déconnexion"
               aria-label="Déconnexion"
+              className="hidden sm:block"
             >
               <motion.div
                 variants={buttonHoverEffect}
@@ -505,8 +506,8 @@ const Navbar = () => {
                   </div>
 
                   {/* Footer with enhanced visual separation */}
-                  <div className="p-6 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm">
-                    <div className="flex items-center justify-between">
+                  <div className="space-y-4 border-t border-gray-100 bg-gray-50/80 p-6 backdrop-blur-sm dark:border-gray-800/80 dark:bg-gray-900/80">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <button
                         onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                         className="flex items-center space-x-3 text-gray-700 dark:text-gray-300 group"
@@ -525,21 +526,28 @@ const Navbar = () => {
 
                       <Link
                         href={auth?.user ? accountRoute : route('login')}
-                        className="flex items-center space-x-2 text-[#DA2E29] font-medium group"
+                        className="ux-btn-secondary !px-4 !py-2"
                       >
-                        <span>
-                          {auth?.user ? (isAdmin ? 'Dashboard admin' : 'Mon espace') : 'Connexion'}
-                        </span>
-                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                        {auth?.user ? (isAdmin ? 'Dashboard admin' : 'Mon espace') : 'Connexion'}
                       </Link>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2">
+                      <a
+                        href={settings?.calendly_link || route('contact')}
+                        target={settings?.calendly_link ? '_blank' : undefined}
+                        rel={settings?.calendly_link ? 'noopener noreferrer' : undefined}
+                        className="ux-btn-primary"
+                      >
+                        {settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
+                      </a>
 
                       {!auth?.user && (
                         <Link
                           href={route('register.page', { tab: 'register' })}
-                          className="flex items-center space-x-2 text-slate-700 dark:text-slate-200 font-medium group"
+                          className="ux-btn-secondary"
                         >
-                          <span>S'inscrire</span>
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                          S'inscrire
                         </Link>
                       )}
 
@@ -548,10 +556,10 @@ const Navbar = () => {
                           href={route('logout')}
                           method="post"
                           as="button"
-                          className="flex items-center space-x-2 text-red-600 dark:text-red-400 font-medium group"
+                          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-red-300 bg-white px-4 py-2 font-semibold text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:bg-gray-900 dark:text-red-400 dark:hover:bg-red-950/30"
                         >
-                          <span>Déconnexion</span>
-                          <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                          Déconnexion
+                          <LogOut className="h-4 w-4" />
                         </Link>
                       )}
                     </div>

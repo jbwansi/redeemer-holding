@@ -44,13 +44,82 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
 
   // Success state
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [liveErrors, setLiveErrors] = useState<Record<string, string>>({});
+
+  const validateField = (field: string, value: string): string => {
+    const trimmed = value.trim();
+
+    if (['first_name', 'last_name', 'email', 'message'].includes(field) && !trimmed) {
+      return 'Ce champ est obligatoire.';
+    }
+
+    if (field === 'email' && trimmed && !/\S+@\S+\.\S+/.test(trimmed)) {
+      return 'Veuillez saisir une adresse email valide.';
+    }
+
+    if (field === 'phone' && trimmed && !/^[+0-9()\s-]{7,20}$/.test(trimmed)) {
+      return 'Numéro invalide (caractères autorisés: + chiffres, espaces, parenthèses).';
+    }
+
+    if (field === 'message' && trimmed && trimmed.length < 20) {
+      return 'Ajoutez au moins 20 caractères pour contextualiser votre demande.';
+    }
+
+    return '';
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setData(field as any, value);
+    clearErrors(field as any);
+
+    const message = validateField(field, value);
+    setLiveErrors((prev) => {
+      if (!message) {
+        const { [field]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return { ...prev, [field]: message };
+    });
+  };
+
+  const handleFieldBlur = (field: string, value: string) => {
+    const message = validateField(field, value);
+    setLiveErrors((prev) => {
+      if (!message) {
+        const { [field]: _removed, ...rest } = prev;
+        return rest;
+      }
+
+      return { ...prev, [field]: message };
+    });
+  };
+
+  const getFieldError = (field: string): string | undefined => {
+    return liveErrors[field] || (errors as Record<string, string>)[field];
+  };
 
   // Form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const nextErrors: Record<string, string> = {};
+    (['first_name', 'last_name', 'email', 'phone', 'message'] as const).forEach((field) => {
+      const message = validateField(field, String((data as any)[field] || ''));
+      if (message) {
+        nextErrors[field] = message;
+      }
+    });
+
+    setLiveErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
     post(route('service-requests.store', service?.id), {
       onSuccess: () => {
         reset();
+        setLiveErrors({});
         setIsSubmitted(true);
         // Reset success message after 5 seconds
         setTimeout(() => setIsSubmitted(false), 5000);
@@ -157,17 +226,18 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                           name="first_name"
                           type="text"
                           value={data.first_name}
-                          onChange={(e) => setData('first_name', e.target.value)}
+                          onChange={(e) => handleFieldChange('first_name', e.target.value)}
+                          onBlur={(e) => handleFieldBlur('first_name', e.target.value)}
                           required
                           className={`block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
-                            errors.first_name
+                            getFieldError('first_name')
                               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                               : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
                           } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
                           placeholder="Votre prénom"
                         />
-                        {errors.first_name && (
-                          <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
+                        {getFieldError('first_name') && (
+                          <p className="mt-1 text-sm text-red-600">{getFieldError('first_name')}</p>
                         )}
                       </div>
                     </motion.div>
@@ -189,17 +259,18 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                           name="last_name"
                           type="text"
                           value={data.last_name}
-                          onChange={(e) => setData('last_name', e.target.value)}
+                          onChange={(e) => handleFieldChange('last_name', e.target.value)}
+                          onBlur={(e) => handleFieldBlur('last_name', e.target.value)}
                           required
                           className={`block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
-                            errors.last_name
+                            getFieldError('last_name')
                               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                               : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
                           } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
                           placeholder="Votre nom"
                         />
-                        {errors.last_name && (
-                          <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
+                        {getFieldError('last_name') && (
+                          <p className="mt-1 text-sm text-red-600">{getFieldError('last_name')}</p>
                         )}
                       </div>
                     </motion.div>
@@ -221,17 +292,20 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                           name="email"
                           type="email"
                           value={data.email}
-                          onChange={(e) => setData('email', e.target.value)}
+                          onChange={(e) => handleFieldChange('email', e.target.value)}
+                          onBlur={(e) => handleFieldBlur('email', e.target.value)}
                           required
                           className={`block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
-                            errors.email
+                            getFieldError('email')
                               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                               : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
                           } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
                           placeholder="votre.email@exemple.com"
                         />
-                        {errors.email && (
-                          <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                        {getFieldError('email') ? (
+                          <p className="mt-1 text-sm text-red-600">{getFieldError('email')}</p>
+                        ) : (
+                          <p className="ux-field-help">Nous utilisons cet email pour vous répondre.</p>
                         )}
                       </div>
                     </motion.div>
@@ -253,16 +327,17 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                           name="phone"
                           type="tel"
                           value={data.phone || ''}
-                          onChange={(e) => setData('phone', e.target.value)}
+                          onChange={(e) => handleFieldChange('phone', e.target.value)}
+                          onBlur={(e) => handleFieldBlur('phone', e.target.value)}
                           className={`block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
-                            errors.phone
+                            getFieldError('phone')
                               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                               : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
                           } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
                           placeholder="+33 6 12 34 56 78"
                         />
-                        {errors.phone && (
-                          <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                        {getFieldError('phone') && (
+                          <p className="mt-1 text-sm text-red-600">{getFieldError('phone')}</p>
                         )}
                       </div>
                     </motion.div>
@@ -284,18 +359,21 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                         id="message"
                         name="message"
                         value={data.message}
-                        onChange={(e) => setData('message', e.target.value)}
+                        onChange={(e) => handleFieldChange('message', e.target.value)}
+                        onBlur={(e) => handleFieldBlur('message', e.target.value)}
                         required
                         rows={5}
                         className={`block w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
-                          errors.message
+                          getFieldError('message')
                             ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
                             : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
                         } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
                         placeholder="Décrivez votre besoin ou posez vos questions..."
                       />
-                      {errors.message && (
-                        <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                      {getFieldError('message') ? (
+                        <p className="mt-1 text-sm text-red-600">{getFieldError('message')}</p>
+                      ) : (
+                        <p className="ux-field-help">Plus votre message est précis, plus la réponse sera utile.</p>
                       )}
                     </div>
                   </motion.div>

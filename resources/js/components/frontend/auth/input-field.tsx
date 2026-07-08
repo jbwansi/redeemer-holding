@@ -8,10 +8,12 @@ export const InputField = ({
   value,
   onChange,
   required = false,
-  autoComplete = 'off',
+  autoComplete = 'on',
   placeholder,
   icon: Icon,
   error,
+  helperText,
+  isValid,
   showPassword,
   togglePasswordVisibility,
 }: any) => {
@@ -38,7 +40,9 @@ export const InputField = ({
           className={`block w-full pl-10 pr-10 py-3 bg-gray-50 dark:bg-gray-800/60 border ${
             error
               ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500'
-              : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
+              : isValid
+                ? 'border-emerald-300 focus:ring-emerald-500 focus:border-emerald-500'
+                : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29] focus:border-[#DA2E29]'
           } rounded-lg shadow-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-opacity-50`}
           placeholder={placeholder}
         />
@@ -55,6 +59,7 @@ export const InputField = ({
         )}
       </div>
       {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {!error && helperText && <p className="ux-field-help">{helperText}</p>}
     </div>
   );
 };

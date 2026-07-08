@@ -5,6 +5,7 @@ use App\Http\Controllers\Frontend\ChatbotController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/reminders/send', [ActivityReminderController::class, 'send'])
+    ->middleware(['cron.token', 'throttle:6,1'])
     ->name('api.reminders.send');
 
 Route::post('/chatbot/message', [ChatbotController::class, 'message'])

@@ -3,8 +3,8 @@
 namespace App\Services\Payments;
 
 use App\Services\Payments\Handlers\EventPaymentHandler;
-use App\Services\Payments\Handlers\TrainingPaymentHandler;
 use App\Services\Payments\Handlers\ServicePaymentHandler;
+use App\Services\Payments\Handlers\TrainingPaymentHandler;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Exception\SignatureVerificationException;
@@ -17,6 +17,7 @@ class PaymentManager
     {
         return match ($type) {
             'event' => app(EventPaymentHandler::class),
+            'training' => app(TrainingPaymentHandler::class),
             'formation' => app(TrainingPaymentHandler::class),
             'service' => app(ServicePaymentHandler::class),
             default => abort(404, 'Type de paiement invalide.'),
