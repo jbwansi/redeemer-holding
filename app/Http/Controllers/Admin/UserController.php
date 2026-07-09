@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Training;
+use App\Models\TrainingParticipant;
+use App\Models\User as UserModel;
 use App\Notifications\AccountReactivatedNotification;
 use App\Notifications\WelcomeNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +20,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::query()
+        $query = UserModel::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -46,9 +49,33 @@ class UserController extends Controller
         $users = $query->paginate(10)
             ->appends($request->query());
 
+        $availableTrainings = Training::query()
+            ->where('is_published', true)
+            ->orderBy('start_date')
+            ->get([
+                'id',
+                'title',
+                'slug',
+                'start_date',
+                'end_date',
+                'price',
+            ])
+            ->map(function (Training $training) {
+                return [
+                    'id' => $training->id,
+                    'title' => $training->title,
+                    'slug' => $training->slug,
+                    'start_date' => $training->start_date,
+                    'end_date' => $training->end_date,
+                    'price' => (float) $training->price,
+                ];
+            })
+            ->values();
+
         return inertia('backend/users/index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'is_active', 'verified']),
+            'availableTrainings' => $availableTrainings,
         ]);
     }
 
@@ -69,7 +96,7 @@ class UserController extends Controller
 
         $plainPassword = $request->password;
 
-        $user = User::create([
+        $user = UserModel::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($plainPassword),
@@ -84,7 +111,7 @@ class UserController extends Controller
             ->with('success', 'Utilisateur créé avec succès. Un email avec les identifiants a été envoyé.');
     }
 
-    public function edit(User $user)
+    public function edit(UserModel $user)
     {
         return inertia('backend/users/edit', [
             'user' => [
@@ -97,7 +124,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, UserModel $user)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -122,7 +149,7 @@ class UserController extends Controller
             ->with('success', 'Utilisateur mis à jour avec succès.');
     }
 
-    public function destroy(User $user)
+    public function destroy(UserModel $user)
     {
         if ($user->id === Auth::id()) {
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
@@ -144,13 +171,66 @@ class UserController extends Controller
     /**
      * Affiche les détails d'un utilisateur spécifique.
      *
-     * @param User $user
+    * @param UserModel $user
      * @return \Inertia\Response
      */
-    public function show(User $user)
+    public function show(UserModel $user)
     {
-        // Charge l'utilisateur avec ses relations si nécessaire
-        // $user->load(['posts', 'comments']);
+        $availableTrainings = Training::query()
+            ->where('is_published', true)
+            ->orderBy('start_date')
+            ->get([
+                'id',
+                'title',
+                'slug',
+                'start_date',
+                'end_date',
+                'price',
+            ])
+            ->map(function (Training $training) {
+                return [
+                    'id' => $training->id,
+                    'title' => $training->title,
+                    'slug' => $training->slug,
+                    'start_date' => $training->start_date,
+                    'end_date' => $training->end_date,
+                    'price' => (float) $training->price,
+                ];
+            })
+            ->values();
+
+        $assignedTrainings = TrainingParticipant::query()
+            ->where('user_id', $user->id)
+            ->with([
+                'training' => function ($query) {
+                    $query->select('id', 'title', 'slug', 'start_date', 'end_date', 'price');
+                },
+                'assignedByAdmin:id,name,email',
+                'cancelledByAdmin:id,name,email',
+            ])
+            ->latest()
+            ->get()
+            ->filter(fn(TrainingParticipant $participant) => $participant->training !== null)
+            ->map(function (TrainingParticipant $participant) {
+                return [
+                    'id' => $participant->id,
+                    'training_id' => $participant->training_id,
+                    'training_title' => $participant->training->title,
+                    'training_slug' => $participant->training->slug,
+                    'start_date' => $participant->training->start_date,
+                    'end_date' => $participant->training->end_date,
+                    'price' => (float) $participant->training->price,
+                    'status' => $participant->status,
+                    'assigned_at' => $participant->created_at,
+                    'reference' => $participant->reference,
+                    'assigned_by_admin_id' => $participant->assigned_by_admin_id,
+                    'assigned_by_admin_name' => optional($participant->assignedByAdmin)->name,
+                    'cancelled_at' => $participant->cancelled_at,
+                    'cancelled_by_admin_id' => $participant->cancelled_by_admin_id,
+                    'cancelled_by_admin_name' => optional($participant->cancelledByAdmin)->name,
+                ];
+            })
+            ->values();
 
         return inertia('backend/users/show', [
             'user' => [
@@ -169,6 +249,116 @@ class UserController extends Controller
 
              
             ],
+            'availableTrainings' => $availableTrainings,
+            'assignedTrainings' => $assignedTrainings,
+        ]);
+    }
+
+    public function assignTraining(Request $request, UserModel $user)
+    {
+        $validated = $request->validate([
+            'training_id' => ['required', 'integer', 'exists:trainings,id'],
+        ]);
+
+        $training = Training::query()
+            ->select('id', 'title', 'price')
+            ->findOrFail($validated['training_id']);
+
+        $existingAssignment = TrainingParticipant::query()
+            ->where('user_id', $user->id)
+            ->where('training_id', $training->id)
+            ->where('status', '!=', TrainingParticipant::STATUS_CANCELLED)
+            ->first();
+
+        if ($existingAssignment) {
+            return back()->with('error', 'Cette formation est déjà attribuée à cet utilisateur.');
+        }
+
+        $this->createAdminAssignment($user, $training);
+
+        return back()->with('success', 'Formation attribuée avec succès à ' . $user->name . '.');
+    }
+
+    public function bulkAssignTraining(Request $request)
+    {
+        $validated = $request->validate([
+            'training_id' => ['required', 'integer', 'exists:trainings,id'],
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $training = Training::query()
+            ->select('id', 'title', 'price')
+            ->findOrFail($validated['training_id']);
+
+        $users = UserModel::query()
+            ->whereKey($validated['user_ids'])
+            ->get(['id', 'name', 'email', 'phone']);
+
+        $created = 0;
+        $skipped = 0;
+
+        DB::transaction(function () use ($users, $training, &$created, &$skipped) {
+            foreach ($users as $user) {
+                $existingAssignment = TrainingParticipant::query()
+                    ->where('user_id', $user->id)
+                    ->where('training_id', $training->id)
+                    ->where('status', '!=', TrainingParticipant::STATUS_CANCELLED)
+                    ->exists();
+
+                if ($existingAssignment) {
+                    $skipped++;
+                    continue;
+                }
+
+                $this->createAdminAssignment($user, $training);
+                $created++;
+            }
+        });
+
+        return back()->with(
+            'success',
+            "Attribution en lot terminée: {$created} attribution(s), {$skipped} déjà existante(s)."
+        );
+    }
+
+    public function unassignTraining(UserModel $user, TrainingParticipant $participant)
+    {
+        if ((int) $participant->user_id !== (int) $user->id) {
+            return back()->with('error', 'Cette inscription ne correspond pas à cet utilisateur.');
+        }
+
+        if ($participant->status === TrainingParticipant::STATUS_CANCELLED) {
+            return back()->with('error', 'Cette formation est déjà révoquée pour cet utilisateur.');
+        }
+
+        $participant->update([
+            'status' => TrainingParticipant::STATUS_CANCELLED,
+            'cancelled_at' => now(),
+            'cancelled_by_admin_id' => Auth::id(),
+        ]);
+
+        return back()->with('success', 'Attribution de formation révoquée avec succès.');
+    }
+
+    private function createAdminAssignment($user, Training $training): TrainingParticipant
+    {
+        return TrainingParticipant::query()->create([
+            'user_id' => $user->id,
+            'assigned_by_admin_id' => Auth::id(),
+            'cancelled_by_admin_id' => null,
+            'training_id' => $training->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'qty' => 1,
+            'status' => TrainingParticipant::STATUS_COMPLETED,
+            'reference' => TrainingParticipant::generateReference(),
+            'payment_id' => 'admin-assigned-' . $user->id . '-' . $training->id,
+            'payment_amount' => 0,
+            'payment_date' => now(),
+            'payment_confirmed' => true,
+            'payment_error' => 'Attribue par admin #' . (string) Auth::id(),
         ]);
     }
 
@@ -176,7 +366,7 @@ class UserController extends Controller
     /**
      * Renvoie l'email de vérification.
      */
-    public function resendVerification(User $user)
+    public function resendVerification(UserModel $user)
     {
         if ($user->hasVerifiedEmail()) {
             return back()->with('error', 'Cet utilisateur a déjà vérifié son email.');
@@ -190,7 +380,7 @@ class UserController extends Controller
 
     public function blockedUsers(Request $request)
     {
-        $query = User::query()
+        $query = UserModel::query()
             ->where('is_active', 0)
             ->when($request->input('is_active') && $request->input('is_active') !== 'all', function ($query) use ($request) {
                 $query->where('is_active', $request->input('is_active'));
@@ -212,7 +402,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function reactivateUser(User $user)
+    public function reactivateUser(UserModel $user)
     {
         // Vérifier si l'utilisateur est actuellement inactif ou banni
         if (!in_array($user->is_active, [0])) {
@@ -315,7 +505,7 @@ class UserController extends Controller
                 $plainPassword = (string) env('TEST_USERS_PASSWORD', 'Test1234!');
             }
 
-            $user = User::where('email', $email)->first();
+            $user = UserModel::query()->where('email', $email)->first();
 
             if ($user) {
                 $user->name = $name;
@@ -327,7 +517,7 @@ class UserController extends Controller
                 $user->save();
                 $updated++;
             } else {
-                $newUser = new User();
+                $newUser = new UserModel();
                 $newUser->name = $name;
                 $newUser->email = $email;
                 $newUser->role = $role;
@@ -345,7 +535,7 @@ class UserController extends Controller
 
     public function export(Request $request)
     {
-        $query = User::query()
+        $query = UserModel::query()
             ->when($request->input('search'), function ($query, $search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%")

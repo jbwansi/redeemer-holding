@@ -17,6 +17,8 @@ class TrainingParticipant extends Model
 
     protected $fillable = [
         'user_id',
+        'assigned_by_admin_id',
+        'cancelled_by_admin_id',
         'training_id',
         'name',
         'qty',
@@ -65,6 +67,22 @@ class TrainingParticipant extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Admin ayant attribué la formation.
+     */
+    public function assignedByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by_admin_id');
+    }
+
+    /**
+     * Admin ayant révoqué l'accès à la formation.
+     */
+    public function cancelledByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_admin_id');
     }
 
     /**

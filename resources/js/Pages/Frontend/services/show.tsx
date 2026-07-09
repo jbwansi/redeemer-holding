@@ -107,7 +107,7 @@ const ServiceDetail = ({
         </div>
 
         {/* Hero Section */}
-        <section ref={heroRef} className="relative h-[400px] md:h-[500px] overflow-hidden">
+        <section ref={heroRef} className="relative min-h-[520px] md:min-h-[560px] overflow-hidden">
           {/* Background avec effet parallax */}
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
@@ -120,7 +120,7 @@ const ServiceDetail = ({
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/70 to-gray-900/60 dark:from-gray-950/90 dark:via-gray-950/80 dark:to-gray-950/70"></div>
           </motion.div>
 
-          <div className="relative z-10 h-full flex items-center">
+          <div className="relative z-10 flex min-h-[520px] items-center py-8 md:min-h-[560px] md:py-10">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 w-full">
               <motion.div
                 className="max-w-3xl"
@@ -166,7 +166,7 @@ const ServiceDetail = ({
                 >
                   <Link
                     href={requestUrl}
-                    className="px-6 py-3 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium inline-flex items-center justify-center transition-colors duration-300 shadow-lg shadow-[#DA2E29]/20"
+                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#DA2E29] bg-[#DA2E29] px-6 py-3 font-semibold text-white shadow-lg shadow-[#DA2E29]/30 transition-colors duration-300 hover:bg-[#c02824]"
                   >
                     <Calendar className="mr-2 w-5 h-5" />
                     <span>Réserver maintenant</span>
@@ -174,7 +174,7 @@ const ServiceDetail = ({
 
                   <a
                     href="#details"
-                    className="px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-lg font-medium inline-flex items-center justify-center transition-colors duration-300"
+                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/35 bg-[#0f2342]/85 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-colors duration-300 hover:bg-[#17315a]"
                   >
                     <span>En savoir plus</span>
                     <ChevronRight className="ml-2 w-5 h-5" />

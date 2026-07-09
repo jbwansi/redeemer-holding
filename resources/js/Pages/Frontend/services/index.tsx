@@ -44,12 +44,20 @@ type FaqItem = {
 
 type PageContent = Record<string, string>;
 
-type ServiceFocus = 'all' | 'coaching' | 'consultation' | 'formation' | 'webinaire' | 'ressources';
+type ServiceFocus =
+  | 'all'
+  | 'coaching'
+  | 'consultation'
+  | 'formation'
+  | 'team_building'
+  | 'webinaire'
+  | 'ressources';
 
 const focusKeywords: Record<Exclude<ServiceFocus, 'all'>, string[]> = {
   coaching: ['coaching', 'coach'],
   consultation: ['consultation', 'conseil', 'advisory'],
   formation: ['formation', 'training', 'atelier'],
+  team_building: ['team building', 'teambuilding', 'lego serious play', 'lsp', 'cohesion'],
   webinaire: ['webinaire', 'webinar', 'masterclass'],
   ressources: ['ressource', 'guide', 'template', 'ebook', 'outil'],
 };
@@ -84,7 +92,7 @@ function ServicesPage({
   contactFaqs?: FaqItem[];
   pageContent?: PageContent;
 }) {
-  const page = usePage() as any;
+  const page = usePage<{ url?: string }>();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
@@ -102,20 +110,20 @@ function ServicesPage({
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', '35%']);
 
   const queryString = String(page?.url || '').split('?')[1] || '';
-  const queryParams = new URLSearchParams(queryString);
+  const queryParams = new window.URLSearchParams(queryString);
   const queryFocus = (queryParams.get('focus') || 'all').toLowerCase() as ServiceFocus;
 
   const initialFocus: ServiceFocus = [
     'coaching',
     'consultation',
     'formation',
+    'team_building',
     'webinaire',
     'ressources',
   ].includes(queryFocus)
     ? queryFocus
     : 'all';
 
-  // const [openIndex, setOpenIndex] = useState<number>(0);
   const [focus, setFocus] = useState<ServiceFocus>(initialFocus);
 
   const serviceCount = services?.length ?? 0;
@@ -131,7 +139,9 @@ function ServicesPage({
 
   const filteredServices = useMemo(() => {
     if (focus === 'all') return services;
+
     const keywords = focusKeywords[focus];
+
     return services.filter((service) => {
       const haystack =
         `${service.name || ''} ${service.excerpt || ''} ${service.slug || ''}`.toLowerCase();
@@ -160,6 +170,7 @@ function ServicesPage({
       : [];
 
     const dedup = new Map<string, FaqItem>();
+
     externalFaqs.forEach((faq) => {
       const key = faq.question.toLowerCase();
       if (!dedup.has(key)) dedup.set(key, faq);
@@ -176,17 +187,17 @@ function ServicesPage({
         ref={containerRef}
         className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pb-20 pt-28 text-slate-900 dark:bg-[#020817] dark:text-white"
       >
-        {/* Orbs */}
         <motion.div
           className="pointer-events-none absolute -left-20 -top-24 h-80 w-80 rounded-full bg-[#da2e29]/20 blur-3xl dark:bg-[#da2e29]/25"
           style={{ y: orbY }}
         />
+
         <motion.div
           className="pointer-events-none absolute bottom-[-120px] right-[-40px] h-96 w-96 rounded-full bg-[#0f766e]/15 blur-3xl dark:bg-[#0f766e]/20"
           style={{ y: orbY }}
         />
 
-        {/* ── HERO ── */}
+        {/* HERO */}
         <section
           ref={heroRef}
           className="relative mx-auto max-w-[1320px] px-6 md:px-8"
@@ -217,6 +228,7 @@ function ServicesPage({
             />
 
             <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/65 dark:from-[#020817]/80 dark:via-[#020817]/25 dark:to-transparent" />
+
             <div className="relative z-10 flex min-h-[460px] items-center px-8 py-14 md:min-h-[520px] md:px-12 lg:px-16">
               <div className="max-w-3xl">
                 <span className="inline-flex items-center gap-2 rounded-full border text-sm font-black uppercase tracking-[0.25em] text-[#da2e29]">
@@ -275,7 +287,7 @@ function ServicesPage({
           id="liste-services"
           ref={cardsRef}
           data-progress-label="Services"
-          className="relative mx-auto mt-12 max-w-[1320px] px-6 md:mt-16 md:px-8"
+          className="relative mx-auto mt-12 max-w-[1820px] px-4 md:mt-16 md:px-6"
         >
           <motion.div
             initial={false}
@@ -302,7 +314,8 @@ function ServicesPage({
                 { key: 'all', label: 'Tous' },
                 { key: 'coaching', label: 'Coaching' },
                 { key: 'consultation', label: 'Consultation' },
-              { key: 'formation', label: 'Formation en groupe' },
+                { key: 'formation', label: 'Formation en groupe' },
+                { key: 'team_building', label: 'Team Building' },
                 { key: 'webinaire', label: 'Webinaires' },
                 { key: 'ressources', label: 'Ressources' },
               ].map((item) => (
@@ -310,7 +323,7 @@ function ServicesPage({
                   key={item.key}
                   type="button"
                   onClick={() => setFocus(item.key as ServiceFocus)}
-                  className={`shrink-0 rounded-full px-6 py-3 text-sm font-bold transition ${
+                  className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition ${
                     focus === item.key
                       ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/25'
                       : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 dark:hover:text-white'
@@ -324,29 +337,32 @@ function ServicesPage({
 
           {/* Cards */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredServices.map((service, idx) => (
-              <motion.article
-                key={service.id}
-                initial={false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: idx * 0.08 }}
-                className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 hover:border-[#da2e29]/40 dark:border-white/10 dark:bg-[#0b1424] dark:shadow-black/25"
-              >
-                <div className="relative overflow-hidden rounded-[1.5rem]">
-                  <img
-                    src={service.image || '/assets/images/coaching-session.jpg'}
-                    alt={service.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-40 w-full object-cover transition duration-700 group-hover:scale-105 sm:h-48"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent dark:from-[#020817]/80 dark:via-[#020817]/10" />
-                </div>
+            {filteredServices.map((service, idx) => {
+              const excerpt =
+                (service.excerpt ?? '').length > 300
+                  ? (service.excerpt ?? '').slice(0, 300) + '...'
+                  : (service.excerpt ?? '');
+              return (
+                <motion.article
+                  key={service.id}
+                  initial={false}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: idx * 0.08 }}
+                  className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 hover:border-[#da2e29]/40 dark:border-white/10 dark:bg-[#0b1424] dark:shadow-black/25"
+                >
+                  <div className="relative overflow-visible">
+                    <div className="overflow-hidden rounded-[1.25rem]">
+                      <img
+                        src={service.image || '/assets/images/coaching-session.jpg'}
+                        alt={service.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-64 w-full object-cover transition duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-x-0 top-0 h-64 rounded-[1.25rem] bg-gradient-to-t from-[#061229]/70 via-transparent to-transparent" />
+                    </div>
 
-                <div className="px-5 pb-6">
-                  {/* FIX 3 : Icône flottante avec tooltip */}
-                  <div className="group/icon -mt-8 relative z-10 inline-flex">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
+                    <div className="absolute -bottom-7 left-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
                       {service.icon ? (
                         <IconComponent
                           name={normalizeServiceIconName(service.icon) || 'users'}
@@ -356,77 +372,85 @@ function ServicesPage({
                         <Users className="h-5 w-5" />
                       )}
                     </div>
-                    {/* Tooltip */}
                     <div className="pointer-events-none absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover/icon:opacity-100 dark:bg-white dark:text-slate-900">
                       {service.name}
                       <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-white" />
                     </div>
                   </div>
 
-                  <h3 className="mt-5 text-2xl font-black text-slate-900 dark:text-white">
-                    {service.name}
-                  </h3>
+                  <div className="flex flex-1 flex-col px-4 pb-4 pt-12">
+                    <h3 className="mt-5 text-2xl font-black text-slate-900 dark:text-white">
+                      {service.name}
+                    </h3>
 
-                  {service.tagline && (
-                    <p className="mt-1 text-sm font-bold text-[#da2e29]">{service.tagline}</p>
-                  )}
+                    {service.tagline && (
+                      <p className="mt-2 text-base font-semibold text-[#ff8d8a] dark:text-[#ff8d8a]">
+                        {service.tagline}
+                      </p>
+                    )}
 
-                  <p className="mt-4 line-clamp-4 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                    {service.excerpt || 'Accompagnement personnalisé et orienté résultats.'}
-                  </p>
+                    {/* Passage en 2 colonnes : texte à gauche, checklist à droite */}
+                    {/* Texte + checklist */}
+                    <div className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8">
+                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-300">
+                        {excerpt || 'Accompagnement personnalisé et orienté résultats.'}
+                      </p>
 
-                  <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-white/5 dark:bg-white/[0.04]">
-                    <p className="mb-3 font-bold text-slate-900 dark:text-white">
-                      Idéal si vous voulez :
-                    </p>
-                    <ul className="space-y-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      {(Array.isArray(service.ideal_for) && service.ideal_for.length > 0
-                        ? service.ideal_for
-                        : [
-                            'Un accompagnement sur mesure',
-                            'Des résultats concrets et durables',
-                            'Avancer plus vite et plus sereinement',
-                          ]
-                      ).map((item: string, index: number) => (
-                        <li key={index} className="flex gap-2">
-                          <span className="text-[#da2e29]">✓</span>
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                      <div className="rounded-2xl border border-slate-200 bg-white/5 p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+                        <p className="mb-4 font-bold text-slate-900 dark:text-white">
+                          Idéal si vous voulez :
+                        </p>
 
-                  {service.featured_note && (
-                    <div className="mt-5 rounded-2xl border border-[#da2e29]/30 bg-[#da2e29]/10 px-4 py-3 text-xs font-bold text-[#da2e29]">
-                      {service.featured_note}
+                        <ul className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          {(Array.isArray(service.ideal_for) && service.ideal_for.length > 0
+                            ? service.ideal_for
+                            : [
+                                'Un accompagnement sur mesure',
+                                'Des résultats concrets et durables',
+                                'Avancer plus vite et plus sereinement',
+                              ]
+                          ).map((item: string, index: number) => (
+                            <li key={index} className="flex items-start gap-3">
+                              <span className="mt-0.5 shrink-0 text-[#da2e29]">✓</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <Link
-                      href={
-                        service.cta_primary_url ||
-                        (service.slug
-                          ? `/services-requests/${encodeURIComponent(service.slug)}`
-                          : '#')
-                      }
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#da2e29] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#c62823] sm:w-auto"
-                    >
-                      {service.cta_primary_label || 'Réserver'}
-                      <Calendar className="h-4 w-4" />
-                    </Link>
+                    {service.featured_note && (
+                      <div className="mt-5 rounded-2xl border border-[#da2e29]/30 bg-[#da2e29]/10 px-4 py-3 text-xs font-bold text-[#da2e29]">
+                        {service.featured_note}
+                      </div>
+                    )}
 
-                    <Link
-                      href={service.cta_secondary_url || route('services.details', service.slug)}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-5 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10 sm:w-auto"
-                    >
-                      {service.cta_secondary_label || 'En savoir plus'}
-                      <ChevronRight className="h-4 w-4" />
-                    </Link>
+                    <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                      <Link
+                        href={
+                          service.cta_primary_url ||
+                          (service.slug
+                            ? `/services-requests/${encodeURIComponent(service.slug)}`
+                            : '#')
+                        }
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#da2e29] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#c62823] sm:w-fit"
+                      >
+                        {service.cta_primary_label || ' Réserver une seance decouverte'}
+                        <Calendar className="h-4 w-4" />
+                      </Link>
+
+                      <Link
+                        href={service.cta_secondary_url || route('services.details', service.slug)}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#10213c] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#162946] sm:w-fit"
+                      >
+                        {service.cta_secondary_label || 'En savoir plus'}
+                        <ChevronRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </motion.article>
-            ))}
+                </motion.article>
+              );
+            })}
           </div>
 
           {filteredServices.length === 0 && (
@@ -484,6 +508,7 @@ function ServicesPage({
             <div className="mt-9 grid grid-cols-1 gap-6 md:grid-cols-3">
               {processSteps.map((step, idx) => {
                 const Icon = step.icon;
+
                 return (
                   <motion.div
                     key={step.title}
@@ -495,9 +520,11 @@ function ServicesPage({
                     <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[#da2e29] text-white">
                       <Icon className="h-5 w-5" />
                     </div>
+
                     <h3 className="mt-5 text-xl font-black text-slate-900 dark:text-white">
                       {step.title}
                     </h3>
+
                     <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                       {step.description}
                     </p>
@@ -553,7 +580,7 @@ function ServicesPage({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-[#da2e29] to-[#c62823] px-8 py-12 text-white shadow-2xl shadow-[#da2e29]/20 md:px-12 md:py-14"
+            className="relative overflow-hidden rounded-[2rem] bg-gradient-to-r from-[#da2e29] to-[#c62823] px-6 py-8 text-white shadow-2xl shadow-[#da2e29]/20 md:px-12 md:py-14"
           >
             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
             <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-black/10 blur-3xl" />

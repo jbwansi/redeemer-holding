@@ -264,6 +264,12 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             ->name('users.')
             ->group(function () {
                 Route::post('/import', [UserController::class, 'import'])->name('import');
+                Route::post('/trainings/bulk-assign', [UserController::class, 'bulkAssignTraining'])
+                    ->name('trainings.bulk-assign');
+                Route::post('/{user}/trainings/assign', [UserController::class, 'assignTraining'])
+                    ->name('trainings.assign');
+                Route::post('/{user}/trainings/{participant}/unassign', [UserController::class, 'unassignTraining'])
+                    ->name('trainings.unassign');
                 Route::get('/export-csv', [UserController::class, 'export'])->name('export');
                 Route::get('/blocked/list', [UserController::class, 'blockedUsers'])->name('blocked');
                 Route::post('/{user}/verification/resend', [UserController::class, 'resendVerification'])->name('verification.resend');

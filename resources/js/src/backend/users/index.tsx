@@ -42,6 +42,7 @@ import {
   User,
   Shield,
   Calendar,
+  GraduationCap,
 } from 'lucide-react';
 import debounce from 'lodash/debounce';
 import { useState, useCallback, useRef } from 'react';
@@ -56,6 +57,15 @@ interface User {
   is_active: 1 | 0;
   email_verified_at: string | null;
   created_at: string;
+}
+
+interface TrainingOption {
+  id: number;
+  title: string;
+  slug: string;
+  start_date: string;
+  end_date: string;
+  price: number;
 }
 
 interface Props {
@@ -81,6 +91,7 @@ interface Props {
     is_active?: string;
     verified?: string;
   };
+  availableTrainings: TrainingOption[];
 }
 
 const roleOptions = [
@@ -102,7 +113,7 @@ const verifiedOptions = [
   { id: 'unverified', name: 'Non vérifié', value: 'unverified' },
 ];
 
-export default function Index({ users, filters }: Props) {
+export default function Index({ users, filters, availableTrainings }: Props) {
   const importInputRef = useRef<HTMLInputElement | null>(null);
   const [searchQuery, setSearchQuery] = useState(filters.search || '');
   const [selectedrole, setSelectedrole] = useState(filters.role || 'all');
@@ -110,9 +121,13 @@ export default function Index({ users, filters }: Props) {
   const [selectedVerified, setSelectedVerified] = useState(filters.verified || 'all');
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+  const [bulkTrainingId, setBulkTrainingId] = useState('');
 
   const activeCount = users?.data?.filter((u) => u.is_active === 1).length ?? 0;
   const verifiedCount = users?.data?.filter((u) => !!u.email_verified_at).length ?? 0;
+  const allCurrentPageSelected =
+    users.data.length > 0 && users.data.every((user) => selectedUserIds.includes(user.id));
 
   const debouncedSearch = useCallback(
     debounce((value: string) => {
@@ -238,12 +253,66 @@ export default function Index({ users, filters }: Props) {
     );
   };
 
+  const toggleUserSelection = (userId: number) => {
+    setSelectedUserIds((previous) => {
+      if (previous.includes(userId)) {
+        return previous.filter((id) => id !== userId);
+      }
+
+      return [...previous, userId];
+    });
+  };
+
+  const toggleCurrentPageSelection = () => {
+    if (allCurrentPageSelected) {
+      const currentPageIds = new Set(users.data.map((user) => user.id));
+      setSelectedUserIds((previous) => previous.filter((id) => !currentPageIds.has(id)));
+      return;
+    }
+
+    const merged = new Set(selectedUserIds);
+    users.data.forEach((user) => merged.add(user.id));
+    setSelectedUserIds(Array.from(merged));
+  };
+
+  const handleBulkAssignTraining = () => {
+    if (!bulkTrainingId) {
+      toast.error('Veuillez sélectionner une formation à attribuer.');
+      return;
+    }
+
+    if (selectedUserIds.length === 0) {
+      toast.error('Veuillez sélectionner au moins un utilisateur.');
+      return;
+    }
+
+    router.post(
+      route('users.trainings.bulk-assign'),
+      {
+        training_id: Number(bulkTrainingId),
+        user_ids: selectedUserIds,
+      },
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success('Attribution en lot réalisée avec succès.');
+          setSelectedUserIds([]);
+          setBulkTrainingId('');
+        },
+        onError: () => {
+          toast.error("L'attribution en lot a échoué.");
+        },
+      }
+    );
+  };
+
   return (
     <>
       <Head title="Utilisateurs" />
       <input
         ref={importInputRef}
         type="file"
+        aria-label="Importer des utilisateurs"
         accept=".csv,text/csv,.txt"
         className="hidden"
         onChange={handleImportFileChange}
@@ -380,6 +449,35 @@ export default function Index({ users, filters }: Props) {
                     </Select>
                   </div>
                 </div>
+
+                <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Attribution en lot</p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedUserIds.length} utilisateur(s) sélectionné(s)
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <Select value={bulkTrainingId} onValueChange={setBulkTrainingId}>
+                        <SelectTrigger className="w-full sm:w-[280px] bg-white">
+                          <SelectValue placeholder="Choisir une formation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTrainings.map((training) => (
+                            <SelectItem key={training.id} value={String(training.id)}>
+                              {training.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button onClick={handleBulkAssignTraining} className="h-10">
+                        <GraduationCap className="mr-2 h-4 w-4" />
+                        Attribuer aux sélectionnés
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
 
               {/* Table */}
@@ -387,6 +485,14 @@ export default function Index({ users, filters }: Props) {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[45px]">
+                        <input
+                          type="checkbox"
+                          aria-label="Sélectionner tous les utilisateurs de la page"
+                          checked={allCurrentPageSelected}
+                          onChange={toggleCurrentPageSelection}
+                        />
+                      </TableHead>
                       <TableHead>
                         <button
                           onClick={() => handleSort('created_at')}
@@ -415,13 +521,21 @@ export default function Index({ users, filters }: Props) {
                   <TableBody>
                     {users.data.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-24 text-center">
+                        <TableCell colSpan={8} className="h-24 text-center">
                           Aucun utilisateur trouvé
                         </TableCell>
                       </TableRow>
                     ) : (
                       users.data.map((user) => (
                         <TableRow key={user.id}>
+                          <TableCell>
+                            <input
+                              type="checkbox"
+                              aria-label={`Sélectionner ${user.name}`}
+                              checked={selectedUserIds.includes(user.id)}
+                              onChange={() => toggleUserSelection(user.id)}
+                            />
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -463,6 +577,15 @@ export default function Index({ users, filters }: Props) {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end" className="w-[160px]">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href={`${route('users.show', user.id)}#assign-training`}
+                                    className="cursor-pointer"
+                                  >
+                                    <GraduationCap className="h-4 w-4 mr-2" />
+                                    Attribuer formation
+                                  </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                   <Link
                                     href={route('users.show', user.id)}
