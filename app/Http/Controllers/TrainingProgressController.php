@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Training;
 use App\Models\TrainingLesson;
 use App\Models\TrainingProgress;
-use App\Models\TrainingParticipant;
 use App\Services\LearningProgressService;
 
 class TrainingProgressController extends Controller
@@ -61,19 +60,6 @@ class TrainingProgressController extends Controller
     {
         abort_unless((int) $lesson->training_id === (int) $training->id, 404);
 
-        $query = TrainingParticipant::where('training_id', $training->id)
-            ->where('user_id', auth()->id())
-            ->whereIn('status', [
-                TrainingParticipant::STATUS_REGISTERED,
-                TrainingParticipant::STATUS_CONFIRMED,
-                TrainingParticipant::STATUS_IN_PROGRESS,
-                TrainingParticipant::STATUS_COMPLETED,
-            ]);
-
-        if ((float) $training->price > 0) {
-            $query->where('payment_confirmed', true);
-        }
-
-        abort_unless($query->exists(), 403);
+        app(LearningProgressService::class)->ensureTrainingAccess($training, auth()->user());
     }
 }

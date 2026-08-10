@@ -8,7 +8,7 @@ class StoreTrainingResourceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->role === 'admin';
+        return auth()->user()?->can('administer') ?? false;
     }
 
     public function rules(): array

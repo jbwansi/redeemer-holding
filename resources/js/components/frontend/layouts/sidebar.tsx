@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Menu, LogOut, ChevronRight, LayoutDashboard } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export interface SidebarItem {
@@ -68,8 +68,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggle,
   onPageChange,
   onLogout,
-  userRole,
 }) => {
+  const { auth } = usePage().props as any;
+
   return (
     <>
       <motion.aside
@@ -113,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 showText={isOpen}
               />
             ))}
-            {userRole == 'admin' && (
+            {auth?.can?.administer === true && (
               <Link
                 href={route('dashboard')}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300`}

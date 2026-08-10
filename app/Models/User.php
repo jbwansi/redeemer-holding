@@ -50,6 +50,16 @@ class User extends Authenticatable
         ];
     }
 
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
     public function getProfilePhotoPathAttribute()
     {
         return 'https://www.gravatar.com/avatar/' . md5(strtolower($this->email)) . '?d=mp';

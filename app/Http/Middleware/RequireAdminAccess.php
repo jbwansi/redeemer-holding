@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class RequireAdminAccess
@@ -21,11 +22,7 @@ class RequireAdminAccess
                 ->with('error', 'Veuillez vous connecter pour acceder au dashboard administrateur.');
         }
 
-        if ($request->user()->role !== 'admin') {
-            return redirect()
-                ->route('home')
-                ->with('error', 'Acces reserve aux administrateurs.');
-        }
+        Gate::forUser($request->user())->authorize('administer');
 
         return $next($request);
     }

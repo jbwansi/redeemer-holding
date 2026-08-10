@@ -15,7 +15,9 @@ class CheckUserRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!$request->user() || !in_array($request->user()->role, $roles)) {
+        if (!$request->user() || !collect($roles)->contains(
+            fn (string $role): bool => $request->user()->hasRole($role)
+        )) {
             abort(403, 'Vous n\'avez pas les permissions nécessaires.');
         }
         return $next($request);

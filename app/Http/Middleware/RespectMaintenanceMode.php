@@ -33,7 +33,7 @@ class RespectMaintenanceMode
         }
 
         // Allow admins to browse the public site while maintenance is active.
-        if ($request->user() && $request->user()->role === 'admin') {
+        if ($request->user()?->can('administer')) {
             return $next($request);
         }
 

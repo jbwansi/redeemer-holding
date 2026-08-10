@@ -53,8 +53,8 @@ const Navbar = () => {
   const page = usePage() as any;
   const { auth } = page.props;
   const currentPath = normalizePath(page.url || window.location.pathname);
-  const isAdmin = auth?.user?.role === 'admin';
-  const accountRoute = isAdmin ? route('dashboard') : route('dashboard.client.profile');
+  const canAdminister = auth?.can?.administer === true;
+  const accountRoute = canAdminister ? route('dashboard') : route('dashboard.client.profile');
 
   // Smoother animations with spring physics
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
@@ -528,7 +528,11 @@ const Navbar = () => {
                         href={auth?.user ? accountRoute : route('login')}
                         className="ux-btn-secondary !px-4 !py-2"
                       >
-                        {auth?.user ? (isAdmin ? 'Dashboard admin' : 'Mon espace') : 'Connexion'}
+          {auth?.user
+            ? canAdminister
+              ? 'Dashboard admin'
+              : 'Mon espace'
+            : 'Connexion'}
                       </Link>
                     </div>
 

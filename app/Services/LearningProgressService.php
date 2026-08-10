@@ -6,10 +6,10 @@ use App\Models\Training;
 use App\Models\TrainingLesson;
 use App\Models\TrainingProgress;
 use App\Models\TrainingSection;
-use App\Models\TrainingParticipant;
 use App\Models\TrainingQuiz;
 use App\Models\TrainingQuizAttempt;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class LearningProgressService
 {
@@ -76,26 +76,7 @@ class LearningProgressService
     {
         abort_unless($user, 403, 'Vous devez être connecté pour accéder à cette formation.');
 
-        if ($user->is_admin ?? false) {
-            return;
-        }
-
-        abort_unless($training->is_published, 403, 'Cette formation n’est pas encore disponible.');
-
-        $query = TrainingParticipant::where('training_id', $training->id)
-            ->where('user_id', $user->id)
-            ->whereIn('status', [
-                TrainingParticipant::STATUS_REGISTERED,
-                TrainingParticipant::STATUS_CONFIRMED,
-                TrainingParticipant::STATUS_IN_PROGRESS,
-                TrainingParticipant::STATUS_COMPLETED,
-            ]);
-
-        if ((float) $training->price > 0) {
-            $query->where('payment_confirmed', true);
-        }
-
-        abort_unless($query->exists(), 403, 'Vous n\'avez pas accès à cette formation.');
+        Gate::forUser($user)->authorize('viewLearning', $training);
     }
 
 

@@ -32,7 +32,7 @@ class OnlyTestUsers
             return redirect()->route('login');
         }
 
-        if ($request->user()->role === 'admin') {
+        if ($request->user()->can('administer')) {
             return $next($request);
         }
 

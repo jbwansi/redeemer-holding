@@ -8,7 +8,7 @@ const VisitorsByCountry = () => {
   const [total, setTotal] = useState(0);
 
   // Ne rien afficher si ce n'est pas un admin
-  if (auth?.user?.role !== 'admin') {
+  if (auth?.can?.administer !== true) {
     return null;
   }
 

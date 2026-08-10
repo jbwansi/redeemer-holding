@@ -41,7 +41,7 @@ class AuthController extends Controller
         $this->authService->authenticate($request);
 
 
-        if (Auth::user()->role == 'admin') {
+        if (Auth::user()->can('administer')) {
             return redirect()->route('dashboard');
         } else {
             return redirect()->route('dashboard.client.profile');
@@ -56,7 +56,7 @@ class AuthController extends Controller
         }
 
         $user = $this->authService->register($request);
-        if (Auth::user()->role == 'admin') {
+        if (Auth::user()->can('administer')) {
             return redirect()->route('dashboard');
         } else {
             return redirect()->route('dashboard.client.profile');

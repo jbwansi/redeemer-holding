@@ -2,19 +2,16 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Gate;
 
 class BackupController
 {
     public function export()
     {
-        // Only allow admin users
-        if (!Auth::user() || Auth::user()->role !== 'admin') {
-            abort(403, 'Unauthorized');
-        }
+        Gate::authorize('administer');
 
         $filename = 'backup-' . date('Y-m-d_H-i-s') . '.sql';
         $path = storage_path('app/' . $filename);

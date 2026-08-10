@@ -48,6 +48,9 @@ class HandleInertiaRequests extends Middleware
                     'user' => $request->user()
                         ? Auth::user()
                         : null,
+                    'can' => [
+                        'administer' => $request->user()?->can('administer') ?? false,
+                    ],
                 ];
             },
             'flash' => function () use ($request) {
