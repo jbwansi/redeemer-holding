@@ -105,6 +105,7 @@ class ServiceController extends Controller
         ]);
 
         $serviceRequest = ServiceRequest::create([
+            'user_id' => auth()->id(),
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
@@ -113,6 +114,8 @@ class ServiceController extends Controller
             'message' => $validated['message'] ?? null,
             'status' => ServiceRequest::STATUS_PENDING,
         ]);
+
+        session()->put('temp_service_request_' . $serviceRequest->id, true);
 
         if ((bool) get_setting('service_confirmation_enabled', true)) {
             $this->dynamicMailerService->queue(

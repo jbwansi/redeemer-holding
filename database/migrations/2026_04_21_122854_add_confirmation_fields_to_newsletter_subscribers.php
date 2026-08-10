@@ -18,6 +18,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('newsletter_subscribers', function (Blueprint $table) {
+            $table->dropUnique(['confirmation_token']);
+        });
+
+        Schema::table('newsletter_subscribers', function (Blueprint $table) {
             $table->dropColumn([
                 'confirmation_token',
                 'confirmation_sent_at',

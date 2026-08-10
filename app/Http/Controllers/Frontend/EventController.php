@@ -10,6 +10,8 @@ use App\Http\Resources\Event\EventCollection;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventParticipant;
+use App\Services\OwnedResourceAccessService;
+use App\Services\PaymentAmountService;
 use App\Models\PageContent;
 use App\Services\DynamicMailerService;
 use App\Services\SeoService;
@@ -247,14 +249,7 @@ class EventController extends Controller
             abort(404);
         }
 
-        // Vérifier les autorisations
-        if (auth()->check()) {
-            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-            }
-        } elseif (!session()->has('temp_participant_' . $participant_id)) {
-            abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-        }
+        app(OwnedResourceAccessService::class)->authorize($participant);
 
         // Préparer les données pour la vue
         $participant->load('event');
@@ -279,18 +274,11 @@ class EventController extends Controller
             abort(404);
         }
 
-        // Vérifier les autorisations
-        if (auth()->check()) {
-            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
-            }
-        } elseif (!session()->has('temp_participant_' . $participant_id)) {
-            abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
-        }
+        app(OwnedResourceAccessService::class)->authorize($participant, 'update');
 
         // Vérifier si l'annulation est encore possible
         $cancellationDeadline = (new \DateTime($event->start_date))->modify('-24 hours');
-        if (now() > $cancellationDeadline && !auth()->user()?->hasRole('admin')) {
+        if (now() > $cancellationDeadline && !auth()->user()?->can('administer')) {
             return back()->withErrors([
                 'general' => "Les annulations ne sont plus possibles moins de 24h avant le début de l'événement."
             ]);
@@ -350,22 +338,15 @@ class EventController extends Controller
             abort(404);
         }
 
-        // Vérifier les autorisations
-        if (auth()->check()) {
-            if ($registration->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403);
-            }
-        } elseif (!session()->has('temp_participant_' . $registration->id)) {
-            abort(403);
-        }
+        app(OwnedResourceAccessService::class)->authorize($registration);
+
+        $amounts = app(PaymentAmountService::class)->calculate($event->price * $registration->qty);
 
         // Générer la facture
         $data = [
             'event' => $event,
             'registration' => $registration,
-            'subtotal' => $event->price * $registration->qty,
-            'serviceFee' => $event->price * $registration->qty * 0.05,
-            'total' => $event->price * $registration->qty * 1.05,
+            ...$amounts,
             'date' => $registration->payment_date ?? $registration->created_at,
             'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
         ];

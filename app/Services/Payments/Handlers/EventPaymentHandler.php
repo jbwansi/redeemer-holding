@@ -6,6 +6,8 @@ use App\Models\Event;
 use App\Models\EventParticipant;
 use App\Notifications\InvoiceNotification;
 use App\Services\Payments\Contracts\PaymentHandlerInterface;
+use App\Services\OwnedResourceAccessService;
+use App\Services\PaymentAmountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeSession;
@@ -26,6 +28,8 @@ class EventPaymentHandler implements PaymentHandlerInterface
             abort(404);
         }
 
+        app(OwnedResourceAccessService::class)->authorize($participant);
+
         if ($participant->status !== EventParticipant::STATUS_PENDING) {
             if ($participant->status === EventParticipant::STATUS_COMPLETED) {
                 return redirect()->route('events.registration.confirmation', [
@@ -37,9 +41,8 @@ class EventPaymentHandler implements PaymentHandlerInterface
             abort(400);
         }
 
-        $subtotal = $event->price * $participant->qty;
-        $serviceFee = $subtotal * 0.05;
-        $total = $subtotal + $serviceFee;
+        $amounts = app(PaymentAmountService::class)->calculate($event->price * $participant->qty);
+        ['subtotal' => $subtotal, 'serviceFee' => $serviceFee, 'total' => $total] = $amounts;
 
         $session = StripeSession::create([
             'payment_method_types' => ['card'],
@@ -114,12 +117,12 @@ class EventPaymentHandler implements PaymentHandlerInterface
             'payment_date' => now(),
         ]);
 
+        $amounts = app(PaymentAmountService::class)->calculate($event->price * $participant->qty);
+
         $participant->notify(new InvoiceNotification($event, $participant, [
             'event' => $event,
             'registration' => $participant,
-            'subtotal' => $event->price * $participant->qty,
-            'serviceFee' => $event->price * $participant->qty * 0.05,
-            'total' => $event->price * $participant->qty * 1.05,
+            ...$amounts,
             'date' => $participant->payment_date,
             'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($participant->id, 6, '0', STR_PAD_LEFT),
         ]));
@@ -134,7 +137,11 @@ class EventPaymentHandler implements PaymentHandlerInterface
     {
         $participant = EventParticipant::find($request->get('participant_id'));
 
-        if ($participant && $participant->status === EventParticipant::STATUS_IN_PROGRESS) {
+        if ($participant) {
+            app(OwnedResourceAccessService::class)->authorize($participant, 'update');
+        }
+
+        if ($participant?->status === EventParticipant::STATUS_IN_PROGRESS) {
             $participant->update([
                 'status' => EventParticipant::STATUS_PENDING,
             ]);
@@ -159,4 +166,5 @@ class EventPaymentHandler implements PaymentHandlerInterface
             'payment_date' => now(),
         ]);
     }
+
 }

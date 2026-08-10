@@ -2,30 +2,26 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\OnlyTestUsers;
 use App\Models\Training;
 use App\Models\TrainingLesson;
 use App\Models\TrainingParticipant;
 use App\Models\TrainingProgress;
 use App\Models\TrainingSection;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class LearningResumeActionTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        try {
-            $this->artisan('migrate:fresh');
-        } catch (\RuntimeException $exception) {
-            if (str_contains($exception->getMessage(), 'does not support dropping foreign keys by name')) {
-                $this->markTestSkipped('Migrations sqlite incompatibles dans ce projet (dropForeign par nom).');
-            }
-
-            throw $exception;
-        }
+        $this->withoutMiddleware([OnlyTestUsers::class]);
     }
 
     public function test_learning_index_exposes_start_continue_and_review_actions(): void

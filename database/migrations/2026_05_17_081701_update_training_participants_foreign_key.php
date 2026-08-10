@@ -8,6 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            Schema::table('training_participants', function (Blueprint $table) {
+                $table->renameColumn('formation_id', 'training_id');
+            });
+
+            return;
+        }
+
         Schema::table('training_participants', function (Blueprint $table) {
             $table->dropForeign('formation_participants_formation_id_foreign');
         });
@@ -26,6 +34,14 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            Schema::table('training_participants', function (Blueprint $table) {
+                $table->renameColumn('training_id', 'formation_id');
+            });
+
+            return;
+        }
+
         Schema::table('training_participants', function (Blueprint $table) {
             $table->dropForeign(['training_id']);
         });

@@ -6,6 +6,8 @@ use App\Models\Training;
 use App\Models\TrainingParticipant;
 use App\Notifications\TrainingInvoiceNotification;
 use App\Services\Payments\Contracts\PaymentHandlerInterface;
+use App\Services\OwnedResourceAccessService;
+use App\Services\PaymentAmountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeSession;
@@ -30,7 +32,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             abort(404);
         }
 
-        $this->authorizeAccess($participant);
+        app(OwnedResourceAccessService::class)->authorize($participant);
 
         if ($participant->status !== TrainingParticipant::STATUS_PENDING) {
             if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
@@ -43,9 +45,8 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             abort(400, "Cette inscription ne peut pas être payée actuellement.");
         }
 
-        $subtotal = $training->price * $participant->qty;
-        $serviceFee = $subtotal * 0.05;
-        $total = $subtotal + $serviceFee;
+        $amounts = app(PaymentAmountService::class)->calculate($training->price * $participant->qty);
+        ['subtotal' => $subtotal, 'serviceFee' => $serviceFee, 'total' => $total] = $amounts;
 
         try {
             $session = StripeSession::create([
@@ -182,6 +183,8 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             $participant = TrainingParticipant::with('training')->find($participantId);
 
             if ($participant) {
+                app(OwnedResourceAccessService::class)->authorize($participant, 'update');
+
                 $participant->update([
                     'status' => TrainingParticipant::STATUS_PENDING,
                 ]);
@@ -268,24 +271,6 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         ]);
     }
 
-    private function authorizeAccess(TrainingParticipant $participant): void
-    {
-        if (auth()->check()) {
-            if (
-                $participant->user_id !== auth()->id()
-                && !auth()->user()->hasRole('admin')
-            ) {
-                abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-            }
-
-            return;
-        }
-
-        if (!session()->has('temp_participant_' . $participant->id)) {
-            abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-        }
-    }
-
     private function markAsPaid(TrainingParticipant $participant, $session): void
     {
         if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
@@ -303,12 +288,12 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
     private function sendInvoice(Training $training, TrainingParticipant $participant): void
     {
+        $amounts = app(PaymentAmountService::class)->calculate($training->price * $participant->qty);
+
         $invoiceData = [
             'formation' => $training,
             'registration' => $participant,
-            'subtotal' => $training->price * $participant->qty,
-            'serviceFee' => $training->price * $participant->qty * 0.05,
-            'total' => $training->price * $participant->qty * 1.05,
+            ...$amounts,
             'date' => $participant->payment_date ?? $participant->created_at,
             'invoice_number' => 'FORM-' . date('Y') . '-' . str_pad($participant->id, 6, '0', STR_PAD_LEFT),
         ];

@@ -15,6 +15,7 @@ class ServiceRequest extends Model
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',

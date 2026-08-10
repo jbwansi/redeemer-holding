@@ -7,6 +7,8 @@ use App\Models\Training;
 use App\Models\TrainingParticipant;
 use App\Models\PageContent;
 use App\Services\SeoService;
+use App\Services\OwnedResourceAccessService;
+use App\Services\PaymentAmountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -233,13 +235,7 @@ class TrainingController extends Controller
             abort(404);
         }
 
-        if (auth()->check()) {
-            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-            }
-        } elseif (!session()->has('temp_participant_' . $participant_id)) {
-            abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-        }
+        app(OwnedResourceAccessService::class)->authorize($participant);
 
         $participant->load('training');
 
@@ -262,16 +258,10 @@ class TrainingController extends Controller
             abort(404);
         }
 
-        if (auth()->check()) {
-            if ($participant->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
-            }
-        } elseif (!session()->has('temp_participant_' . $participant_id)) {
-            abort(403, "Vous n'êtes pas autorisé à effectuer cette action.");
-        }
+        app(OwnedResourceAccessService::class)->authorize($participant, 'update');
 
         $cancellationDeadline = (new \DateTime($training->start_date))->modify('-24 hours');
-        if (now() > $cancellationDeadline && !auth()->user()?->hasRole('admin')) {
+        if (now() > $cancellationDeadline && !auth()->user()?->can('administer')) {
             return back()->withErrors([
                 'general' => "Les annulations ne sont plus possibles moins de 24h avant le début de la formation."
             ]);
@@ -324,20 +314,14 @@ class TrainingController extends Controller
             abort(404);
         }
 
-        if (auth()->check()) {
-            if ($registration->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
-                abort(403);
-            }
-        } elseif (!session()->has('temp_participant_' . $registration->id)) {
-            abort(403);
-        }
+        app(OwnedResourceAccessService::class)->authorize($registration);
+
+        $amounts = app(PaymentAmountService::class)->calculate($training->price * $registration->qty);
 
         $data = [
             'training' => $training,
             'registration' => $registration,
-            'subtotal' => $training->price * $registration->qty,
-            'serviceFee' => $training->price * $registration->qty * 0.05,
-            'total' => $training->price * $registration->qty * 1.05,
+            ...$amounts,
             'date' => $registration->payment_date ?? $registration->created_at,
             'invoice_number' => 'FORM-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
         ];
@@ -348,6 +332,5 @@ class TrainingController extends Controller
 
         return $pdf->download('facture_formation_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
     }
+
 }
-
-

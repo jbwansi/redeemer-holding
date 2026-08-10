@@ -5,6 +5,8 @@ namespace App\Services\Payments\Handlers;
 use App\Models\Service;
 use App\Models\ServiceRequest;
 use App\Services\Payments\Contracts\PaymentHandlerInterface;
+use App\Services\OwnedResourceAccessService;
+use App\Services\PaymentAmountService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeSession;
@@ -26,7 +28,7 @@ class ServicePaymentHandler implements PaymentHandlerInterface
             abort(404);
         }
 
-        $this->authorizeAccess($serviceRequest);
+        app(OwnedResourceAccessService::class)->authorize($serviceRequest);
 
         if ($serviceRequest->status !== ServiceRequest::STATUS_PENDING) {
             if ($serviceRequest->status === ServiceRequest::STATUS_COMPLETED) {
@@ -38,8 +40,8 @@ class ServicePaymentHandler implements PaymentHandlerInterface
         }
 
         $subtotal = $serviceRequest->amount ?? $service->price;
-        $serviceFee = $subtotal * 0.05;
-        $total = $subtotal + $serviceFee;
+        $amounts = app(PaymentAmountService::class)->calculate($subtotal);
+        ['serviceFee' => $serviceFee, 'total' => $total] = $amounts;
 
         try {
             $session = StripeSession::create([
@@ -165,6 +167,8 @@ class ServicePaymentHandler implements PaymentHandlerInterface
             $serviceRequest = ServiceRequest::with('service')->find($requestId);
 
             if ($serviceRequest) {
+                app(OwnedResourceAccessService::class)->authorize($serviceRequest, 'update');
+
                 if ($serviceRequest->status === ServiceRequest::STATUS_IN_PROGRESS) {
                     $serviceRequest->update([
                         'status' => ServiceRequest::STATUS_PENDING,
@@ -239,25 +243,6 @@ class ServicePaymentHandler implements PaymentHandlerInterface
             'status' => ServiceRequest::STATUS_PENDING,
             'payment_error' => $paymentIntent->last_payment_error->message ?? 'Erreur de paiement',
         ]);
-    }
-
-    private function authorizeAccess(ServiceRequest $serviceRequest): void
-    {
-        if (auth()->check()) {
-            if (
-                isset($serviceRequest->user_id)
-                && $serviceRequest->user_id !== auth()->id()
-                && !auth()->user()->hasRole('admin')
-            ) {
-                abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-            }
-
-            return;
-        }
-
-        if (!session()->has('temp_service_request_' . $serviceRequest->id)) {
-            abort(403, "Vous n'êtes pas autorisé à accéder à cette page.");
-        }
     }
 
     private function markAsPaid(ServiceRequest $serviceRequest, $session): void

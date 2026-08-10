@@ -9,25 +9,18 @@ use App\Models\TrainingLesson;
 use App\Models\TrainingResource;
 use App\Models\TrainingSection;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class TrainingResourceUploadTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
-
-        try {
-            $this->artisan('migrate:fresh');
-        } catch (\RuntimeException $exception) {
-            if (str_contains($exception->getMessage(), 'does not support dropping foreign keys by name')) {
-                $this->markTestSkipped('Migrations sqlite incompatibles dans ce projet (dropForeign par nom).');
-            }
-
-            throw $exception;
-        }
 
         $this->withoutMiddleware([
             RequireAdminAccess::class,
