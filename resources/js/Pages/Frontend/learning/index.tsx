@@ -32,7 +32,9 @@ export default function LearningIndex({ trainings }: Props) {
 
       <div className="space-y-6">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Mes formations en cours</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+            Mes formations en cours
+          </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Continuez vos lecons, suivez votre progression et accedez aux ressources.
           </p>
@@ -40,7 +42,9 @@ export default function LearningIndex({ trainings }: Props) {
 
         {trainings.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-900/40">
-            <p className="text-slate-700 dark:text-slate-300">Aucune formation disponible pour votre compte.</p>
+            <p className="text-slate-700 dark:text-slate-300">
+              Aucune formation disponible pour votre compte.
+            </p>
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
@@ -49,8 +53,12 @@ export default function LearningIndex({ trainings }: Props) {
                 key={training.id}
                 className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/70"
               >
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{training.title}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">{training.excerpt}</p>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  {training.title}
+                </h3>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                  {training.excerpt}
+                </p>
 
                 <div className="mt-4 space-y-2">
                   <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
@@ -60,7 +68,9 @@ export default function LearningIndex({ trainings }: Props) {
                     <span>{training.progress}%</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
-                    <div className={`h-full rounded bg-red-600 ${progressClass(training.progress)}`} />
+                    <div
+                      className={`h-full rounded bg-red-600 ${progressClass(training.progress)}`}
+                    />
                   </div>
                 </div>
 

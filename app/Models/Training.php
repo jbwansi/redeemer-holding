@@ -221,23 +221,7 @@ class Training extends Model
 
     public function progressPercentage(User $user): int
     {
-        $totalLessons = $this->lessons()->count();
-
-        if ($totalLessons === 0) {
-            return 0;
-        }
-
-        $completedLessons = TrainingProgress::where('user_id', $user->id)
-            ->where('training_id', $this->id)
-            ->where(
-                'completed',
-                true
-            )
-            ->count();
-
-        return (int) round(
-            ($completedLessons / $totalLessons) * 100
-        );
+        return app(\App\Services\LearningProgressService::class)
+            ->progressPercentage($this, $user);
     }
 }
-

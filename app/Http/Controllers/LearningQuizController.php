@@ -14,10 +14,9 @@ class LearningQuizController extends Controller
 {
     public function show(Training $training, TrainingSection $section)
     {
-        app(LearningProgressService::class)->ensureTrainingAccess($training, auth()->user());
-        abort_unless((int) $section->training_id === (int) $training->id, 404);
+        app(LearningProgressService::class)->ensureSectionAccess($training, $section, auth()->user());
 
-         app(LearningProgressService::class)->ensureCanTakeQuiz(
+        app(LearningProgressService::class)->ensureCanTakeQuiz(
             $training,
             $section,
             auth()->id()
@@ -60,8 +59,7 @@ class LearningQuizController extends Controller
 
     public function submit(Request $request, Training $training, TrainingSection $section)
     {
-          app(LearningProgressService::class)->ensureTrainingAccess($training, auth()->user());
-        abort_unless((int) $section->training_id === (int) $training->id, 404);
+        app(LearningProgressService::class)->ensureSectionAccess($training, $section, auth()->user());
 
         app(LearningProgressService::class)->ensureCanTakeQuiz(
             $training,

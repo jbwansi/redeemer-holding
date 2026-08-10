@@ -6,7 +6,15 @@ import prettierPlugin from 'eslint-plugin-prettier';
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**', 'public/build/**'],
+    ignores: [
+      'bootstrap/cache/**',
+      'dist/**',
+      'node_modules/**',
+      'public/build/**',
+      'storage/**',
+      'vendor/**',
+      'resources/js/ziggy.js',
+    ],
   },
   js.configs.recommended,
   {
@@ -35,6 +43,8 @@ export default [
         HTMLInputElement: 'readonly',
         HTMLButtonElement: 'readonly',
         Event: 'readonly',
+        File: 'readonly',
+        URLSearchParams: 'readonly',
         // Ziggy route helper
         route: 'readonly',
       },
@@ -51,11 +61,13 @@ export default [
         ignoreRestSiblings: true
       }],
       '@typescript-eslint/no-explicit-any': 'warn', // Changed from error to warn
-      'prettier/prettier': 'error',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
       'no-console': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
-      'no-redeclare': 'error',
+      'no-undef': 'off',
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'error',
     },
   },
   prettierConfig,

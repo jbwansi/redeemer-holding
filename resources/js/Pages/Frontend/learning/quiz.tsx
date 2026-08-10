@@ -56,7 +56,9 @@ export default function LearningQuiz({ training, section, quiz, latest_attempt }
               </p>
               <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{quiz.title}</h2>
               {quiz.description ? (
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{quiz.description}</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                  {quiz.description}
+                </p>
               ) : null}
             </div>
 
@@ -83,8 +85,8 @@ export default function LearningQuiz({ training, section, quiz, latest_attempt }
           <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900/70">
             <p className="text-sm text-slate-600 dark:text-slate-400">Derniere tentative</p>
             <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">
-              Score: {latest_attempt.score}% ({latest_attempt.correct_answers}/{latest_attempt.total_questions}) -{' '}
-              {latest_attempt.passed ? 'Reussi' : 'Non reussi'}
+              Score: {latest_attempt.score}% ({latest_attempt.correct_answers}/
+              {latest_attempt.total_questions}) - {latest_attempt.passed ? 'Reussi' : 'Non reussi'}
             </p>
           </div>
         ) : null}

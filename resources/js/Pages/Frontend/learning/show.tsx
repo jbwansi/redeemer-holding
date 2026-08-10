@@ -183,7 +183,8 @@ export default function LearningShow({
                         <div>
                           <p
                             className={`text-sm font-medium ${
-                              !canAccess ? 'text-slate-400' : 'text-slate-900 dark:text-white'}`}
+                              !canAccess ? 'text-slate-400' : 'text-slate-900 dark:text-white'
+                            }`}
                           >
                             {!canAccess ? '🔒 ' : isCompleted ? '✅ ' : ''}
                             {lesson.title}
@@ -196,7 +197,7 @@ export default function LearningShow({
                           ) : null}
 
                           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            {(lesson.resources?.length ?? 0)} ressource(s)
+                            {lesson.resources?.length ?? 0} ressource(s)
                           </p>
                         </div>
 

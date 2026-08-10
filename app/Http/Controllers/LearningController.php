@@ -27,61 +27,26 @@ class LearningController extends Controller
                         });
                 });
         })
+            ->when(!auth()->user()->isAdmin(), fn ($query) => $query->where('is_published', true))
             ->orderBy('id')
-            ->withCount([
-                'lessons as lessons_count' => function ($query) {
-                    $query->where('is_published', true);
-                },
-            ])
-            ->with([
-                'lessons' => function ($query) {
-                    $query->select('id', 'training_id', 'training_section_id', 'sort_order')
-                        ->where('is_published', true)
-                        ->orderBy('training_section_id')
-                        ->orderBy('sort_order')
-                        ->orderBy('id');
-                },
-            ])
             ->get();
 
-        $completedProgressByTraining = TrainingProgress::where('user_id', auth()->id())
-            ->whereIn('training_id', $trainings->pluck('id'))
-            ->where('completed', true)
-            ->get(['training_id', 'training_lesson_id'])
-            ->groupBy('training_id');
+        $progressService = app(LearningProgressService::class);
+        $user = auth()->user();
+        $progressByTraining = $progressService->getProgressForTrainings($trainings, $user);
 
-        $trainings = $trainings->map(function ($training) use ($completedProgressByTraining) {
-            $publishedLessons = $training->lessons;
-            $lessonCount = $training->lessons_count ?? 0;
-
-            $completedLessonIds = $completedProgressByTraining
-                ->get($training->id, collect())
-                ->pluck('training_lesson_id')
-                ->map(fn ($id) => (int) $id)
-                ->all();
-
-            $completedLessons = $publishedLessons
-                ->filter(fn ($lesson) => in_array((int) $lesson->id, $completedLessonIds, true))
-                ->count();
-
-            $progress = $lessonCount > 0
-                ? (int) round(($completedLessons / $lessonCount) * 100)
-                : 0;
-
-            $firstLesson = $publishedLessons->first();
-
-            $resumeLesson = $publishedLessons
-                ->first(fn ($lesson) => !in_array((int) $lesson->id, $completedLessonIds, true));
+        $trainings = $trainings->map(function ($training) use ($progressByTraining) {
+            $learningProgress = $progressByTraining->get($training->id);
 
             $actionLabel = 'Commencer';
 
-            if ($progress === 100) {
+            if ($learningProgress['is_completed']) {
                 $actionLabel = 'Revoir';
-            } elseif ($completedLessons > 0) {
+            } elseif ($learningProgress['has_started']) {
                 $actionLabel = 'Continuer';
             }
 
-            $targetLesson = $resumeLesson ?: $firstLesson;
+            $targetLesson = $learningProgress['next_lesson'] ?: $learningProgress['first_lesson'];
 
             $actionUrl = $targetLesson
                 ? route('learning.lesson', [
@@ -98,10 +63,10 @@ class LearningController extends Controller
                 'slug' => $training->slug,
                 'excerpt' => $training->excerpt,
                 'featured_image' => $training->featured_image,
-                'lessons_count' => $training->lessons_count,
-                'completed_lessons' => $completedLessons,
-                'progress' => $progress,
-                'is_completed' => $progress === 100,
+                'lessons_count' => $learningProgress['total_lessons'],
+                'completed_lessons' => $learningProgress['completed_lessons'],
+                'progress' => $learningProgress['percentage'],
+                'is_completed' => $learningProgress['is_completed'],
                 'action_label' => $actionLabel,
                 'action_url' => $actionUrl,
             ];
@@ -118,9 +83,12 @@ class LearningController extends Controller
 
         $progressService->ensureTrainingAccess($training, auth()->user());
 
+        $isAdmin = auth()->user()->isAdmin();
+
         $training->load([
-            'sections' => function ($query) {
-                $query->orderBy('sort_order')->orderBy('id');
+            'sections' => function ($query) use ($isAdmin) {
+                $query->when(!$isAdmin, fn ($query) => $query->where('is_published', true))
+                    ->orderBy('sort_order')->orderBy('id');
             },
             'sections.lessons' => function ($query) {
                 $query->where('is_published', true)
@@ -147,46 +115,12 @@ class LearningController extends Controller
             ->get()
             ->keyBy('training_lesson_id');
 
-        $sectionProgress = $training->sections->mapWithKeys(function ($section) use (
+        $sectionProgress = $progressService->getSectionProgressSummaries(
+            $training,
+            $training->sections,
             $progress,
-            $progressService,
-            $training
-        ) {
-            $totalLessons = $section->lessons->count();
-
-            $completedLessons = $section->lessons
-                ->filter(function ($lesson) use ($progress) {
-                    return (bool) optional($progress->get($lesson->id))->completed;
-                })
-                ->count();
-
-            $percentage = $totalLessons > 0
-                ? (int) round(($completedLessons / $totalLessons) * 100)
-                : 0;
-
-            return [
-                (string) $section->id => [
-                    'completed_lessons' => $completedLessons,
-                    'total_lessons' => $totalLessons,
-                    'progress_percentage' => $percentage,
-                    'is_completed' => $progressService->isSectionCompleted(
-                        $training,
-                        $section,
-                        auth()->id()
-                    ),
-                    'can_access' => $progressService->canAccessSection(
-                        $training,
-                        $section,
-                        auth()->id()
-                    ),
-                    'can_take_quiz' => $progressService->canTakeQuiz(
-                        $training,
-                        $section,
-                        auth()->id()
-                    ),
-                ],
-            ];
-        });
+            auth()->user()
+        );
 
         return inertia('Frontend/learning/show', [
             'training' => $training,
@@ -200,17 +134,7 @@ class LearningController extends Controller
     {
         $progressService = app(LearningProgressService::class);
 
-        $progressService->ensureTrainingAccess($training, auth()->user());
-
-        abort_unless((int) $lesson->training_id === (int) $training->id, 404);
-
-        $lesson->load('section');
-
-        $progressService->ensureCanAccessSection(
-            $training,
-            $lesson->section,
-            auth()->id()
-        );
+        $progressService->ensureLessonAccess($training, $lesson, auth()->user());
 
         $lesson->load([
             'section.quiz' => function ($query) {
@@ -231,18 +155,7 @@ class LearningController extends Controller
             ->where('training_lesson_id', $lesson->id)
             ->first();
 
-        $nextLesson = TrainingLesson::where('training_id', $training->id)
-            ->where('is_published', true)
-            ->where(function ($query) use ($lesson) {
-                $query->where('sort_order', '>', $lesson->sort_order)
-                    ->orWhere(function ($nestedQuery) use ($lesson) {
-                        $nestedQuery->where('sort_order', $lesson->sort_order)
-                            ->where('id', '>', $lesson->id);
-                    });
-            })
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->first();
+        $nextLesson = $progressService->getFollowingLesson($training, $lesson);
 
         $section = $lesson->section;
 
