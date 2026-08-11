@@ -155,10 +155,15 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             $participant = TrainingParticipant::with('training')
                 ->findOrFail($session->client_reference_id);
 
+            if ($participant->stripe_session_id !== $session->id) {
+                abort(404);
+            }
+
             $training = $participant->training;
 
-            $this->markAsPaid($participant, $session);
-            $this->sendInvoice($training, $participant);
+            if ($this->markAsPaid($participant, $session)) {
+                $this->sendInvoice($training, $participant);
+            }
 
             return redirect()->route('trainings.registration.confirmation', [
                 'slug' => $training->slug,
@@ -224,10 +229,15 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         }
 
         if ($session->payment_status === 'paid') {
-            $this->markAsPaid($participant, $session);
+            if ($participant->stripe_session_id !== ($session->id ?? null)) {
+                Log::warning('Session Stripe formation non liée à l’inscription.', [
+                    'participant_id' => $participant->id,
+                    'session_id' => $session->id ?? null,
+                ]);
+                return;
+            }
 
-            // Optionnel : éviter double envoi si success() a déjà envoyé la facture.
-            if (!$participant->wasRecentlyCreated) {
+            if ($this->markAsPaid($participant, $session)) {
                 $this->sendInvoice($participant->training, $participant);
             }
         }
@@ -243,7 +253,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
         $participant = TrainingParticipant::find($participantId);
 
-        if ($participant) {
+        if ($participant && $participant->status !== TrainingParticipant::STATUS_COMPLETED) {
             $participant->update([
                 'status' => TrainingParticipant::STATUS_COMPLETED,
                 'payment_confirmed' => true,
@@ -265,25 +275,34 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             return;
         }
 
+        if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
+            return;
+        }
+
         $participant->update([
             'status' => TrainingParticipant::STATUS_PENDING,
             'payment_error' => $paymentIntent->last_payment_error->message ?? 'Erreur de paiement',
         ]);
     }
 
-    private function markAsPaid(TrainingParticipant $participant, $session): void
+    private function markAsPaid(TrainingParticipant $participant, $session): bool
     {
-        if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
-            return;
-        }
-
-        $participant->update([
+        $updated = TrainingParticipant::query()
+            ->whereKey($participant->id)
+            ->where('status', '!=', TrainingParticipant::STATUS_COMPLETED)
+            ->update([
             'status' => TrainingParticipant::STATUS_COMPLETED,
             'payment_id' => $session->payment_intent,
             'payment_amount' => $session->amount_total / 100,
             'payment_date' => now(),
             'payment_confirmed' => true,
         ]);
+
+        if ($updated === 1) {
+            $participant->refresh();
+        }
+
+        return $updated === 1;
     }
 
     private function sendInvoice(Training $training, TrainingParticipant $participant): void

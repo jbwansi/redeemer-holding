@@ -13,13 +13,14 @@ class NewsletterCampaignMail extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public string $subject,
+        string $subject,
         public string $headline,
         public string $content,
         public ?string $ctaText = null,
         public ?string $ctaUrl = null,
         public ?string $unsubscribeUrl = null,
     ) {
+        $this->subject = $subject;
     }
 
     public function envelope(): Envelope

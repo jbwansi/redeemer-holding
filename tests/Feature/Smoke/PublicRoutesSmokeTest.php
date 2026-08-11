@@ -8,6 +8,11 @@ use Tests\TestCase;
 
 class PublicRoutesSmokeTest extends TestCase
 {
+    public function test_health_route_checks_the_application_and_database(): void
+    {
+        $this->get('/up')->assertOk()->assertSee('Application up');
+    }
+
     use RefreshDatabase;
 
     protected function setUp(): void

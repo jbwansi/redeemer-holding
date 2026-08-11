@@ -8,9 +8,11 @@ use App\Notifications\InvoiceNotification;
 use App\Services\Payments\Contracts\PaymentHandlerInterface;
 use App\Services\OwnedResourceAccessService;
 use App\Services\PaymentAmountService;
+use App\Services\Payments\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session as StripeSession;
+use Stripe\Exception\ApiErrorException;
 
 class EventPaymentHandler implements PaymentHandlerInterface
 {
@@ -44,7 +46,8 @@ class EventPaymentHandler implements PaymentHandlerInterface
         $amounts = app(PaymentAmountService::class)->calculate($event->price * $participant->qty);
         ['subtotal' => $subtotal, 'serviceFee' => $serviceFee, 'total' => $total] = $amounts;
 
-        $session = StripeSession::create([
+        try {
+            $session = app(StripeCheckoutService::class)->createSession([
             'payment_method_types' => ['card'],
             'line_items' => [
                 [
@@ -82,7 +85,20 @@ class EventPaymentHandler implements PaymentHandlerInterface
             'cancel_url' => route('events.payment.cancel', [
                 'participant_id' => $participant->id,
             ]),
-        ]);
+            ]);
+        } catch (ApiErrorException $exception) {
+            Log::error('Erreur Stripe lors de la création de la session événement.', [
+                'operation' => 'stripe_checkout_create',
+                'resource_type' => EventParticipant::class,
+                'resource_id' => $participant->id,
+                'event_id' => $event->id,
+                'user_id' => $participant->user_id,
+                'exception' => $exception,
+            ]);
+
+            return redirect()->route('evenements.details', $event->slug)
+                ->with('error', "Une erreur s'est produite lors de la préparation du paiement. Veuillez réessayer.");
+        }
 
         $participant->update([
             'status' => EventParticipant::STATUS_IN_PROGRESS,
@@ -108,7 +124,17 @@ class EventPaymentHandler implements PaymentHandlerInterface
         }
 
         $participant = EventParticipant::with('event')->findOrFail($session->client_reference_id);
+        if ($participant->stripe_session_id !== $session->id) {
+            abort(404);
+        }
         $event = $participant->event;
+
+        if ($participant->status === EventParticipant::STATUS_COMPLETED) {
+            return redirect()->route('events.registration.confirmation', [
+                'slug' => $event->slug,
+                'participant_id' => $participant->id,
+            ]);
+        }
 
         $participant->update([
             'status' => EventParticipant::STATUS_COMPLETED,
@@ -156,6 +182,18 @@ class EventPaymentHandler implements PaymentHandlerInterface
         $participant = EventParticipant::find($session->client_reference_id);
 
         if (!$participant || $session->payment_status !== 'paid') {
+            return;
+        }
+
+        if ($participant->status === EventParticipant::STATUS_COMPLETED) {
+            return;
+        }
+
+        if ($participant->stripe_session_id !== ($session->id ?? null)) {
+            Log::warning('Session Stripe événement non liée à l’inscription.', [
+                'participant_id' => $participant->id,
+                'session_id' => $session->id ?? null,
+            ]);
             return;
         }
 

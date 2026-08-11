@@ -144,6 +144,10 @@ class ServicePaymentHandler implements PaymentHandlerInterface
             $serviceRequest = ServiceRequest::with('service')
                 ->findOrFail($session->client_reference_id);
 
+            if ($serviceRequest->stripe_session_id !== $session->id) {
+                abort(404);
+            }
+
             $this->markAsPaid($serviceRequest, $session);
 
             return redirect()->route('services.details', $serviceRequest->service->slug)
@@ -204,6 +208,14 @@ class ServicePaymentHandler implements PaymentHandlerInterface
             return;
         }
 
+        if ($serviceRequest->stripe_session_id !== ($session->id ?? null)) {
+            Log::warning('Session Stripe service non liée à la demande.', [
+                'request_id' => $serviceRequest->id,
+                'session_id' => $session->id ?? null,
+            ]);
+            return;
+        }
+
         $this->markAsPaid($serviceRequest, $session);
     }
 
@@ -217,7 +229,7 @@ class ServicePaymentHandler implements PaymentHandlerInterface
 
         $serviceRequest = ServiceRequest::find($requestId);
 
-        if ($serviceRequest) {
+        if ($serviceRequest && $serviceRequest->status !== ServiceRequest::STATUS_COMPLETED) {
             $serviceRequest->update([
                 'status' => ServiceRequest::STATUS_COMPLETED,
                 'payment_confirmed' => true,
@@ -236,6 +248,10 @@ class ServicePaymentHandler implements PaymentHandlerInterface
         $serviceRequest = ServiceRequest::find($requestId);
 
         if (!$serviceRequest) {
+            return;
+        }
+
+        if ($serviceRequest->status === ServiceRequest::STATUS_COMPLETED) {
             return;
         }
 

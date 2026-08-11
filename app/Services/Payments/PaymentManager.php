@@ -30,6 +30,12 @@ class PaymentManager
         $signature = $request->header('Stripe-Signature');
         $secret = config('services.stripe.webhook_secret');
 
+        if (!is_string($signature) || $signature === '' || !is_string($secret) || $secret === '') {
+            Log::warning('Webhook Stripe refusé: signature ou configuration absente.');
+
+            return response()->json(['error' => 'Signature invalide.'], 400);
+        }
+
         try {
             $stripeEvent = Webhook::constructEvent(
                 $payload,
@@ -55,25 +61,19 @@ class PaymentManager
                 'status' => 'success',
             ]);
         } catch (UnexpectedValueException $e) {
-            Log::error('Payload Stripe invalide.', [
-                'message' => $e->getMessage(),
-            ]);
+            Log::warning('Payload Stripe invalide.', ['exception' => $e]);
 
             return response()->json([
                 'error' => 'Payload invalide.',
             ], 400);
         } catch (SignatureVerificationException $e) {
-            Log::error('Signature Stripe invalide.', [
-                'message' => $e->getMessage(),
-            ]);
+            Log::warning('Signature Stripe invalide.', ['exception' => $e]);
 
             return response()->json([
                 'error' => 'Signature invalide.',
             ], 400);
         } catch (\Throwable $e) {
-            Log::error('Erreur webhook Stripe.', [
-                'message' => $e->getMessage(),
-            ]);
+            Log::error('Erreur webhook Stripe.', ['exception' => $e]);
 
             return response()->json([
                 'error' => 'Erreur serveur.',
