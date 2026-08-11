@@ -30,6 +30,12 @@ return [
 
     'disks' => [
 
+        'coach_private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/coach'),
+            'throw' => true,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

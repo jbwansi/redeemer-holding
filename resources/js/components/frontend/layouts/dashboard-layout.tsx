@@ -1,7 +1,7 @@
 // components/layouts/DashboardLayout.tsx
 import React, { useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
-import { Calendar, GraduationCap, User, Home } from 'lucide-react';
+import { Calendar, GraduationCap, User, Home, MessageCircle } from 'lucide-react';
 import { Sidebar } from '@/components/frontend/layouts/sidebar';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { route } from 'ziggy-js';
@@ -12,12 +12,22 @@ interface DashboardLayoutProps {
   currentPage?: string;
 }
 
+interface DashboardPageProps {
+  auth: {
+    user: {
+      name: string;
+      role: string;
+    };
+  };
+  [key: string]: unknown;
+}
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
   title,
   currentPage = 'dashboard',
 }) => {
-  const { auth } = usePage().props as any;
+  const { auth } = usePage<DashboardPageProps>().props;
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activePage, setActivePage] = useState(currentPage);
 
@@ -39,6 +49,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       icon: <Calendar className="w-5 h-5" />,
       text: 'Événements',
       href: route('dashboard.client.events'),
+    },
+    {
+      id: 'coach',
+      icon: <MessageCircle className="w-5 h-5" />,
+      text: 'Coach numérique',
+      href: route('coach.dashboard'),
     },
     {
       id: 'profile',
@@ -80,9 +96,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     </h1>
                   </div>
 
-                  <div className="p-4 lg:p-6 dashboard-content">
-                    {children}
-                  </div>
+                  <div className="p-4 lg:p-6 dashboard-content">{children}</div>
                 </div>
               </div>
             </div>

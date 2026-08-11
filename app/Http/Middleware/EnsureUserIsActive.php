@@ -8,22 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsActive
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()->is_active === 0) {
+        if (!$request->user()->is_active) {
             return redirect()->route('account.inactive');
         }
 
-
-        if ($request->user()->is_active === 1) {
-            return $next($request);
-        }
-
-        abort(403, 'Votre compte n\'est pas autorisé à accéder à cette ressource.');
+        return $next($request);
     }
 }

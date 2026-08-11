@@ -9,6 +9,7 @@ use App\Http\Middleware\RespectMaintenanceMode;
 use App\Http\Middleware\RequireAdminAccess;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\VerifyCronToken;
+use App\Http\Middleware\EnsureCoachIsEnabled;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.access' => RequireAdminAccess::class,
             'test.users' => OnlyTestUsers::class,
             'cron.token' => VerifyCronToken::class,
+            'coach.enabled' => EnsureCoachIsEnabled::class,
         ]);
     })
     ->withCommands([

@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\{
     CategoryController,
     ChatbotController,
     ChatbotLeadController,
+    CoachController,
     ConfigController,
     ContactController,
     DashboardController,
@@ -40,6 +41,9 @@ use App\Http\Controllers\Admin\{
 */
 
 Route::middleware(['admin.access', 'active'])->group(function () {
+    Route::get('/admin/coach', [CoachController::class, 'index'])->name('admin.coach.index');
+    Route::put('/admin/coach/settings', [CoachController::class, 'update'])->name('admin.coach.settings.update');
+
     Route::get('/admin/page-contents', [PageContentController::class, 'index'])
         ->name('page-contents.index');
 

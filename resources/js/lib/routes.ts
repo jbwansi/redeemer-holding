@@ -18,6 +18,7 @@ import {
   Settings,
   Users,
   Star,
+  Bot,
 } from 'lucide-react';
 
 // Types pour les mappings
@@ -213,6 +214,11 @@ export const dataRoutes = {
       title: 'Page statique',
       url: route('pages.index'),
       icon: LucideBookOpen,
+    },
+    {
+      title: 'Coach numérique',
+      url: route('admin.coach.index'),
+      icon: Bot,
     },
     {
       title: 'Configuration',

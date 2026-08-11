@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -47,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -64,4 +67,9 @@ class User extends Authenticatable
     {
         return 'https://www.gravatar.com/avatar/' . md5(strtolower($this->email)) . '?d=mp';
     }
+
+    public function professionalProfile(): HasOne { return $this->hasOne(ProfessionalProfile::class); }
+    public function coachDocuments(): HasMany { return $this->hasMany(UserDocument::class); }
+    public function coachConversations(): HasMany { return $this->hasMany(CoachConversation::class); }
+    public function interviewSimulations(): HasMany { return $this->hasMany(InterviewSimulation::class); }
 }

@@ -1,17 +1,8 @@
-// Exemple d'utilisation dans ClientDashboard.tsx
 import React from 'react';
 import { usePage } from '@inertiajs/react';
-
 import DashboardContent from './dashboard-content';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 
-// data recevied
-// 'countCurrentTrainings' => $countCurrentTrainings,
-// 'countUpGoingTrainings' => $countUpGoingTrainings,
-// 'CountPastTrainings' => $CountPastTrainings,
-// 'countCurrentEvents' => $countCurrentEvents,
-// 'countUpGoingEvents' => $countUpGoingEvents,
-// 'CountPastEvents' => $CountPastEvents,
 interface ClientDashboardProps {
   countCurrentTrainings: number;
   countUpGoingTrainings: number;
@@ -21,31 +12,21 @@ interface ClientDashboardProps {
   CountPastEvents: number;
 }
 
-const ClientDashboard = ({
-  countCurrentEvents,
-  countUpGoingEvents,
-  CountPastEvents,
-  countCurrentTrainings,
-  countUpGoingTrainings,
-  CountPastTrainings,
-}: ClientDashboardProps) => {
-  const { auth } = usePage().props as any;
+interface DashboardPageProps {
+  auth: { user: { name: string; role: string } };
+  [key: string]: unknown;
+}
+
+const ClientDashboard = (props: ClientDashboardProps) => {
+  const { auth } = usePage<DashboardPageProps>().props;
 
   return (
     <DashboardLayout title="Tableau de bord" currentPage="dashboard">
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+        <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
           Bienvenue sur votre tableau de bord
         </h1>
-        <DashboardContent
-          auth={auth}
-          countCurrentEvents={countCurrentEvents}
-          countUpGoingEvents={countUpGoingEvents}
-          CountPastEvents={CountPastEvents}
-          countCurrentTrainings={countCurrentTrainings}
-          countUpGoingTrainings={countUpGoingTrainings}
-          CountPastTrainings={CountPastTrainings}
-        />
+        <DashboardContent auth={auth} {...props} />
       </div>
     </DashboardLayout>
   );

@@ -62,7 +62,6 @@ class DashboardController extends Controller
             'countCurrentEvents' => $countCurrentEvents,
             'countUpGoingEvents' => $countUpGoingEvents,
             'CountPastEvents' => $CountPastEvents,
-
         ];
 
 
@@ -140,5 +139,3 @@ class DashboardController extends Controller
         return inertia('Frontend/dashboard/clientAccount');
     }
 }
-
-
