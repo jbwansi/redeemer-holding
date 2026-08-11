@@ -142,10 +142,14 @@ function normalizeMeta(meta: Partial<Meta> | null | undefined): Meta {
   return {
     hero_badge: meta?.hero_badge ?? defaultMeta.hero_badge,
     hero_subtitle: meta?.hero_subtitle ?? defaultMeta.hero_subtitle,
-    hero_primary_button_text: meta?.hero_primary_button_text ?? defaultMeta.hero_primary_button_text,
-    hero_primary_button_link: meta?.hero_primary_button_link ?? defaultMeta.hero_primary_button_link,
-    hero_secondary_button_text: meta?.hero_secondary_button_text ?? defaultMeta.hero_secondary_button_text,
-    hero_secondary_button_link: meta?.hero_secondary_button_link ?? defaultMeta.hero_secondary_button_link,
+    hero_primary_button_text:
+      meta?.hero_primary_button_text ?? defaultMeta.hero_primary_button_text,
+    hero_primary_button_link:
+      meta?.hero_primary_button_link ?? defaultMeta.hero_primary_button_link,
+    hero_secondary_button_text:
+      meta?.hero_secondary_button_text ?? defaultMeta.hero_secondary_button_text,
+    hero_secondary_button_link:
+      meta?.hero_secondary_button_link ?? defaultMeta.hero_secondary_button_link,
     hero_title_before: meta?.hero_title_before ?? defaultMeta.hero_title_before,
     hero_title_highlight: meta?.hero_title_highlight ?? defaultMeta.hero_title_highlight,
     hero_title_after: meta?.hero_title_after ?? defaultMeta.hero_title_after,
@@ -163,13 +167,17 @@ function normalizeMeta(meta: Partial<Meta> | null | undefined): Meta {
     stats: Array.isArray(meta?.stats) ? meta.stats : defaultMeta.stats,
     journey: Array.isArray(meta?.journey) ? meta.journey : defaultMeta.journey,
     testimonials: Array.isArray(meta?.testimonials) ? meta.testimonials : defaultMeta.testimonials,
-    certifications: Array.isArray(meta?.certifications) ? meta.certifications : defaultMeta.certifications,
+    certifications: Array.isArray(meta?.certifications)
+      ? meta.certifications
+      : defaultMeta.certifications,
     cta_title: meta?.cta_title ?? defaultMeta.cta_title,
     cta_subtitle: meta?.cta_subtitle ?? defaultMeta.cta_subtitle,
     cta_primary_button_text: meta?.cta_primary_button_text ?? defaultMeta.cta_primary_button_text,
     cta_primary_button_link: meta?.cta_primary_button_link ?? defaultMeta.cta_primary_button_link,
-    cta_secondary_button_text: meta?.cta_secondary_button_text ?? defaultMeta.cta_secondary_button_text,
-    cta_secondary_button_link: meta?.cta_secondary_button_link ?? defaultMeta.cta_secondary_button_link,
+    cta_secondary_button_text:
+      meta?.cta_secondary_button_text ?? defaultMeta.cta_secondary_button_text,
+    cta_secondary_button_link:
+      meta?.cta_secondary_button_link ?? defaultMeta.cta_secondary_button_link,
   };
 }
 

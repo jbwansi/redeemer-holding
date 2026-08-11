@@ -1,20 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  Search,
-  CheckCircle,
-  History,
-  X,
-  ArrowRight,
-  Home,
-  GraduationCap,
-  User,
-} from 'lucide-react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Calendar, Clock, MapPin, Users, Search, CheckCircle, X } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';

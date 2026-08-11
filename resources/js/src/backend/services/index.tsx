@@ -350,24 +350,23 @@ export default function ServicesIndex({ services, stats }: Props) {
     const search = searchTerm.toLowerCase();
 
     return (
-      servicesWithOptimisticHome
-        .filter((service) => {
-          if (service.position !== null) return false;
+      servicesWithOptimisticHome.filter((service) => {
+        if (service.position !== null) return false;
 
-          const matchesSearch =
-            service.name?.toLowerCase().includes(search) ||
-            service.excerpt?.toLowerCase().includes(search) ||
-            service.slug?.toLowerCase().includes(search) ||
-            service.tagline?.toLowerCase().includes(search) ||
-            service.featured_note?.toLowerCase().includes(search);
+        const matchesSearch =
+          service.name?.toLowerCase().includes(search) ||
+          service.excerpt?.toLowerCase().includes(search) ||
+          service.slug?.toLowerCase().includes(search) ||
+          service.tagline?.toLowerCase().includes(search) ||
+          service.featured_note?.toLowerCase().includes(search);
 
-          const matchesStatus =
-            selectedStatus === 'all' ||
-            (selectedStatus === 'active' && service.status) ||
-            (selectedStatus === 'inactive' && !service.status);
+        const matchesStatus =
+          selectedStatus === 'all' ||
+          (selectedStatus === 'active' && service.status) ||
+          (selectedStatus === 'inactive' && !service.status);
 
-          return matchesSearch && matchesStatus;
-        }) || []
+        return matchesSearch && matchesStatus;
+      }) || []
     );
   }, [searchTerm, selectedStatus, servicesWithOptimisticHome]);
 
@@ -429,9 +428,7 @@ export default function ServicesIndex({ services, stats }: Props) {
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
-          toast.success(
-            isHome ? 'Retiré de la page d’accueil' : 'Ajouté à la page d’accueil'
-          );
+          toast.success(isHome ? 'Retiré de la page d’accueil' : 'Ajouté à la page d’accueil');
         },
         onError: () => {
           setOptimisticHomePositions((prev) => {
@@ -609,47 +606,47 @@ export default function ServicesIndex({ services, stats }: Props) {
         </div>
       )}
 
-        {filteredServices.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onDelete={(s) => {
-                  setSelectedService(s);
-                  setIsDeleteOpen(true);
-                }}
-                onStatusChange={handleStatusChange}
-                onHomeToggle={handleHomeToggle}
-              />
-            ))}
+      {filteredServices.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredServices.map((service) => (
+            <ServiceCard
+              key={service.id}
+              service={service}
+              onDelete={(s) => {
+                setSelectedService(s);
+                setIsDeleteOpen(true);
+              }}
+              onStatusChange={handleStatusChange}
+              onHomeToggle={handleHomeToggle}
+            />
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center justify-center py-24 text-center"
+        >
+          <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+            <Wrench className="h-8 w-8 text-muted-foreground" />
           </div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-24 text-center"
-          >
-            <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-              <Wrench className="h-8 w-8 text-muted-foreground" />
-            </div>
 
-            <p className="font-medium text-muted-foreground">
-              {searchTerm || selectedStatus !== 'all'
-                ? 'Aucun résultat pour ces filtres'
-                : 'Aucun service créé'}
-            </p>
+          <p className="font-medium text-muted-foreground">
+            {searchTerm || selectedStatus !== 'all'
+              ? 'Aucun résultat pour ces filtres'
+              : 'Aucun service créé'}
+          </p>
 
-            {!searchTerm && selectedStatus === 'all' && (
-              <Link href={route('services.create')} className="mt-4">
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Créer le premier service
-                </Button>
-              </Link>
-            )}
-          </motion.div>
-        )}
+          {!searchTerm && selectedStatus === 'all' && (
+            <Link href={route('services.create')} className="mt-4">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Créer le premier service
+              </Button>
+            </Link>
+          )}
+        </motion.div>
+      )}
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>

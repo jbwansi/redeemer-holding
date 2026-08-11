@@ -141,7 +141,11 @@ const CreateTraining = () => {
                   onChange={handleImageChange}
                 />
                 {preview ? (
-                  <img src={preview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
                 ) : (
                   <div className="flex flex-col items-center">
                     <ImagePlus className="mb-4 h-12 w-12 text-muted-foreground" />
@@ -150,7 +154,9 @@ const CreateTraining = () => {
                   </div>
                 )}
               </div>
-              {errors.featured_image && <p className="text-sm text-red-500">{errors.featured_image}</p>}
+              {errors.featured_image && (
+                <p className="text-sm text-red-500">{errors.featured_image}</p>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="title">Titre de la formation</Label>
@@ -212,7 +218,9 @@ const CreateTraining = () => {
                       className="h-12 pl-11"
                     />
                   </div>
-                  {errors.max_participants && <p className="text-sm text-red-500">{errors.max_participants}</p>}
+                  {errors.max_participants && (
+                    <p className="text-sm text-red-500">{errors.max_participants}</p>
+                  )}
                 </div>
               </div>
 
@@ -231,7 +239,9 @@ const CreateTraining = () => {
                 <p className="text-xs text-muted-foreground">
                   Lien optionnel pour les réunions en ligne (Google Meet, Zoom, etc.)
                 </p>
-                {errors.meeting_link && <p className="text-sm text-red-500">{errors.meeting_link}</p>}
+                {errors.meeting_link && (
+                  <p className="text-sm text-red-500">{errors.meeting_link}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -283,9 +293,16 @@ const CreateTraining = () => {
                   <div className="grid gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="h-12 w-full justify-start text-left font-normal">
+                        <Button
+                          variant="outline"
+                          className="h-12 w-full justify-start text-left font-normal"
+                        >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {data.start_date ? format(new Date(data.start_date), 'PPP', { locale: fr }) : <span>Choisir une date</span>}
+                          {data.start_date ? (
+                            format(new Date(data.start_date), 'PPP', { locale: fr })
+                          ) : (
+                            <span>Choisir une date</span>
+                          )}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -296,7 +313,11 @@ const CreateTraining = () => {
                           onSelect={(date) => {
                             if (!date) return;
                             updateDateField('start_date', (currentDate) => {
-                              currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+                              currentDate.setFullYear(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate()
+                              );
                             });
                           }}
                           initialFocus
@@ -307,9 +328,13 @@ const CreateTraining = () => {
                     <div className="flex gap-2">
                       <div className="flex-1">
                         <Select
-                          value={data.start_date ? new Date(data.start_date).getHours().toString() : ''}
+                          value={
+                            data.start_date ? new Date(data.start_date).getHours().toString() : ''
+                          }
                           onValueChange={(value) =>
-                            updateDateField('start_date', (date) => date.setHours(parseInt(value, 10)))
+                            updateDateField('start_date', (date) =>
+                              date.setHours(parseInt(value, 10))
+                            )
                           }
                         >
                           <SelectTrigger className="h-12">
@@ -327,9 +352,13 @@ const CreateTraining = () => {
                       </div>
                       <div className="flex-1">
                         <Select
-                          value={data.start_date ? new Date(data.start_date).getMinutes().toString() : ''}
+                          value={
+                            data.start_date ? new Date(data.start_date).getMinutes().toString() : ''
+                          }
                           onValueChange={(value) =>
-                            updateDateField('start_date', (date) => date.setMinutes(parseInt(value, 10)))
+                            updateDateField('start_date', (date) =>
+                              date.setMinutes(parseInt(value, 10))
+                            )
                           }
                         >
                           <SelectTrigger className="h-12">
@@ -354,9 +383,16 @@ const CreateTraining = () => {
                   <div className="grid gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="h-12 w-full justify-start text-left font-normal">
+                        <Button
+                          variant="outline"
+                          className="h-12 w-full justify-start text-left font-normal"
+                        >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {data.end_date ? format(new Date(data.end_date), 'PPP', { locale: fr }) : <span>Choisir une date</span>}
+                          {data.end_date ? (
+                            format(new Date(data.end_date), 'PPP', { locale: fr })
+                          ) : (
+                            <span>Choisir une date</span>
+                          )}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
@@ -367,7 +403,11 @@ const CreateTraining = () => {
                           onSelect={(date) => {
                             if (!date) return;
                             updateDateField('end_date', (currentDate) => {
-                              currentDate.setFullYear(date.getFullYear(), date.getMonth(), date.getDate());
+                              currentDate.setFullYear(
+                                date.getFullYear(),
+                                date.getMonth(),
+                                date.getDate()
+                              );
                             });
                           }}
                           initialFocus
@@ -380,7 +420,9 @@ const CreateTraining = () => {
                         <Select
                           value={data.end_date ? new Date(data.end_date).getHours().toString() : ''}
                           onValueChange={(value) =>
-                            updateDateField('end_date', (date) => date.setHours(parseInt(value, 10)))
+                            updateDateField('end_date', (date) =>
+                              date.setHours(parseInt(value, 10))
+                            )
                           }
                         >
                           <SelectTrigger className="h-12">
@@ -398,9 +440,13 @@ const CreateTraining = () => {
                       </div>
                       <div className="flex-1">
                         <Select
-                          value={data.end_date ? new Date(data.end_date).getMinutes().toString() : ''}
+                          value={
+                            data.end_date ? new Date(data.end_date).getMinutes().toString() : ''
+                          }
                           onValueChange={(value) =>
-                            updateDateField('end_date', (date) => date.setMinutes(parseInt(value, 10)))
+                            updateDateField('end_date', (date) =>
+                              date.setMinutes(parseInt(value, 10))
+                            )
                           }
                         >
                           <SelectTrigger className="h-12">
@@ -451,7 +497,10 @@ const CreateTraining = () => {
                     Activez pour rendre la formation visible au public
                   </p>
                 </div>
-                <Switch checked={data.is_published} onCheckedChange={(checked) => setField('is_published', checked)} />
+                <Switch
+                  checked={data.is_published}
+                  onCheckedChange={(checked) => setField('is_published', checked)}
+                />
               </div>
 
               <div className="flex items-center justify-between border-t pt-6">
@@ -461,7 +510,10 @@ const CreateTraining = () => {
                     Activez pour mettre la formation en avant sur la page d'accueil
                   </p>
                 </div>
-                <Switch checked={data.is_featured} onCheckedChange={(checked) => setField('is_featured', checked)} />
+                <Switch
+                  checked={data.is_featured}
+                  onCheckedChange={(checked) => setField('is_featured', checked)}
+                />
               </div>
             </CardContent>
           </Card>

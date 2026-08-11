@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Head, Link, } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Clock, Mail, Search, Sparkles, Tag } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -32,7 +32,6 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-
 
   const allPosts = posts?.data ?? [];
   const currentPage = posts?.meta?.current_page ?? 1;
@@ -212,10 +211,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className={`rounded-full px-3 py-1 text-xs font-medium ${selectedCategory === null
-                  ? 'bg-[#da2e29] text-white'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                  }`}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  selectedCategory === null
+                    ? 'bg-[#da2e29] text-white'
+                    : 'bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                }`}
               >
                 Toutes les categories
               </button>
@@ -225,10 +225,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                   key={category.id}
                   type="button"
                   onClick={() => setSelectedCategory(category.name)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${selectedCategory === category.name
-                    ? 'bg-[#da2e29] text-white'
-                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
-                    }`}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    selectedCategory === category.name
+                      ? 'bg-[#da2e29] text-white'
+                      : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
+                  }`}
                 >
                   {category.name}
                 </button>
@@ -239,10 +240,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
               <button
                 type="button"
                 onClick={() => setSelectedTag(null)}
-                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${selectedTag === null
-                  ? 'bg-[#0f766e] text-white'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                  }`}
+                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${
+                  selectedTag === null
+                    ? 'bg-[#0f766e] text-white'
+                    : 'bg-white text-slate-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                }`}
               >
                 <Tag className="h-3.5 w-3.5" />
                 Tous les tags
@@ -253,10 +255,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(tag)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${selectedTag === tag
-                    ? 'bg-[#0f766e] text-white'
-                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
-                    }`}
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    selectedTag === tag
+                      ? 'bg-[#0f766e] text-white'
+                      : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800'
+                  }`}
                 >
                   #{tag}
                 </button>
@@ -315,10 +318,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
             <div className="mt-10 flex items-center justify-center gap-3">
               <Link
                 href={route('blogs', { page: currentPage - 1 })}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold ${currentPage <= 1
-                  ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                  }`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                  currentPage <= 1
+                    ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
+                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                }`}
               >
                 Précédent
               </Link>
@@ -329,10 +333,11 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
 
               <Link
                 href={route('blogs', { page: currentPage + 1 })}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold ${currentPage >= lastPage
-                  ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
-                  : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
-                  }`}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                  currentPage >= lastPage
+                    ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
+                    : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700'
+                }`}
               >
                 Suivant
               </Link>

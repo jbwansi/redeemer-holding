@@ -28,7 +28,7 @@ const CountdownTimer = ({ expiryTimestamp, onExpire, className = '' }) => {
   useEffect(() => {
     // Si déjà expiré, déclencher le callback immédiatement
     if (timeLeft.expired) {
-      onExpire && onExpire();
+      onExpire?.();
       return;
     }
 

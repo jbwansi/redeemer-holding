@@ -28,12 +28,12 @@ interface MaintenanceCard {
 }
 
 const SystemConfig: React.FC = () => {
-  const { post, processing, setData } = useForm({
+  const { processing } = useForm({
     command: '',
   });
 
   const executeCommand = (commandName: string) => {
-    let donnees = {
+    const donnees = {
       command: commandName,
     };
 

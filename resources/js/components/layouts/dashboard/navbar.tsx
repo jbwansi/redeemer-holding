@@ -2,24 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NavUser } from './nav-user';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
-import { Input } from '@/components/ui/input';
-import {
-  Bell,
-  MessageSquare,
-  Radio,
-  Search,
-  LayoutDashboard,
-  Music2,
-  Calendar as Calendar1,
-  ShoppingCart,
-  CalendarDays,
-  BookType,
-  Users,
-  Headset,
-  MonitorCog,
-  Settings,
-  Globe,
-} from 'lucide-react';
+import { Bell, Search, Globe } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -169,23 +152,6 @@ export function Navbar({ title }: NavbarProps) {
     email: auth?.user?.email,
     avatar: 'https://randomuser.me/api',
   };
-
-  const filteredNavMain = dataRoutes.navMain.flatMap((section) => {
-    if (section.items) {
-      return section.items.map((item) => ({
-        ...item,
-        parentTitle: section.title,
-        icon: section.icon,
-      }));
-    }
-    return [
-      {
-        title: section.title,
-        url: section.url,
-        icon: section.icon,
-      },
-    ];
-  });
 
   const handleSelect = (url: string) => {
     if (url && url !== '#') {

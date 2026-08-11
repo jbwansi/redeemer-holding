@@ -14,18 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Radio,
-  KeyRound,
-  Wifi,
-  Cloud,
-  Music2,
-  CloudRain,
-  Lock,
-  GanttChartSquare,
-  Loader,
-  RefreshCw,
-} from 'lucide-react';
+import { Cloud, Music2, Lock, Loader, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { route } from 'ziggy-js';
 import { useSettings } from '@/hooks/use-settings';

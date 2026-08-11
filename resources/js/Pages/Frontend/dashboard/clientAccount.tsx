@@ -1,17 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm, usePage } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  LockKeyhole,
-  User,
-  KeyRound,
-  Eye,
-  EyeOff,
-  Home,
-  GraduationCap,
-  Calendar,
-} from 'lucide-react';
+import { LockKeyhole, User, Eye, EyeOff } from 'lucide-react';
 import { route } from 'ziggy-js';
 
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';

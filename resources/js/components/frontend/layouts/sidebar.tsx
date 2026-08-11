@@ -6,7 +6,7 @@ import { ChevronLeft, Menu, LogOut, ChevronRight, LayoutDashboard } from 'lucide
 import { Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
-export interface SidebarItem {
+export interface SidebarItemData {
   id: string;
   icon: ReactNode;
   text: string;
@@ -14,7 +14,7 @@ export interface SidebarItem {
 }
 
 export interface SidebarProps {
-  items: SidebarItem[];
+  items: SidebarItemData[];
   activePage: string;
   isOpen: boolean;
   userName: string;
@@ -67,7 +67,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   userName,
   onToggle,
   onPageChange,
-  onLogout,
 }) => {
   const { auth } = usePage().props as any;
 

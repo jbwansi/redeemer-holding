@@ -29,16 +29,15 @@ const BackupButton = ({
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
-        onNotify && onNotify('Sauvegarde réussie. Le fichier a été téléchargé.', 'success');
+        onNotify?.('Sauvegarde réussie. Le fichier a été téléchargé.', 'success');
       } else {
-        onNotify &&
-          onNotify(
-            "Erreur lors de la sauvegarde. Vérifiez vos droits ou contactez l'administrateur.",
-            'error'
-          );
+        onNotify?.(
+          "Erreur lors de la sauvegarde. Vérifiez vos droits ou contactez l'administrateur.",
+          'error'
+        );
       }
-    } catch (e) {
-      onNotify && onNotify('Erreur réseau lors de la sauvegarde.', 'error');
+    } catch {
+      onNotify?.('Erreur réseau lors de la sauvegarde.', 'error');
     }
   };
 

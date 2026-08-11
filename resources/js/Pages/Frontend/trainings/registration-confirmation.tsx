@@ -111,12 +111,14 @@ const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) 
       registration={registration}
       qrCodeValue={qrCodeValue}
       calendarHref={calendarUrl}
-      invoiceHref={!isTrainingFree
-        ? route('trainings.facture.download', {
-            slug: formation.slug,
-            reference: registration.reference,
-          })
-        : undefined}
+      invoiceHref={
+        !isTrainingFree
+          ? route('trainings.facture.download', {
+              slug: formation.slug,
+              reference: registration.reference,
+            })
+          : undefined
+      }
       isFree={isTrainingFree}
       paymentSummary={paymentSummary}
       bottomSection={bottomSection}

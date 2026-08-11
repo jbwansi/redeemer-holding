@@ -58,8 +58,8 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
       }
 
       await navigator.clipboard.writeText(url);
-    } catch (error) {
-      console.log('Partage annulé ou impossible');
+    } catch {
+      return;
     }
   };
 

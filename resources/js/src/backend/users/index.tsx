@@ -39,7 +39,7 @@ import {
   ArrowDown,
   ArrowUp,
   Mail,
-  User,
+  User as UserIcon,
   Shield,
   Calendar,
   GraduationCap,
@@ -544,7 +544,7 @@ export default function Index({ users, filters, availableTrainings }: Props) {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
+                              <UserIcon className="h-4 w-4 text-muted-foreground" />
                               <span className="font-medium">{user.name}</span>
                             </div>
                           </TableCell>
@@ -591,7 +591,7 @@ export default function Index({ users, filters, availableTrainings }: Props) {
                                     href={route('users.show', user.id)}
                                     className="cursor-pointer"
                                   >
-                                    <User className="h-4 w-4 mr-2" />
+                                    <UserIcon className="h-4 w-4 mr-2" />
                                     Profil
                                   </Link>
                                 </DropdownMenuItem>

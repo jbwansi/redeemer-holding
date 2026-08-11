@@ -134,18 +134,12 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
               )}
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#events"
-                  className="ux-btn-primary"
-                >
+                <a href="#events" className="ux-btn-primary">
                   Découvrir les événements
                   <ArrowRight className="h-4 w-4" />
                 </a>
 
-                <Link
-                  href={route('contact')}
-                  className="ux-btn-secondary"
-                >
+                <Link href={route('contact')} className="ux-btn-secondary">
                   Organiser un événement
                 </Link>
               </div>
@@ -262,9 +256,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#da2e29]">Agenda</p>
-              <h2 className="ux-section-title mt-2">
-                Événements à venir
-              </h2>
+              <h2 className="ux-section-title mt-2">Événements à venir</h2>
             </div>
 
             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -327,9 +319,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
             data-progress-label="Passés"
           >
             <div className="mb-8 flex items-end justify-between gap-4">
-              <h2 className="ux-section-title">
-                Événements passés
-              </h2>
+              <h2 className="ux-section-title">Événements passés</h2>
 
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {filteredPast.length} résultat(s)
@@ -372,10 +362,7 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
                 </h3>
               </div>
 
-              <Link
-                href={route('contact')}
-                className="ux-btn-secondary !bg-white !text-[#da2e29]"
-              >
+              <Link href={route('contact')} className="ux-btn-secondary !bg-white !text-[#da2e29]">
                 Nous contacter
                 <ArrowRight className="h-4 w-4" />
               </Link>

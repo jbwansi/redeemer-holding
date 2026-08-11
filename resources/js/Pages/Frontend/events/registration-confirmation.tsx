@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { formatDate, formatTime, formatCurrency } from '@/lib/utils';
 import RegistrationConfirmation from '@/components/frontend/confirmation/registration-confirmation';
@@ -36,9 +36,7 @@ const EventRegistrationConfirmationPage = ({ event, registration }: any) => {
 
   const cancelSection = registration?.can_be_cancelled ? (
     <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-      <p className="text-sm">
-        Vous pouvez annuler cette reservation jusqu a 24h avant le debut.
-      </p>
+      <p className="text-sm">Vous pouvez annuler cette reservation jusqu a 24h avant le debut.</p>
       <Link
         href={route('events.registration.cancel', {
           slug: event.slug,
@@ -92,12 +90,14 @@ const EventRegistrationConfirmationPage = ({ event, registration }: any) => {
       registration={registration}
       qrCodeValue={qrCodeValue}
       calendarHref={calendarUrl}
-      invoiceHref={!isEventFree
-        ? route('evenements.facture.download', {
-            slug: event.slug,
-            reference: registration.reference,
-          })
-        : undefined}
+      invoiceHref={
+        !isEventFree
+          ? route('evenements.facture.download', {
+              slug: event.slug,
+              reference: registration.reference,
+            })
+          : undefined
+      }
       isFree={isEventFree}
       paymentSummary={paymentSummary}
       cancelSection={cancelSection}

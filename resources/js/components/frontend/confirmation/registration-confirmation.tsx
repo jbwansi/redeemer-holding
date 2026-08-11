@@ -1,6 +1,5 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { formatDate, formatCurrency, formatTime } from '@/lib/utils';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { CheckCircle, Printer, CalendarDays, FileText } from 'lucide-react';
 import QRCode from 'react-qr-code';
@@ -43,9 +42,7 @@ const resolveImage = (image: any, placeholder: string) => {
   if (!image) return placeholder;
   if (typeof image === 'string') return image;
 
-  return (
-    image.large || image.medium || image.original || image.thumbnail || placeholder
-  );
+  return image.large || image.medium || image.original || image.thumbnail || placeholder;
 };
 
 const RegistrationConfirmation = ({
@@ -66,38 +63,9 @@ const RegistrationConfirmation = ({
   bottomSection,
   cancelSection,
 }: RegistrationConfirmationProps) => {
-  const [notification, setNotification] = React.useState<
-    | {
-        message: string;
-        type: 'success' | 'error';
-      }
-    | null
-  >(null);
-
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
-    setNotification({ message, type });
-    window.setTimeout(() => setNotification(null), 4000);
-  };
-
   return (
     <FrontLayout>
       <Head title={pageTitle} />
-
-      {notification && (
-        <div
-          className={`fixed top-6 right-6 z-50 px-4 py-3 rounded shadow-lg text-white ${
-            notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-          }`}
-          role="alert"
-        >
-          <div className="flex items-center justify-between gap-4">
-            <span>{notification.message}</span>
-            <button onClick={() => setNotification(null)} className="ml-4 text-white font-bold">
-              ×
-            </button>
-          </div>
-        </div>
-      )}
 
       <main className="relative min-h-screen overflow-hidden bg-[#f7f6f2] pt-24 pb-20 dark:bg-slate-950">
         <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
@@ -159,7 +127,10 @@ const RegistrationConfirmation = ({
             <div className="lg:col-span-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900">
               <div className="flex flex-col gap-5 md:flex-row">
                 <img
-                  src={resolveImage(itemImage, placeholderImage ?? '/assets/images/coaching-session.jpg')}
+                  src={resolveImage(
+                    itemImage,
+                    placeholderImage ?? '/assets/images/coaching-session.jpg'
+                  )}
                   alt={itemTitle}
                   className="h-44 w-full rounded-xl object-cover md:w-56"
                 />

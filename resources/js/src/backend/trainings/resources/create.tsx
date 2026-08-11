@@ -33,7 +33,9 @@ const ResourceCreate = ({ training, lesson }: any) => {
       <h1 className="text-2xl font-bold">Nouvelle ressource</h1>
 
       <div>
-        <label htmlFor="title" className="block text-sm mb-1">Titre</label>
+        <label htmlFor="title" className="block text-sm mb-1">
+          Titre
+        </label>
         <input
           id="title"
           title="Titre"
@@ -46,7 +48,9 @@ const ResourceCreate = ({ training, lesson }: any) => {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm mb-1">Description</label>
+        <label htmlFor="description" className="block text-sm mb-1">
+          Description
+        </label>
         <textarea
           id="description"
           title="Description"
@@ -58,7 +62,9 @@ const ResourceCreate = ({ training, lesson }: any) => {
       </div>
 
       <div>
-        <label htmlFor="file" className="block text-sm mb-1">Fichier (optionnel)</label>
+        <label htmlFor="file" className="block text-sm mb-1">
+          Fichier (optionnel)
+        </label>
         <input
           id="file"
           title="Fichier"
@@ -70,7 +76,9 @@ const ResourceCreate = ({ training, lesson }: any) => {
       </div>
 
       <div>
-        <label htmlFor="external_url" className="block text-sm mb-1">URL externe (optionnel)</label>
+        <label htmlFor="external_url" className="block text-sm mb-1">
+          URL externe (optionnel)
+        </label>
         <input
           id="external_url"
           title="URL externe"
@@ -79,12 +87,16 @@ const ResourceCreate = ({ training, lesson }: any) => {
           onChange={(e) => setData('external_url', e.target.value)}
           placeholder="https://..."
         />
-        {errors.external_url ? <p className="text-xs text-red-600 mt-1">{errors.external_url}</p> : null}
+        {errors.external_url ? (
+          <p className="text-xs text-red-600 mt-1">{errors.external_url}</p>
+        ) : null}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div>
-          <label htmlFor="file_type" className="block text-sm mb-1">Type de fichier</label>
+          <label htmlFor="file_type" className="block text-sm mb-1">
+            Type de fichier
+          </label>
           <input
             id="file_type"
             title="Type de fichier"
@@ -96,7 +108,9 @@ const ResourceCreate = ({ training, lesson }: any) => {
         </div>
 
         <div>
-          <label htmlFor="sort_order" className="block text-sm mb-1">Ordre</label>
+          <label htmlFor="sort_order" className="block text-sm mb-1">
+            Ordre
+          </label>
           <input
             id="sort_order"
             title="Ordre"

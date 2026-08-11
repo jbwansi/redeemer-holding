@@ -36,10 +36,10 @@ const EventJoin = ({ event, auth, onNotify }: any) => {
     e.preventDefault();
     post(route('events.register', event.slug), {
       onSuccess: () => {
-        onNotify && onNotify("Inscription réussie à l'événement.", 'success');
+        onNotify?.("Inscription réussie à l'événement.", 'success');
       },
       onError: () => {
-        onNotify && onNotify("Erreur lors de l'inscription à l'événement.", 'error');
+        onNotify?.("Erreur lors de l'inscription à l'événement.", 'error');
       },
     });
   };

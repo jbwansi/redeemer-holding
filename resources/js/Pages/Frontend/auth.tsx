@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { InputField } from '@/components/frontend/auth/input-field';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { route } from 'ziggy-js';
@@ -243,11 +243,7 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
         </div>
 
         <div className="pt-2">
-          <button
-            type="submit"
-            disabled={processing}
-            className="ux-btn-primary w-full"
-          >
+          <button type="submit" disabled={processing} className="ux-btn-primary w-full">
             {processing ? (
               <>
                 <svg
@@ -397,7 +393,9 @@ const RegisterForm = ({ setActiveTab }: any) => {
           autoComplete="new-password"
           placeholder="Mot de passe"
           icon={Lock}
-          error={errors.password || (!hasStrongPassword && data.password ? 'Minimum 8 caractères.' : '')}
+          error={
+            errors.password || (!hasStrongPassword && data.password ? 'Minimum 8 caractères.' : '')
+          }
           showPassword={showPassword}
           togglePasswordVisibility={() => setShowPassword(!showPassword)}
           isValid={hasStrongPassword && data.password.length > 0}
@@ -418,16 +416,15 @@ const RegisterForm = ({ setActiveTab }: any) => {
           autoComplete="new-password"
           placeholder="Confirmer le mot de passe"
           icon={Lock}
-          error={errors.password_confirmation || (passwordMismatch ? 'Les mots de passe ne correspondent pas.' : '')}
+          error={
+            errors.password_confirmation ||
+            (passwordMismatch ? 'Les mots de passe ne correspondent pas.' : '')
+          }
           showPassword={showPasswordConfirmation}
           togglePasswordVisibility={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
-          isValid={
-            data.password_confirmation.length > 0 && !passwordMismatch && hasStrongPassword
-          }
+          isValid={data.password_confirmation.length > 0 && !passwordMismatch && hasStrongPassword}
           helperText={
-            data.password_confirmation.length > 0 && !passwordMismatch
-              ? 'Confirmation valide.'
-              : ''
+            data.password_confirmation.length > 0 && !passwordMismatch ? 'Confirmation valide.' : ''
           }
         />
 

@@ -35,7 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 
-interface Table {
+interface DatabaseTable {
   name: string;
   rows: number;
   created_at: string;
@@ -46,13 +46,11 @@ interface Table {
 }
 
 interface Props {
-  tables: Table[];
+  tables: DatabaseTable[];
   error?: string;
 }
 
 const DatabaseClean: React.FC<Props> = ({ tables, error }) => {
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
-  const [confirmDialog, setConfirmDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [truncateConfirm, setTruncateConfirm] = useState({ show: false, tableName: '' });
 

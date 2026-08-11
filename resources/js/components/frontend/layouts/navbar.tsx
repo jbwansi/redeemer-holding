@@ -47,7 +47,7 @@ const Navbar = () => {
   const [searchActive, setSearchActive] = useState(false);
   const { theme, setTheme } = useTheme();
   const { scrollY } = useScroll();
-  const { settings, isLoading, isError, error } = useSettings();
+  const { settings } = useSettings();
   const [hasRendered, setHasRendered] = useState(false);
 
   const page = usePage() as any;
@@ -152,7 +152,7 @@ const Navbar = () => {
   };
 
   // Active navigation indicator with refined animation
-  const NavIndicator = ({ pathname }: { pathname: string }) => (
+  const NavIndicator = () => (
     <motion.div
       className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-[#DA2E29] to-rose-600 rounded-t-md"
       layoutId="navIndicator"
@@ -186,7 +186,7 @@ const Navbar = () => {
                         }`}
         >
           {children}
-          {isActive && <NavIndicator pathname={item.href} />}
+          {isActive && <NavIndicator />}
         </Link>
       </motion.div>
     );
@@ -528,11 +528,11 @@ const Navbar = () => {
                         href={auth?.user ? accountRoute : route('login')}
                         className="ux-btn-secondary !px-4 !py-2"
                       >
-          {auth?.user
-            ? canAdminister
-              ? 'Dashboard admin'
-              : 'Mon espace'
-            : 'Connexion'}
+                        {auth?.user
+                          ? canAdminister
+                            ? 'Dashboard admin'
+                            : 'Mon espace'
+                          : 'Connexion'}
                       </Link>
                     </div>
 

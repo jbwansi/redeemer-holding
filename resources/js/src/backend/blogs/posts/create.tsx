@@ -3,7 +3,6 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { PageProps } from '@inertiajs/core';
 import { Category } from '@/types/category';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PostForm } from '@/components/partials/post-form';
 import { AlertCircle, ArrowLeft, Plus } from 'lucide-react';
 

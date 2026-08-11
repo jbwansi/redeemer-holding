@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { ChevronLeft, Edit } from 'lucide-react';
+import { ChevronLeft, Edit as EditIcon } from 'lucide-react';
 import { Service } from '@/types/service';
 import FormService from './form-service';
 
@@ -29,7 +29,7 @@ const Edit = ({ service }: EditServiceProps) => {
           </Link>
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Edit className="h-4 w-4 text-primary" />
+              <EditIcon className="h-4 w-4 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Modifier le service</h1>
