@@ -70,6 +70,28 @@ export default function Dashboard({
             </Button>
           </Card>
         )}
+        {settings.modules.cv && (
+          <Card className="p-5">
+            <h2 className="font-semibold">CV & candidatures</h2>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Comparez votre CV à une offre et préparez des brouillons éditables.
+            </p>
+            <Button asChild>
+              <Link href={route('coach.cv.index')}>Ouvrir le module CV</Link>
+            </Button>
+          </Card>
+        )}
+        {settings.modules.career && (
+          <Card className="p-5">
+            <h2 className="font-semibold">Orientation & carrière</h2>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Définissez un objectif et suivez un plan d’action concret.
+            </p>
+            <Button asChild>
+              <Link href={route('coach.career.index')}>Ouvrir le module Carrière</Link>
+            </Button>
+          </Card>
+        )}
         <div className="flex flex-wrap gap-3">
           <Button asChild>
             <Link href={route('coach.profile.edit')}>Profil professionnel</Link>

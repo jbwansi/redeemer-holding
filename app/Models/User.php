@@ -72,4 +72,6 @@ class User extends Authenticatable
     public function coachDocuments(): HasMany { return $this->hasMany(UserDocument::class); }
     public function coachConversations(): HasMany { return $this->hasMany(CoachConversation::class); }
     public function interviewSimulations(): HasMany { return $this->hasMany(InterviewSimulation::class); }
+    public function coachAnalyses(): HasMany { return $this->hasMany(CoachAnalysis::class); }
+    public function careerGoals(): HasMany { return $this->hasMany(CareerGoal::class); }
 }

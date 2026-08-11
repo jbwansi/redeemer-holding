@@ -34,6 +34,41 @@ class FakeAIProvider implements AIProviderInterface
 
     private function structuredData(AIRequest $request): array
     {
+        if ($request->promptKey === 'career.analyze_situation') return ['current_position_summary'=>"[{$request->language}] Synthèse indicative fondée sur les faits déclarés.",'strengths'=>['Expérience déclarée à valoriser'],'transferable_skills'=>['Communication à confirmer'],'gaps'=>['Écart à vérifier'],'opportunities'=>['Explorer une transition progressive'],'risks_or_constraints'=>['Valider les hypothèses avec le marché']];
+        if ($request->promptKey === 'career.gap_analysis') return ['target'=>"[{$request->language}] Objectif professionnel déclaré",'existing_strengths'=>['Forces issues du contexte'],'missing_skills'=>['Compétence suggérée à développer'],'experience_gaps'=>['Expérience à documenter'],'knowledge_gaps'=>['Connaissance à approfondir'],'priority_gaps'=>['Priorité indicative à valider']];
+        if ($request->promptKey === 'career.explore_roles') return ['recommended_roles'=>[['title'=>"[{$request->language}] Piste professionnelle",'why_it_fits'=>'Correspondance indicative avec les faits déclarés','strengths_used'=>['Force déclarée'],'gaps_to_close'=>['Écart suggéré']]]];
+        if ($request->promptKey === 'career.build_action_plan') return ['actions'=>[['title'=>"[{$request->language}] Clarifier le projet",'description'=>'Documenter les critères de décision','priority'=>'high','suggested_due_window'=>'Dans les 30 jours'],['title'=>'Valider une compétence cible','description'=>'Recueillir des preuves et retours','priority'=>'medium','suggested_due_window'=>'Dans les 60 jours']]];
+        if ($request->promptKey === 'cv.compare') {
+            return [
+                'match_level' => 'moderate',
+                'match_summary' => "[{$request->language}] Le profil présente des éléments transférables à vérifier avec le CV source.",
+                'strengths' => ['Expérience professionnelle déclarée dans le contexte'],
+                'missing_or_weak_skills' => ['Éléments non démontrés à documenter'],
+                'important_keywords' => ['collaboration', 'résultats'],
+                'experience_alignment' => ['Relier les expériences vérifiées aux responsabilités du poste'],
+                'improvement_recommendations' => ['Ajouter des exemples factuels et mesurables'],
+                'interview_risks' => ['Ne pas revendiquer une compétence absente des faits fournis'],
+            ];
+        }
+        if ($request->promptKey === 'cv.improve') {
+            return [
+                'summary_recommendation' => "[{$request->language}] Clarifier la proposition de valeur avec des faits vérifiables.",
+                'experience_recommendations' => ['Décrire contexte, action et résultat sans ajouter de fait'],
+                'skills_recommendations' => ['Conserver uniquement les compétences démontrées'],
+                'keywords_to_add' => ['Ajouter seulement les mots-clés réellement maîtrisés'],
+                'content_to_remove_or_reduce' => ['Réduire les formulations génériques'],
+                'general_advice' => ['Relire et valider chaque proposition avant utilisation'],
+            ];
+        }
+        if ($request->promptKey === 'cv.adapt') {
+            return ['adapted_cv_draft' => "[{$request->language}] BROUILLON À RELIRE\n\nTitre et résumé fondés uniquement sur les informations utilisateur disponibles."];
+        }
+        if ($request->promptKey === 'cv.cover_letter') {
+            return ['cover_letter' => "[{$request->language}] Madame, Monsieur,\n\nJe vous propose ma candidature sur la base des expériences que j’ai personnellement vérifiées.\n\nCordialement"];
+        }
+        if ($request->promptKey === 'cv.application_message') {
+            return ['application_message' => "[{$request->language}] Bonjour, je souhaite vous proposer ma candidature. Vous trouverez mon CV à relire en pièce jointe."];
+        }
         if ($request->promptKey === 'interview.analyze_job') {
             return [
                 'role_summary' => "[{$request->language}] Analyse déterministe du poste",

@@ -1,0 +1,16 @@
+<?php
+namespace App\Http\Controllers\Coach;
+use App\Coach\Services\CareerCoachService; use App\Coach\Services\CareerProgressService; use App\Coach\Services\CoachSettingsService;
+use App\Http\Controllers\Controller; use App\Http\Requests\Coach\StoreCareerActionRequest; use App\Http\Requests\Coach\StoreCareerGoalRequest; use App\Http\Requests\Coach\UpdateCareerActionRequest;
+use Illuminate\Http\Request; use RuntimeException; use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+class CareerGoalController extends Controller {
+ public function index(Request $request,CoachSettingsService $settings){$this->enabled($settings);return inertia('Frontend/Coach/Career/Index',['goals'=>$request->user()->careerGoals()->latest('updated_at')->get()]);}
+ public function create(Request $request,CoachSettingsService $settings){$this->enabled($settings);return inertia('Frontend/Coach/Career/Create',['languages'=>array_values(array_intersect($settings->all()['languages'],['fr','de','en'])),'defaultLanguage'=>$settings->all()['default_language']]);}
+ public function store(StoreCareerGoalRequest $request,CareerCoachService $service){try{$goal=$service->create($request->user(),$request->validated());return redirect()->route('coach.career.show',$goal);}catch(RuntimeException $e){if($e instanceof HttpExceptionInterface)throw $e;return back()->withInput()->with('error','L’analyse carrière a échoué. L’objectif reste en brouillon.');}}
+ public function show(Request $request,int $goal,CoachSettingsService $settings){$this->enabled($settings);$model=$request->user()->careerGoals()->with('actions')->findOrFail($goal);$this->authorize('view',$model);return inertia('Frontend/Coach/Career/Show',['goal'=>$model]);}
+ public function plan(Request $request,int $goal,CoachSettingsService $settings){$this->enabled($settings);$model=$request->user()->careerGoals()->with('actions')->findOrFail($goal);$this->authorize('view',$model);return inertia('Frontend/Coach/Career/Plan',['goal'=>$model]);}
+ public function storeAction(StoreCareerActionRequest $request,int $goal,CareerProgressService $progress){$model=$request->user()->careerGoals()->findOrFail($goal);$this->authorize('update',$model);$model->actions()->create([...$request->validated(),'status'=>'todo','progress'=>0,'sort_order'=>(int)$model->actions()->max('sort_order')+1,'source'=>'manual']);$progress->recalculate($model);return back();}
+ public function updateAction(UpdateCareerActionRequest $request,int $goal,int $action,CareerProgressService $progress){$model=$request->user()->careerGoals()->findOrFail($goal);$this->authorize('update',$model);$item=$model->actions()->findOrFail($action);$data=$request->validated();if(isset($data['status'])){$data['progress']=$data['status']==='completed'?100:0;$data['completed_at']=$data['status']==='completed'?now():null;}$item->update($data);$progress->recalculate($model);return back();}
+ public function archive(Request $request,int $goal){$model=$request->user()->careerGoals()->findOrFail($goal);$this->authorize('update',$model);$model->update(['status'=>'archived']);return redirect()->route('coach.career.index');}
+ private function enabled(CoachSettingsService $settings):void{abort_unless($settings->moduleEnabled('career'),403,'Le module Orientation & carrière est désactivé.');}
+}

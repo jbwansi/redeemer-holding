@@ -7,6 +7,8 @@ use App\Http\Controllers\Coach\CoachConversationController;
 use App\Http\Controllers\Coach\CoachDashboardController;
 use App\Http\Controllers\Coach\CoachMessageController;
 use App\Http\Controllers\Coach\InterviewSimulationController;
+use App\Http\Controllers\Coach\CvAnalysisController;
+use App\Http\Controllers\Coach\CareerGoalController;
 use App\Http\Controllers\Coach\ProfessionalProfileController;
 use App\Http\Controllers\Coach\UserDocumentController;
 use App\Http\Controllers\Frontend\DashboardController;
@@ -108,5 +110,21 @@ Route::middleware(['auth', 'active'])->group(function () {
                 ->middleware('throttle:coach-ai')
                 ->name('interviews.answers.store');
             Route::get('/interviews/{simulation}/debrief', [InterviewSimulationController::class, 'debrief'])->name('interviews.debrief');
+
+            Route::get('/cv', [CvAnalysisController::class, 'index'])->name('cv.index');
+            Route::get('/cv/analyze', [CvAnalysisController::class, 'create'])->name('cv.create');
+            Route::post('/cv', [CvAnalysisController::class, 'store'])
+                ->middleware('throttle:coach-ai')
+                ->name('cv.store');
+            Route::get('/cv/{analysis}', [CvAnalysisController::class, 'show'])->name('cv.show');
+
+            Route::get('/career', [CareerGoalController::class, 'index'])->name('career.index');
+            Route::get('/career/create', [CareerGoalController::class, 'create'])->name('career.create');
+            Route::post('/career', [CareerGoalController::class, 'store'])->middleware('throttle:coach-ai')->name('career.store');
+            Route::get('/career/{goal}', [CareerGoalController::class, 'show'])->name('career.show');
+            Route::get('/career/{goal}/plan', [CareerGoalController::class, 'plan'])->name('career.plan');
+            Route::post('/career/{goal}/actions', [CareerGoalController::class, 'storeAction'])->name('career.actions.store');
+            Route::patch('/career/{goal}/actions/{action}', [CareerGoalController::class, 'updateAction'])->name('career.actions.update');
+            Route::patch('/career/{goal}/archive', [CareerGoalController::class, 'archive'])->name('career.archive');
         });
 });

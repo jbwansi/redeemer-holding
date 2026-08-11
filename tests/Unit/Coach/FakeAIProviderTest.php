@@ -59,4 +59,27 @@ class FakeAIProviderTest extends TestCase
             $this->assertGreaterThan(0, $response->inputTokens + $response->outputTokens);
         }
     }
+
+    public function test_fake_provider_supports_all_cv_contracts_in_supported_languages(): void
+    {
+        $provider = new FakeAIProvider();
+        $contracts = [
+            'cv.compare' => 'match_summary', 'cv.improve' => 'summary_recommendation',
+            'cv.adapt' => 'adapted_cv_draft', 'cv.cover_letter' => 'cover_letter',
+            'cv.application_message' => 'application_message',
+        ];
+        foreach (['fr', 'de', 'en'] as $language) {
+            foreach ($contracts as $key => $expectedKey) {
+                $response = $provider->generateStructured(new AIRequest('system', '', $language, $key, '1.0'), []);
+                $this->assertArrayHasKey($expectedKey, $response->data);
+                $this->assertStringContainsString("[{$language}]", json_encode($response->data));
+            }
+        }
+    }
+    public function test_fake_provider_supports_all_career_contracts_without_network(): void
+    {
+        $provider=new FakeAIProvider();
+        $contracts=['career.analyze_situation'=>'transferable_skills','career.gap_analysis'=>'missing_skills','career.explore_roles'=>'recommended_roles','career.build_action_plan'=>'actions'];
+        foreach(['fr','de','en'] as $language) foreach($contracts as $key=>$field){$response=$provider->generateStructured(new AIRequest('system','',$language,$key,'1.0'),[]);$this->assertArrayHasKey($field,$response->data);$this->assertStringContainsString("[{$language}]",json_encode($response->data));}
+    }
 }
