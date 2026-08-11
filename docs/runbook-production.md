@@ -7,8 +7,10 @@ Ce document sert de guide d'exploitation pour les mises en production, la superv
 - PHP, Composer, Node.js et npm installes sur le serveur de build/deploiement.
 - Base de donnees accessible.
 - Variables d'environnement de production renseignees.
+- HTTPS configure et teste sur le domaine de production.
 - Stripe configure avec cles reelles (pas les placeholders).
 - Worker de queue actif (driver `database` dans le projet actuel).
+- Cache partage et persistant entre les workers (Redis ou equivalent), requis pour l'idempotence newsletter.
 
 ## 2. Variables critiques a verifier
 
@@ -18,6 +20,8 @@ Verifier au minimum dans `.env` de production:
 - `APP_DEBUG=false`
 - `APP_URL` correct
 - `DB_*` correct
+- `CACHE_STORE` pointe vers le cache partage de production
+- `SESSION_DRIVER` adapte a une execution multi-instance
 - `QUEUE_CONNECTION=database`
 - `MAIL_*` correct
 - `SESSION_SECURE_COOKIE=true`
@@ -33,8 +37,10 @@ Verifier au minimum dans `.env` de production:
 ### 3.1 Avant de deployer
 
 - Faire un backup DB.
+- Verifier que cette sauvegarde est lisible et restaurable avant toute migration.
 - Valider la branche a deployer et le changelog.
 - Verifier l'etat des migrations a venir.
+- Conserver la version ou le commit actuellement deploye pour permettre un retour rapide.
 
 ### 3.2 Commandes de deploiement
 
@@ -46,12 +52,16 @@ php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan storage:link
 ```
 
-Si vous utilisez les notifications DB pour la cloche:
+`storage:link` est necessaire car le projet publie des medias depuis `storage/app/public`.
+
+Verifier ensuite les permissions d'ecriture du compte PHP sur:
 
 ```bash
-php artisan migrate --force
+storage
+bootstrap/cache
 ```
 
 ### 3.3 Queue worker
@@ -84,6 +94,20 @@ sudo systemctl enable --now laravel-queue
 sudo systemctl status laravel-queue
 ```
 
+Apres chaque deploiement, redemarrer proprement les workers afin qu'ils chargent le nouveau code:
+
+```bash
+php artisan queue:restart
+```
+
+## 3.4 Scheduler
+
+Le scheduler execute les rappels et le controle de sante de la queue. Configurer une execution chaque minute:
+
+```cron
+* * * * * cd /var/www/redeemer-holding && php artisan schedule:run >> /dev/null 2>&1
+```
+
 ## 4. Verification post-deploiement (smoke checks)
 
 - Homepage charge sans erreur.
@@ -95,6 +119,8 @@ sudo systemctl status laravel-queue
 - Import CSV users fonctionne.
 - Export CSV users telecharge un fichier non vide.
 - Pages riches (blog, about, event, formation, services, pages) rendent bien le HTML.
+- Endpoint `/up` repond correctement.
+- `php artisan queue:health-check` reussit avec les seuils de production.
 
 ## 5. Securite operationnelle
 
@@ -162,7 +188,20 @@ php artisan queue:retry all
 - [ ] Smoke tests passes
 - [ ] Monitoring/alerting verifies
 
-## 10. Contacts et escalation
+## 10. Rollback minimal
+
+En cas de probleme bloquant apres deploiement:
+
+1. Mettre l'application en maintenance si les ecritures doivent etre suspendues.
+2. Revenir a la version ou au commit precedemment deploye.
+3. Reinstaller les dependances et reconstruire les caches pour cette version.
+4. Restaurer la sauvegarde DB uniquement si le code precedent est incompatible avec les migrations appliquees.
+5. Utiliser `php artisan migrate:rollback` seulement apres verification explicite que les migrations sont reversibles et qu'aucune donnee ne sera perdue.
+6. Redemarrer les workers, sortir de maintenance et refaire les smoke tests.
+
+Ne jamais lancer un rollback de migration ou une restauration DB sans sauvegarde valide et accord du responsable de release.
+
+## 11. Contacts et escalation
 
 Completer cette section avec les contacts internes:
 
