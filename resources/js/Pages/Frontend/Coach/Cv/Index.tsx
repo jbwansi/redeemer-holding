@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CoachPagination, type Paginated } from '../Pagination';
 
 interface Analysis {
   id: number;
@@ -14,7 +15,7 @@ interface Analysis {
   job_document: { original_name: string } | null;
 }
 
-export default function Index({ analyses }: { analyses: Analysis[] }) {
+export default function Index({ analyses }: { analyses: Paginated<Analysis> }) {
   return (
     <DashboardLayout title="CV & candidatures" currentPage="coach">
       <Head title="CV & candidatures" />
@@ -28,8 +29,8 @@ export default function Index({ analyses }: { analyses: Analysis[] }) {
             <Link href={route('coach.cv.create')}>Nouvelle analyse</Link>
           </Button>
         </div>
-        {analyses.length === 0 && <Card className="p-5">Aucune analyse pour le moment.</Card>}
-        {analyses.map((analysis) => (
+        {analyses.data.length === 0 && <Card className="p-5">Aucune analyse pour le moment.</Card>}
+        {analyses.data.map((analysis) => (
           <Card className="flex flex-wrap items-center justify-between gap-4 p-5" key={analysis.id}>
             <div>
               <h2 className="font-semibold">{analysis.job_title}</h2>
@@ -45,6 +46,7 @@ export default function Index({ analyses }: { analyses: Analysis[] }) {
             </Button>
           </Card>
         ))}
+        <CoachPagination page={analyses} />
       </div>
     </DashboardLayout>
   );

@@ -78,7 +78,7 @@ class CvAnalysisTest extends TestCase
         $admin = User::factory()->create(['role' => 'admin']);
 
         $this->actingAs($owner)->get(route('coach.cv.index'))->assertOk()->assertInertia(
-            fn (Assert $page) => $page->component('Frontend/Coach/Cv/Index')->has('analyses', 1),
+            fn (Assert $page) => $page->component('Frontend/Coach/Cv/Index')->has('analyses.data', 1),
         );
         $this->actingAs($owner)->get(route('coach.cv.show', $analysis))->assertOk();
         $this->actingAs($other)->get(route('coach.cv.show', $analysis))->assertNotFound();

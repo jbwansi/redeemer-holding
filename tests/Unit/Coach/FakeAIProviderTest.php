@@ -82,4 +82,9 @@ class FakeAIProviderTest extends TestCase
         $contracts=['career.analyze_situation'=>'transferable_skills','career.gap_analysis'=>'missing_skills','career.explore_roles'=>'recommended_roles','career.build_action_plan'=>'actions'];
         foreach(['fr','de','en'] as $language) foreach($contracts as $key=>$field){$response=$provider->generateStructured(new AIRequest('system','',$language,$key,'1.0'),[]);$this->assertArrayHasKey($field,$response->data);$this->assertStringContainsString("[{$language}]",json_encode($response->data));}
     }
+    public function test_fake_provider_supports_all_certification_contracts_without_network(): void
+    {
+        $provider=new FakeAIProvider();$contracts=['certification.skills_gap'=>'priority_skills','certification.recommend'=>'recommendations','certification.learning_plan'=>'steps'];
+        foreach(['fr','de','en'] as $language)foreach($contracts as $key=>$field){$response=$provider->generateStructured(new AIRequest('system','',$language,$key,'1.0'),[]);$this->assertArrayHasKey($field,$response->data);$this->assertStringContainsString("[{$language}]",json_encode($response->data));}
+    }
 }

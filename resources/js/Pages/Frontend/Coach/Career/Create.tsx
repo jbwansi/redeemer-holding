@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
+import { Textarea } from '@/components/ui/textarea';
 export default function Create({
   languages,
   defaultLanguage,
@@ -44,7 +46,7 @@ export default function Create({
           </div>
           <div>
             <Label>Situation actuelle</Label>
-            <textarea
+            <Textarea
               className="w-full rounded-md border p-2"
               value={form.data.current_situation}
               onChange={(e) => form.setData('current_situation', e.target.value)}
@@ -68,14 +70,14 @@ export default function Create({
           </div>
           <div>
             <Label>Description</Label>
-            <textarea
+            <Textarea
               className="w-full rounded-md border p-2"
               value={form.data.target_description}
               onChange={(e) => form.setData('target_description', e.target.value)}
             />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <select
+            <NativeSelect
               className="rounded-md border p-2"
               value={form.data.language}
               onChange={(e) => form.setData('language', e.target.value)}
@@ -83,7 +85,7 @@ export default function Create({
               {languages.map((l) => (
                 <option key={l}>{l}</option>
               ))}
-            </select>
+            </NativeSelect>
             <Input
               type="date"
               value={form.data.target_date}

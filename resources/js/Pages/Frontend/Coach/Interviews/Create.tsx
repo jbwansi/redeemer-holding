@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { NativeSelect } from '@/components/ui/native-select';
 
 interface Document {
   id: number;
@@ -62,7 +63,7 @@ export default function Create({
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <select
+          <NativeSelect
             className="rounded border bg-background p-2"
             value={form.data.interview_type}
             onChange={(e) => form.setData('interview_type', e.target.value)}
@@ -72,8 +73,8 @@ export default function Create({
                 {value}
               </option>
             ))}
-          </select>
-          <select
+          </NativeSelect>
+          <NativeSelect
             className="rounded border bg-background p-2"
             value={form.data.difficulty}
             onChange={(e) => form.setData('difficulty', e.target.value)}
@@ -83,8 +84,8 @@ export default function Create({
                 {value}
               </option>
             ))}
-          </select>
-          <select
+          </NativeSelect>
+          <NativeSelect
             className="rounded border bg-background p-2"
             value={form.data.language}
             onChange={(e) => form.setData('language', e.target.value)}
@@ -94,7 +95,7 @@ export default function Create({
                 {value.toUpperCase()}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         {documents.length > 0 && (
           <fieldset>

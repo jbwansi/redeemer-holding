@@ -10,7 +10,7 @@ class CoachAnalysis extends Model
 {
     use HasFactory;
 
-    public const TYPES = ['cv_job_match', 'cv_improvement', 'cover_letter', 'application_message'];
+    public const TYPES = ['cv_job_match', 'cv_improvement', 'cover_letter', 'application_message', 'skills_gap', 'certification_recommendation', 'learning_plan'];
 
     protected $guarded = [];
 
@@ -20,4 +20,5 @@ class CoachAnalysis extends Model
     public function conversation(): BelongsTo { return $this->belongsTo(CoachConversation::class, 'coach_conversation_id'); }
     public function cvDocument(): BelongsTo { return $this->belongsTo(UserDocument::class, 'cv_document_id'); }
     public function jobDocument(): BelongsTo { return $this->belongsTo(UserDocument::class, 'job_document_id'); }
+    public function careerGoal(): BelongsTo { return $this->belongsTo(CareerGoal::class); }
 }

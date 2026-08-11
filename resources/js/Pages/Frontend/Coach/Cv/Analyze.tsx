@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 
 interface Document {
   id: number;
@@ -57,7 +58,7 @@ export default function Analyze({
           <div className="rounded-md border bg-muted/30 p-4">
             <h2 className="mb-2 font-medium">Ajouter un document privé</h2>
             <div className="flex flex-wrap gap-2">
-              <select
+              <NativeSelect
                 className="rounded-md border p-2"
                 value={upload.data.type}
                 onChange={(e) => upload.setData('type', e.target.value)}
@@ -65,7 +66,7 @@ export default function Analyze({
                 <option value="cv">CV</option>
                 <option value="job_offer">Offre d’emploi</option>
                 <option value="job_description">Description de poste</option>
-              </select>
+              </NativeSelect>
               <input
                 accept=".pdf,.docx,.txt"
                 type="file"
@@ -91,7 +92,7 @@ export default function Analyze({
           </div>
           <div>
             <Label htmlFor="cv">CV</Label>
-            <select
+            <NativeSelect
               className="w-full rounded-md border p-2"
               id="cv"
               value={form.data.cv_document_id}
@@ -104,14 +105,14 @@ export default function Analyze({
                   {d.original_name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             {form.errors.cv_document_id && (
               <p className="text-sm text-red-600">{form.errors.cv_document_id}</p>
             )}
           </div>
           <div>
             <Label htmlFor="offer">Offre ou description de poste</Label>
-            <select
+            <NativeSelect
               className="w-full rounded-md border p-2"
               id="offer"
               value={form.data.job_document_id}
@@ -124,7 +125,7 @@ export default function Analyze({
                   {d.original_name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             {form.errors.job_document_id && (
               <p className="text-sm text-red-600">{form.errors.job_document_id}</p>
             )}
@@ -148,7 +149,7 @@ export default function Analyze({
           </div>
           <div>
             <Label htmlFor="language">Langue de réponse</Label>
-            <select
+            <NativeSelect
               className="w-full rounded-md border p-2"
               id="language"
               value={form.data.language}
@@ -159,7 +160,7 @@ export default function Analyze({
                   {language.toUpperCase()}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <div className="flex gap-3">
             <Button

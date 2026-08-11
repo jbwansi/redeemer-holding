@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CoachPagination, type Paginated } from '../Pagination';
 interface Goal {
   id: number;
   title: string;
@@ -11,7 +12,7 @@ interface Goal {
   target_date: string | null;
   updated_at: string;
 }
-export default function Index({ goals }: { goals: Goal[] }) {
+export default function Index({ goals }: { goals: Paginated<Goal> }) {
   return (
     <DashboardLayout title="Orientation & carrière" currentPage="coach">
       <Head title="Orientation & carrière" />
@@ -22,8 +23,8 @@ export default function Index({ goals }: { goals: Goal[] }) {
             <Link href={route('coach.career.create')}>Nouvel objectif</Link>
           </Button>
         </div>
-        {goals.length === 0 && <Card className="p-5">Aucun objectif.</Card>}
-        {goals.map((g) => (
+        {goals.data.length === 0 && <Card className="p-5">Aucun objectif.</Card>}
+        {goals.data.map((g) => (
           <Card className="flex items-center justify-between p-5" key={g.id}>
             <div>
               <h2 className="font-semibold">{g.title}</h2>
@@ -40,6 +41,7 @@ export default function Index({ goals }: { goals: Goal[] }) {
             </Button>
           </Card>
         ))}
+        <CoachPagination page={goals} />
       </div>
     </DashboardLayout>
   );

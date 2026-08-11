@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 interface Document {
   id: number;
   type: string;
@@ -28,13 +29,16 @@ export default function Index({ documents }: { documents: Document[] }) {
             form.post(route('coach.documents.store'), { forceFormData: true });
           }}
         >
-          <select value={form.data.type} onChange={(e) => form.setData('type', e.target.value)}>
+          <NativeSelect
+            value={form.data.type}
+            onChange={(e) => form.setData('type', e.target.value)}
+          >
             <option value="cv">CV</option>
             <option value="job_offer">Offre</option>
             <option value="job_description">Description de poste</option>
             <option value="certificate">Certificat</option>
             <option value="other">Autre</option>
-          </select>
+          </NativeSelect>
           <input
             type="file"
             accept=".pdf,.docx,.txt"

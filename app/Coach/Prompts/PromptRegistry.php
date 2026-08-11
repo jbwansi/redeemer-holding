@@ -16,6 +16,9 @@ use App\Coach\Prompts\Career\AnalyzeSituationPrompt;
 use App\Coach\Prompts\Career\BuildActionPlanPrompt;
 use App\Coach\Prompts\Career\ExploreRolesPrompt;
 use App\Coach\Prompts\Career\GapAnalysisPrompt;
+use App\Coach\Prompts\Certification\AnalyzeSkillsGapPrompt;
+use App\Coach\Prompts\Certification\BuildLearningPlanPrompt;
+use App\Coach\Prompts\Certification\RecommendCertificationsPrompt;
 use InvalidArgumentException;
 
 class PromptRegistry
@@ -42,6 +45,9 @@ class PromptRegistry
             'career.gap_analysis' => new GapAnalysisPrompt(),
             'career.explore_roles' => new ExploreRolesPrompt(),
             'career.build_action_plan' => new BuildActionPlanPrompt(),
+            'certification.skills_gap' => new AnalyzeSkillsGapPrompt(),
+            'certification.recommend' => new RecommendCertificationsPrompt(),
+            'certification.learning_plan' => new BuildLearningPlanPrompt(),
             default => throw new InvalidArgumentException('Prompt Coach inconnu.'),
         };
     }

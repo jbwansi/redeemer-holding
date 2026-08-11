@@ -16,7 +16,7 @@ class InterviewSimulationController extends Controller
     public function index(Request $request, CoachSettingsService $settings)
     {
         $this->ensureEnabled($settings);
-        $simulations = $request->user()->interviewSimulations()->withCount(['turns', 'turns as answered_turns_count' => fn ($query) => $query->whereNotNull('answered_at')])->latest()->get();
+        $simulations = $request->user()->interviewSimulations()->withCount(['turns', 'turns as answered_turns_count' => fn ($query) => $query->whereNotNull('answered_at')])->latest()->paginate(20)->withQueryString();
         return inertia('Frontend/Coach/Interviews/Index', ['simulations' => $simulations]);
     }
 

@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CoachPagination, type Paginated } from '../Pagination';
 
 interface Simulation {
   id: number;
@@ -13,7 +14,7 @@ interface Simulation {
   turns_count: number;
   answered_turns_count: number;
 }
-export default function Index({ simulations }: { simulations: Simulation[] }) {
+export default function Index({ simulations }: { simulations: Paginated<Simulation> }) {
   return (
     <DashboardLayout title="Préparation aux entretiens" currentPage="coach">
       <Head title="Entretiens" />
@@ -25,7 +26,8 @@ export default function Index({ simulations }: { simulations: Simulation[] }) {
           </Button>
         </div>
         <div className="grid gap-3">
-          {simulations.map((simulation) => (
+          {simulations.data.length === 0 && <Card className="p-5">Aucune simulation.</Card>}
+          {simulations.data.map((simulation) => (
             <Card
               className="flex flex-wrap items-center justify-between gap-3 p-4"
               key={simulation.id}
@@ -51,6 +53,7 @@ export default function Index({ simulations }: { simulations: Simulation[] }) {
             </Card>
           ))}
         </div>
+        <CoachPagination page={simulations} />
       </div>
     </DashboardLayout>
   );

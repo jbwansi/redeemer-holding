@@ -9,6 +9,7 @@ use App\Http\Controllers\Coach\CoachMessageController;
 use App\Http\Controllers\Coach\InterviewSimulationController;
 use App\Http\Controllers\Coach\CvAnalysisController;
 use App\Http\Controllers\Coach\CareerGoalController;
+use App\Http\Controllers\Coach\CertificationAnalysisController;
 use App\Http\Controllers\Coach\ProfessionalProfileController;
 use App\Http\Controllers\Coach\UserDocumentController;
 use App\Http\Controllers\Frontend\DashboardController;
@@ -122,9 +123,15 @@ Route::middleware(['auth', 'active'])->group(function () {
             Route::get('/career/create', [CareerGoalController::class, 'create'])->name('career.create');
             Route::post('/career', [CareerGoalController::class, 'store'])->middleware('throttle:coach-ai')->name('career.store');
             Route::get('/career/{goal}', [CareerGoalController::class, 'show'])->name('career.show');
+            Route::patch('/career/{goal}', [CareerGoalController::class, 'update'])->name('career.update');
             Route::get('/career/{goal}/plan', [CareerGoalController::class, 'plan'])->name('career.plan');
             Route::post('/career/{goal}/actions', [CareerGoalController::class, 'storeAction'])->name('career.actions.store');
             Route::patch('/career/{goal}/actions/{action}', [CareerGoalController::class, 'updateAction'])->name('career.actions.update');
             Route::patch('/career/{goal}/archive', [CareerGoalController::class, 'archive'])->name('career.archive');
+
+            Route::get('/certifications', [CertificationAnalysisController::class, 'index'])->name('certifications.index');
+            Route::get('/certifications/create', [CertificationAnalysisController::class, 'create'])->name('certifications.create');
+            Route::post('/certifications', [CertificationAnalysisController::class, 'store'])->middleware('throttle:coach-ai')->name('certifications.store');
+            Route::get('/certifications/{analysis}', [CertificationAnalysisController::class, 'show'])->name('certifications.show');
         });
 });

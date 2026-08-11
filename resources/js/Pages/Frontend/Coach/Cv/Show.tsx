@@ -3,6 +3,7 @@ import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 
 interface CvResult {
   comparison: {
@@ -87,21 +88,21 @@ export default function Show({ analysis }: { analysis: Analysis }) {
               <p className="mb-3 text-sm text-amber-700">
                 Proposition éditable à relire — votre CV original reste intact.
               </p>
-              <textarea
+              <Textarea
                 className="min-h-64 w-full rounded-md border p-3"
                 defaultValue={result.adapted.adapted_cv_draft}
               />
             </Card>
             <Card className="p-5">
               <h2 className="mb-2 font-semibold">Lettre de motivation</h2>
-              <textarea
+              <Textarea
                 className="min-h-64 w-full rounded-md border p-3"
                 defaultValue={result.letter.cover_letter}
               />
             </Card>
             <Card className="p-5">
               <h2 className="mb-2 font-semibold">Message court</h2>
-              <textarea
+              <Textarea
                 className="min-h-32 w-full rounded-md border p-3"
                 defaultValue={result.message.application_message}
               />

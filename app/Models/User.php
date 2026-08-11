@@ -74,4 +74,5 @@ class User extends Authenticatable
     public function interviewSimulations(): HasMany { return $this->hasMany(InterviewSimulation::class); }
     public function coachAnalyses(): HasMany { return $this->hasMany(CoachAnalysis::class); }
     public function careerGoals(): HasMany { return $this->hasMany(CareerGoal::class); }
+    public function coachUsages(): HasMany { return $this->hasMany(CoachUsage::class); }
 }

@@ -1,8 +1,10 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 interface Goal {
   id: number;
   title: string;
@@ -10,6 +12,10 @@ interface Goal {
   target_sector: string | null;
   progress: number;
   status: string;
+  current_situation: string | null;
+  target_description: string | null;
+  language: string;
+  target_date: string | null;
   analysis: {
     situation: {
       current_position_summary: string;
@@ -29,6 +35,15 @@ const List = ({ items }: { items: string[] }) => (
 );
 export default function Show({ goal }: { goal: Goal }) {
   const a = goal.analysis;
+  const edit = useForm({
+    title: goal.title,
+    current_situation: goal.current_situation || '',
+    target_role: goal.target_role || '',
+    target_sector: goal.target_sector || '',
+    target_description: goal.target_description || '',
+    language: goal.language,
+    target_date: goal.target_date?.slice(0, 10) || '',
+  });
   return (
     <DashboardLayout title={goal.title} currentPage="coach">
       <Head title={goal.title} />
@@ -53,6 +68,56 @@ export default function Show({ goal }: { goal: Goal }) {
             </Button>
           </div>
         </div>
+        <Card className="p-5">
+          <h2 className="mb-3 font-semibold">Réviser mon objectif</h2>
+          <form
+            className="grid gap-3 md:grid-cols-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              edit.patch(route('coach.career.update', goal.id), { preserveScroll: true });
+            }}
+          >
+            <Input
+              className="rounded-md border p-2"
+              required
+              value={edit.data.title}
+              onChange={(event) => edit.setData('title', event.target.value)}
+            />
+            <Input
+              className="rounded-md border p-2"
+              placeholder="Poste cible"
+              value={edit.data.target_role}
+              onChange={(event) => edit.setData('target_role', event.target.value)}
+            />
+            <Input
+              className="rounded-md border p-2"
+              placeholder="Secteur cible"
+              value={edit.data.target_sector}
+              onChange={(event) => edit.setData('target_sector', event.target.value)}
+            />
+            <Input
+              className="rounded-md border p-2"
+              type="date"
+              value={edit.data.target_date}
+              onChange={(event) => edit.setData('target_date', event.target.value)}
+            />
+            <Textarea
+              className="rounded-md border p-2 md:col-span-2"
+              placeholder="Situation actuelle"
+              value={edit.data.current_situation}
+              onChange={(event) => edit.setData('current_situation', event.target.value)}
+            />
+            <Textarea
+              className="rounded-md border p-2 md:col-span-2"
+              placeholder="Description de la cible"
+              value={edit.data.target_description}
+              onChange={(event) => edit.setData('target_description', event.target.value)}
+            />
+            <Button className="w-fit" disabled={edit.processing}>
+              Enregistrer sans relancer l’IA
+            </Button>
+          </form>
+        </Card>
         {!a ? (
           <Card className="p-5">Analyse indisponible. L’objectif reste en brouillon.</Card>
         ) : (

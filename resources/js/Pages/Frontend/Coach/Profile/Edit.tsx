@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 interface Profile {
   professional_title?: string;
   summary?: string;
@@ -88,7 +89,7 @@ export default function Edit({ profile }: { profile: Profile | null }) {
           placeholder="Objectif professionnel"
           onChange={(e) => form.setData('career_objective', e.target.value)}
         />
-        <select
+        <NativeSelect
           className="rounded border p-2"
           value={form.data.default_language}
           onChange={(e) => form.setData('default_language', e.target.value)}
@@ -96,7 +97,7 @@ export default function Edit({ profile }: { profile: Profile | null }) {
           <option value="fr">Français</option>
           <option value="de">Deutsch</option>
           <option value="en">English</option>
-        </select>
+        </NativeSelect>
         <Button disabled={form.processing}>Enregistrer</Button>
       </form>
     </DashboardLayout>

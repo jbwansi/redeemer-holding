@@ -17,6 +17,13 @@ interface Props {
   };
 }
 
+const moduleLabels: Record<string, string> = {
+  interview: 'Entretiens',
+  cv: 'CV & candidatures',
+  career: 'Orientation & carrière',
+  certification: 'Compétences & certifications',
+};
+
 export default function Dashboard({
   profileComplete,
   documentCount,
@@ -50,11 +57,11 @@ export default function Dashboard({
           </Card>
         </div>
         <Card className="p-4">
-          <h2 className="mb-2 font-semibold">Modules à venir</h2>
+          <h2 className="mb-2 font-semibold">Disponibilité des modules</h2>
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             {Object.entries(settings.modules).map(([module, enabled]) => (
               <span key={module}>
-                {module}: {enabled ? 'activé (prochainement)' : 'désactivé'}
+                {moduleLabels[module] ?? module}: {enabled ? 'activé' : 'désactivé'}
               </span>
             ))}
           </div>
@@ -89,6 +96,17 @@ export default function Dashboard({
             </p>
             <Button asChild>
               <Link href={route('coach.career.index')}>Ouvrir le module Carrière</Link>
+            </Button>
+          </Card>
+        )}
+        {settings.modules.certification && (
+          <Card className="p-5">
+            <h2 className="font-semibold">Compétences & certifications</h2>
+            <p className="mb-3 text-sm text-muted-foreground">
+              Identifiez vos priorités et explorez des suggestions à vérifier.
+            </p>
+            <Button asChild>
+              <Link href={route('coach.certifications.index')}>Ouvrir le module Compétences</Link>
             </Button>
           </Card>
         )}

@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/frontend/layouts/dashboard-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 interface Action {
   id: number;
   title: string;
@@ -45,7 +46,7 @@ export default function Plan({ goal }: { goal: Goal }) {
               onChange={(e) => form.setData('title', e.target.value)}
               required
             />
-            <select
+            <NativeSelect
               className="rounded-md border p-2"
               value={form.data.priority}
               onChange={(e) => form.setData('priority', e.target.value)}
@@ -53,7 +54,7 @@ export default function Plan({ goal }: { goal: Goal }) {
               <option value="low">Basse</option>
               <option value="medium">Moyenne</option>
               <option value="high">Haute</option>
-            </select>
+            </NativeSelect>
             <Input
               type="date"
               value={form.data.due_date}
@@ -99,7 +100,7 @@ export default function Plan({ goal }: { goal: Goal }) {
               >
                 {a.status === 'completed' ? 'Rouvrir' : 'Terminer'}
               </Button>
-              <select
+              <NativeSelect
                 className="rounded-md border p-2"
                 value={a.priority}
                 onChange={(e) =>
@@ -111,7 +112,7 @@ export default function Plan({ goal }: { goal: Goal }) {
                 <option value="low">Basse</option>
                 <option value="medium">Moyenne</option>
                 <option value="high">Haute</option>
-              </select>
+              </NativeSelect>
               <Input
                 className="w-auto"
                 defaultValue={a.due_date?.slice(0, 10) || ''}

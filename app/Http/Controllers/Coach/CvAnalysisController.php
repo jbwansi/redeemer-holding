@@ -17,7 +17,7 @@ class CvAnalysisController extends Controller
         $this->ensureEnabled($settings);
         $analyses = $request->user()->coachAnalyses()
             ->with(['cvDocument:id,original_name', 'jobDocument:id,original_name'])
-            ->latest()->get();
+            ->latest()->paginate(20)->withQueryString();
 
         return inertia('Frontend/Coach/Cv/Index', ['analyses' => $analyses]);
     }
