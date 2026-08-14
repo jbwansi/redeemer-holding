@@ -1,105 +1,42 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, follow">
     <title>Page non trouvée</title>
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-    <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-
-            100% {
-                transform: translateY(0px);
-            }
-        }
+        :root { color-scheme: dark; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at top, #162542 0, #071224 48%, #030712 100%); color: #f8fafc; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+        main { width: min(680px, 100%); padding: clamp(28px, 6vw, 56px); text-align: center; border: 1px solid rgba(255, 255, 255, .1); border-radius: 28px; background: rgba(8, 20, 39, .88); box-shadow: 0 24px 80px rgba(0, 0, 0, .38); }
+        .brand { margin: 0 0 28px; color: #da2e29; font-size: 14px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+        .code { margin: 0; color: #da2e29; font-size: clamp(72px, 20vw, 132px); font-weight: 900; line-height: .85; }
+        h1 { margin: 26px 0 0; font-size: clamp(28px, 6vw, 42px); }
+        p { margin: 16px auto 0; max-width: 520px; color: #cbd5e1; line-height: 1.7; }
+        .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 32px; }
+        a { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 11px 18px; border-radius: 12px; color: white; font-weight: 750; text-decoration: none; }
+        .primary { background: #da2e29; }
+        .primary:hover { background: #bd2622; }
+        .secondary { border: 1px solid #475569; background: #10213c; }
+        .secondary:hover { background: #162b4c; }
+        .support { margin-top: 30px; font-size: 14px; }
+        .support a { min-height: 0; padding: 0; color: #ff8d8a; }
     </style>
 </head>
-
-<body class="antialiased">
-    <div class="relative min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <!-- Background pattern -->
-        <div
-            class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25 dark:[mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0.5))]">
+<body>
+    <main>
+        <p class="brand">Redeemer Holding · Transformer par les valeurs</p>
+        <p class="code" aria-label="Erreur 404">404</p>
+        <h1>Page non trouvée</h1>
+        <p>La page demandée n’existe pas ou a été déplacée. Vous pouvez revenir à l’accueil ou à la page précédente.</p>
+        <div class="actions">
+            <a class="primary" href="{{ route('home') }}">Retour à l’accueil</a>
+            <a class="secondary" href="{{ url()->previous() }}">Page précédente</a>
         </div>
-
-        <div class="relative p-6 w-full max-w-4xl">
-            <div class="text-center">
-                <!-- Numéro d'erreur stylisé -->
-                <h1
-                    class="text-9xl font-bold bg-gradient-to-r from-red-500 via-red-400 to-red-500 text-transparent bg-clip-text select-none">
-                    404
-                </h1>
-
-                <!-- Message principal -->
-                <h2 class="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-                    Page non trouvée
-                </h2>
-
-                <!-- Description -->
-                <p class="mt-4 text-gray-500 dark:text-gray-400">
-                    Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
-                </p>
-
-                <!-- Illustration -->
-                <div class="mt-8 flex justify-center">
-                    <div class="relative animate-float">
-                        <svg class="w-48 h-48 text-red-500/20 dark:text-red-400/20" fill="currentColor"
-                            viewBox="0 0 24 24">
-                            <path
-                                d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-2a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm-1-5h2v2h-2v-2zm0-8h2v6h-2V7z" />
-                        </svg>
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <svg class="w-24 h-24 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="mt-12 flex items-center justify-center gap-4">
-                    <a href="{{ url()->previous() }}"
-                        class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold text-xs text-gray-700 dark:text-gray-300 uppercase tracking-widest shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        Retour
-                    </a>
-                    <a href="{{ route('home') }}"
-                        class="inline-flex items-center px-4 py-2 bg-red-500 dark:bg-red-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-600 dark:hover:bg-blue-700 focus:bg-blue-600 dark:focus:bg-blue-700 active:bg-blue-700 dark:active:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                        Retour à l'accueil
-                    </a>
-                </div>
-
-                <!-- Contact support -->
-                <p class="mt-8 text-sm text-gray-500 dark:text-gray-400">
-                    Si vous pensez qu'il s'agit d'une erreur, veuillez contacter le support
-                    <a href="mailto:{{ get_setting('support_email') }}"
-                        class="font-medium text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-500">
-                        {{ get_setting('support_email') }}
-                    </a>
-                </p>
-            </div>
-        </div>
-    </div>
+        @if (get_setting('support_email'))
+            <p class="support">Besoin d’aide ? <a href="mailto:{{ get_setting('support_email') }}">Contacter le support</a></p>
+        @endif
+    </main>
 </body>
-
 </html>

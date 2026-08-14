@@ -35,7 +35,7 @@ const defaultContactMeta = {
   calendly_description:
     'Réservez directement un créneau dans mon agenda pour discuter de vos besoins et objectifs.',
   calendly_button: 'Réserver un appel',
-  calendly_social_proof: 'Plus de 300 accompagnements réalisés.',
+  calendly_social_proof: 'Des accompagnements centrés sur vos réalités et vos objectifs.',
   email_description: 'Réponse sous 24h ouvrées',
   phone_description: 'Lun-Ven, 9h-18h',
   address_description: 'Suisse',
@@ -72,7 +72,12 @@ const defaultContactMeta = {
 
 const ContactPage = ({ page }: any) => {
   const [settings, setSettings] = useState<any>();
+  const calendlyLink =
+    typeof settings?.calendly_link === 'string' ? settings.calendly_link.trim() : '';
   const meta = { ...defaultContactMeta, ...(page?.meta ?? {}) };
+  const calendlySocialProof = /\b300\b/.test(String(meta.calendly_social_proof ?? ''))
+    ? defaultContactMeta.calendly_social_proof
+    : meta.calendly_social_proof;
 
   const formRef = useRef<HTMLDivElement | null>(null);
   const infoRef = useRef<HTMLDivElement | null>(null);
@@ -329,7 +334,7 @@ const ContactPage = ({ page }: any) => {
                 </div>
               </div>
 
-              <motion.div
+              {calendlyLink && <motion.div
                 variants={itemVariants}
                 className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xl backdrop-blur-sm sm:p-8 dark:border-gray-700/30 dark:bg-gray-800/50"
               >
@@ -347,21 +352,21 @@ const ContactPage = ({ page }: any) => {
 
                 <p className="text-gray-600 dark:text-gray-300 mb-6">{meta.calendly_description}</p>
 
-                {meta.calendly_social_proof && (
+                {calendlySocialProof && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    {meta.calendly_social_proof}
+                    {calendlySocialProof}
                   </p>
                 )}
 
                 <a
-                  href={settings?.calendly_link}
+                  href={calendlyLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ux-btn-primary w-full"
                 >
                   {meta.calendly_button}
                 </a>
-              </motion.div>
+              </motion.div>}
             </motion.div>
 
             <motion.div

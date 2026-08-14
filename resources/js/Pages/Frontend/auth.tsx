@@ -54,6 +54,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
     <FrontLayout>
       <div className="relative flex min-h-screen flex-col justify-center overflow-hidden px-4 pb-12 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <Head title={activeTab === 'login' ? 'Connexion' : 'Inscription'}>
+          <meta name="robots" content="noindex, follow" />
           <meta
             name="description"
             content={

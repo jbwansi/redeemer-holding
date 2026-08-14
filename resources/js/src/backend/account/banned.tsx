@@ -133,7 +133,7 @@ export default function Banned({ email = 'support@example.com', contactUrl = '#'
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-2 text-muted-foreground">
                 <ShieldOff className="h-4 w-4" />
-                <span className="text-sm">Besoin d'intrainings supplémentaires ?</span>
+                <span className="text-sm">Besoin d'informations supplémentaires ?</span>
               </div>
               <p className="text-sm text-muted-foreground">
                 Notre équipe est disponible à l'adresse{' '}

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, follow">
     <title>Service indisponible</title>
 </head>
 <body style="margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#111827">

@@ -87,7 +87,7 @@ export function PostForm({ post, categories }: PostFormProps) {
           <Card>
             <CardHeader>
               <CardTitle>Intrainings principales</CardTitle>
-              <CardDescription>Les intrainings essentielles de votre article</CardDescription>
+              <CardDescription>Les informations essentielles de votre article</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

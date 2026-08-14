@@ -119,7 +119,7 @@ const CreateEvent = ({ categories }: any) => {
         <div className="absolute -top-10 -right-10 h-36 w-36 rounded-full bg-white/10 blur-2xl" />
         <h1 className="text-3xl font-bold tracking-tight">Créer un événement</h1>
         <p className="mt-2 text-white/80">
-          Remplissez les intrainings ci-dessous pour créer votre événement
+          Remplissez les informations ci-dessous pour créer votre événement
         </p>
       </div>
 

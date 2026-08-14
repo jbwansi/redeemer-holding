@@ -191,7 +191,7 @@
             </div>
 
             <div class="user-info">
-                <strong>Vos intrainings :</strong>
+                <strong>Vos informations :</strong>
                 <p>Email : {{ $user->email }}</p>
                 @if ($user->phone)
                     <p>Téléphone : {{ $user->phone }}</p>

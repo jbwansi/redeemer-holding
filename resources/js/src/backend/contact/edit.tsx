@@ -70,8 +70,8 @@ const defaultMeta: Meta = {
   calendly_subtitle: 'Consultation gratuite de 30 minutes',
   calendly_description:
     'Reservez directement un creneau dans mon agenda pour discuter de vos besoins et objectifs.',
-  calendly_button: 'Reserver un appel',
-  calendly_social_proof: 'Plus de 300 accompagnements realises.',
+  calendly_button: 'Réserver un appel',
+  calendly_social_proof: 'Des accompagnements centrés sur vos réalités et vos objectifs.',
   email_description: 'Reponse sous 24h ouvrees',
   phone_description: 'Lun-Ven, 9h-18h',
   address_description: 'Suisse',

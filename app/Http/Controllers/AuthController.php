@@ -6,6 +6,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Services\AuthenticationService;
 use App\Services\SettingsService;
+use App\Services\SeoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,10 +21,19 @@ class AuthController extends Controller
     }
 
 
-    public function show_auth()
+    public function show_auth(Request $request)
     {
+        $isRegistration = $request->routeIs('register.page');
+
         return inertia("Frontend/auth", [
             'registrationEnabled' => $this->isRegistrationEnabled(),
+            'seo' => SeoService::page(
+                $isRegistration ? 'Inscription' : 'Connexion',
+                $isRegistration
+                    ? 'Créez votre compte Redeemer Holding.'
+                    : 'Connectez-vous à votre compte Redeemer Holding.',
+                extra: ['robots' => 'noindex, follow'],
+            ),
         ]);
     }
 
@@ -31,6 +41,11 @@ class AuthController extends Controller
     {
         return inertia("Frontend/auth", [
             'registrationEnabled' => $this->isRegistrationEnabled(),
+            'seo' => SeoService::page(
+                'Réinitialisation du mot de passe',
+                'Réinitialisez l’accès à votre compte Redeemer Holding.',
+                extra: ['robots' => 'noindex, follow'],
+            ),
         ]);
     }
 

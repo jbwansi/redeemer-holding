@@ -67,7 +67,7 @@ export default function Edit({ user }: Props) {
               <div>
                 <h1 className="text-2xl font-semibold">Modifier l'utilisateur</h1>
                 <p className="text-sm text-muted-foreground">
-                  Modifier les intrainings de {user.name}
+                  Modifier les informations de {user.name}
                 </p>
               </div>
             </div>

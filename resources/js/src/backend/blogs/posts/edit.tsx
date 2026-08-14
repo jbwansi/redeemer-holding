@@ -26,7 +26,7 @@ const Edit = ({ post, categories }: EditPostProps) => {
           </Link>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight">Modifier l'article</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Mettez à jour les intrainings de publication.
+            Mettez à jour les informations de publication.
           </p>
         </div>
 

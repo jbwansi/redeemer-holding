@@ -318,6 +318,12 @@ function ServicesPage({
               const idealFor = Array.isArray(service.ideal_for)
                 ? service.ideal_for.filter(Boolean).slice(0, 3)
                 : [];
+              const primaryHref =
+                service.cta_primary_url ||
+                (service.slug ? `/services-requests/${encodeURIComponent(service.slug)}` : null);
+              const secondaryHref =
+                service.cta_secondary_url ||
+                (service.slug ? route('services.details', service.slug) : null);
               return (
                 <motion.article
                   key={service.id}
@@ -383,26 +389,21 @@ function ServicesPage({
                     )}
 
                     <div className="mt-auto flex flex-col gap-3 pt-6 sm:flex-row sm:flex-wrap">
-                      <Link
-                        href={
-                          service.cta_primary_url ||
-                          (service.slug
-                            ? `/services-requests/${encodeURIComponent(service.slug)}`
-                            : '#')
-                        }
+                      {primaryHref && <Link
+                        href={primaryHref}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#da2e29] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#c62823] sm:w-fit"
                       >
                         {service.cta_primary_label || 'Faire une demande'}
                         <Calendar className="h-4 w-4" />
-                      </Link>
+                      </Link>}
 
-                      <Link
-                        href={service.cta_secondary_url || route('services.details', service.slug)}
+                      {secondaryHref && <Link
+                        href={secondaryHref}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-[#10213c] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#162946] sm:w-fit"
                       >
                         {service.cta_secondary_label || 'En savoir plus'}
                         <ChevronRight className="h-4 w-4" />
-                      </Link>
+                      </Link>}
                     </div>
                   </div>
                 </motion.article>

@@ -35,7 +35,7 @@ const TabSystem = () => {
       <div className="px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 lg:pb-28">
         <div className="mx-auto max-w-screen-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Section intrainings personnelles */}
+            {/* Section informations personnelles */}
             <div className="border rounded-lg p-4 sm:p-6 bg-white dark:bg-gray-900 shadow-sm">
               <h2 className="text-lg sm:text-xl font-semibold">Information personnelle</h2>
 

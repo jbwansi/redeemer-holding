@@ -115,7 +115,7 @@ const Activation = () => {
         },
         {
           name: 'Profils utilisateurs',
-          description: 'Pages et intrainings de profil',
+          description: 'Pages et informations de profil',
           enabled: data.enable_user_profiles,
           key: 'enable_user_profiles',
           icon: <Users className="h-4 w-4" />,

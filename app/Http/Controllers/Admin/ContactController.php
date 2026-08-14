@@ -92,7 +92,7 @@ class ContactController extends Controller
             'calendly_subtitle' => 'Consultation gratuite de 30 minutes',
             'calendly_description' => 'Réservez directement un créneau dans mon agenda pour discuter de vos besoins et objectifs.',
             'calendly_button' => 'Réserver un appel',
-            'calendly_social_proof' => 'Plus de 300 accompagnements réalisés.',
+            'calendly_social_proof' => 'Des accompagnements centrés sur vos réalités et vos objectifs.',
             'email_description' => 'Réponse sous 24h ouvrées',
             'phone_description' => 'Lun-Ven, 9h-18h',
             'address_description' => 'Suisse',
