@@ -113,4 +113,21 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Staging mail safety
+    |--------------------------------------------------------------------------
+    |
+    | Staging never uses an SMTP transport. Messages are captured in memory
+    | and recipients are restricted to the explicitly configured test users.
+    |
+    */
+    'staging' => [
+        'mailer' => 'array',
+        'allowed_recipients' => array_values(array_filter(array_map(
+            static fn (string $email): string => strtolower(trim($email)),
+            explode(',', (string) env('TEST_ALLOWED_EMAILS', '')),
+        ))),
+    ],
+
 ];

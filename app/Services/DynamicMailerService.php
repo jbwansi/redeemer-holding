@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
 
 class DynamicMailerService
 {
@@ -16,6 +17,13 @@ class DynamicMailerService
 
     public function send($mailable, string $to): void
     {
+        if (app()->environment('staging')) {
+            $this->assertAllowedStagingRecipient($to);
+            Mail::mailer('array')->to($to)->send($mailable);
+
+            return;
+        }
+
         $settings = $this->settingsService->getAllSettings();
 
         $host = $settings['host'] ?? null;
@@ -62,6 +70,13 @@ class DynamicMailerService
 
     public function queue($mailable, string $to): void
     {
+        if (app()->environment('staging')) {
+            $this->assertAllowedStagingRecipient($to);
+            Mail::mailer('array')->to($to)->queue($mailable);
+
+            return;
+        }
+
         $settings = $this->settingsService->getAllSettings();
 
         $host = $settings['host'] ?? config('mail.mailers.smtp.host');
@@ -104,5 +119,17 @@ class DynamicMailerService
             ->queue(
                 $mailable->from($fromEmail, $fromName)
             );
+    }
+
+    private function assertAllowedStagingRecipient(string $recipient): void
+    {
+        $allowed = array_map(
+            static fn ($email): string => strtolower(trim((string) $email)),
+            config('mail.staging.allowed_recipients', []),
+        );
+
+        if (!in_array(strtolower(trim($recipient)), $allowed, true)) {
+            throw new RuntimeException('Envoi email staging bloqué : destinataire non autorisé.');
+        }
     }
 }

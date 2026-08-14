@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Foundation\Events\DiagnosingHealth;
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use App\Coach\AI\AIProviderInterface;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Coach\Services\CoachSettingsService;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,5 +43,30 @@ class AppServiceProvider extends ServiceProvider
             DB::select('select 1');
         });
         RateLimiter::for('coach-ai', fn ($request) => Limit::perMinute((int) app(CoachSettingsService::class)->all()['rate_limit_per_minute'])->by((string) $request->user()->id));
+
+        Event::listen(MessageSending::class, function (MessageSending $event): void {
+            if (!app()->environment('staging')) {
+                return;
+            }
+
+            $allowed = collect(config('mail.staging.allowed_recipients', []))
+                ->map(static fn ($email): string => strtolower(trim((string) $email)))
+                ->filter()
+                ->all();
+
+            $recipients = collect([
+                ...$event->message->getTo(),
+                ...$event->message->getCc(),
+                ...$event->message->getBcc(),
+            ])->map(static fn ($address): string => strtolower(trim($address->getAddress())))
+                ->filter()
+                ->unique();
+
+            if ($recipients->isEmpty() || $recipients->contains(
+                static fn (string $email): bool => !in_array($email, $allowed, true)
+            )) {
+                throw new RuntimeException('Envoi email staging bloqué : destinataire non autorisé.');
+            }
+        });
     }
 }

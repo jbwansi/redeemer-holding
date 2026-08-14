@@ -19,7 +19,7 @@ class ConfigServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // configure smtp setting
-        if (get_setting('host') != null) {
+        if (!app()->environment('staging') && get_setting('host') != null) {
             $config = array(
                 'status' => 1,
                 'driver' => 'smtp',
@@ -33,6 +33,10 @@ class ConfigServiceProvider extends ServiceProvider
                 'pretend' => false,
             );
             Config::set('mail', $config);
+        }
+
+        if (app()->environment('staging')) {
+            Config::set('mail.default', 'array');
         }
 
         // Configure session lifetime
