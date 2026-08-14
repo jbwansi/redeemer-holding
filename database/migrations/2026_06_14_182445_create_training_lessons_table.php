@@ -18,9 +18,9 @@ return new class extends Migration
         ->constrained()
         ->cascadeOnDelete();
 
-    $table->foreignId('training_section_id')
-        ->constrained()
-        ->cascadeOnDelete();
+    // training_sections is created by the later 191631 migration. Keep the
+    // column and its index here, then add the FK once its parent table exists.
+    $table->foreignId('training_section_id')->index();
 
     $table->string('title');
     $table->string('slug')->unique();

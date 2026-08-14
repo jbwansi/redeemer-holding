@@ -89,6 +89,25 @@ Interrompre immediatement le deploiement en cas d'ambiguite. Apres `migrate --fo
 executer un nouveau `migrate:status`, un nouveau `deployment:preflight`, puis les smoke
 tests. Ne jamais utiliser `migrate:fresh` en staging ou en production.
 
+#### Reprise apres l'echec MySQL 1824 de v1.0.0-rc.1
+
+L'echec sur `2026_06_14_182445_create_training_lessons_table` est provoque par une
+contrainte vers `training_sections` avant la creation de cette table. MySQL annule le
+`CREATE TABLE` fautif et Laravel n'enregistre pas cette migration. Avant reprise:
+
+1. faire et verifier un backup complet;
+2. confirmer avec `php artisan migrate:status` que la migration `182445` est `Pending`;
+3. confirmer que `training_lessons` et `training_sections` sont absentes; si l'une des
+   deux existe, interrompre la reprise et analyser explicitement le schema et les donnees;
+4. deployer le correctif, puis executer `php artisan deployment:preflight` et
+   `php artisan migrate --force`;
+5. verifier que la migration corrective `191632` est executee et que la FK
+   `training_lessons_training_section_id_foreign` reference `training_sections(id)` avec
+   `ON DELETE CASCADE`.
+
+Ne jamais inserer manuellement la migration `182445` dans la table `migrations`, ni
+supprimer une table LMS existante pour forcer la reprise.
+
 ### 3.3 Commandes de deploiement
 
 ```bash
