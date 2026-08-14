@@ -30,6 +30,13 @@ interface Service {
   updated_at: string | null;
   hero_image?: string | null;
   image?: string | null;
+  tagline?: string | null;
+  featured_note?: string | null;
+  ideal_for?: string[] | null;
+  cta_primary_label?: string | null;
+  cta_primary_url?: string | null;
+  cta_secondary_label?: string | null;
+  cta_secondary_url?: string | null;
 }
 
 // Interface pour les props de la page
@@ -86,6 +93,13 @@ const ServiceDetail = ({
 
   const iconName = normalizeServiceIconName(service.icon);
   const requestUrl = service?.slug ? `/services-requests/${encodeURIComponent(service.slug)}` : '#';
+  const primaryCtaUrl = service.cta_primary_url || requestUrl;
+  const primaryCtaLabel = service.cta_primary_label || 'Faire une demande';
+  const secondaryCtaUrl = service.cta_secondary_url || route('contact');
+  const secondaryCtaLabel = service.cta_secondary_label || 'Poser une question';
+  const fallbackContent = service.excerpt?.trim()
+    ? service.excerpt
+    : `Redeemer Holding vous accompagne dans le domaine « ${service.name} » avec une approche humaine, structurée et adaptée à votre contexte.`;
 
   return (
     <FrontLayout>
@@ -147,14 +161,14 @@ const ServiceDetail = ({
                   {service.name}
                 </motion.h1>
 
-                {service.excerpt && (
+                {(service.tagline || service.excerpt) && (
                   <motion.p
                     className="text-xl text-gray-200 mb-8 max-w-2xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                     transition={{ duration: 0.6, delay: 0.3 }}
                   >
-                    {service.excerpt}
+                    {service.tagline || service.excerpt}
                   </motion.p>
                 )}
 
@@ -165,11 +179,11 @@ const ServiceDetail = ({
                   transition={{ duration: 0.6, delay: 0.4 }}
                 >
                   <Link
-                    href={requestUrl}
+                    href={primaryCtaUrl}
                     className="inline-flex min-h-12 items-center justify-center rounded-lg border border-[#DA2E29] bg-[#DA2E29] px-6 py-3 font-semibold text-white shadow-lg shadow-[#DA2E29]/30 transition-colors duration-300 hover:bg-[#c02824]"
                   >
                     <Calendar className="mr-2 w-5 h-5" />
-                    <span>Réserver maintenant</span>
+                    <span>{primaryCtaLabel}</span>
                   </Link>
 
                   <a
@@ -202,11 +216,31 @@ const ServiceDetail = ({
                       {parse(service.content)}
                     </div>
                   ) : (
-                    <div className="text-center p-8">
-                      <p className="text-gray-500 dark:text-gray-400 italic">
-                        Description détaillée à venir prochainement...
-                      </p>
+                    <div className="prose prose-lg max-w-none text-gray-700 dark:text-gray-300">
+                      <p>{fallbackContent}</p>
                     </div>
+                  )}
+
+                  {Array.isArray(service.ideal_for) && service.ideal_for.length > 0 && (
+                    <div className="mt-8 rounded-2xl bg-gray-50 p-6 dark:bg-gray-900/50">
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        Cet accompagnement est adapté si vous souhaitez
+                      </h2>
+                      <ul className="mt-4 space-y-2 text-gray-700 dark:text-gray-300">
+                        {service.ideal_for.map((item) => (
+                          <li key={item} className="flex items-start gap-2">
+                            <CheckCircle className="mt-1 h-4 w-4 shrink-0 text-[#DA2E29]" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {service.featured_note && (
+                    <p className="mt-6 rounded-xl border border-[#DA2E29]/20 bg-[#DA2E29]/5 p-4 font-medium text-gray-700 dark:text-gray-200">
+                      {service.featured_note}
+                    </p>
                   )}
 
                   {formattedDate && (
@@ -231,7 +265,7 @@ const ServiceDetail = ({
                       Commencer maintenant
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
-                      Réservez un premier échange de 20 min pour clarifier vos objectifs.
+                      Après votre demande, nous organisons un premier échange de 30 minutes pour clarifier vos objectifs.
                     </p>
 
                     <ul className="mb-6 space-y-2">
@@ -251,19 +285,19 @@ const ServiceDetail = ({
                     </ul>
 
                     <Link
-                      href={requestUrl}
+                      href={primaryCtaUrl}
                       className="w-full flex justify-center items-center py-3 px-4 bg-[#DA2E29] hover:bg-[#c02824] text-white rounded-lg font-medium transition-colors duration-300"
                     >
-                      Réserver dès maintenant
+                      {primaryCtaLabel}
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
 
                     <div className="mt-4 text-center">
                       <Link
-                        href={route('contact')}
+                        href={secondaryCtaUrl}
                         className="text-sm text-gray-500 hover:text-[#DA2E29] dark:text-gray-400 dark:hover:text-[#DA2E29] transition-colors"
                       >
-                        Poser une question d'abord →
+                        {secondaryCtaLabel} →
                       </Link>
                     </div>
                   </motion.div>
@@ -390,11 +424,11 @@ const ServiceDetail = ({
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
-                    href={route('contact')}
+                    href={primaryCtaUrl}
                     className="px-8 py-4 bg-white text-[#DA2E29] rounded-lg font-medium text-lg hover:bg-gray-100 transition-colors duration-300 inline-flex items-center justify-center shadow-xl shadow-rose-600/20"
                   >
                     <Calendar className="mr-2 w-5 h-5" />
-                    <span>Prendre rendez-vous</span>
+                    <span>{primaryCtaLabel}</span>
                   </Link>
                 </div>
               </div>

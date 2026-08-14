@@ -529,7 +529,7 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                     <div>
                       <h4 className="font-medium text-gray-900 dark:text-white">Consultation</h4>
                       <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                        Nous planifierons un appel pour discuter de vos besoins
+                        Nous conviendrons avec vous d'un échange de 30 minutes pour discuter de vos besoins
                       </p>
                     </div>
                   </div>

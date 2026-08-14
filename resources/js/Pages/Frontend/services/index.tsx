@@ -16,6 +16,7 @@ import {
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import IconComponent from '@/components/ui/icon';
 import { normalizeServiceIconName } from '@/lib/service-icon';
+import { serviceMatchesFocus, type ServiceFocus } from '@/lib/service-focus';
 import FaqAccordion from '@/components/frontend/faq/faq-accordion';
 
 type Service = {
@@ -43,24 +44,6 @@ type FaqItem = {
 };
 
 type PageContent = Record<string, string>;
-
-type ServiceFocus =
-  | 'all'
-  | 'coaching'
-  | 'consultation'
-  | 'formation'
-  | 'team_building'
-  | 'webinaire'
-  | 'ressources';
-
-const focusKeywords: Record<Exclude<ServiceFocus, 'all'>, string[]> = {
-  coaching: ['coaching', 'coach'],
-  consultation: ['consultation', 'conseil', 'advisory'],
-  formation: ['formation', 'training', 'atelier'],
-  team_building: ['team building', 'teambuilding', 'lego serious play', 'lsp', 'cohesion'],
-  webinaire: ['webinaire', 'webinar', 'masterclass'],
-  ressources: ['ressource', 'guide', 'template', 'ebook', 'outil'],
-};
 
 const processSteps = [
   {
@@ -140,13 +123,7 @@ function ServicesPage({
   const filteredServices = useMemo(() => {
     if (focus === 'all') return services;
 
-    const keywords = focusKeywords[focus];
-
-    return services.filter((service) => {
-      const haystack =
-        `${service.name || ''} ${service.excerpt || ''} ${service.slug || ''}`.toLowerCase();
-      return keywords.some((keyword) => haystack.includes(keyword));
-    });
+    return services.filter((service) => serviceMatchesFocus(service, focus));
   }, [focus, services]);
 
   const resolvedHeroImage = useMemo(() => {
@@ -252,7 +229,7 @@ function ServicesPage({
                     className="ux-btn-primary"
                   >
                     <Calendar className="h-5 w-5" />
-                    {pageContent.hero_primary_cta_label || 'Réserver un appel'}
+                    {pageContent.hero_primary_cta_label || 'Nous contacter'}
                   </Link>
 
                   <a
@@ -353,7 +330,7 @@ function ServicesPage({
                   <div className="relative overflow-visible">
                     <div className="overflow-hidden rounded-[1.25rem]">
                       <img
-                        src={service.image || '/assets/images/coaching-session.jpg'}
+                        src={service.image || '/assets/images/services-bg.jpg'}
                         alt={service.name}
                         loading="lazy"
                         decoding="async"
@@ -435,7 +412,7 @@ function ServicesPage({
                         }
                         className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#da2e29] px-4 py-2.5 text-sm font-black text-white transition hover:bg-[#c62823] sm:w-fit"
                       >
-                        {service.cta_primary_label || ' Réserver une seance decouverte'}
+                        {service.cta_primary_label || 'Faire une demande'}
                         <Calendar className="h-4 w-4" />
                       </Link>
 
@@ -593,7 +570,7 @@ function ServicesPage({
 
                 <p className="mt-4 text-base leading-8 text-white/90 md:text-lg">
                   {pageContent.final_cta_text ||
-                    "Réservez un premier échange pour clarifier vos besoins et choisir le meilleur format d'accompagnement."}
+                    "Contactez-nous pour clarifier vos besoins et choisir le format d'accompagnement le plus adapté."}
                 </p>
               </div>
 
