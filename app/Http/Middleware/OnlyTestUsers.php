@@ -19,9 +19,11 @@ class OnlyTestUsers
 
         $allowedRouteNames = [
             'login',
+            'login.submit',
             'register.page',
             'password.request',
             'register',
+            'payments.webhook',
         ];
 
         if ($request->route() && in_array($request->route()->getName(), $allowedRouteNames, true)) {
