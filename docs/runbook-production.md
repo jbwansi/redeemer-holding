@@ -51,11 +51,25 @@ le mot de passe administrateur dans `.env`, un script de deploiement ou l'histor
 
 ### 3.1 Avant de deployer
 
-- Faire un backup DB.
-- Verifier que cette sauvegarde est lisible et restaurable avant toute migration.
+- Faire un backup MySQL complet avant toute migration.
+- Verifier que le fichier de sauvegarde existe, n'est pas vide et peut etre lu.
+- Restaurer idealement cette sauvegarde dans une base isolee et verifier les volumes
+  de donnees avant de poursuivre.
 - Valider la branche a deployer et le changelog.
 - Verifier l'etat des migrations a venir.
 - Conserver la version ou le commit actuellement deploye pour permettre un retour rapide.
+
+Executer ensuite, dans cet ordre:
+
+```bash
+php artisan migrate:status
+php artisan deployment:preflight
+```
+
+Le preflight doit reussir avant `migrate --force`. Il refuse notamment la coexistence
+de `formations` avec `trainings`, ou de `formation_participants` avec
+`training_participants`. Ne supprimer, fusionner ou renommer manuellement aucune de ces
+tables sans sauvegarde valide et analyse explicite de leurs donnees et cles etrangeres.
 
 ### 3.2 Commandes de deploiement
 
@@ -63,6 +77,8 @@ le mot de passe administrateur dans `.env`, un script de deploiement ou l'histor
 composer install --no-dev --optimize-autoloader
 npm ci
 npm run build
+php artisan migrate:status
+php artisan deployment:preflight
 php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
@@ -78,6 +94,19 @@ Verifier ensuite les permissions d'ecriture du compte PHP sur:
 storage
 bootstrap/cache
 ```
+
+Apres migration, verifier au minimum:
+
+```bash
+php artisan migrate:status
+php artisan deployment:preflight
+```
+
+Controler aussi les volumes de `trainings` et `training_participants`, plusieurs
+inscriptions sentinelles, leurs references de paiement, puis les acces LMS. En cas
+d'anomalie, suspendre les ecritures, conserver les logs et revenir au code precedent.
+Ne restaurer la sauvegarde que dans le cadre de la procedure d'incident validee ; ne
+pas lancer automatiquement `migrate:rollback` sur ces renommages historiques.
 
 ### 3.3 Queue worker
 

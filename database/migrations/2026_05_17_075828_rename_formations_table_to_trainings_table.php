@@ -11,8 +11,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-          Schema::dropIfExists('trainings');
-         Schema::rename('formations', 'trainings');
+        $legacyExists = Schema::hasTable('formations');
+        $currentExists = Schema::hasTable('trainings');
+
+        if ($legacyExists && $currentExists) {
+            throw new RuntimeException(
+                'Migration interrompue : les tables formations et trainings coexistent. '
+                . 'Aucune table ne sera supprimée automatiquement.'
+            );
+        }
+
+        if ($legacyExists) {
+            Schema::rename('formations', 'trainings');
+
+            return;
+        }
+
+        if (!$currentExists) {
+            throw new RuntimeException(
+                'Migration interrompue : ni formations ni trainings n’existe.'
+            );
+        }
     }
 
     /**
@@ -20,6 +39,25 @@ return new class extends Migration
      */
     public function down(): void
     {
-       Schema::rename('trainings', 'formations');
+        $legacyExists = Schema::hasTable('formations');
+        $currentExists = Schema::hasTable('trainings');
+
+        if ($legacyExists && $currentExists) {
+            throw new RuntimeException(
+                'Rollback interrompu : les tables formations et trainings coexistent.'
+            );
+        }
+
+        if ($currentExists) {
+            Schema::rename('trainings', 'formations');
+
+            return;
+        }
+
+        if (!$legacyExists) {
+            throw new RuntimeException(
+                'Rollback interrompu : ni formations ni trainings n’existe.'
+            );
+        }
     }
 };

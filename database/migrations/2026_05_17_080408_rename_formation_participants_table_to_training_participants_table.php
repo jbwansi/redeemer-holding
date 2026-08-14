@@ -7,33 +7,53 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
+        $legacyExists = Schema::hasTable('formation_participants');
+        $currentExists = Schema::hasTable('training_participants');
 
-        if (Schema::hasTable('training_participants')) {
-            Schema::drop('training_participants');
-        }
-
-        if (Schema::hasTable('formation_participants')) {
-            Schema::rename(
-                'formation_participants',
-                'training_participants'
+        if ($legacyExists && $currentExists) {
+            throw new RuntimeException(
+                'Migration interrompue : les tables formation_participants et '
+                . 'training_participants coexistent. Aucune table ne sera supprimée automatiquement.'
             );
         }
 
-        Schema::enableForeignKeyConstraints();
+        if ($legacyExists) {
+            Schema::rename('formation_participants', 'training_participants');
+
+            return;
+        }
+
+        if (!$currentExists) {
+            throw new RuntimeException(
+                'Migration interrompue : ni formation_participants ni '
+                . 'training_participants n’existe.'
+            );
+        }
     }
 
     public function down(): void
     {
-        Schema::disableForeignKeyConstraints();
+        $legacyExists = Schema::hasTable('formation_participants');
+        $currentExists = Schema::hasTable('training_participants');
 
-        if (Schema::hasTable('training_participants')) {
-            Schema::rename(
-                'training_participants',
-                'formation_participants'
+        if ($legacyExists && $currentExists) {
+            throw new RuntimeException(
+                'Rollback interrompu : les tables formation_participants et '
+                . 'training_participants coexistent.'
             );
         }
 
-        Schema::enableForeignKeyConstraints();
+        if ($currentExists) {
+            Schema::rename('training_participants', 'formation_participants');
+
+            return;
+        }
+
+        if (!$legacyExists) {
+            throw new RuntimeException(
+                'Rollback interrompu : ni formation_participants ni '
+                . 'training_participants n’existe.'
+            );
+        }
     }
 };
