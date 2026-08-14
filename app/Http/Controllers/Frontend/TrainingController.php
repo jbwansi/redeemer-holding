@@ -260,6 +260,12 @@ class TrainingController extends Controller
 
         app(OwnedResourceAccessService::class)->authorize($participant, 'update');
 
+        if ($participant->hasConfirmedPayment()) {
+            return back()->withErrors([
+                'general' => 'Cette inscription a déjà été payée. Pour toute demande d’annulation ou de remboursement, veuillez contacter Redeemer Holding.'
+            ]);
+        }
+
         $cancellationDeadline = (new \DateTime($training->start_date))->modify('-24 hours');
         if (now() > $cancellationDeadline && !auth()->user()?->can('administer')) {
             return back()->withErrors([
@@ -270,15 +276,10 @@ class TrainingController extends Controller
         try {
             DB::beginTransaction();
 
-            $previousStatus = $participant->status;
             $participant->update([
                 'status' => TrainingParticipant::STATUS_CANCELLED,
                 'cancelled_at' => now()
             ]);
-
-            if ($previousStatus === TrainingParticipant::STATUS_COMPLETED && $training->price > 0 && $participant->payment_id) {
-                // Logique de remboursement via Stripe à implémenter
-            }
 
             DB::commit();
 

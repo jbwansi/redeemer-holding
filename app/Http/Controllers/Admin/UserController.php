@@ -332,6 +332,13 @@ class UserController extends Controller
             return back()->with('error', 'Cette formation est déjà révoquée pour cet utilisateur.');
         }
 
+        if ($participant->hasConfirmedPayment()) {
+            return back()->with(
+                'error',
+                'Cette inscription a déjà été payée. Son annulation ou son remboursement nécessite un traitement administratif dédié.'
+            );
+        }
+
         $participant->update([
             'status' => TrainingParticipant::STATUS_CANCELLED,
             'cancelled_at' => now(),

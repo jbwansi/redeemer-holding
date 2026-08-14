@@ -165,7 +165,20 @@ class TrainingParticipant extends Model
      */
     public function getIsPaidAttribute(): bool
     {
-        return $this->status === self::STATUS_COMPLETED && $this->payment_id && $this->payment_confirmed;
+        return $this->hasConfirmedPayment();
+    }
+
+    /**
+     * Indique qu'un paiement financier a bien été confirmé.
+     *
+     * Les attributions administratives gratuites ont un identifiant interne et
+     * un montant nul : elles ne doivent pas être assimilées à un paiement Stripe.
+     */
+    public function hasConfirmedPayment(): bool
+    {
+        return $this->payment_confirmed === true
+            && filled($this->payment_id)
+            && (float) $this->payment_amount > 0;
     }
 
     /**
@@ -188,7 +201,7 @@ class TrainingParticipant extends Model
      */
     public function cancel(): bool
     {
-        if (!$this->can_be_cancelled) {
+        if (!$this->can_be_cancelled || $this->hasConfirmedPayment()) {
             return false;
         }
 
