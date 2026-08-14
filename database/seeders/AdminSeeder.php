@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
@@ -13,13 +11,7 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'admin@admin.com'],
-            [
-                'name'     => 'Admin',
-                'role'     => 'admin',
-                'password' => bcrypt('password'),
-            ]
-        );
+        // Administrators must be created explicitly with `php artisan admin:create`.
+        // Keeping this seeder inert makes `db:seed` safe in every environment.
     }
 }

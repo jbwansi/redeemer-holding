@@ -34,6 +34,21 @@ Verifier au minimum dans `.env` de production:
 
 ## 3. Procedure de deploiement
 
+### 3.0 Creation du premier administrateur
+
+Les seeders ne creent aucun administrateur et ne contiennent aucun identifiant par defaut.
+Apres avoir configure l'environnement et applique les migrations, creer le premier compte
+depuis un terminal securise sur le serveur:
+
+```bash
+php artisan admin:create
+```
+
+La commande demande le nom, l'adresse email, le mot de passe masque et sa confirmation,
+puis exige une confirmation explicite avant la creation. Elle refuse une adresse deja
+utilisee et applique les memes regles de mot de passe que l'application. Ne jamais placer
+le mot de passe administrateur dans `.env`, un script de deploiement ou l'historique du shell.
+
 ### 3.1 Avant de deployer
 
 - Faire un backup DB.
