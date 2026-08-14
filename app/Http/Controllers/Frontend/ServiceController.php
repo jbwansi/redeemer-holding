@@ -68,6 +68,16 @@ class ServiceController extends Controller
     public function service_detail($slug)
     {
         $service = Service::where('status', 1)->where('slug', $slug)->firstOrFail();
+        $seoDescription = trim((string) $service->excerpt);
+
+        if ($seoDescription === '') {
+            $seoDescription = SeoService::excerpt((string) $service->content, 155);
+        }
+
+        if ($seoDescription === '') {
+            $seoDescription = 'Découvrez ce service Redeemer Holding et avancez avec un accompagnement humain, structuré et orienté résultats.';
+        }
+
         $testimonials = Testimonial::where('is_active', true)
             ->where('service_id', $service->id)
             ->latest()
@@ -78,7 +88,7 @@ class ServiceController extends Controller
             'testimonials' => $testimonials,
             'seo' => SeoService::page(
                 $service->name,
-                $service->description ?? $service->short_description ?? '',
+                $seoDescription,
             ),
         ]);
     }

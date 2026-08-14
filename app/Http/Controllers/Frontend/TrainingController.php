@@ -53,8 +53,8 @@ class TrainingController extends Controller
             'featuredTraining' => $featuredTraining,
             'pageContent' => $pageContent,
             'seo' => SeoService::page(
-                'Trainings',
-                'Découvrez nos trainings en développement personnel et transformation par les valeurs.'
+                'Formations',
+                'Découvrez nos formations en développement personnel et transformation par les valeurs.'
             ),
         ]);
     }

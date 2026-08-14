@@ -1,10 +1,17 @@
 import React from 'react';
+import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 
 const PrivacyPolicy = () => {
   return (
     <FrontLayout>
+      <Head title="Politique de confidentialité">
+        <meta
+          name="description"
+          content="Découvrez comment Redeemer Holding collecte, utilise et protège vos données personnelles."
+        />
+      </Head>
       <div className="container mx-auto px-4 py-12 pt-32">
         <Card className="max-w-4xl mx-auto p-8">
           <h1 className="text-3xl font-bold mb-8">Politique de confidentialité</h1>
@@ -24,7 +31,7 @@ const PrivacyPolicy = () => {
                 <li>Coordonnées de contact (adresse email, numéro de téléphone)</li>
                 <li>Intrainings de paiement (traitées de manière sécurisée par Stripe)</li>
                 <li>Données de participation aux événements</li>
-                <li>Intrainings techniques (adresse IP, données de navigation)</li>
+                <li>Informations techniques (adresse IP, données de navigation)</li>
               </ul>
             </section>
 

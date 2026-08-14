@@ -21,22 +21,22 @@ const defaultContactMeta = {
   hero_title: 'Discutons de votre transformation',
   hero_highlight: 'transformation',
   hero_subtitle:
-    'Je suis la pour repondre a vos questions et vous accompagner dans votre parcours de developpement personnel et professionnel.',
+    'Je suis là pour répondre à vos questions et vous accompagner dans votre parcours de développement personnel et professionnel.',
   form_title: 'Envoyez-moi un message',
   form_subtitle:
-    'Completez le formulaire ci-dessous et je vous repondrai dans les plus brefs delais.',
-  form_sla_title: 'Reponse garantie',
-  form_sla_text: 'Je reponds a chaque demande qualifiee sous 24h ouvrees.',
+    'Complétez le formulaire ci-dessous et je vous répondrai dans les plus brefs délais.',
+  form_sla_title: 'Réponse garantie',
+  form_sla_text: 'Je réponds à chaque demande qualifiée sous 24h ouvrées.',
   honeypot_enabled: true,
-  privacy_text: 'En soumettant ce formulaire, vous acceptez notre politique de confidentialite.',
+  privacy_text: 'En soumettant ce formulaire, vous acceptez notre politique de confidentialité.',
   privacy_url: '/politique-de-confidentialite',
   calendly_title: 'Prendre rendez-vous',
   calendly_subtitle: 'Consultation gratuite de 30 minutes',
   calendly_description:
-    'Reservez directement un creneau dans mon agenda pour discuter de vos besoins et objectifs.',
-  calendly_button: 'Reserver un appel',
-  calendly_social_proof: 'Plus de 300 accompagnements realises.',
-  email_description: 'Reponse sous 24h ouvrees',
+    'Réservez directement un créneau dans mon agenda pour discuter de vos besoins et objectifs.',
+  calendly_button: 'Réserver un appel',
+  calendly_social_proof: 'Plus de 300 accompagnements réalisés.',
+  email_description: 'Réponse sous 24h ouvrées',
   phone_description: 'Lun-Ven, 9h-18h',
   address_description: 'Suisse',
   map_embed_url:
@@ -50,22 +50,22 @@ const defaultContactMeta = {
   ],
   faqs: [
     {
-      question: 'Comment se deroule une seance de coaching?',
+      question: 'Comment se déroule une séance de coaching ?',
       answer:
-        "Les seances se deroulent en visioconference ou en presentiel selon votre preference. Nous commencons par definir vos objectifs, puis elaborons un plan d'action personnalise.",
+        "Les séances se déroulent en visioconférence ou en présentiel selon votre préférence. Nous commençons par définir vos objectifs, puis élaborons un plan d'action personnalisé.",
     },
     {
-      question: 'Combien de seances sont necessaires?',
+      question: 'Combien de séances sont nécessaires ?',
       answer:
-        'Le nombre de seances varie selon vos objectifs. Generalement, un programme complet comprend 8 a 12 seances, mais nous adaptons toujours a vos besoins specifiques.',
+        'Le nombre de séances varie selon vos objectifs. Généralement, un programme complet comprend 8 à 12 séances, mais nous adaptons toujours à vos besoins spécifiques.',
     },
     {
-      question: 'Proposez-vous des tarifs degressifs?',
+      question: 'Proposez-vous des tarifs dégressifs ?',
       answer:
-        "Oui, des forfaits degressifs sont disponibles pour les engagements sur plusieurs seances. N'hesitez pas a me contacter pour obtenir un devis personnalise.",
+        "Oui, des forfaits dégressifs sont disponibles pour les engagements sur plusieurs séances. N'hésitez pas à me contacter pour obtenir un devis personnalisé.",
     },
   ],
-  faq_title: 'Questions frequentes',
+  faq_title: 'Questions fréquentes',
   faq_link_label: 'Voir toutes les questions fréquentes',
   faq_link_url: '/faq',
 };
@@ -546,7 +546,7 @@ const ContactPage = ({ page }: any) => {
                         required
                         rows={6}
                         className={`w-full px-4 py-3 bg-gray-50 dark:bg-gray-800/60 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-gray-200 ${formErrors.message ? 'border-red-300 focus:ring-red-500/40' : 'border-gray-200 dark:border-gray-700 focus:ring-[#DA2E29]/50'}`}
-                        placeholder="Detaillez votre demande ici..."
+                        placeholder="Détaillez votre demande ici…"
                       />
                       {formErrors.message ? (
                         <p className="ux-field-error">{formErrors.message}</p>

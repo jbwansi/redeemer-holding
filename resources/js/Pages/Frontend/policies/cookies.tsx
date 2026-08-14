@@ -1,10 +1,17 @@
 import React from 'react';
+import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 
 const CookiesPage = () => {
   return (
     <FrontLayout>
+      <Head title="Politique des cookies">
+        <meta
+          name="description"
+          content="Consultez la politique de Redeemer Holding concernant l'utilisation des cookies sur le site."
+        />
+      </Head>
       <div className="container mx-auto px-4 py-12 pt-32">
         <Card className="max-w-4xl mx-auto p-8">
           <h1 className="text-3xl font-bold mb-8">Politique des cookies</h1>

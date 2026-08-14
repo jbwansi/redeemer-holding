@@ -84,7 +84,7 @@ class AppController extends Controller
             'page' => $page,
             'seo' => SeoService::page(
                 'FAQ',
-                data_get($page, 'meta.meta_description') ?: 'Retrouvez les reponses aux questions frequentes sur nos services, trainings et evenements.',
+                data_get($page, 'meta.meta_description') ?: 'Retrouvez les réponses aux questions fréquentes sur nos services, formations et événements.',
             ),
         ]);
     }
@@ -193,4 +193,3 @@ class AppController extends Controller
         return inertia("Frontend/policies/cookies");
     }
 }
-

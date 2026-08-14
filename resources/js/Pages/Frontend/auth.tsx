@@ -53,7 +53,16 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
   return (
     <FrontLayout>
       <div className="min-h-screen flex flex-col justify-center pb-12 pt-32 sm:px-6 lg:px-8 relative overflow-hidden">
-        <Head title={activeTab === 'login' ? 'Connexion' : 'Inscription'} />
+        <Head title={activeTab === 'login' ? 'Connexion' : 'Inscription'}>
+          <meta
+            name="description"
+            content={
+              activeTab === 'login'
+                ? 'Connectez-vous à votre compte Redeemer Holding pour accéder à votre espace personnel.'
+                : 'Créez votre compte Redeemer Holding et accédez à vos formations, événements et services.'
+            }
+          />
+        </Head>
 
         {/* Animated background gradient */}
         <motion.div
@@ -80,6 +89,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
             {/* Tabs navigation */}
             <div className="flex rounded-lg p-1 bg-gray-100 dark:bg-gray-700/50 mb-6 relative z-10">
               <button
+                type="button"
                 onClick={() => setActiveTab('login')}
                 className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                   activeTab === 'login'
@@ -91,6 +101,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
               </button>
               {registrationEnabled && (
                 <button
+                  type="button"
                   onClick={() => setActiveTab('register')}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     activeTab === 'register'
@@ -179,7 +190,7 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="ux-section-title !text-2xl">Bienvenue</h2>
+        <h1 className="ux-section-title !text-2xl">Bienvenue</h1>
         <p className="ux-section-subtitle mt-1 !text-sm">
           Connectez-vous pour accéder à votre compte
         </p>
@@ -334,7 +345,7 @@ const RegisterForm = ({ setActiveTab }: any) => {
   return (
     <div>
       <div className="text-center mb-6">
-        <h2 className="ux-section-title !text-2xl">Créer un compte</h2>
+        <h1 className="ux-section-title !text-2xl">Créer un compte</h1>
         <p className="ux-section-subtitle mt-1 !text-sm">
           Rejoignez-nous pour commencer votre transformation
         </p>

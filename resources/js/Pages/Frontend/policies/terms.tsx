@@ -1,10 +1,17 @@
 import React from 'react';
+import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 
 const TermsAndConditions = () => {
   return (
     <FrontLayout>
+      <Head title="Conditions générales">
+        <meta
+          name="description"
+          content="Consultez les conditions générales applicables aux services, événements et paiements proposés par Redeemer Holding."
+        />
+      </Head>
       <div className="container mx-auto px-4 py-12 pt-32">
         <Card className="max-w-4xl mx-auto p-8">
           <h1 className="text-3xl font-bold mb-8">Conditions Générales</h1>
