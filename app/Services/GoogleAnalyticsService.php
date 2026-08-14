@@ -9,6 +9,7 @@ use Google\Analytics\Data\V1beta\Metric;
 use Google\Analytics\Data\V1beta\RunReportRequest;
 use Illuminate\Support\Facades\Cache;
 use RuntimeException;
+use Throwable;
 
 class GoogleAnalyticsService
 {
@@ -17,8 +18,10 @@ class GoogleAnalyticsService
 
     public function __construct()
     {
-        $this->propertyId = (string) env('GA_PROPERTY_ID');
-        $this->credentialsPath = base_path((string) env('GA_CREDENTIALS_PATH'));
+        $this->propertyId = (string) config('services.google_analytics.property_id', '');
+
+        $credentialsPath = (string) config('services.google_analytics.credentials_path', '');
+        $this->credentialsPath = $credentialsPath === '' ? '' : base_path($credentialsPath);
     }
 
     public function getVisitorsByCountry(): array
@@ -51,36 +54,48 @@ class GoogleAnalyticsService
 
     private function runReport(string $dimension, string $metric): array
     {
-        if (! file_exists($this->credentialsPath)) {
-            throw new RuntimeException('Credentials file not found: ' . $this->credentialsPath);
-        }
-
         if (empty($this->propertyId)) {
             throw new RuntimeException('GA_PROPERTY_ID is missing.');
         }
 
-        $client = new BetaAnalyticsDataClient([
-            'credentials' => $this->credentialsPath,
-        ]);
+        if ($this->credentialsPath === '') {
+            throw new RuntimeException('GA_CREDENTIALS_PATH is missing.');
+        }
 
-        $request = new RunReportRequest([
-            'property' => 'properties/' . $this->propertyId,
-            'date_ranges' => [
-                new DateRange([
-                    'start_date' => '30daysAgo',
-                    'end_date' => 'today',
-                ]),
-            ],
-            'dimensions' => [
-                new Dimension(['name' => $dimension]),
-            ],
-            'metrics' => [
-                new Metric(['name' => $metric]),
-            ],
-            'limit' => 10,
-        ]);
+        if (! is_file($this->credentialsPath)) {
+            throw new RuntimeException('Google Analytics credentials file was not found.');
+        }
 
-        $response = $client->runReport($request);
+        if (! is_readable($this->credentialsPath)) {
+            throw new RuntimeException('Google Analytics credentials file is not readable.');
+        }
+
+        try {
+            $client = new BetaAnalyticsDataClient([
+                'credentials' => $this->credentialsPath,
+            ]);
+
+            $request = new RunReportRequest([
+                'property' => 'properties/' . $this->propertyId,
+                'date_ranges' => [
+                    new DateRange([
+                        'start_date' => '30daysAgo',
+                        'end_date' => 'today',
+                    ]),
+                ],
+                'dimensions' => [
+                    new Dimension(['name' => $dimension]),
+                ],
+                'metrics' => [
+                    new Metric(['name' => $metric]),
+                ],
+                'limit' => 10,
+            ]);
+
+            $response = $client->runReport($request);
+        } catch (Throwable $e) {
+            throw new RuntimeException('Google Analytics request failed.', previous: $e);
+        }
 
         $data = [];
 

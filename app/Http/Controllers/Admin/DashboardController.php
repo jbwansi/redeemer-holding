@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Services\GoogleAnalyticsService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -70,20 +71,35 @@ class DashboardController extends Controller
         $stats['queue_health'] = $this->getQueueHealth();
 
         // 🔥 Google Analytics
+        $visitorsByCountry = [];
+        $visitorsByDay = [];
+        $topPages = [];
+        $trafficSources = [];
+        $gaError = null;
+
         try {
             $visitorsByCountry = $ga->getVisitorsByCountry();
-            $gaError = null;
+            $visitorsByDay = $ga->getVisitorsByDay();
+            $topPages = $ga->getTopPages();
+            $trafficSources = $ga->getTrafficSources();
         } catch (\Throwable $e) {
             $visitorsByCountry = [];
-            $gaError = $e->getMessage();
+            $visitorsByDay = [];
+            $topPages = [];
+            $trafficSources = [];
+            $gaError = 'Google Analytics est temporairement indisponible.';
+
+            Log::warning('Google Analytics is unavailable on the admin dashboard.', [
+                'exception' => $e::class,
+            ]);
         }
 
         return inertia("backend/index", [
             'stats' => $stats,
             'visitorsByCountry' => $visitorsByCountry,
-            'visitorsByDay' => $ga->getVisitorsByDay(),
-            'topPages' => $ga->getTopPages(),
-            'trafficSources' => $ga->getTrafficSources(),
+            'visitorsByDay' => $visitorsByDay,
+            'topPages' => $topPages,
+            'trafficSources' => $trafficSources,
             'gaError' => $gaError,
         ]);
     }
@@ -687,5 +703,3 @@ class DashboardController extends Controller
         return $insights;
     }
 }
-
-
