@@ -21,14 +21,14 @@ import DOMPurify from 'dompurify';
 // };
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/coaching-session.jpg';
+  if (!image) return '/assets/images/services-bg.jpg';
   if (typeof image === 'string') return image;
   return (
     image?.original ||
     image?.large ||
     image?.medium ||
     image?.thumbnail ||
-    '/assets/images/coaching-session.jpg'
+    '/assets/images/services-bg.jpg'
   );
 };
 
@@ -157,7 +157,7 @@ const EventDetailPage = ({ event }: any) => {
         </section>
 
         <section className="relative z-10 mx-auto mt-12 max-w-[1180px] px-6 md:px-8">
-          <div className="grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-900/5 md:grid-cols-4 dark:border-slate-700 dark:bg-slate-900">
+          <div className="grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl shadow-slate-900/5 sm:grid-cols-2 lg:grid-cols-4 dark:border-slate-700 dark:bg-slate-900">
             <Info
               icon={<Calendar />}
               label="Date"
@@ -183,7 +183,7 @@ const EventDetailPage = ({ event }: any) => {
           id="details"
           className="mx-auto mt-12 grid max-w-[1320px] gap-8 px-6 md:px-8 lg:grid-cols-[1fr_380px]"
         >
-          <article className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5 md:p-10 dark:border-slate-700 dark:bg-slate-900">
+          <article className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 sm:p-8 md:p-10 dark:border-slate-700 dark:bg-slate-900">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-[#da2e29]">À propos</p>
 
             <h2 className="mt-3 text-3xl font-black text-slate-900 dark:text-white">

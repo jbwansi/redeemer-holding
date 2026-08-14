@@ -276,7 +276,7 @@ const ContactPage = ({ page }: any) => {
               initial="hidden"
               animate={isInfoInView ? 'visible' : 'hidden'}
             >
-              <div className="relative overflow-hidden rounded-3xl border border-slate-700/80 bg-gradient-to-br from-[#0c1b36] via-[#101f3f] to-[#0b1730] p-8 shadow-2xl shadow-slate-950/35 mb-8">
+              <div className="relative mb-8 overflow-hidden rounded-3xl border border-slate-700/80 bg-gradient-to-br from-[#0c1b36] via-[#101f3f] to-[#0b1730] p-5 shadow-2xl shadow-slate-950/35 sm:p-8">
                 <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-[#DA2E29]/20 blur-3xl"></div>
                 <motion.h2
                   variants={itemVariants}
@@ -331,7 +331,7 @@ const ContactPage = ({ page }: any) => {
 
               <motion.div
                 variants={itemVariants}
-                className="bg-white dark:bg-gray-800/50 shadow-xl backdrop-blur-sm rounded-2xl p-8 border border-gray-100 dark:border-gray-700/30"
+                className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xl backdrop-blur-sm sm:p-8 dark:border-gray-700/30 dark:bg-gray-800/50"
               >
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 rounded-full bg-[#DA2E29]/10 dark:bg-[#DA2E29]/20 flex items-center justify-center text-[#DA2E29] mr-4">
@@ -371,7 +371,7 @@ const ContactPage = ({ page }: any) => {
               initial="hidden"
               animate={isFormInView ? 'visible' : 'hidden'}
             >
-              <div className="bg-white dark:bg-gray-800/50 shadow-xl backdrop-blur-sm rounded-2xl p-8 md:p-10 border border-gray-100 dark:border-gray-700/30 relative overflow-hidden">
+              <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-xl backdrop-blur-sm sm:p-8 md:p-10 dark:border-gray-700/30 dark:bg-gray-800/50">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#DA2E29] to-rose-600"></div>
 
                 <motion.h2

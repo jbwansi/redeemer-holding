@@ -80,7 +80,7 @@ const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) 
       backLabel="Retour formation"
       itemTitle={formation?.title}
       itemImage={formation?.featured_image}
-      placeholderImage="/assets/images/coaching-session.jpg"
+      placeholderImage="/assets/images/services-bg.jpg"
       fields={[
         {
           icon: <Calendar className="h-4 w-4" />,

@@ -7,6 +7,7 @@ import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { formatDate } from '@/lib/utils';
 import { PostResponse, SinglePostResponse } from '@/types/post';
 import NewsletterForm from '@/components/frontend/NewsletterForm';
+import { catalogPageParams, readCatalogFilter } from '@/lib/catalog-filters';
 
 interface Props {
   posts: PostResponse;
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/coaching-session.jpg';
+  if (!image) return '/assets/images/services-bg.jpg';
   if (typeof image === 'string') return image;
 
   return (
@@ -24,14 +25,18 @@ const resolveImage = (image: any): string => {
     image?.medium ||
     image?.original ||
     image?.thumbnail ||
-    '/assets/images/coaching-session.jpg'
+    '/assets/images/services-bg.jpg'
   );
 };
 
 const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [search, setSearch] = useState(() => readCatalogFilter('search'));
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    () => readCatalogFilter('category') || null
+  );
+  const [selectedTag, setSelectedTag] = useState<string | null>(
+    () => readCatalogFilter('tag') || null
+  );
 
   const allPosts = posts?.data ?? [];
   const currentPage = posts?.meta?.current_page ?? 1;
@@ -191,8 +196,12 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
             </div>
 
             <div className="relative w-full md:max-w-sm">
+              <label htmlFor="blog-search" className="sr-only">
+                Rechercher un article
+              </label>
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                id="blog-search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un article"
@@ -317,7 +326,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
           {lastPage > 1 && (
             <div className="mt-10 flex items-center justify-center gap-3">
               <Link
-                href={route('blogs', { page: currentPage - 1 })}
+                href={route(
+                  'blogs',
+                  catalogPageParams(currentPage - 1, {
+                    search,
+                    category: selectedCategory,
+                    tag: selectedTag,
+                  })
+                )}
                 className={`rounded-lg px-4 py-2 text-sm font-semibold ${
                   currentPage <= 1
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
@@ -332,7 +348,14 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
               </span>
 
               <Link
-                href={route('blogs', { page: currentPage + 1 })}
+                href={route(
+                  'blogs',
+                  catalogPageParams(currentPage + 1, {
+                    search,
+                    category: selectedCategory,
+                    tag: selectedTag,
+                  })
+                )}
                 className={`rounded-lg px-4 py-2 text-sm font-semibold ${
                   currentPage >= lastPage
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-500'

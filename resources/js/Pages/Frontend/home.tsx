@@ -16,12 +16,12 @@ const BlogPreview = lazy(() => import('@/components/frontend/home/blog-preview')
 const CalendlyCTA = lazy(() => import('@/components/frontend/layouts/calendly-cta'));
 
 const defaultHomeMeta = {
-  hero_badge: 'Coaching • Formation • Accompagnement',
+  hero_badge: 'Transformer par les valeurs',
   hero_title_line1: 'Structurez vos actions',
   hero_title_line2: 'et développez des résultats',
   hero_title_line3: 'durables',
   hero_subtitle:
-    'J’accompagne les entrepreneurs, les leaders et les professionnels en évolution à clarifier leurs priorités, renforcer leur posture et avancer avec méthode.',
+    'Guidée par les valeurs humaines, Redeemer Holding accompagne les entrepreneurs, les leaders et les professionnels par le coaching, la formation et des leviers technologiques agiles pour faire évoluer durablement leurs actions.',
 
   hero_cta_text: 'Réserver un appel découverte',
   hero_cta_url: '/contact',
@@ -70,7 +70,7 @@ const defaultHomeMeta = {
   clarity_action_final_cta_subtitle:
     'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.',
   clarity_action_final_cta_button_text: 'Réserver mon appel découverte',
-  process_title: 'Une méthode claire, humaine et orientée résultats',
+  process_title: 'Une méthode humaine, agile et orientée résultats',
   process_subtitle:
     'Chaque accompagnement s’appuie sur un cadre structuré pour transformer vos intentions en avancées concrètes.',
 

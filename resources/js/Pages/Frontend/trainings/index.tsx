@@ -5,16 +5,17 @@ import { GraduationCap, Search, Sparkles, ArrowRight, History } from 'lucide-rea
 import { route } from 'ziggy-js';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import TrainingCard from '@/components/frontend/trainings/training-card';
+import { catalogPageParams, readCatalogFilter } from '@/lib/catalog-filters';
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/coaching-session.jpg';
+  if (!image) return '/assets/images/services-bg.jpg';
   if (typeof image === 'string') return image;
   return (
     image?.large ||
     image?.medium ||
     image?.original ||
     image?.thumbnail ||
-    '/assets/images/coaching-session.jpg'
+    '/assets/images/services-bg.jpg'
   );
 };
 
@@ -25,8 +26,8 @@ const toDate = (value: any): Date | null => {
 };
 
 const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) => {
-  const [search, setSearch] = useState('');
-  const [showPast, setShowPast] = useState(false);
+  const [search, setSearch] = useState(() => readCatalogFilter('search'));
+  const [showPast, setShowPast] = useState(() => readCatalogFilter('past') === '1');
 
   const allTrainings = trainings?.data ?? [];
   const currentPage = trainings?.meta?.current_page ?? 1;
@@ -175,8 +176,12 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
           <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-5 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="relative w-full md:max-w-xl">
+                <label htmlFor="training-search" className="sr-only">
+                  Rechercher une formation
+                </label>
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
+                  id="training-search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Rechercher une formation"
@@ -237,7 +242,10 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
           {lastPage > 1 && (
             <div className="mt-10 flex items-center justify-center gap-3">
               <Link
-                href={route('trainings', { page: currentPage - 1 })}
+                href={route(
+                  'trainings',
+                  catalogPageParams(currentPage - 1, { search, past: showPast ? '1' : null })
+                )}
                 className={`rounded-xl px-5 py-3 text-sm font-bold ${
                   currentPage <= 1
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
@@ -252,7 +260,10 @@ const TrainingsPage = ({ trainings, featuredTraining, pageContent = {} }: any) =
               </span>
 
               <Link
-                href={route('trainings', { page: currentPage + 1 })}
+                href={route(
+                  'trainings',
+                  catalogPageParams(currentPage + 1, { search, past: showPast ? '1' : null })
+                )}
                 className={`rounded-xl px-5 py-3 text-sm font-bold ${
                   currentPage >= lastPage
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'

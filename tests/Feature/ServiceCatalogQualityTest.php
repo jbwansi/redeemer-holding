@@ -90,4 +90,39 @@ class ServiceCatalogQualityTest extends TestCase
             $this->assertStringContainsString($slug, $filterSource);
         }
     }
+
+    public function test_seeded_services_have_distinct_concise_catalog_promises(): void
+    {
+        $expectedTaglines = [
+            'coaching-individuel' => 'Retrouvez vos repères et passez à l’action.',
+            'coaching-d-equipe' => 'Donnez à votre équipe un cap commun et les moyens de mieux coopérer.',
+            'developpement-du-leadership' => 'Décidez avec cohérence et mobilisez avec justesse.',
+            'accompagnement-entrepreneurial' => 'Transformez vos priorités en décisions et en actions.',
+            'bilan-de-competences' => 'Faites de votre parcours un point d’appui pour la suite.',
+            'conferences-workshops' => 'Faites émerger des idées qui mobilisent et mettent en mouvement.',
+        ];
+
+        foreach ($expectedTaglines as $slug => $tagline) {
+            $service = Service::where('slug', $slug)->firstOrFail();
+
+            $this->assertSame($tagline, $service->tagline);
+            $this->assertLessThanOrEqual(160, mb_strlen($service->excerpt));
+            $this->assertCount(3, $service->ideal_for);
+        }
+    }
+
+    public function test_service_seeder_preserves_existing_administered_content(): void
+    {
+        $service = Service::where('slug', 'coaching-individuel')->firstOrFail();
+        $service->update([
+            'tagline' => 'Contenu administré',
+            'excerpt' => 'Extrait administré',
+        ]);
+
+        $this->seed(ServiceSeeder::class);
+
+        $service->refresh();
+        $this->assertSame('Contenu administré', $service->tagline);
+        $this->assertSame('Extrait administré', $service->excerpt);
+    }
 }

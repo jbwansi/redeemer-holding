@@ -157,15 +157,15 @@ const Footer = () => {
                     {settings?.app_name || 'Redeemer Holding'}
                   </span>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 tracking-wider uppercase">
-                    Formation & Coaching
+                    Transformer par les valeurs
                   </span>
                 </div>
               </div>
             </Link>
 
             <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md">
-              Je vous accompagne dans votre développement personnel et professionnel pour vous aider
-              à atteindre vos objectifs et à vivre la vie que vous méritez.
+              Les valeurs humaines donnent le cap. Le coaching, la formation et des leviers agiles
+              soutiennent des transformations durables.
             </p>
 
             <div className="mb-8">

@@ -166,7 +166,7 @@ const ServiceRequest = ({ service }: ServiceRequestProps) => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100 dark:border-gray-700/30 relative overflow-hidden"
+                className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-xl sm:p-8 md:p-10 dark:border-gray-700/30 dark:bg-gray-800"
               >
                 {/* Subtle pattern background */}
                 <div

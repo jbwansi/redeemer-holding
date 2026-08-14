@@ -14,7 +14,7 @@ interface Props {
 }
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/coaching-session.jpg';
+  if (!image) return '/assets/images/services-bg.jpg';
   if (typeof image === 'string') return image;
 
   return (
@@ -22,7 +22,7 @@ const resolveImage = (image: any): string => {
     image?.medium ||
     image?.original ||
     image?.thumbnail ||
-    '/assets/images/coaching-session.jpg'
+    '/assets/images/services-bg.jpg'
   );
 };
 

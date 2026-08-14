@@ -115,7 +115,7 @@ class TrainingSeeder extends Seeder
             [
                 'title'           => 'Formation E-Learning : Maîtriser le Digital',
                 'excerpt'         => 'Apprenez les meilleures pratiques pour créer et animer des formations en ligne efficaces.',
-                'content'         => '<p>Cette formation vous apprend comment créer du contenu pédagogique engageant pour l\'e-learning. Vous découvrirez les outils, les techniques et les stratégies utilisées par les meilleurs formateurs en ligne.</p><h2>Modules disponibles</h2><ul><li>Semaine 1 : Fondamentaux du e-learning</li><li>Semaine 2 : Créer du contenu vidéo</li><li>Semaine 3 : Conception pédagogique</li><li>Semaine 4 : Outils et plateformes</li><li>Semaine 5 : Animer et motiver les apprenants</li><li>Semaine 6 : Évaluation et feedback</li></ul><h2>Avantages</h2><ul><li>Accès illimité au contenu</li><li>Certificat de completion</li><li>Ressources téléchargeables</li><li>Support communautaire</li></ul>',
+                'content'         => '<p>Cette formation vous apprend comment créer du contenu pédagogique engageant pour l\'e-learning. Vous découvrirez les outils, les techniques et les stratégies utilisées par les meilleurs formateurs en ligne.</p><h2>Modules disponibles</h2><ul><li>Semaine 1 : Fondamentaux du e-learning</li><li>Semaine 2 : Créer du contenu vidéo</li><li>Semaine 3 : Conception pédagogique</li><li>Semaine 4 : Outils et plateformes</li><li>Semaine 5 : Animer et motiver les apprenants</li><li>Semaine 6 : Évaluation et feedback</li></ul><h2>Avantages</h2><ul><li>Accès illimité au contenu</li><li>Ressources de synthèse</li><li>Ressources téléchargeables</li><li>Support communautaire</li></ul>',
                 'location'        => 'En ligne — Plateforme e-learning',
                 'start_date'      => now()->subDays(10)->setTime(8, 0),
                 'end_date'        => now()->addDays(40)->setTime(22, 0),
@@ -207,5 +207,4 @@ class TrainingSeeder extends Seeder
         }
     }
 }
-
 

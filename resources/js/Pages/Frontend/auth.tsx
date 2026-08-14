@@ -52,7 +52,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
 
   return (
     <FrontLayout>
-      <div className="min-h-screen flex flex-col justify-center pb-12 pt-32 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="relative flex min-h-screen flex-col justify-center overflow-hidden px-4 pb-12 pt-28 sm:px-6 sm:pt-32 lg:px-8">
         <Head title={activeTab === 'login' ? 'Connexion' : 'Inscription'}>
           <meta
             name="description"
@@ -77,7 +77,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
         <div className="absolute bottom-40 right-10 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[120px]"></div>
 
         <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow-xl sm:rounded-xl sm:px-10 border border-gray-100 dark:border-gray-700/30 relative overflow-hidden">
+          <div className="relative overflow-hidden rounded-xl border border-gray-100 bg-white px-5 py-7 shadow-xl sm:px-10 sm:py-8 dark:border-gray-700/30 dark:bg-gray-800">
             {/* Subtle pattern background */}
             <div
               className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none"
@@ -352,7 +352,7 @@ const RegisterForm = ({ setActiveTab }: any) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <InputField
             id="register-first_name"
             name="first_name"

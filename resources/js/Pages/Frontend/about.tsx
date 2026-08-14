@@ -156,13 +156,13 @@ function AboutPage({
 
   const safeContent = useMemo(() => DOMPurify.sanitize(page?.content ?? ''), [page?.content]);
 
-  const heroBadge = meta.hero_badge ?? 'À propos';
+  const heroBadge = meta.hero_badge ?? 'Transformer par les valeurs';
   const heroTitleBefore = meta.hero_title_before ?? 'Transformer des';
   const heroTitleHighlight = meta.hero_title_highlight ?? 'trajectoires';
   const heroTitleAfter = meta.hero_title_after ?? ' avec clarté, structure et impact';
   const signatureSubtitle =
     meta.hero_subtitle ??
-    `J'accompagne les entrepreneurs, les leaders et les professionnels en évolution à clarifier leurs priorités, renforcer leur posture et avancer avec méthode.`;
+    `Notre approche place les valeurs humaines au cœur de chaque transformation. Nous associons accompagnement humain, technologie et agilité pour construire des changements utiles, concrets et durables.`;
   const heroPrimaryButtonText = meta.hero_primary_button_text ?? 'Discutons de votre projet';
   const heroPrimaryButtonLink = meta.hero_primary_button_link ?? '/contact';
   const heroSecondaryButtonText = meta.hero_secondary_button_text ?? 'Voir mes services';
@@ -181,15 +181,15 @@ function AboutPage({
   const missionSubtitle = meta.mission_subtitle ?? 'TRAVAILLONS ENSEMBLE';
   const missionText =
     meta.mission_text ??
-    `Chaque accompagnement est pensé pour transformer vos intentions en avancées concrètes, durables et alignées avec votre réalité.`;
+    `Chaque accompagnement mobilise coaching, formation et outils adaptés pour transformer vos intentions en avancées concrètes, durables et alignées avec votre réalité.`;
   const missionButtonText = meta.mission_button_text ?? 'Parlons-en';
   const missionButtonLink = meta.mission_button_link ?? '/contact';
 
   const quickPoints = useMemo(
     () => [
-      'Coaching humain et structuré',
-      'Méthode claire et progressive',
-      'Résultats concrets et durables',
+      'Des valeurs humaines pour donner le cap',
+      'Technologie et agilité comme leviers utiles',
+      'Formation et coaching pour transformer',
     ],
     []
   );
@@ -369,7 +369,7 @@ function AboutPage({
                   Ce qui guide ma manière d'accompagner
                 </h2>
                 <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
-                  Une approche exigeante, humaine et orientée résultats.
+                  Une boussole pour donner du sens, orienter les décisions et construire un changement cohérent et durable.
                 </p>
               </div>
 

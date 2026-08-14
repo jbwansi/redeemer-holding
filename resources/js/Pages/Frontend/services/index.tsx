@@ -185,7 +185,7 @@ function ServicesPage({
             initial={false}
             animate={inHero ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="relative min-h-[620px] overflow-hidden rounded-[2.75rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 dark:border-white/10 dark:bg-slate-900"
+            className="relative min-h-[500px] overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-2xl shadow-slate-900/10 sm:rounded-[2.75rem] md:min-h-[560px] dark:border-white/10 dark:bg-slate-900"
           >
             {/* FIX 1 : object-top pour ne pas couper le visage */}
             <img
@@ -206,7 +206,7 @@ function ServicesPage({
 
             <div className="absolute inset-0 bg-gradient-to-r from-white via-white/90 to-white/65 dark:from-[#020817]/80 dark:via-[#020817]/25 dark:to-transparent" />
 
-            <div className="relative z-10 flex min-h-[460px] items-center px-8 py-14 md:min-h-[520px] md:px-12 lg:px-16">
+            <div className="relative z-10 flex min-h-[400px] items-center px-5 py-10 sm:px-8 md:min-h-[460px] md:px-12 md:py-12 lg:px-16">
               <div className="max-w-3xl">
                 <span className="inline-flex items-center gap-2 rounded-full border text-sm font-black uppercase tracking-[0.25em] text-[#da2e29]">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -264,7 +264,7 @@ function ServicesPage({
           id="liste-services"
           ref={cardsRef}
           data-progress-label="Services"
-          className="relative mx-auto mt-12 max-w-[1820px] px-4 md:mt-16 md:px-6"
+          className="relative mx-auto mt-12 max-w-[1320px] px-4 md:mt-16 md:px-8"
         >
           <motion.div
             initial={false}
@@ -315,31 +315,30 @@ function ServicesPage({
           {/* Cards */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {filteredServices.map((service, idx) => {
-              const excerpt =
-                (service.excerpt ?? '').length > 300
-                  ? (service.excerpt ?? '').slice(0, 300) + '...'
-                  : (service.excerpt ?? '');
+              const idealFor = Array.isArray(service.ideal_for)
+                ? service.ideal_for.filter(Boolean).slice(0, 3)
+                : [];
               return (
                 <motion.article
                   key={service.id}
                   initial={false}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: idx * 0.08 }}
-                  className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 hover:border-[#da2e29]/40 dark:border-white/10 dark:bg-[#0b1424] dark:shadow-black/25"
+                  className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-lg shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 hover:border-[#da2e29]/40 hover:shadow-xl dark:border-white/10 dark:bg-[#0b1424] dark:shadow-black/25"
                 >
-                  <div className="relative overflow-visible">
+                  <div className="relative shrink-0">
                     <div className="overflow-hidden rounded-[1.25rem]">
                       <img
                         src={service.image || '/assets/images/services-bg.jpg'}
                         alt={service.name}
                         loading="lazy"
                         decoding="async"
-                        className="h-64 w-full object-cover transition duration-700 group-hover:scale-105"
+                        className="aspect-[16/9] w-full object-cover transition duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-x-0 top-0 h-64 rounded-[1.25rem] bg-gradient-to-t from-[#061229]/70 via-transparent to-transparent" />
+                      <div className="absolute inset-0 rounded-[1.25rem] bg-gradient-to-t from-[#061229]/60 via-transparent to-transparent" />
                     </div>
 
-                    <div className="absolute -bottom-7 left-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
+                    <div className="absolute -bottom-5 left-5 flex h-12 w-12 items-center justify-center rounded-xl bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/30">
                       {service.icon ? (
                         <IconComponent
                           name={normalizeServiceIconName(service.icon) || 'users'}
@@ -349,60 +348,41 @@ function ServicesPage({
                         <Users className="h-5 w-5" />
                       )}
                     </div>
-                    <div className="pointer-events-none absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover/icon:opacity-100 dark:bg-white dark:text-slate-900">
-                      {service.name}
-                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-white" />
-                    </div>
                   </div>
 
-                  <div className="flex flex-1 flex-col px-4 pb-4 pt-12">
-                    <h3 className="mt-5 text-2xl font-black text-slate-900 dark:text-white">
+                  <div className="flex flex-1 flex-col px-4 pb-4 pt-9">
+                    <h3 className="text-2xl font-black leading-tight text-slate-900 dark:text-white">
                       {service.name}
                     </h3>
 
                     {service.tagline && (
-                      <p className="mt-2 text-base font-semibold text-[#ff8d8a] dark:text-[#ff8d8a]">
+                      <p className="mt-2 line-clamp-2 text-sm font-semibold leading-6 text-[#d93430] dark:text-[#ff8d8a]">
                         {service.tagline}
                       </p>
                     )}
 
-                    {/* Passage en 2 colonnes : texte à gauche, checklist à droite */}
-                    {/* Texte + checklist */}
-                    <div className="mt-5 grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-8">
-                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-300">
-                        {excerpt || 'Accompagnement personnalisé et orienté résultats.'}
-                      </p>
+                    <p className="mt-4 line-clamp-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {service.excerpt || 'Accompagnement personnalisé et orienté résultats.'}
+                    </p>
 
-                      <div className="rounded-2xl border border-slate-200 bg-white/5 p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-                        <p className="mb-4 font-bold text-slate-900 dark:text-white">
-                          Idéal si vous voulez :
+                    {idealFor.length > 0 && (
+                      <div className="mt-5 border-t border-slate-200 pt-4 dark:border-white/10">
+                        <p className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                          Idéal pour
                         </p>
 
-                        <ul className="space-y-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          {(Array.isArray(service.ideal_for) && service.ideal_for.length > 0
-                            ? service.ideal_for
-                            : [
-                                'Un accompagnement sur mesure',
-                                'Des résultats concrets et durables',
-                                'Avancer plus vite et plus sereinement',
-                              ]
-                          ).map((item: string, index: number) => (
-                            <li key={index} className="flex items-start gap-3">
-                              <span className="mt-0.5 shrink-0 text-[#da2e29]">✓</span>
-                              <span>{item}</span>
+                        <ul className="space-y-2 text-sm leading-5 text-slate-600 dark:text-slate-300">
+                          {idealFor.map((item: string, index: number) => (
+                            <li key={index} className="flex items-start gap-2.5">
+                              <span className="shrink-0 font-black text-[#da2e29]">✓</span>
+                              <span className="line-clamp-2">{item}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
-                    </div>
-
-                    {service.featured_note && (
-                      <div className="mt-5 rounded-2xl border border-[#da2e29]/30 bg-[#da2e29]/10 px-4 py-3 text-xs font-bold text-[#da2e29]">
-                        {service.featured_note}
-                      </div>
                     )}
 
-                    <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <div className="mt-auto flex flex-col gap-3 pt-6 sm:flex-row sm:flex-wrap">
                       <Link
                         href={
                           service.cta_primary_url ||
@@ -443,7 +423,7 @@ function ServicesPage({
           id="services-proof"
           data-progress-label="Preuves"
         >
-          <div className="grid gap-6 rounded-[2rem] border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-white/10 dark:bg-white/[0.04] md:grid-cols-4">
+          <div className="grid gap-6 rounded-[2rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/5 backdrop-blur sm:grid-cols-2 sm:p-8 dark:border-white/10 dark:bg-white/[0.04] lg:grid-cols-4">
             {keyFigures.map((item) => (
               <div key={item.label}>
                 <p className="text-4xl font-black text-slate-900 dark:text-white">{item.value}</p>

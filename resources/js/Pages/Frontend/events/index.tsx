@@ -5,16 +5,17 @@ import { Search, Sparkles, ArrowRight, History, Filter } from 'lucide-react';
 import { route } from 'ziggy-js';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import EventCard from '@/components/frontend/events/event-card';
+import { catalogPageParams, readCatalogFilter } from '@/lib/catalog-filters';
 
 const resolveImage = (image: any): string => {
-  if (!image) return '/assets/images/coaching-session.jpg';
+  if (!image) return '/assets/images/services-bg.jpg';
   if (typeof image === 'string') return image;
   return (
     image?.original ||
     image?.large ||
     image?.medium ||
     image?.thumbnail ||
-    '/assets/images/coaching-session.jpg'
+    '/assets/images/services-bg.jpg'
   );
 };
 
@@ -25,9 +26,11 @@ const toDate = (value: any): Date | null => {
 };
 
 const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any) => {
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showPast, setShowPast] = useState(false);
+  const [search, setSearch] = useState(() => readCatalogFilter('search'));
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    () => readCatalogFilter('category') || null
+  );
+  const [showPast, setShowPast] = useState(() => readCatalogFilter('past') === '1');
 
   const allEvents = events?.data ?? [];
   const currentPage = events?.meta?.current_page ?? 1;
@@ -197,8 +200,12 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           <div className="rounded-[2rem] border border-slate-200 bg-white/90 p-5 shadow-xl shadow-slate-900/5 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
             <div className="flex flex-col gap-3 md:flex-row md:items-center">
               <div className="relative w-full md:max-w-xl">
+                <label htmlFor="event-search" className="sr-only">
+                  Rechercher un événement
+                </label>
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
+                  id="event-search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Rechercher un événement"
@@ -284,7 +291,14 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
           {lastPage > 1 && (
             <div className="mt-10 flex items-center justify-center gap-3">
               <Link
-                href={route('evenements', { page: currentPage - 1 })}
+                href={route(
+                  'evenements',
+                  catalogPageParams(currentPage - 1, {
+                    search,
+                    category: selectedCategory,
+                    past: showPast ? '1' : null,
+                  })
+                )}
                 className={`rounded-xl px-5 py-3 text-sm font-bold ${
                   currentPage <= 1
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'
@@ -299,7 +313,14 @@ const EventsPage = ({ events, categories, featuredEvent, pageContent = {} }: any
               </span>
 
               <Link
-                href={route('evenements', { page: currentPage + 1 })}
+                href={route(
+                  'evenements',
+                  catalogPageParams(currentPage + 1, {
+                    search,
+                    category: selectedCategory,
+                    past: showPast ? '1' : null,
+                  })
+                )}
                 className={`rounded-xl px-5 py-3 text-sm font-bold ${
                   currentPage >= lastPage
                     ? 'pointer-events-none bg-slate-200 text-slate-500 dark:bg-slate-800'

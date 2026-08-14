@@ -54,13 +54,13 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
     setImageErrors((prev) => ({ ...prev, [index]: true }));
   };
 
-  const badge = meta?.hero_badge ?? 'Coaching • Conseil • Accompagnement';
+  const badge = meta?.hero_badge ?? 'Transformer par les valeurs';
   const titleLine1 = meta?.hero_title_line1 ?? 'Transformez votre potentiel';
   const titleLine2 = meta?.hero_title_line2 ?? 'en résultats';
   const titleLine3 = meta?.hero_title_line3 ?? 'durables et concrets';
   const subtitle =
     meta?.hero_subtitle ??
-    "J'accompagne les entrepreneurs, les dirigeants et les professionnels en évolution à clarifier leurs priorités, structurer leurs actions et avancer avec plus d'impact.";
+    "Guidée par les valeurs humaines, Redeemer Holding vous accompagne par le coaching, la formation et des leviers technologiques agiles pour faire évoluer durablement vos actions.";
 
   const ctaText = meta?.hero_cta_text ?? 'Réserver un appel découverte';
   const ctaUrl = meta?.hero_cta_url ?? route('contact');

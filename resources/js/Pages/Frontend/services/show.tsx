@@ -121,7 +121,7 @@ const ServiceDetail = ({
         </div>
 
         {/* Hero Section */}
-        <section ref={heroRef} className="relative min-h-[520px] md:min-h-[560px] overflow-hidden">
+        <section ref={heroRef} className="relative min-h-[420px] overflow-hidden md:min-h-[500px]">
           {/* Background avec effet parallax */}
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
@@ -134,7 +134,7 @@ const ServiceDetail = ({
             <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/70 to-gray-900/60 dark:from-gray-950/90 dark:via-gray-950/80 dark:to-gray-950/70"></div>
           </motion.div>
 
-          <div className="relative z-10 flex min-h-[520px] items-center py-8 md:min-h-[560px] md:py-10">
+          <div className="relative z-10 flex min-h-[420px] items-center py-8 md:min-h-[500px] md:py-10">
             <div className="max-w-[1400px] mx-auto px-4 md:px-8 w-full">
               <motion.div
                 className="max-w-3xl"
@@ -153,7 +153,7 @@ const ServiceDetail = ({
                 </motion.div>
 
                 <motion.h1
-                  className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
+                  className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-6xl"
                   initial={{ opacity: 0, y: 20 }}
                   animate={isHeroInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
@@ -206,7 +206,7 @@ const ServiceDetail = ({
               {/* Contenu du service */}
               <div className="lg:col-span-8" ref={contentRef}>
                 <motion.div
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-10 border border-gray-100 dark:border-gray-700/30"
+                  className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xl sm:p-8 md:p-10 dark:border-gray-700/30 dark:bg-gray-800"
                   initial={{ opacity: 0, y: 30 }}
                   animate={isContentInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                   transition={{ duration: 0.7 }}
