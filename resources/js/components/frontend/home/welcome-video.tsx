@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
+import { useCookieConsent } from '@/components/frontend/consent/cookie-consent-provider';
 
 function resolveEmbedUrl(url: string): string | null {
   if (!url || url.trim() === '') return null;
@@ -39,6 +40,7 @@ export default function WelcomeVideo({
   enabled?: boolean;
 }) {
   const embedUrl = useMemo(() => resolveEmbedUrl(videoUrl ?? ''), [videoUrl]);
+  const { consent, allowExternalMedia } = useCookieConsent();
 
   if (!enabled || !embedUrl) return null;
 
@@ -79,17 +81,31 @@ export default function WelcomeVideo({
           viewport={{ once: true }}
           transition={{ duration: 0.55, delay: 0.1 }}
         >
-          <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16/9 */ }}>
-            <iframe
-              className="absolute inset-0 h-full w-full"
-              src={embedUrl}
-              title={title ?? 'Vidéo de bienvenue'}
-              loading="lazy"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
+          {consent?.externalMedia ? (
+            <div className="relative w-full" style={{ paddingTop: '56.25%' /* 16/9 */ }}>
+              <iframe
+                className="absolute inset-0 h-full w-full"
+                src={embedUrl}
+                title={title ?? 'Vidéo de bienvenue'}
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div className="flex aspect-video flex-col items-center justify-center bg-slate-950 px-6 text-center text-white">
+              <Play className="h-12 w-12 text-[#DA2E29]" aria-hidden="true" />
+              <h3 className="mt-4 text-xl font-bold">Autoriser la vidéo externe</h3>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
+                Cette vidéo est hébergée par YouTube ou Vimeo. Elle ne sera chargée qu’après votre
+                accord pour les médias externes.
+              </p>
+              <button type="button" onClick={allowExternalMedia} className="ux-btn-primary mt-5 min-h-11">
+                Autoriser et charger la vidéo
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

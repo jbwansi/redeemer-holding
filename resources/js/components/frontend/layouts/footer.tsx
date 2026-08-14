@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import NewsletterForm from '../NewsletterForm';
+import { useCookieConsent } from '@/components/frontend/consent/cookie-consent-provider';
 
 const Footer = () => {
   const { settings } = useSettings();
+  const { openPreferences } = useCookieConsent();
 
   const isEnabled = (value: unknown) => {
     return value === true || value === 1 || value === '1' || value === 'true';
@@ -273,6 +275,13 @@ const Footer = () => {
             >
               Cookies
             </Link>
+            <button
+              type="button"
+              onClick={openPreferences}
+              className="hover:text-[#DA2E29] transition-colors duration-200"
+            >
+              Gérer mes cookies
+            </button>
           </div>
         </div>
       </div>

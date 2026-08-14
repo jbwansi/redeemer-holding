@@ -2,6 +2,7 @@ import React from 'react';
 import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import { LEGAL_LAST_UPDATED } from '@/lib/legal';
 
 const TermsAndConditions = () => {
   return (
@@ -96,7 +97,7 @@ const TermsAndConditions = () => {
 
               <h3 className="text-xl font-semibold mb-2 mt-4">5.2 Vos responsabilités</h3>
               <ul>
-                <li>Fournir des intrainings exactes lors de l'inscription</li>
+                <li>Fournir des informations exactes lors de l'inscription</li>
                 <li>Respecter les horaires et le règlement des événements</li>
                 <li>Avoir un comportement approprié durant les événements</li>
                 <li>Ne pas céder ou revendre votre place</li>
@@ -171,7 +172,7 @@ const TermsAndConditions = () => {
             </section>
 
             <div className="mt-12 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-400">
-              <p>Dernière mise à jour : {new Date().toLocaleDateString('fr-CH')}</p>
+              <p>Dernière mise à jour : {LEGAL_LAST_UPDATED}</p>
             </div>
           </div>
         </Card>

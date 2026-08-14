@@ -2,14 +2,6 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
 
-{{-- Google tag (gtag.js) --}}
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JZ6MTSNT1D"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-JZ6MTSNT1D');
-</script>
     <!-- Encodage et responsive -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -53,11 +45,6 @@
     <link rel="canonical" href="{{ $seoCanon }}">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ route('sitemap') }}">
     <link rel="sitemap" type="application/xml" title="Sitemap Index" href="{{ route('sitemap.index') }}">
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/images/logo.png') }}">
@@ -96,7 +83,7 @@
     <!-- Main content -->
     @inertia
 
-    <!-- Noscript avec plus d'intrainings -->
+    <!-- Informations pour les visiteurs sans JavaScript -->
     <noscript>
         <div class="flex items-center justify-center min-h-screen text-center p-4">
             <div>

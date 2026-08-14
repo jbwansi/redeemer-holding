@@ -2,6 +2,7 @@ import React from 'react';
 import { Head } from '@inertiajs/react';
 import { Card } from '@/components/ui/card';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
+import { LEGAL_LAST_UPDATED } from '@/lib/legal';
 
 const PrivacyPolicy = () => {
   return (
@@ -20,16 +21,16 @@ const PrivacyPolicy = () => {
             <p className="lead mb-8">
               Chez Redeemer Holding, nous accordons une grande importance à la protection de vos
               données personnelles. Cette politique de confidentialité explique comment nous
-              collectons, utilisons et protégeons vos intrainings.
+              collectons, utilisons et protégeons vos informations.
             </p>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">1. Collecte des données</h2>
-              <p>Nous collectons les intrainings suivantes lorsque vous utilisez nos services :</p>
+              <p>Nous collectons les informations suivantes lorsque vous utilisez nos services :</p>
               <ul>
-                <li>Intrainings d'identification (nom, prénom)</li>
+                <li>Informations d'identification (nom, prénom)</li>
                 <li>Coordonnées de contact (adresse email, numéro de téléphone)</li>
-                <li>Intrainings de paiement (traitées de manière sécurisée par Stripe)</li>
+                <li>Informations de paiement (traitées de manière sécurisée par Stripe)</li>
                 <li>Données de participation aux événements</li>
                 <li>Informations techniques (adresse IP, données de navigation)</li>
               </ul>
@@ -40,7 +41,7 @@ const PrivacyPolicy = () => {
               <p>Vos données sont utilisées pour :</p>
               <ul>
                 <li>Gérer votre inscription aux événements</li>
-                <li>Vous envoyer des confirmations et intrainings importantes</li>
+                <li>Vous envoyer des confirmations et informations importantes</li>
                 <li>Traiter vos paiements</li>
                 <li>Améliorer nos services</li>
                 <li>Respecter nos obligations légales</li>
@@ -156,7 +157,7 @@ const PrivacyPolicy = () => {
             </section>
 
             <div className="mt-12 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm text-gray-600 dark:text-gray-400">
-              <p>Dernière mise à jour : {new Date().toLocaleDateString('fr-CH')}</p>
+              <p>Dernière mise à jour : {LEGAL_LAST_UPDATED}</p>
             </div>
           </div>
         </Card>

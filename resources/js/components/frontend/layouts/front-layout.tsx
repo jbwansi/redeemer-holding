@@ -6,6 +6,7 @@ import PageProgress from './page-progress';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { toast, Toaster } from 'sonner';
 import { usePage } from '@inertiajs/react';
+import CookieConsentProvider from '@/components/frontend/consent/cookie-consent-provider';
 const VisitorChatbot = lazy(() => import('@/components/frontend/chatbot/visitor-chatbot'));
 
 function FrontLayout({ children }: { children: React.ReactNode }) {
@@ -47,7 +48,8 @@ function FrontLayout({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        {app?.is_test_env && (
+        <CookieConsentProvider>
+          {app?.is_test_env && (
           <div className="sticky top-0 z-[70] bg-amber-500 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-900">
             Environnement de test - Donnees non contractuelles
           </div>
@@ -59,7 +61,8 @@ function FrontLayout({ children }: { children: React.ReactNode }) {
         <Suspense fallback={null}>
           <VisitorChatbot />
         </Suspense>
-        <Footer />
+          <Footer />
+        </CookieConsentProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
