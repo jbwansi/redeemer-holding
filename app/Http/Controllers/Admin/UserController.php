@@ -509,7 +509,7 @@ class UserController extends Controller
 
             $plainPassword = (string) ($data['password'] ?? '');
             if ($plainPassword === '') {
-                $plainPassword = (string) env('TEST_USERS_PASSWORD', 'Test1234!');
+                $plainPassword = trim((string) env('TEST_USERS_PASSWORD', ''));
             }
 
             $user = UserModel::query()->where('email', $email)->first();
@@ -524,6 +524,11 @@ class UserController extends Controller
                 $user->save();
                 $updated++;
             } else {
+                if ($plainPassword === '') {
+                    $skipped++;
+                    continue;
+                }
+
                 $newUser = new UserModel();
                 $newUser->name = $name;
                 $newUser->email = $email;

@@ -12,7 +12,19 @@ class TrainingSeeder extends Seeder
 {
     public function run(): void
     {
+        if (!app()->environment(['local', 'testing'])) {
+            $this->command?->warn('TrainingSeeder ignoré hors développement local.');
+
+            return;
+        }
+
         $admin = User::where('role', 'admin')->first();
+
+        if (!$admin) {
+            $this->command?->warn('Aucun administrateur disponible : données de démonstration ignorées.');
+
+            return;
+        }
         
         // Get or create test users for participants
         $users = User::limit(5)->pluck('id')->toArray();
@@ -133,7 +145,7 @@ class TrainingSeeder extends Seeder
         foreach ($trainings as $data) {
             $slug = Str::slug($data['title']);
 
-            $training = Training::updateOrCreate(
+            $training = Training::firstOrCreate(
                 ['slug' => $slug],
                 [
                     'title'            => $data['title'],
@@ -153,12 +165,14 @@ class TrainingSeeder extends Seeder
                     'user_id'          => $admin->id,
                 ]
             );
-            
-            $createdTrainings[$training->id] = [
-                'slug' => $slug,
-                'title' => $data['title'],
-                'price' => $data['price'],
-            ];
+
+            if ($training->wasRecentlyCreated) {
+                $createdTrainings[$training->id] = [
+                    'slug' => $slug,
+                    'title' => $data['title'],
+                    'price' => $data['price'],
+                ];
+            }
         }
 
         // Add participants to trainings with different statuses
@@ -207,4 +221,3 @@ class TrainingSeeder extends Seeder
         }
     }
 }
-

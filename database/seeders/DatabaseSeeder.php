@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
 
         // These demonstration seeders require an explicit content owner. Never
         // manufacture an administrator merely to satisfy that relationship.
-        if (User::query()->where('role', 'admin')->exists()) {
+        if (app()->environment('local') && User::query()->where('role', 'admin')->exists()) {
             $this->call([
                 PostSeeder::class,
                 EventSeeder::class,
@@ -33,7 +33,8 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        if (app()->environment(['local', 'staging', 'testing'])) {
+        // Test accounts are opt-in in local/staging. Automated tests use factories.
+        if (app()->environment(['local', 'staging'])) {
             $this->call([
                 TestUsersSeeder::class,
             ]);

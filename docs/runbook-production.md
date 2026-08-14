@@ -29,8 +29,8 @@ Verifier au minimum dans `.env` de production:
 - `FORCE_HTTPS=true` si HTTPS est termine au niveau app/reverse-proxy
 - `REMINDER_CRON_TOKEN` fort et unique
 - `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET` valides
-- `ONLY_TEST_USERS_ENABLED=false` en production ouverte
-- `TEST_USER_EMAILS` vide ou strictement maitrise
+- `TEST_ALLOWED_EMAILS` vide en production ; en staging, liste explicite des seuls comptes autorises
+- `TEST_USERS_PASSWORD` vide en production ; secret obligatoire uniquement pour un seeding staging explicitement voulu
 
 ## 3. Procedure de deploiement
 
@@ -49,7 +49,21 @@ puis exige une confirmation explicite avant la creation. Elle refuse une adresse
 utilisee et applique les memes regles de mot de passe que l'application. Ne jamais placer
 le mot de passe administrateur dans `.env`, un script de deploiement ou l'historique du shell.
 
-### 3.1 Avant de deployer
+### 3.1 Nouvelle installation
+
+1. Configurer et verifier l'environnement et la connexion DB.
+2. Executer `php artisan deployment:preflight`.
+3. Continuer uniquement si la commande confirme `Fresh database`.
+4. Executer `php artisan migrate --force`.
+5. Creer le premier administrateur avec `php artisan admin:create`.
+6. Executer uniquement les seeders explicitement autorises ci-dessous.
+7. Verifier `migrate:status`, relancer le preflight et effectuer les smoke tests.
+
+Un backup n'est pas applicable si la base est reellement vierge. Le preflight verifie
+aussi l'absence de schema applicatif et de migrations enregistrees ; l'absence des seules
+tables de formations ne suffit pas.
+
+### 3.2 Mise a jour d'une base existante
 
 - Faire un backup MySQL complet avant toute migration.
 - Verifier que le fichier de sauvegarde existe, n'est pas vide et peut etre lu.
@@ -71,7 +85,11 @@ de `formations` avec `trainings`, ou de `formation_participants` avec
 `training_participants`. Ne supprimer, fusionner ou renommer manuellement aucune de ces
 tables sans sauvegarde valide et analyse explicite de leurs donnees et cles etrangeres.
 
-### 3.2 Commandes de deploiement
+Interrompre immediatement le deploiement en cas d'ambiguite. Apres `migrate --force`,
+executer un nouveau `migrate:status`, un nouveau `deployment:preflight`, puis les smoke
+tests. Ne jamais utiliser `migrate:fresh` en staging ou en production.
+
+### 3.3 Commandes de deploiement
 
 ```bash
 composer install --no-dev --optimize-autoloader
@@ -108,7 +126,26 @@ d'anomalie, suspendre les ecritures, conserver les logs et revenir au code prece
 Ne restaurer la sauvegarde que dans le cadre de la procedure d'incident validee ; ne
 pas lancer automatiquement `migrate:rollback` sur ces renommages historiques.
 
-### 3.3 Queue worker
+### 3.4 Seeders et comptes de test
+
+`php artisan db:seed` ne cree aucun administrateur. En production et en testing,
+`TestUsersSeeder` est toujours ignore. En local et staging, il ne cree rien tant que
+`TEST_ALLOWED_EMAILS` et `TEST_USERS_PASSWORD` ne sont pas toutes deux renseignees
+explicitement. Le mot de passe doit venir du gestionnaire de secrets du deploiement et
+ne doit jamais etre commite.
+
+- `AdminSeeder` : sur en production, aucun compte cree ; utiliser `admin:create`.
+- `SettingsSeeder`, `CategorySeeder`, `ServiceSeeder` : installation initiale ; conservateurs sur les contenus existants.
+- `PostSeeder`, `EventSeeder`, `TrainingSeeder`, `TrainingLessonSeeder`, `TrainingResourceSeeder`, `TrainingProgressSeeder`, `TrainingEnrollmentSeeder` : demonstration/local uniquement ; ne pas executer en production.
+- `TestUsersSeeder`, `TestDashboardActivitiesSeeder` : demonstration/local uniquement et interdits en production.
+
+`DatabaseSeeder` est sur par defaut : les seeders de demonstration ne sont appeles qu'en
+environnement local. `TrainingSeeder` refuse aussi une execution directe hors local/testing.
+
+`TrainingSeeder` cree seulement les formations de demonstration absentes. Une formation
+existante portant le meme slug et ses participants ne sont jamais remplaces.
+
+### 3.5 Queue worker
 
 L'application envoie certains emails en queue. Le worker doit tourner en continu.
 
@@ -144,7 +181,7 @@ Apres chaque deploiement, redemarrer proprement les workers afin qu'ils chargent
 php artisan queue:restart
 ```
 
-## 3.4 Scheduler
+## 3.6 Scheduler
 
 Le scheduler execute les rappels et le controle de sante de la queue. Configurer une execution chaque minute:
 

@@ -174,6 +174,61 @@ class HistoricalTrainingMigrationSafetyTest extends TestCase
             ->assertSuccessful();
     }
 
+    public function test_preflight_accepts_a_genuinely_fresh_database(): void
+    {
+        $this->artisan('deployment:preflight')
+            ->expectsOutputToContain('Fresh database')
+            ->assertSuccessful();
+    }
+
+    public function test_preflight_accepts_consistent_modern_state(): void
+    {
+        $this->createTrainingTable('trainings');
+        $this->createParticipantTable('training_participants');
+
+        $this->artisan('deployment:preflight')
+            ->expectsOutputToContain('Preflight migrations réussi')
+            ->assertSuccessful();
+    }
+
+    public function test_preflight_refuses_mixed_generations_without_changing_data(): void
+    {
+        $this->createTrainingTable('formations');
+        $this->createParticipantTable('training_participants');
+        DB::table('formations')->insert(['id' => 1, 'title' => 'OLD_SENTINEL']);
+        DB::table('training_participants')->insert([
+            'id' => 2, 'email' => 'new-sentinel@example.test', 'payment_id' => 'PAYMENT_NEW',
+        ]);
+
+        $this->artisan('deployment:preflight')
+            ->expectsOutputToContain('État incohérent')
+            ->assertFailed();
+
+        $this->assertSame(['OLD_SENTINEL'], DB::table('formations')->pluck('title')->all());
+        $this->assertSame(['PAYMENT_NEW'], DB::table('training_participants')->pluck('payment_id')->all());
+    }
+
+    public function test_preflight_refuses_recorded_migrations_with_missing_tables(): void
+    {
+        Schema::create('migrations', function (Blueprint $table): void {
+            $table->id();
+            $table->string('migration');
+            $table->integer('batch');
+        });
+        DB::table('migrations')->insert([
+            'migration' => '2026_05_17_075828_rename_formations_table_to_trainings_table',
+            'batch' => 1,
+        ]);
+
+        $this->artisan('deployment:preflight')
+            ->expectsOutputToContain('État incomplet')
+            ->assertFailed();
+
+        $this->assertDatabaseHas('migrations', [
+            'migration' => '2026_05_17_075828_rename_formations_table_to_trainings_table',
+        ]);
+    }
+
     public function test_preflight_refuses_coexistence_without_changing_sentinels(): void
     {
         $this->createTrainingTable('formations');
