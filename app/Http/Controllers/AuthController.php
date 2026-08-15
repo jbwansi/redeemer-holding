@@ -10,6 +10,9 @@ use App\Services\SeoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\TrainingRegistrationLinkService;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 class AuthController extends Controller
 {
@@ -17,6 +20,7 @@ class AuthController extends Controller
     public function __construct(
         private readonly AuthenticationService $authService,
         private readonly SettingsService $settingsService,
+        private readonly TrainingRegistrationLinkService $registrationLinkService,
     ) {
     }
 
@@ -24,9 +28,12 @@ class AuthController extends Controller
     public function show_auth(Request $request)
     {
         $isRegistration = $request->routeIs('register.page');
+        $registrationEnabled = $this->isRegistrationEnabled();
 
         return inertia("Frontend/auth", [
-            'registrationEnabled' => $this->isRegistrationEnabled(),
+            'registrationEnabled' => $registrationEnabled,
+            'initialMode' => $isRegistration && $registrationEnabled ? 'register' : 'login',
+            'suggestedEmail' => $this->registrationLinkService->pendingEmail(),
             'seo' => SeoService::page(
                 $isRegistration ? 'Inscription' : 'Connexion',
                 $isRegistration
@@ -56,11 +63,7 @@ class AuthController extends Controller
         $this->authService->authenticate($request);
 
 
-        if (Auth::user()->can('administer')) {
-            return redirect()->route('dashboard');
-        } else {
-            return redirect()->route('dashboard.client.profile');
-        }
+        return $this->authenticatedRedirect($request);
     }
     public function register(RegisterRequest $request)
     {
@@ -71,11 +74,41 @@ class AuthController extends Controller
         }
 
         $user = $this->authService->register($request);
-        if (Auth::user()->can('administer')) {
-            return redirect()->route('dashboard');
-        } else {
-            return redirect()->route('dashboard.client.profile');
+        return $this->authenticatedRedirect($request);
+    }
+
+    public function verificationNotice(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('training-registration.claim');
         }
+
+        return inertia('Frontend/auth', [
+            'registrationEnabled' => $this->isRegistrationEnabled(),
+            'emailVerificationRequired' => true,
+            'verificationEmail' => $request->user()->email,
+            'status' => session('status'),
+        ]);
+    }
+
+    public function sendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('training-registration.claim');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'verification-link-sent');
+    }
+
+    public function verifyEmail(EmailVerificationRequest $request)
+    {
+        if ($request->user()->markEmailAsVerified()) {
+            event(new Verified($request->user()));
+        }
+
+        return redirect()->route('training-registration.claim');
     }
     public function logout(Request $request): RedirectResponse
     {
@@ -108,5 +141,18 @@ class AuthController extends Controller
             || $value === 1
             || $value === '1'
             || $value === 'true';
+    }
+
+    private function authenticatedRedirect(Request $request)
+    {
+        if ($this->registrationLinkService->hasPending()) {
+            return $request->user()->hasVerifiedEmail()
+                ? redirect()->route('training-registration.claim')
+                : redirect()->route('verification.notice');
+        }
+
+        return $request->user()->can('administer')
+            ? redirect()->route('dashboard')
+            : redirect()->route('dashboard.client.profile');
     }
 }

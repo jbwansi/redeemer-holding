@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
 import { AlertCircle, GraduationCap } from 'lucide-react';
 import { route } from 'ziggy-js';
 
 const TrainingJoin = ({ training, auth }: any) => {
   const [participantQuantity, setParticipantQuantity] = useState(1);
+  const isSubmitting = useRef(false);
 
   const MAX_PARTICIPANTS_PER_REGISTRATION = 5; // Limite par inscription
   const maxQty = Math.min(training?.available_seats, MAX_PARTICIPANTS_PER_REGISTRATION);
@@ -35,7 +36,14 @@ const TrainingJoin = ({ training, auth }: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    post(route('trainings.register', training.slug));
+    if (isSubmitting.current || processing) return;
+
+    isSubmitting.current = true;
+    post(route('trainings.register', training.slug), {
+      onFinish: () => {
+        isSubmitting.current = false;
+      },
+    });
   };
 
   // Rendu si la formation est complète
@@ -88,6 +96,14 @@ const TrainingJoin = ({ training, auth }: any) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {errors.general && (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+            >
+              {errors.general}
+            </div>
+          )}
           {/* Prénom + Nom */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -287,7 +303,7 @@ const TrainingJoin = ({ training, auth }: any) => {
               ) : (
                 <>
                   <GraduationCap className="mr-2 w-5 h-5" />
-                  {training.price > 0 ? 'Procéder au paiement' : 'Réserver gratuitement'}
+                  S'inscrire à la formation
                 </>
               )}
             </button>

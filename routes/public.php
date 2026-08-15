@@ -36,8 +36,9 @@ Route::post('/services-requests/store/{id}', [FrontendServiceController::class, 
 // Formations
 Route::get('/formations', [TrainingController::class, 'trainings'])->name('formations');
 Route::get('/formations/{slug}', [TrainingController::class, 'formation_detail'])->name('formations.details');
-Route::post('/formations/{slug}/inscription', [TrainingController::class, 'register_formation'])->middleware('throttle:3,1')->name('trainings.register');
+Route::post('/formations/{slug}/inscription', [TrainingController::class, 'register_formation'])->middleware('throttle:training-registration')->name('trainings.register');
 Route::get('/formations/{slug}/confirmation/{participant_id}', [TrainingController::class, 'showConfirmation_formation'])->name('trainings.registration.confirmation');
+Route::get('/formations/{slug}/confirmation/{participant_id}/compte', [TrainingController::class, 'startAccountLink_formation'])->name('trainings.registration.account');
 Route::delete('/formations/{slug}/inscription/{participant_id}', [TrainingController::class, 'cancelRegistration_formation'])->name('trainings.registration.cancel');
 Route::get('/formations/{slug}/facture/{reference}', [TrainingController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
 

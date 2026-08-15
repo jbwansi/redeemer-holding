@@ -43,6 +43,14 @@ class AppServiceProvider extends ServiceProvider
             DB::select('select 1');
         });
         RateLimiter::for('coach-ai', fn ($request) => Limit::perMinute((int) app(CoachSettingsService::class)->all()['rate_limit_per_minute'])->by((string) $request->user()->id));
+        RateLimiter::for('training-registration', function ($request) {
+            $actor = $request->user()
+                ? 'user:' . $request->user()->getAuthIdentifier()
+                : 'ip:' . $request->ip();
+
+            return Limit::perMinute(3)
+                ->by($actor . '|training:' . (string) $request->route('slug'));
+        });
 
         Event::listen(MessageSending::class, function (MessageSending $event): void {
             if (!app()->environment('staging')) {

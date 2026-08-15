@@ -1,28 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { InputField } from '@/components/frontend/auth/input-field';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { route } from 'ziggy-js';
 
-const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolean }) => {
-  const [activeTab, setActiveTab] = useState('login');
+type AuthPageProps = {
+  registrationEnabled?: boolean;
+  initialMode?: 'login' | 'register';
+  suggestedEmail?: string | null;
+  emailVerificationRequired?: boolean;
+  verificationEmail?: string;
+  status?: string;
+};
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
+const AuthPage = ({
+  registrationEnabled = true,
+  initialMode = 'login',
+  suggestedEmail = null,
+  emailVerificationRequired = false,
+  verificationEmail,
+  status,
+}: AuthPageProps) => {
+  const activeTab = initialMode;
 
-    if (tab === 'register' && registrationEnabled) {
-      setActiveTab('register');
-    }
-  }, [registrationEnabled]);
-
-  useEffect(() => {
-    if (!registrationEnabled && activeTab === 'register') {
-      setActiveTab('login');
-    }
-  }, [registrationEnabled, activeTab]);
+  if (emailVerificationRequired) {
+    return (
+      <FrontLayout>
+        <Head title="Vérifiez votre adresse e-mail" />
+        <div className="flex min-h-screen items-center justify-center px-4 pt-24">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <Mail className="mx-auto h-12 w-12 text-[#DA2E29]" />
+            <h1 className="mt-5 text-2xl font-semibold text-slate-900 dark:text-white">
+              Vérifiez votre adresse e-mail
+            </h1>
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+              Un lien de vérification a été envoyé à <strong>{verificationEmail}</strong>. Ouvrez-le
+              pour rattacher votre inscription et accéder à la formation.
+            </p>
+            {status === 'verification-link-sent' && (
+              <p className="mt-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                Un nouveau lien de vérification vient d’être envoyé.
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => router.post(route('verification.send'))}
+              className="ux-btn-primary mt-6 w-full"
+            >
+              Renvoyer l’e-mail de vérification
+            </button>
+          </div>
+        </div>
+      </FrontLayout>
+    );
+  }
 
   // Animations
   const tabVariants = {
@@ -89,9 +122,8 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
 
             {/* Tabs navigation */}
             <div className="flex rounded-lg p-1 bg-gray-100 dark:bg-gray-700/50 mb-6 relative z-10">
-              <button
-                type="button"
-                onClick={() => setActiveTab('login')}
+              <Link
+                href={route('login')}
                 className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                   activeTab === 'login'
                     ? 'bg-white dark:bg-gray-800 text-[#DA2E29] shadow-sm'
@@ -99,11 +131,10 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
                 }`}
               >
                 Connexion
-              </button>
+              </Link>
               {registrationEnabled && (
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('register')}
+                <Link
+                  href={route('register.page')}
                   className={`flex-1 py-2.5 text-sm font-medium rounded-md transition-all duration-200 ${
                     activeTab === 'register'
                       ? 'bg-white dark:bg-gray-800 text-[#DA2E29] shadow-sm'
@@ -111,7 +142,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
                   }`}
                 >
                   Inscription
-                </button>
+                </Link>
               )}
             </div>
 
@@ -133,8 +164,8 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
                   exit="exit"
                 >
                   <LoginForm
-                    setActiveTab={setActiveTab}
                     registrationEnabled={registrationEnabled}
+                    suggestedEmail={suggestedEmail}
                   />
                 </motion.div>
               ) : (
@@ -145,7 +176,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
                   animate="visible"
                   exit="exit"
                 >
-                  <RegisterForm setActiveTab={setActiveTab} />
+                  <RegisterForm suggestedEmail={suggestedEmail} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -159,7 +190,7 @@ const AuthPage = ({ registrationEnabled = true }: { registrationEnabled?: boolea
 // Input field component
 
 // Login form component
-const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
+const LoginForm = ({ registrationEnabled, suggestedEmail }: any) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -170,7 +201,7 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
     errors: loginErrors,
     reset,
   } = useForm({
-    email: '',
+    email: suggestedEmail || '',
     password: '',
     remember: false,
   });
@@ -210,6 +241,7 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
           error={loginErrors.email}
           isValid={hasValidLoginEmail}
           helperText={!hasValidLoginEmail && data.email ? 'Format attendu: nom@domaine.com' : ''}
+          readOnly={Boolean(suggestedEmail)}
         />
 
         <InputField
@@ -294,13 +326,12 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
         {registrationEnabled ? (
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Pas encore de compte?{' '}
-            <button
-              type="button"
-              onClick={() => setActiveTab('register')}
+            <Link
+              href={route('register.page')}
               className="font-medium text-[#DA2E29] hover:text-[#c02824] transition-colors"
             >
               S'inscrire
-            </button>
+            </Link>
           </p>
         ) : (
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -313,14 +344,14 @@ const LoginForm = ({ setActiveTab, registrationEnabled }: any) => {
 };
 
 // Register form component
-const RegisterForm = ({ setActiveTab }: any) => {
+const RegisterForm = ({ suggestedEmail }: any) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
 
   const { data, setData, post, processing, errors, reset } = useForm({
     first_name: '',
     last_name: '',
-    email: '',
+    email: suggestedEmail || '',
     password: '',
     password_confirmation: '',
     terms: false,
@@ -393,6 +424,7 @@ const RegisterForm = ({ setActiveTab }: any) => {
           error={errors.email}
           isValid={hasValidRegisterEmail}
           helperText={!hasValidRegisterEmail && data.email ? 'Format attendu: nom@domaine.com' : ''}
+          readOnly={Boolean(suggestedEmail)}
         />
 
         <InputField
@@ -515,13 +547,12 @@ const RegisterForm = ({ setActiveTab }: any) => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Déjà inscrit?{' '}
-          <button
-            type="button"
-            onClick={() => setActiveTab('login')}
+          <Link
+            href={route('login')}
             className="font-medium text-[#DA2E29] hover:text-[#c02824] transition-colors"
           >
             Se connecter
-          </button>
+          </Link>
         </p>
       </div>
     </div>

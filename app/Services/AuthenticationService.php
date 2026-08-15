@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\WelcomeMail;
 use App\Services\DynamicMailerService;
+use Illuminate\Auth\Events\Registered;
 
 class AuthenticationService
 {
@@ -46,7 +47,8 @@ class AuthenticationService
             unset($userData['terms']);
 
             // Création de l'utilisateur
-            $user = User::create($userData);
+            $user = User::create($userData)->refresh();
+            event(new Registered($user));
             $this->dynamicMailerService->send(new WelcomeMail($user), $user->email);
             // Connexion automatique
             Auth::login($user);

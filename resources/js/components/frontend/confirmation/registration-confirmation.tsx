@@ -32,6 +32,7 @@ interface RegistrationConfirmationProps {
     rows: PaymentSummaryRow[];
     total: string;
   };
+  primaryAction?: React.ReactNode;
   actionButtons?: React.ReactNode;
   bottomSection?: React.ReactNode;
   cancelSection?: React.ReactNode;
@@ -59,9 +60,11 @@ const RegistrationConfirmation = ({
   invoiceHref,
   isFree = false,
   paymentSummary,
+  primaryAction,
   actionButtons,
   bottomSection,
   cancelSection,
+  placeholderImage,
 }: RegistrationConfirmationProps) => {
   return (
     <FrontLayout>
@@ -80,6 +83,8 @@ const RegistrationConfirmation = ({
               Un email de confirmation a été envoyé à {registration.email}.
             </p>
           </div>
+
+          {primaryAction && <div className="mt-6">{primaryAction}</div>}
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Link

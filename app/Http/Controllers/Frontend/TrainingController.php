@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Training;
 use App\Models\TrainingParticipant;
+use App\Models\TrainingProgress;
 use App\Models\PageContent;
 use App\Services\SeoService;
 use App\Services\OwnedResourceAccessService;
 use App\Services\PaymentAmountService;
+use App\Services\TrainingRegistrationLinkService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +79,7 @@ class TrainingController extends Controller
         return inertia('Frontend/trainings/show', [
             'training' => $training,
             'participant' => $participant,
+            'trainingAccess' => $participant ? $this->trainingAccessData($training, $participant) : null,
             'seo' => SeoService::page(
                 $training->title ?? $training->name ?? '',
                 $training->description ?? $training->excerpt ?? '',
@@ -100,10 +103,7 @@ class TrainingController extends Controller
             return back()->withErrors(['general' => "Cette formation est déjà terminée."]);
         }
 
-        $training->loadCount('participants'); // Charge le compte des participants
-        $availableSeats = $training->max_participants
-            ? $training->max_participants - $training->participants_count
-            : PHP_INT_MAX;
+        $availableSeats = $training->available_seats;
 
         if ($availableSeats <= 0) {
             return back()->withErrors(['general' => "Désolé, cette formation est complète."]);
@@ -125,9 +125,28 @@ class TrainingController extends Controller
 
         // 4. Transaction
         try {
-            return DB::transaction(function () use ($training, $validated, $availableSeats) {
+            return DB::transaction(function () use ($training, $validated) {
+                $lockedTraining = Training::query()->lockForUpdate()->findOrFail($training->id);
+
+                $existingRegistration = TrainingParticipant::query()
+                    ->where('training_id', $lockedTraining->id)
+                    ->where('status', '!=', TrainingParticipant::STATUS_CANCELLED)
+                    ->when(
+                        auth()->check(),
+                        fn ($query) => $query->where('user_id', auth()->id()),
+                        fn ($query) => $query->whereNull('user_id')->where('email', $validated['email'])
+                    )
+                    ->first();
+
+                if ($existingRegistration) {
+                    return back()->withErrors([
+                        'general' => 'Vous êtes déjà inscrit à cette formation.',
+                    ]);
+                }
+
+                $availableSeats = $lockedTraining->available_seats;
                 // Revérification du nombre de places
-                if ($validated['qty'] > $availableSeats && $training->max_participants !== null) {
+                if ($validated['qty'] > $availableSeats && $lockedTraining->max_participants !== null) {
                     return back()->withErrors([
                         'qty' => "Il ne reste que {$availableSeats} place(s) disponible(s)."
                     ]);
@@ -135,7 +154,7 @@ class TrainingController extends Controller
 
                 // Création du participant
                 $participant = new TrainingParticipant();
-                $participant->training_id = $training->id; // Ajout explicite
+                $participant->training_id = $lockedTraining->id;
                 $participant->user_id = auth()->id();
                 $participant->name = trim($validated['first_name'] . ' ' . $validated['last_name']);
                 $participant->email = $validated['email'];
@@ -151,19 +170,19 @@ class TrainingController extends Controller
                 }
 
                 // Envoi des emails
-                $this->sendTrainingConfirmationEmails($training, $participant);
+                $this->sendTrainingConfirmationEmails($lockedTraining, $participant);
 
                 // Redirection selon le prix
-                if ($training->price <= 0) {
+                if ($lockedTraining->price <= 0) {
                     $participant->update(['status' => TrainingParticipant::STATUS_COMPLETED]);
                     return redirect()->route('trainings.registration.confirmation', [
-                        'slug' => $training->slug,
+                        'slug' => $lockedTraining->slug,
                         'participant_id' => $participant->id
                     ]);
                 }
 
                 return redirect()->route('trainings.payment', [
-                    'slug' => $training->slug,
+                    'slug' => $lockedTraining->slug,
                     'participant_id' => $participant->id
                 ]);
             });
@@ -204,7 +223,7 @@ class TrainingController extends Controller
             $this->dynamicMailerService->queue(
                 new RegistrationAdminNotificationMail(
                     type: 'formation',
-                    item: $formation,
+                    item: $training,
                     participant: $participant,
                 ),
                 $adminEmail
@@ -213,13 +232,13 @@ class TrainingController extends Controller
 
         Log::info('Emails de confirmation formation envoyés', [
             'participant_id' => $participant->id,
-            'training_id' => $formation->id,
+            'training_id' => $training->id,
         ]);
     } catch (\Exception $e) {
         Log::error('Erreur lors de l’envoi des emails formation', [
             'error' => $e->getMessage(),
             'participant_id' => $participant->id,
-            'training_id' => $formation->id,
+            'training_id' => $training->id,
         ]);
     }
 }
@@ -242,8 +261,77 @@ class TrainingController extends Controller
         return inertia('Frontend/trainings/registration-confirmation', [
             'training' => $training,
             'registration' => $participant,
-            'total' => $training->price * $participant->qty
+            'total' => $training->price * $participant->qty,
+            'trainingAccess' => $this->trainingAccessData($training, $participant),
         ]);
+    }
+
+    public function startAccountLink_formation(Request $request, $slug, $participant_id)
+    {
+        $training = Training::where('slug', $slug)->published()->firstOrFail();
+        $participant = TrainingParticipant::query()->findOrFail($participant_id);
+
+        abort_unless((int) $participant->training_id === (int) $training->id, 404);
+        abort_unless($participant->user_id === null, 409);
+        abort_unless($participant->status === TrainingParticipant::STATUS_COMPLETED, 409);
+        abort_unless($request->session()->has('temp_participant_' . $participant->id), 403);
+
+        app(TrainingRegistrationLinkService::class)->remember($participant);
+
+        return redirect()->route($request->query('mode') === 'login' ? 'login' : 'register.page');
+    }
+
+    public function claimRegistration_formation(TrainingRegistrationLinkService $linkService)
+    {
+        $participant = $linkService->claim(auth()->user());
+
+        if (!$participant) {
+            return redirect()->route('formations')->with('error', 'Aucune inscription à rattacher.');
+        }
+
+        return redirect()->route('trainings.registration.confirmation', [
+            'slug' => $participant->training->slug,
+            'participant_id' => $participant->id,
+        ])->with('success', 'Votre inscription a été rattachée à votre compte.');
+    }
+
+    private function trainingAccessData(Training $training, TrainingParticipant $participant): array
+    {
+        $canAccess = $participant->status === TrainingParticipant::STATUS_COMPLETED
+            && ((float) $training->price <= 0 || $participant->payment_confirmed);
+
+        if (!$canAccess) {
+            return ['can_access' => false, 'requires_account_link' => false];
+        }
+
+        if (!$participant->user_id) {
+            return [
+                'can_access' => false,
+                'requires_account_link' => true,
+                'register_url' => route('trainings.registration.account', [
+                    'slug' => $training->slug,
+                    'participant_id' => $participant->id,
+                    'mode' => 'register',
+                ]),
+                'login_url' => route('trainings.registration.account', [
+                    'slug' => $training->slug,
+                    'participant_id' => $participant->id,
+                    'mode' => 'login',
+                ]),
+            ];
+        }
+
+        $hasStarted = TrainingProgress::query()
+            ->where('training_id', $training->id)
+            ->where('user_id', $participant->user_id)
+            ->exists();
+
+        return [
+            'can_access' => true,
+            'requires_account_link' => false,
+            'label' => $hasStarted ? 'Continuer la formation' : 'Accéder à la formation',
+            'url' => route('learning.show', ['training' => $training->id]),
+        ];
     }
 
     /**

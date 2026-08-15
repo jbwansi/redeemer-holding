@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'allowed_environments' => ['local', 'staging'],
     'dataset_id' => env('ACCEPTANCE_DATASET_ID', 'A383-v1'),
     'accounts' => [
         'admin' => ['name' => 'TEST A383 Admin', 'email' => env('ACCEPTANCE_ADMIN_EMAIL')],
