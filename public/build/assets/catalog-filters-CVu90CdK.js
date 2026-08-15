@@ -1,0 +1,1 @@
+const o=a=>typeof window>"u"?"":new URLSearchParams(window.location.search).get(a)??"",s=(a,t)=>{const e={page:a};return Object.entries(t).forEach(([n,r])=>{r!==""&&r!==null&&r!==!1&&(e[n]=r)}),e};export{s as c,o as r};
