@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_home_redirects_guest_to_login_in_testing_environment(): void
+    use RefreshDatabase;
+
+    public function test_home_is_publicly_accessible_in_testing_environment(): void
     {
-        $this->get('/')->assertRedirect(route('login'));
+        $this->get('/')->assertOk();
     }
 }

@@ -32,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             HandleInertiaRequests::class,
-            OnlyTestUsers::class,
+            // OnlyTestUsers::class,
             RespectMaintenanceMode::class,
             SecurityHeaders::class,
         ]);
