@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
-import { CheckCircle, Printer, CalendarDays, FileText } from 'lucide-react';
+import { AlertCircle, CalendarDays, CheckCircle, FileText, Printer } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 interface FieldItem {
@@ -21,10 +21,10 @@ interface RegistrationConfirmationProps {
   backHref: string;
   backLabel: string;
   itemTitle: string;
-  itemImage: any;
+  itemImage: unknown;
   fields: FieldItem[];
-  registration: any;
-  qrCodeValue: string;
+  registration: { email: string; reference: string };
+  qrCodeValue?: string;
   calendarHref?: string;
   invoiceHref?: string;
   isFree?: boolean;
@@ -37,13 +37,21 @@ interface RegistrationConfirmationProps {
   bottomSection?: React.ReactNode;
   cancelSection?: React.ReactNode;
   placeholderImage?: string;
+  confirmationTitle?: string;
+  confirmationMessage?: string;
+  isConfirmed?: boolean;
 }
 
-const resolveImage = (image: any, placeholder: string) => {
+const resolveImage = (image: unknown, placeholder: string): string => {
   if (!image) return placeholder;
   if (typeof image === 'string') return image;
+  if (typeof image !== 'object') return placeholder;
 
-  return image.large || image.medium || image.original || image.thumbnail || placeholder;
+  const candidate = image as Record<string, unknown>;
+  const resolved =
+    candidate.large || candidate.medium || candidate.original || candidate.thumbnail || placeholder;
+
+  return typeof resolved === 'string' ? resolved : placeholder;
 };
 
 const RegistrationConfirmation = ({
@@ -65,6 +73,9 @@ const RegistrationConfirmation = ({
   bottomSection,
   cancelSection,
   placeholderImage,
+  confirmationTitle,
+  confirmationMessage,
+  isConfirmed = true,
 }: RegistrationConfirmationProps) => {
   return (
     <FrontLayout>
@@ -74,13 +85,24 @@ const RegistrationConfirmation = ({
         <div className="pointer-events-none absolute -top-20 -left-16 h-72 w-72 rounded-full bg-[#0f766e]/15 blur-3xl" />
 
         <section className="mx-auto max-w-[1200px] px-6 md:px-8">
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+          <div
+            className={`rounded-2xl border p-5 ${
+              isConfirmed
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
+            }`}
+          >
             <p className="inline-flex items-center gap-2 text-lg font-semibold">
-              <CheckCircle className="h-5 w-5" />
-              {eventTypeLabel} confirmé{eventTypeLabel.endsWith('e') ? 'e' : ''}
+              {isConfirmed ? (
+                <CheckCircle className="h-5 w-5" />
+              ) : (
+                <AlertCircle className="h-5 w-5" />
+              )}
+              {confirmationTitle ?? `${eventTypeLabel} confirmé`}
             </p>
             <p className="mt-1 text-sm">
-              Un email de confirmation a été envoyé à {registration.email}.
+              {confirmationMessage ??
+                `Un email de confirmation a été envoyé à ${registration.email}.`}
             </p>
           </div>
 
@@ -96,6 +118,7 @@ const RegistrationConfirmation = ({
             </Link>
 
             <button
+              type="button"
               onClick={() => window.print()}
               className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700"
             >
@@ -116,13 +139,13 @@ const RegistrationConfirmation = ({
             )}
 
             {invoiceHref && !isFree && (
-              <button
-                onClick={() => (window.location.href = invoiceHref)}
+              <a
+                href={invoiceHref}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-700"
               >
                 <FileText className="h-4 w-4" />
                 Facture
-              </button>
+              </a>
             )}
 
             {actionButtons}
@@ -176,19 +199,20 @@ const RegistrationConfirmation = ({
               )}
             </div>
 
-            <div className="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
-              <p className="text-sm text-slate-500">Code de vérification</p>
-              <div className="mx-auto mt-4 inline-block rounded-xl bg-white p-3">
-                <QRCode value={qrCodeValue} size={150} />
+            {qrCodeValue && (
+              <div className="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                <p className="text-sm text-slate-500">Code de vérification</p>
+                <div className="mx-auto mt-4 inline-block rounded-xl bg-white p-3">
+                  <QRCode value={qrCodeValue} size={150} />
+                </div>
+                <p className="mt-3 font-mono text-sm text-slate-700 dark:text-slate-300">
+                  {registration.reference}
+                </p>
               </div>
-              <p className="mt-3 font-mono text-sm text-slate-700 dark:text-slate-300">
-                {registration.reference}
-              </p>
-            </div>
+            )}
           </div>
 
           {cancelSection}
-
           {bottomSection}
         </section>
       </main>

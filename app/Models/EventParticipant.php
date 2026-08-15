@@ -13,7 +13,6 @@ class EventParticipant extends Model
 {
     use Notifiable;
 
-
     protected $fillable = [
         'user_id',
         'event_id',
@@ -29,7 +28,14 @@ class EventParticipant extends Model
         'payment_date',
         'payment_confirmed',
         'payment_error',
-        'cancelled_at'
+        'refund_id',
+        'refund_status',
+        'refund_amount',
+        'refund_date',
+        'cancelled_at',
+        'cancellation_reason',
+        'checked_in_at',
+        'checked_in_by',
     ];
 
     protected $casts = [
@@ -37,15 +43,21 @@ class EventParticipant extends Model
         'payment_amount' => 'decimal:2',
         'payment_date' => 'datetime',
         'payment_confirmed' => 'boolean',
+        'refund_amount' => 'decimal:2',
+        'refund_date' => 'datetime',
         'cancelled_at' => 'datetime',
+        'checked_in_at' => 'datetime',
     ];
 
     /**
      * Les statuts possibles pour un participant
      */
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     /**
@@ -131,11 +143,12 @@ class EventParticipant extends Model
 
         // Vérifier si la date limite d'annulation est passée
         $event = $this->event;
-        if (!$event) {
+        if (! $event) {
             return false;
         }
 
         $cancellationDeadline = (new \DateTime($event->start_date))->modify('-24 hours');
+
         return now() <= $cancellationDeadline;
     }
 
@@ -152,7 +165,7 @@ class EventParticipant extends Model
      */
     public function getTotalAmountAttribute(): float
     {
-        if (!$this->event) {
+        if (! $this->event) {
             return 0;
         }
 
@@ -167,13 +180,13 @@ class EventParticipant extends Model
      */
     public function cancel(): bool
     {
-        if (!$this->can_be_cancelled) {
+        if (! $this->can_be_cancelled) {
             return false;
         }
 
         $this->update([
             'status' => self::STATUS_CANCELLED,
-            'cancelled_at' => now()
+            'cancelled_at' => now(),
         ]);
 
         return true;
@@ -191,7 +204,7 @@ class EventParticipant extends Model
         $this->update([
             'status' => self::STATUS_COMPLETED,
             'payment_date' => $this->payment_date ?? now(),
-            'payment_confirmed' => true
+            'payment_confirmed' => true,
         ]);
 
         return true;
@@ -204,7 +217,7 @@ class EventParticipant extends Model
     {
         return $this->update([
             'status' => self::STATUS_IN_PROGRESS,
-            'stripe_session_id' => $stripeSessionId
+            'stripe_session_id' => $stripeSessionId,
         ]);
     }
 
@@ -213,7 +226,7 @@ class EventParticipant extends Model
      */
     public static function generateReference(): string
     {
-        return strtoupper(substr(uniqid(), -6) . substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, 2));
+        return strtoupper(substr(uniqid(), -6).substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ'), 0, 2));
     }
 
     /**
@@ -222,17 +235,18 @@ class EventParticipant extends Model
     public function getCanBeRefundedAttribute(): bool
     {
         // Doit être payé et pas déjà annulé
-        if (!$this->is_paid || $this->is_cancelled) {
+        if (! $this->is_paid || $this->is_cancelled) {
             return false;
         }
 
         // Vérifier la date limite de remboursement (ex: 7 jours avant l'événement)
         $event = $this->event;
-        if (!$event) {
+        if (! $event) {
             return false;
         }
 
         $refundDeadline = (new \DateTime($event->start_date))->modify('-7 days');
+
         return now() <= $refundDeadline;
     }
 
@@ -241,7 +255,7 @@ class EventParticipant extends Model
      */
     public function refund($fullRefund = true, $refundAmount = null): bool
     {
-        if (!$this->can_be_refunded || !$this->payment_id) {
+        if (! $this->can_be_refunded || ! $this->payment_id) {
             return false;
         }
 
@@ -250,7 +264,7 @@ class EventParticipant extends Model
 
             // Calculer le montant à rembourser
             $amountToRefund = null;
-            if (!$fullRefund && $refundAmount !== null) {
+            if (! $fullRefund && $refundAmount !== null) {
                 $amountToRefund = round($refundAmount * 100); // Convertir en centimes
             }
 
@@ -261,8 +275,8 @@ class EventParticipant extends Model
                 'metadata' => [
                     'participant_id' => $this->id,
                     'event_id' => $this->event_id,
-                    'reason' => 'customer_requested'
-                ]
+                    'reason' => 'customer_requested',
+                ],
             ]);
 
             // Mettre à jour l'inscription
@@ -271,7 +285,7 @@ class EventParticipant extends Model
                 'cancelled_at' => now(),
                 'refund_id' => $refund->id,
                 'refund_amount' => $amountToRefund ? ($amountToRefund / 100) : $this->payment_amount,
-                'refund_date' => now()
+                'refund_date' => now(),
             ]);
 
             return true;
@@ -279,7 +293,7 @@ class EventParticipant extends Model
             Log::error('Erreur lors du remboursement:', [
                 'message' => $e->getMessage(),
                 'participant_id' => $this->id,
-                'payment_id' => $this->payment_id
+                'payment_id' => $this->payment_id,
             ]);
 
             return false;
@@ -308,6 +322,7 @@ class EventParticipant extends Model
     public function getIsPaymentExpiredAttribute(): bool
     {
         $expirationDate = $this->payment_expiration;
+
         return $expirationDate && now() > $expirationDate;
     }
 
@@ -317,12 +332,12 @@ class EventParticipant extends Model
     public static function purgeExpiredRegistrations(): int
     {
         // Trouver les inscriptions abandonnées ou expirées
-        $expiredRegistrations = self::where(function($query) {
+        $expiredRegistrations = self::where(function ($query) {
             $query->where('status', self::STATUS_PENDING)
-                  ->orWhere('status', self::STATUS_IN_PROGRESS);
+                ->orWhere('status', self::STATUS_IN_PROGRESS);
         })
-        ->where('created_at', '<', now()->subMinutes(30))
-        ->get();
+            ->where('created_at', '<', now()->subMinutes(30))
+            ->get();
 
         $count = 0;
         foreach ($expiredRegistrations as $registration) {
@@ -340,7 +355,7 @@ class EventParticipant extends Model
             $registration->update([
                 'status' => self::STATUS_CANCELLED,
                 'cancelled_at' => now(),
-                'cancellation_reason' => 'expired'
+                'cancellation_reason' => 'expired',
             ]);
 
             $count++;

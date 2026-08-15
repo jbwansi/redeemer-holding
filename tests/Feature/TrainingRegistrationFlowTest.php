@@ -454,7 +454,7 @@ class TrainingRegistrationFlowTest extends TestCase
         $secondTraining = $this->training();
         $invalidRegistration = ['qty' => 1];
 
-        foreach (range(1, 3) as $attempt) {
+        foreach (range(1, 5) as $attempt) {
             $this->actingAs($user)
                 ->post(route('trainings.register', $firstTraining->slug), $invalidRegistration)
                 ->assertSessionHasErrors(['first_name', 'last_name', 'email']);

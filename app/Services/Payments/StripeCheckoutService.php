@@ -6,6 +6,11 @@ use Stripe\Checkout\Session as StripeSession;
 
 class StripeCheckoutService
 {
+    public function retrieveSession(string $sessionId)
+    {
+        return StripeSession::retrieve($sessionId);
+    }
+
     public function createSession(array $data)
     {
         return StripeSession::create([
