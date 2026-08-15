@@ -311,3 +311,73 @@ Completer cette section avec les contacts internes:
 - Contact support:
 
 Ajouter ici les canaux d'urgence (email, telephone, canal chat).
+
+---
+
+## Strategie Git et Release Candidate
+
+### Branche `develop`
+
+La branche `develop` est la branche principale d'integration.
+
+Regles :
+
+- les corrections et evolutions sont integrees sur `develop` ;
+- chaque push ou pull request doit passer la CI avec succes ;
+- une CI verte ne declenche pas automatiquement la creation d'une nouvelle Release Candidate ;
+- plusieurs corrections peuvent etre regroupees sur `develop` avant la prochaine RC.
+
+### Creation d'une Release Candidate
+
+Une nouvelle Release Candidate est creee uniquement lorsqu'un lot coherent est reellement pret pour validation sur staging.
+
+Conditions minimales :
+
+- branche `develop` propre ;
+- synchronisation avec `origin/develop` ;
+- CI GitHub Actions verte ;
+- tests Laravel reussis ;
+- build Vite reussi ;
+- aucune modification locale non commitee ;
+- commit precis identifie comme candidat au deploiement.
+
+Une nouvelle RC ne doit pas etre creee uniquement parce qu'un nouveau commit existe.
+
+### Convention de version
+
+Les Release Candidates suivent la convention :
+
+`v1.0.0-rc.N`
+
+Le numero `N` n'est incremente que lorsqu'une nouvelle version doit reellement etre testee sur staging.
+
+### Deploiement staging
+
+Une fois la RC creee :
+
+1. identifier le commit exact ;
+2. creer le tag correspondant ;
+3. pousser le tag vers GitHub ;
+4. deployer cette version sur `test.redeemerholding.com` ;
+5. effectuer les tests fonctionnels de staging.
+
+### Corrections apres validation staging
+
+Si une anomalie est trouvee :
+
+1. corriger sur `develop` ;
+2. executer les tests ;
+3. attendre une CI verte ;
+4. creer une nouvelle RC seulement si la correction doit etre redeployee sur staging.
+
+Ne jamais deplacer ou reutiliser un ancien tag RC.
+
+### Promotion vers production
+
+Une RC validee sur staging doit rester immuable.
+
+Si aucun correctif supplementaire n'est necessaire, cette meme version constitue la candidate a la mise en production.
+
+Objectif :
+
+`develop -> RC -> staging -> production`
