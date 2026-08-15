@@ -1,14 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\AppController;
 use App\Http\Controllers\Frontend\BlogController;
 use App\Http\Controllers\Frontend\EventController;
-use App\Http\Controllers\Frontend\TrainingController;
+use App\Http\Controllers\Frontend\EventTicketController;
 use App\Http\Controllers\Frontend\NewsletterController as FrontendNewsletterController;
 use App\Http\Controllers\Frontend\ServiceController as FrontendServiceController;
 use App\Http\Controllers\Frontend\SettingController;
+use App\Http\Controllers\Frontend\TrainingController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,8 +37,9 @@ Route::post('/services-requests/store/{id}', [FrontendServiceController::class, 
 // Formations
 Route::get('/formations', [TrainingController::class, 'trainings'])->name('formations');
 Route::get('/formations/{slug}', [TrainingController::class, 'formation_detail'])->name('formations.details');
-Route::post('/formations/{slug}/inscription', [TrainingController::class, 'register_formation'])->middleware('throttle:3,1')->name('trainings.register');
+Route::post('/formations/{slug}/inscription', [TrainingController::class, 'register_formation'])->middleware('throttle:public-registration')->name('trainings.register');
 Route::get('/formations/{slug}/confirmation/{participant_id}', [TrainingController::class, 'showConfirmation_formation'])->name('trainings.registration.confirmation');
+Route::get('/formations/{slug}/confirmation/{participant_id}/compte', [TrainingController::class, 'startAccountLink_formation'])->name('trainings.registration.account');
 Route::delete('/formations/{slug}/inscription/{participant_id}', [TrainingController::class, 'cancelRegistration_formation'])->name('trainings.registration.cancel');
 Route::get('/formations/{slug}/facture/{reference}', [TrainingController::class, 'downloadInvoice_formation'])->name('formations.facture.download');
 
@@ -46,9 +48,12 @@ Route::get('/blogs', [BlogController::class, 'blogs'])->name('blogs');
 Route::get('/blogs/{slug}', [BlogController::class, 'blog_detail'])->name('blogs.details');
 
 // Evenements
+Route::get('/billets/evenements/{reference}', [EventTicketController::class, 'show'])
+    ->middleware('signed')
+    ->name('events.tickets.show');
 Route::get('/evenements', [EventController::class, 'events'])->name('evenements');
 Route::get('/evenements/{slug}', [EventController::class, 'evenement_detail'])->name('evenements.details');
-Route::post('/evenements/{slug}/inscription', [EventController::class, 'register'])->middleware('throttle:3,1')->name('events.register');
+Route::post('/evenements/{slug}/inscription', [EventController::class, 'register'])->middleware('throttle:public-registration')->name('events.register');
 Route::get('/evenements/{slug}/confirmation/{participant_id}', [EventController::class, 'showConfirmation'])->name('events.registration.confirmation');
 Route::delete('/evenements/{slug}/inscription/{participant_id}', [EventController::class, 'cancelRegistration'])->name('events.registration.cancel');
 Route::get('/evenements/{slug}/facture/{reference}', [EventController::class, 'downloadInvoice'])->name('evenements.facture.download');

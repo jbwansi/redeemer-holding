@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Database\Seeders\StagingAcceptanceSeeder;
+use Database\Seeders\A383DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -17,9 +17,9 @@ class AcceptanceDatasetCommandsTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function stagingDependencies(bool $careerEnabled = true): void
+    private function stagingDependencies(bool $careerEnabled = true, string $environment = 'staging'): void
     {
-        app()->detectEnvironment(static fn (): string => 'staging');
+        app()->detectEnvironment(static fn (): string => $environment);
         config([
             'acceptance.dataset_id' => 'A383-v1',
             'acceptance.password' => 'acceptance-secret-from-config',
@@ -43,9 +43,41 @@ class AcceptanceDatasetCommandsTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_command_refuses_outside_staging(): void
+    public function test_local_environment_is_explicitly_allowed(): void
     {
+        $this->stagingDependencies(true, 'local');
+        $this->artisan('acceptance:provision --dry-run')->assertSuccessful();
+        $this->assertDatabaseCount('trainings', 0);
+    }
+
+    public function test_staging_environment_is_explicitly_allowed(): void
+    {
+        $this->stagingDependencies(true, 'staging');
+        $this->artisan('acceptance:provision --dry-run')->assertSuccessful();
+        $this->assertDatabaseCount('trainings', 0);
+    }
+
+    public function test_production_environment_is_absolutely_refused(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'production');
         $this->artisan('acceptance:provision --dry-run')->assertFailed();
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    public function test_unlisted_environment_is_refused(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'qa');
+        $this->artisan('acceptance:provision --dry-run')->assertFailed();
+        $this->assertDatabaseCount('users', 0);
+    }
+
+    public function test_local_environment_refuses_any_non_array_mailer(): void
+    {
+        $this->stagingDependencies(true, 'local');
+        config(['mail.default' => 'smtp', 'mail.mailers.smtp.transport' => 'smtp']);
+        $this->artisan('acceptance:provision --dry-run')->assertFailed();
+        $this->assertDatabaseCount('trainings', 0);
+        $this->assertDatabaseCount('users', 2);
     }
 
     public function test_dry_run_does_not_mutate_any_business_table(): void
@@ -66,6 +98,7 @@ class AcceptanceDatasetCommandsTest extends TestCase
         Queue::fake();
         $this->artisan('acceptance:provision --apply')->assertSuccessful();
         $this->assertDatabaseCount('users', 5);
+        $this->assertDatabaseHas('event_categories', ['slug' => 'test-a383-category']);
         $this->assertDatabaseHas('users', ['name' => 'TEST A383 Admin', 'email' => 'a383-admin@example.test', 'role' => 'admin', 'is_active' => 1]);
         $this->assertDatabaseHas('users', ['name' => 'TEST A383 Client', 'email' => 'a383-client@example.test', 'role' => 'client', 'is_active' => 1]);
         $this->assertDatabaseHas('users', ['name' => 'TEST A383 Client Forbidden', 'email' => 'a383-forbidden@example.test', 'role' => 'client', 'is_active' => 1]);
@@ -76,6 +109,11 @@ class AcceptanceDatasetCommandsTest extends TestCase
         $this->assertDatabaseCount('events', 2);
         $this->assertDatabaseCount('services', 1);
         $this->assertDatabaseCount('coach_messages', 2);
+        $this->assertDatabaseCount('training_participants', 0);
+        $this->assertDatabaseCount('training_progress', 0);
+        $this->assertDatabaseCount('training_quiz_attempts', 0);
+        $this->assertDatabaseCount('service_requests', 0);
+        $this->assertDatabaseCount('event_participants', 0);
         Mail::assertNothingSent();
         Queue::assertNothingPushed();
         $manifest = collect(Storage::disk('local')->allFiles('acceptance'))->first();
@@ -129,10 +167,61 @@ class AcceptanceDatasetCommandsTest extends TestCase
         $this->assertDatabaseMissing('settings', ['type' => 'coach_module_career']);
     }
 
-    public function test_staging_seeder_is_not_registered_in_database_seeder_and_refuses_other_environments(): void
+    public function test_local_database_seeder_automatically_creates_a383(): void
     {
+        app()->detectEnvironment(static fn (): string => 'local');
+        config(['mail.default' => 'array', 'mail.mailers.array.transport' => 'array']);
+        Storage::fake('local');
+        Storage::fake('coach_private');
+        Storage::fake('public');
+        $this->seed();
+        $this->assertDatabaseHas('users', ['email' => A383DemoSeeder::LOCAL_ADMIN_EMAIL, 'role' => 'admin']);
+        $this->assertDatabaseHas('users', ['email' => A383DemoSeeder::LOCAL_CLIENT_EMAIL, 'role' => 'client']);
+        $this->assertDatabaseHas('trainings', ['slug' => 'TEST-A383-FREE']);
+    }
+
+    public function test_local_demo_seeder_is_idempotent(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'local');
+        config(['mail.default' => 'log', 'mail.mailers.log.transport' => 'log']);
+        Storage::fake('local');
+        Storage::fake('coach_private');
+        Storage::fake('public');
+        $this->seed(A383DemoSeeder::class);
+        $ids = DB::table('users')->where('name', 'like', 'TEST A383%')->orderBy('id')->pluck('id')->all();
+        $this->seed(A383DemoSeeder::class);
+        $this->assertSame($ids, DB::table('users')->where('name', 'like', 'TEST A383%')->orderBy('id')->pluck('id')->all());
+        $this->assertDatabaseCount('trainings', 2);
+    }
+
+    public function test_staging_explicit_demo_seed_is_allowed_with_valid_configuration(): void
+    {
+        $this->stagingDependencies(false);
+        $this->seed(A383DemoSeeder::class);
+        $this->assertDatabaseHas('users', ['email' => 'a383-admin@example.test', 'role' => 'admin']);
+        $this->assertDatabaseHas('trainings', ['slug' => 'TEST-A383-PAID']);
+    }
+
+    public function test_staging_database_seeder_does_not_automatically_create_a383(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'staging');
+        $this->seed();
+        $this->assertDatabaseMissing('trainings', ['slug' => 'TEST-A383-FREE']);
+        $this->assertDatabaseMissing('users', ['name' => 'TEST A383 Client']);
+    }
+
+    public function test_demo_seeder_is_explicitly_refused_in_production(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'production');
         $this->expectException(RuntimeException::class);
-        $this->seed(StagingAcceptanceSeeder::class);
+        (new A383DemoSeeder)->run();
+    }
+
+    public function test_production_cli_seed_command_is_refused_even_with_force(): void
+    {
+        app()->detectEnvironment(static fn (): string => 'production');
+        $this->expectException(RuntimeException::class);
+        $this->artisan('db:seed --class=A383DemoSeeder --force');
     }
 
     public function test_cleanup_apply_removes_only_manifested_rows_and_files(): void

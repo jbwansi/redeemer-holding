@@ -82,6 +82,10 @@ Route::middleware(['auth', 'active'])
             ->name('resources.download');
     });
 
+Route::get('/inscriptions-formations/rattacher', [\App\Http\Controllers\Frontend\TrainingController::class, 'claimRegistration_formation'])
+    ->middleware(['auth', 'active', 'verified'])
+    ->name('training-registration.claim');
+
 Route::middleware(['auth'])->group(function () {
 
     Route::controller(AuthController::class)->group(function () {
@@ -89,6 +93,15 @@ Route::middleware(['auth'])->group(function () {
         // Logout
         Route::post('/logout', 'logout')
             ->name('logout');
+
+        Route::get('/email/verify', 'verificationNotice')
+            ->name('verification.notice');
+        Route::post('/email/verification-notification', 'sendVerification')
+            ->middleware('throttle:6,1')
+            ->name('verification.send');
+        Route::get('/email/verify/{id}/{hash}', 'verifyEmail')
+            ->middleware(['signed', 'throttle:6,1'])
+            ->name('verification.verify');
 
 
         // Auto logout on browser close

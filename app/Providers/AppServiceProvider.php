@@ -2,19 +2,19 @@
 
 namespace App\Providers;
 
+use App\Coach\AI\AIProviderInterface;
+use App\Coach\AI\FakeAIProvider;
+use App\Coach\AI\UnsupportedAIProvider;
+use App\Coach\Services\CoachSettingsService;
 use App\Models\User;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Events\DiagnosingHealth;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use App\Coach\AI\AIProviderInterface;
-use App\Coach\AI\FakeAIProvider;
-use App\Coach\AI\UnsupportedAIProvider;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
-use App\Coach\Services\CoachSettingsService;
 use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
             $provider = app(CoachSettingsService::class)->all()['provider'] ?? 'fake';
 
             return $provider === 'fake'
-                ? new FakeAIProvider()
+                ? new FakeAIProvider
                 : new UnsupportedAIProvider((string) $provider);
         });
     }
@@ -43,9 +43,18 @@ class AppServiceProvider extends ServiceProvider
             DB::select('select 1');
         });
         RateLimiter::for('coach-ai', fn ($request) => Limit::perMinute((int) app(CoachSettingsService::class)->all()['rate_limit_per_minute'])->by((string) $request->user()->id));
+        RateLimiter::for('public-registration', function ($request) {
+            $actor = $request->user()
+                ? 'user:'.$request->user()->getAuthIdentifier()
+                : 'ip:'.$request->ip();
+            $routeName = (string) $request->route()?->getName();
+
+            return Limit::perMinute(5)
+                ->by($actor.'|route:'.$routeName.'|resource:'.(string) $request->route('slug'));
+        });
 
         Event::listen(MessageSending::class, function (MessageSending $event): void {
-            if (!app()->environment('staging')) {
+            if (! app()->environment('staging')) {
                 return;
             }
 
@@ -63,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
                 ->unique();
 
             if ($recipients->isEmpty() || $recipients->contains(
-                static fn (string $email): bool => !in_array($email, $allowed, true)
+                static fn (string $email): bool => ! in_array($email, $allowed, true)
             )) {
                 throw new RuntimeException('Envoi email staging bloqué : destinataire non autorisé.');
             }

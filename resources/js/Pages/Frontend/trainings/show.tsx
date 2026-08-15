@@ -1,14 +1,6 @@
 import React, { useMemo } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
-import {
-  Calendar,
-  ChevronLeft,
-  Clock,
-  MapPin,
-  Users,
-  ArrowRight,
-  CheckCircle,
-} from 'lucide-react';
+import { Calendar, ChevronLeft, Clock, MapPin, Users, ArrowRight, CheckCircle } from 'lucide-react';
 import { route } from 'ziggy-js';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import TrainingJoin from '@/components/frontend/trainings/training-join';
@@ -38,7 +30,7 @@ const formatTime = (value: any) => {
   return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 };
 
-const TrainingDetailPage = ({ training }: any) => {
+const TrainingDetailPage = ({ training, participant, trainingAccess }: any) => {
   const { auth } = usePage().props as any;
   const safeContent = useMemo(
     () => DOMPurify.sanitize(training?.content || ''),
@@ -49,7 +41,7 @@ const TrainingDetailPage = ({ training }: any) => {
   const endDate = training?.end_date ? new Date(training.end_date) : null;
   const isPast = endDate ? endDate < now : false;
   const canRegister = !isPast && !training?.is_full && (training?.available_seats ?? 0) > 0;
-  const hasTrainingAccess = !!training?.participant && training.participant.status !== 'cancelled';
+  const isRegistered = !!participant && participant.status !== 'cancelled';
 
   return (
     <FrontLayout>
@@ -152,7 +144,8 @@ const TrainingDetailPage = ({ training }: any) => {
                   <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
                     <p className="text-xs uppercase tracking-wide text-slate-500">Accès en ligne</p>
                     <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">
-                      Cette formation propose un accès en ligne. Rejoignez la session avec le lien ci-dessous.
+                      Cette formation propose un accès en ligne. Rejoignez la session avec le lien
+                      ci-dessous.
                     </p>
                     <a
                       href={training.meeting_link}
@@ -165,22 +158,23 @@ const TrainingDetailPage = ({ training }: any) => {
                   </div>
                 )}
 
-                {hasTrainingAccess && (
+                {isRegistered && (
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/30">
                     <p className="text-xs uppercase tracking-wide text-emerald-600 dark:text-emerald-300">
                       E-learning réservé
                     </p>
                     <p className="mt-3 text-sm text-slate-700 dark:text-slate-300">
-                      Vous êtes inscrit à cette formation. Accédez aux contenus exclusifs et aux ressources en ligne.
+                      Vous êtes inscrit à cette formation. Accédez aux contenus exclusifs et aux
+                      ressources en ligne.
                     </p>
-                    <Link
-                      href={route('dashboard.client.trainings.access', {
-                        slug: training.slug,
-                      })}
-                      className="mt-4 inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
-                    >
-                      Accéder au e-learning
-                    </Link>
+                    {trainingAccess?.can_access && (
+                      <Link
+                        href={trainingAccess.url}
+                        className="mt-4 inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                      >
+                        Accéder au e-learning
+                      </Link>
+                    )}
                   </div>
                 )}
 
@@ -196,7 +190,25 @@ const TrainingDetailPage = ({ training }: any) => {
         </section>
 
         <section id="inscription" className="mx-auto mt-12 max-w-[1320px] px-6 md:px-8">
-          {canRegister ? (
+          {isRegistered ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center dark:border-emerald-800 dark:bg-emerald-900/30">
+              <CheckCircle className="mx-auto h-10 w-10 text-emerald-600" />
+              <h3 className="mt-3 text-xl font-semibold text-emerald-900 dark:text-emerald-100">
+                Inscription confirmée
+              </h3>
+              <p className="mt-2 text-emerald-800 dark:text-emerald-200">
+                Vous êtes inscrit à cette formation.
+              </p>
+              {trainingAccess?.can_access && (
+                <Link
+                  href={trainingAccess.url}
+                  className="mt-5 inline-flex items-center rounded-xl bg-emerald-600 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                  {trainingAccess.label}
+                </Link>
+              )}
+            </div>
+          ) : canRegister ? (
             <TrainingJoin training={training} auth={auth} />
           ) : (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">

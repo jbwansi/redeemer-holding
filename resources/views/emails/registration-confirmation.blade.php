@@ -14,6 +14,7 @@
         .footer { padding:24px; color:#6b7280; font-size:14px; text-align:center; }
         .title { font-size:22px; font-weight:700; margin:0 0 10px; }
         .subtitle { color:#f3f4f6; font-size:14px; margin:0; }
+        .button { display:inline-block; margin-top:16px; padding:12px 20px; border-radius:10px; background:#da2e29; color:#ffffff !important; text-decoration:none; font-weight:700; }
     </style>
 </head>
 <body>
@@ -61,6 +62,12 @@
 
             @if($type === 'event' && isset($item->start_date))
                 <p>Début : {{ \Carbon\Carbon::parse($item->start_date)->format('d/m/Y H:i') }}</p>
+            @endif
+
+            @if($type === 'event' && !empty($ticketUrl))
+                <p>
+                    <a href="{{ $ticketUrl }}" class="button">Afficher mon billet</a>
+                </p>
             @endif
 
             @if($type === 'formation' && isset($item->start_date))

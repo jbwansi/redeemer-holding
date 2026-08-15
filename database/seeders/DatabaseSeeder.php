@@ -33,6 +33,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        if (app()->environment('local')) {
+            $this->call(A383DemoSeeder::class);
+        }
+
         // Test accounts are opt-in in local/staging. Automated tests use factories.
         if (app()->environment(['local', 'staging'])) {
             $this->call([

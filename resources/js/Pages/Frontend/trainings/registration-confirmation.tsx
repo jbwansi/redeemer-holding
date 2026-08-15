@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import RegistrationConfirmation from '@/components/frontend/confirmation/registration-confirmation';
-import { Calendar, Clock, GraduationCap, Mail, Monitor } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, GraduationCap, Mail, Monitor } from 'lucide-react';
 
-const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) => {
+const TrainingRegistrationConfirmationPage = ({ training, registration, trainingAccess }: any) => {
+  const formation = training;
   const isTrainingFree = formation?.price <= 0;
 
   const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
@@ -121,6 +123,33 @@ const TrainingRegistrationConfirmationPage = ({ formation, registration }: any) 
       }
       isFree={isTrainingFree}
       paymentSummary={paymentSummary}
+      primaryAction={
+        trainingAccess?.can_access ? (
+          <Link
+            href={trainingAccess.url}
+            className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-[#0f766e] px-6 py-4 text-base font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-[#115e59] sm:w-auto"
+          >
+            {trainingAccess.label}
+            <ArrowRight className="h-5 w-5" />
+          </Link>
+        ) : trainingAccess?.requires_account_link ? (
+          <div className="flex flex-col items-start gap-3">
+            <Link
+              href={trainingAccess.register_url}
+              className="inline-flex w-full items-center justify-center gap-3 rounded-xl bg-[#0f766e] px-6 py-4 text-base font-semibold text-white shadow-lg shadow-emerald-900/20 transition hover:bg-[#115e59] sm:w-auto"
+            >
+              Créer mon compte pour accéder à la formation
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+            <Link
+              href={trainingAccess.login_url}
+              className="text-sm font-semibold text-[#0f766e] underline-offset-4 hover:underline dark:text-emerald-400"
+            >
+              J&apos;ai déjà un compte
+            </Link>
+          </div>
+        ) : undefined
+      }
       bottomSection={bottomSection}
     />
   );

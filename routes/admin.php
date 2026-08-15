@@ -1,38 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Admin\AboutController;
+use App\Http\Controllers\Admin\AccountController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ChatbotController;
+use App\Http\Controllers\Admin\ChatbotLeadController;
+use App\Http\Controllers\Admin\CoachController;
+use App\Http\Controllers\Admin\ConfigController;
+use App\Http\Controllers\Admin\ContactController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EventCategoryController;
+use App\Http\Controllers\Admin\EventCheckInController;
+use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\HomeController;
+use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\PageContentController;
+use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\SearchController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ServiceRequestController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TestimonialController;
+use App\Http\Controllers\Admin\TrainingController;
+use App\Http\Controllers\Admin\TrainingLessonController;
+use App\Http\Controllers\Admin\TrainingQuizController;
+use App\Http\Controllers\Admin\TrainingResourceController;
+use App\Http\Controllers\Admin\TrainingSectionController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\TrainingProgressController;
-
-use App\Http\Controllers\Admin\{
-    AboutController,
-    AccountController,
-    CategoryController,
-    ChatbotController,
-    ChatbotLeadController,
-    CoachController,
-    ConfigController,
-    ContactController,
-    DashboardController,
-    EventCategoryController,
-    EventController,
-    TrainingController,
-    HomeController,
-    NewsletterController,
-    PageController,
-    PageContentController,
-    PostController,
-    SearchController,
-    ServiceController,
-    ServiceRequestController,
-    SettingController,
-    TestimonialController,
-    UserController,
-    TrainingLessonController,
-    TrainingQuizController,
-    TrainingResourceController,
-    TrainingSectionController,
-};
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +49,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         ->name('page-contents.update');
 });
 
-
 Route::middleware(['admin.access', 'active'])->group(function () {
 
     Route::get('/settings/fetch', [SettingController::class, 'fetch'])
@@ -68,7 +65,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         ->middleware('throttle:6,1')
         ->name('reminders.send.cron');
 
-
     Route::prefix('dashboard')->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])
@@ -76,7 +72,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
 
         Route::get('/search/global', [SearchController::class, 'global'])
             ->name('dashboard.search.global');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -92,7 +87,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::post('/send', 'send')->name('send');
                 Route::post('/import-users', 'importUsers')->name('import-users');
             });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -119,7 +113,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::put('/{service}/update-status', 'toggleStatus')->name('update-status');
             });
 
-
         /*
         |--------------------------------------------------------------------------
         | Service Requests
@@ -135,7 +128,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::put('/{serviceRequest}/update-status', 'updateStatus')->name('update-status');
                 Route::delete('/{serviceRequest}', 'destroy')->name('destroy');
             });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -157,7 +149,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::delete('/{post}/delete', 'destroy')->name('destroy');
             });
 
-
         /*
         |--------------------------------------------------------------------------
         | Categories
@@ -165,7 +156,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         */
 
         Route::resource('categories', CategoryController::class);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -196,7 +186,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                     ->name('terminate-other-sessions');
             });
 
-
         /*
         |--------------------------------------------------------------------------
         | Settings
@@ -219,7 +208,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::post('/update', 'update')->name('update');
                 Route::post('/smtp/test', 'test_send_email')->name('smtp.test');
             });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -245,7 +233,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::get('/database/logs', 'database_logs')->name('database.logs');
             });
 
-
         /*
         |--------------------------------------------------------------------------
         | Event Categories
@@ -253,10 +240,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         */
 
         Route::resource('event-categories', EventCategoryController::class);
-
-
-
-
 
         /*
         |--------------------------------------------------------------------------
@@ -283,7 +266,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             });
 
         Route::resource('users', UserController::class);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -322,7 +304,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
         // Google Analytics visitors by country
         Route::get('/analytics/countries', [\App\Http\Controllers\AnalyticsController::class, 'visitorsByCountry']);
 
-
         /*
         |--------------------------------------------------------------------------
         | Dynamic Pages
@@ -344,9 +325,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::delete('/{page}', 'destroy')->name('destroy');
             });
 
-
-
-
         /*
 |--------------------------------------------------------------------------
 | Events
@@ -357,6 +335,10 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             ->name('events.')
             ->controller(EventController::class)
             ->group(function () {
+                Route::get('/{event:slug}/scanner', [EventCheckInController::class, 'show'])->name('scanner');
+                Route::post('/{event:slug}/check-in', [EventCheckInController::class, 'store'])
+                    ->middleware('throttle:60,1')
+                    ->name('check-in');
                 Route::get('/trash', 'trash')->name('trash');
 
                 Route::get('/participants/{slug}', 'participants')->name('participants');
@@ -375,7 +357,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::post('/{event}', 'update')->name('update');
                 Route::delete('/{event}', 'destroy')->name('destroy');
             });
-
 
         /*
         |--------------------------------------------------------------------------
@@ -407,7 +388,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
 
                 Route::post('/{training}/sections', [TrainingSectionController::class, 'store'])
                     ->name('sections.store');
-
 
                 Route::get('/{training}/sections/{section}/edit', [TrainingSectionController::class, 'edit'])
                     ->name('sections.edit');
@@ -465,7 +445,6 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::post('/{training}', [TrainingController::class, 'update'])->name('update');
                 Route::delete('/{training}', [TrainingController::class, 'destroy'])->name('destroy');
             });
-
 
         /*
         |--------------------------------------------------------------------------

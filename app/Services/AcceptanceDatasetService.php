@@ -17,24 +17,28 @@ class AcceptanceDatasetService
 
     public function inspect(): array
     {
+        $this->assertAllowedEnvironment();
         $runId = (string) config('acceptance.dataset_id', 'A383-v1');
         $manifestRelative = "acceptance/{$runId}.json";
         if (Storage::disk('local')->exists($manifestRelative)) {
-            $manifest = $this->cleanupPlan($runId);
+            try {
+                $manifest = $this->cleanupPlan($runId);
 
-            return ['run_id' => $runId, 'state' => 'already_provisioned', 'manifest' => "storage/app/private/{$manifestRelative}", 'counts' => array_map('count', $manifest['rows']), 'dependencies' => [], 'conflicts' => []];
+                return ['run_id' => $runId, 'state' => 'already_provisioned', 'manifest' => "storage/app/private/{$manifestRelative}", 'counts' => array_map('count', $manifest['rows']), 'dependencies' => [], 'conflicts' => []];
+            } catch (RuntimeException $exception) {
+                if (! app()->environment('local')) {
+                    throw $exception;
+                }
+                $this->discardStaleLocalManifest($runId);
+            }
         }
 
         $accounts = $this->accountConfiguration();
         $dependencies = $this->configurationErrors($accounts);
-        $category = DB::table('event_categories')->whereNull('deleted_at')->orderBy('id')->first();
-        if (! $category) {
-            $dependencies[] = 'Une catégorie événement existante est requise en lecture seule.';
-        }
-
         $emails = array_values(array_filter(array_column($accounts, 'email')));
         $conflicts = [
             ...DB::table('users')->whereIn('email', $emails)->pluck('email')->all(),
+            ...DB::table('event_categories')->where('slug', 'test-a383-category')->pluck('slug')->all(),
             ...DB::table('trainings')->whereIn('slug', array_slice(self::SLUGS, 0, 2))->pluck('slug')->all(),
             ...DB::table('services')->where('slug', self::SLUGS[2])->pluck('slug')->all(),
             ...DB::table('events')->whereIn('slug', array_slice(self::SLUGS, 3, 2))->pluck('slug')->all(),
@@ -46,7 +50,7 @@ class AcceptanceDatasetService
             'manifest' => "storage/app/private/{$manifestRelative}",
             'document' => "storage/app/private/coach/acceptance/{$runId}/TEST-A383-profile.txt",
             'public_resource' => "storage/app/public/acceptance/{$runId}/TEST-A383-resource.txt",
-            'event_category_id' => $category?->id, 'career_enabled' => $careerEnabled,
+            'career_enabled' => $careerEnabled,
             'dependencies' => array_values(array_unique($dependencies)),
             'conflicts' => array_values(array_unique($conflicts)),
             'counts' => $this->expectedCounts($careerEnabled), 'slugs' => self::SLUGS,
@@ -56,6 +60,7 @@ class AcceptanceDatasetService
 
     public function provision(array $plan): array
     {
+        $this->assertAllowedEnvironment();
         if (($plan['state'] ?? null) === 'already_provisioned') {
             return $this->cleanupPlan($plan['run_id']);
         }
@@ -80,6 +85,7 @@ class AcceptanceDatasetService
                     return $id;
                 };
 
+                $eventCategory = $add('event_categories', ['name' => 'TEST-A383 Category', 'slug' => 'test-a383-category', 'description' => 'Catégorie événementielle de recette TEST-A383', 'color' => '#334155'], ['slug' => 'test-a383-category']);
                 $admin = $this->addAccount($add, $accounts['admin'], $password);
                 $client = $this->addAccount($add, $accounts['client'], $password);
                 $this->addAccount($add, $accounts['forbidden'], $password);
@@ -106,7 +112,7 @@ class AcceptanceDatasetService
 
                 $add('services', ['user_id' => $admin, 'name' => self::SLUGS[2], 'slug' => self::SLUGS[2], 'excerpt' => 'Service gratuit de recette', 'content' => '<p>TEST A3.8.3.</p>', 'views' => 0, 'status' => 1], ['slug' => self::SLUGS[2]]);
                 foreach ([[self::SLUGS[3], 0], [self::SLUGS[4], 20]] as [$slug, $price]) {
-                    $add('events', ['category_id' => $plan['event_category_id'], 'user_id' => $admin, 'title' => $slug, 'slug' => $slug, 'description' => 'Événement de recette', 'content' => '<p>TEST A3.8.3.</p>', 'location' => 'En ligne — TEST', 'start_date' => now()->addDays(40), 'end_date' => now()->addDays(40)->addHours(2), 'price' => $price, 'max_participants' => 10, 'views' => 0, 'is_published' => 1, 'published_at' => $published], ['slug' => $slug]);
+                    $add('events', ['category_id' => $eventCategory, 'user_id' => $admin, 'title' => $slug, 'slug' => $slug, 'description' => 'Événement de recette', 'content' => '<p>TEST A3.8.3.</p>', 'location' => 'En ligne — TEST', 'start_date' => now()->addDays(40), 'end_date' => now()->addDays(40)->addHours(2), 'price' => $price, 'max_participants' => 10, 'views' => 0, 'is_published' => 1, 'published_at' => $published], ['slug' => $slug]);
                 }
 
                 $add('professional_profiles', ['user_id' => $client, 'professional_title' => 'TEST-A383 Profil', 'summary' => 'Profil non personnel de recette', 'career_objective' => 'Valider le parcours Coach', 'default_language' => 'fr', 'target_roles' => json_encode(['TEST-A383 Role']), 'target_sectors' => json_encode(['TEST']), 'languages' => json_encode(['fr'])], ['user_id' => $client]);
@@ -138,6 +144,7 @@ class AcceptanceDatasetService
 
     public function cleanupPlan(string $runId, bool $verifyWorkflowDependents = false): array
     {
+        $this->assertAllowedEnvironment();
         if ($runId !== (string) config('acceptance.dataset_id', 'A383-v1')) {
             throw new RuntimeException('Run-id non reconnu pour ce paquet acceptance.');
         }
@@ -175,8 +182,9 @@ class AcceptanceDatasetService
 
     public function cleanup(string $runId): array
     {
+        $this->assertAllowedEnvironment();
         $manifest = $this->cleanupPlan($runId, true);
-        $order = ['career_actions', 'career_goals', 'coach_messages', 'coach_conversations', 'user_documents', 'professional_profiles', 'training_quiz_questions', 'training_quizzes', 'training_resources', 'training_lessons', 'training_sections', 'events', 'services', 'trainings', 'users'];
+        $order = ['career_actions', 'career_goals', 'coach_messages', 'coach_conversations', 'user_documents', 'professional_profiles', 'training_quiz_questions', 'training_quizzes', 'training_resources', 'training_lessons', 'training_sections', 'events', 'event_categories', 'services', 'trainings', 'users'];
         DB::transaction(function () use ($manifest, $order): void {
             foreach ($order as $table) {
                 $ids = array_column($manifest['rows'][$table] ?? [], 'id');
@@ -233,13 +241,63 @@ class AcceptanceDatasetService
         if (strlen((string) config('acceptance.password')) < 12) {
             $errors[] = 'ACCEPTANCE_TEST_PASSWORD doit être fourni hors dépôt et contenir au moins 12 caractères.';
         }
+        $mailer = (string) config('mail.default');
+        $transport = (string) config("mail.mailers.{$mailer}.transport");
+        $safeTransports = app()->environment('local') ? ['array', 'log'] : ['array'];
+        if (! in_array($transport, $safeTransports, true)) {
+            $errors[] = app()->environment('local')
+                ? 'Le mailer local doit utiliser exclusivement le transport array ou log.'
+                : 'Le mailer staging doit utiliser exclusivement le transport array.';
+        }
 
         return $errors;
     }
 
+    public function assertAllowedEnvironment(): void
+    {
+        $environment = app()->environment();
+        if ($environment === 'production') {
+            throw new RuntimeException('Refus absolu : le dataset acceptance est interdit en production.');
+        }
+        if (! in_array($environment, config('acceptance.allowed_environments', []), true)) {
+            throw new RuntimeException("Environnement non autorisé pour le dataset acceptance : {$environment}.");
+        }
+    }
+
+    private function discardStaleLocalManifest(string $runId): void
+    {
+        $path = "acceptance/{$runId}.json";
+        $manifest = json_decode(Storage::disk('local')->get($path), true, 512, JSON_THROW_ON_ERROR);
+        if (($manifest['dataset_id'] ?? null) !== $runId || ($manifest['run_id'] ?? null) !== $runId) {
+            throw new RuntimeException('Manifeste local obsolète invalide : suppression refusée.');
+        }
+
+        $accounts = $this->accountConfiguration();
+        $emails = array_values(array_filter(array_column($accounts, 'email')));
+        $identitiesRemain = DB::table('users')->whereIn('email', $emails)->exists()
+            || DB::table('event_categories')->where('slug', 'test-a383-category')->exists()
+            || DB::table('trainings')->whereIn('slug', array_slice(self::SLUGS, 0, 2))->exists()
+            || DB::table('services')->where('slug', self::SLUGS[2])->exists()
+            || DB::table('events')->whereIn('slug', array_slice(self::SLUGS, 3, 2))->exists();
+        if ($identitiesRemain) {
+            throw new RuntimeException('Manifeste local divergent avec identités A383 présentes : intervention manuelle requise.');
+        }
+
+        foreach ($manifest['files'] ?? [] as $file) {
+            $disk = Storage::disk($file['disk']);
+            if ($disk->exists($file['path'])) {
+                if (hash('sha256', $disk->get($file['path'])) !== $file['sha256']) {
+                    throw new RuntimeException('Fichier A383 local divergent : suppression refusée.');
+                }
+                $disk->delete($file['path']);
+            }
+        }
+        Storage::disk('local')->delete($path);
+    }
+
     private function expectedCounts(bool $careerEnabled): array
     {
-        return ['users' => 3, 'trainings' => 2, 'training_sections' => 2, 'training_lessons' => 3, 'training_resources' => 1, 'training_quizzes' => 1, 'training_quiz_questions' => 2, 'services' => 1, 'events' => 2, 'professional_profiles' => 1, 'user_documents' => 1, 'coach_conversations' => 1, 'coach_messages' => 2, 'career_goals' => $careerEnabled ? 1 : 0, 'career_actions' => $careerEnabled ? 1 : 0];
+        return ['event_categories' => 1, 'users' => 3, 'trainings' => 2, 'training_sections' => 2, 'training_lessons' => 3, 'training_resources' => 1, 'training_quizzes' => 1, 'training_quiz_questions' => 2, 'services' => 1, 'events' => 2, 'professional_profiles' => 1, 'user_documents' => 1, 'coach_conversations' => 1, 'coach_messages' => 2, 'career_goals' => $careerEnabled ? 1 : 0, 'career_actions' => $careerEnabled ? 1 : 0];
     }
 
     private function assertNoWorkflowDependents(array $manifest): void

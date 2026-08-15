@@ -30,7 +30,7 @@ class PaymentManager
         $signature = $request->header('Stripe-Signature');
         $secret = config('services.stripe.webhook_secret');
 
-        if (!is_string($signature) || $signature === '' || !is_string($secret) || $secret === '') {
+        if (! is_string($signature) || $signature === '' || ! is_string($secret) || $secret === '') {
             Log::warning('Webhook Stripe refusé: signature ou configuration absente.');
 
             return response()->json(['error' => 'Signature invalide.'], 400);
@@ -54,6 +54,10 @@ class PaymentManager
 
                 case 'payment_intent.payment_failed':
                     $this->handlePaymentFailed($stripeEvent->data->object);
+                    break;
+
+                case 'refund.updated':
+                    $this->handleRefundUpdated($stripeEvent->data->object);
                     break;
             }
 
@@ -85,7 +89,7 @@ class PaymentManager
     {
         $type = $session->metadata->payment_type ?? null;
 
-        if (!$type) {
+        if (! $type) {
             Log::warning('Webhook Stripe sans payment_type.', [
                 'session_id' => $session->id ?? null,
             ]);
@@ -100,7 +104,7 @@ class PaymentManager
     {
         $type = $paymentIntent->metadata->payment_type ?? null;
 
-        if (!$type) {
+        if (! $type) {
             Log::warning('PaymentIntent Stripe sans payment_type.', [
                 'payment_intent_id' => $paymentIntent->id ?? null,
             ]);
@@ -117,7 +121,7 @@ class PaymentManager
     {
         $type = $paymentIntent->metadata->payment_type ?? null;
 
-        if (!$type) {
+        if (! $type) {
             Log::warning('PaymentIntent échoué sans payment_type.', [
                 'payment_intent_id' => $paymentIntent->id ?? null,
             ]);
@@ -127,6 +131,23 @@ class PaymentManager
 
         if (method_exists($this->handler($type), 'handlePaymentFailed')) {
             $this->handler($type)->handlePaymentFailed($paymentIntent);
+        }
+    }
+
+    private function handleRefundUpdated($refund): void
+    {
+        $type = $refund->metadata->payment_type ?? null;
+
+        if (! $type) {
+            Log::warning('Remboursement Stripe sans payment_type.', [
+                'refund_id' => $refund->id ?? null,
+            ]);
+
+            return;
+        }
+
+        if (method_exists($this->handler($type), 'handleRefundUpdated')) {
+            $this->handler($type)->handleRefundUpdated($refund);
         }
     }
 }

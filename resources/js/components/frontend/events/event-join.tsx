@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link, useForm } from '@inertiajs/react';
 import { AlertCircle, Ticket } from 'lucide-react';
 
 const EventJoin = ({ event, auth, onNotify }: any) => {
   const [ticketQuantity, setTicketQuantity] = useState(1);
+  const isSubmitting = useRef(false);
 
   const MAX_TICKETS_PER_PERSON = 10; // Définir une limite par personne
   const maxQty = Math.min(event?.available_seats, MAX_TICKETS_PER_PERSON);
@@ -34,12 +35,18 @@ const EventJoin = ({ event, auth, onNotify }: any) => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    if (isSubmitting.current || processing) return;
+
+    isSubmitting.current = true;
     post(route('events.register', event.slug), {
       onSuccess: () => {
         onNotify?.("Inscription réussie à l'événement.", 'success');
       },
       onError: () => {
         onNotify?.("Erreur lors de l'inscription à l'événement.", 'error');
+      },
+      onFinish: () => {
+        isSubmitting.current = false;
       },
     });
   };

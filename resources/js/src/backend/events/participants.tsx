@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Download, Mail, Phone, Eye } from 'lucide-react';
+import { ArrowLeft, Download, Mail, Phone, Eye, ScanLine } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -71,6 +71,12 @@ const EventParticipants = ({ event, participants, meta }) => {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button asChild className="rounded-xl bg-white text-slate-900 hover:bg-slate-100">
+              <Link href={route('events.scanner', event.slug)}>
+                <ScanLine className="h-4 w-4 mr-2" />
+                Scanner QR
+              </Link>
+            </Button>
             <Button
               variant="outline"
               className="rounded-xl bg-white/10 border-white/25 text-white hover:bg-white/20"
@@ -260,15 +266,17 @@ const EventParticipants = ({ event, participants, meta }) => {
             Affichage de {meta.from}-{meta.to} sur {meta.total} participants
           </div>
           <div className="flex items-center gap-2">
-            {meta.links.map((link: any, i: any) => (
-              <Button
-                key={i}
-                variant={link.active ? 'default' : 'outline'}
-                disabled={!link.url}
-                onClick={() => (window.location.href = link.url)}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.label || '') }}
-              />
-            ))}
+            {meta.links.map(
+              (link: { active: boolean; url: string | null; label: string }, i: number) => (
+                <Button
+                  key={i}
+                  variant={link.active ? 'default' : 'outline'}
+                  disabled={!link.url}
+                  onClick={() => (window.location.href = link.url)}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(link.label || '') }}
+                />
+              )
+            )}
           </div>
         </div>
       )}
