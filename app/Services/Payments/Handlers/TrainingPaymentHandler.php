@@ -8,9 +8,9 @@ use App\Notifications\TrainingInvoiceNotification;
 use App\Services\Payments\Contracts\PaymentHandlerInterface;
 use App\Services\OwnedResourceAccessService;
 use App\Services\PaymentAmountService;
+use App\Services\Payments\StripeCheckoutService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\ApiErrorException;
 
 class TrainingPaymentHandler implements PaymentHandlerInterface
@@ -48,36 +48,19 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         $amounts = app(PaymentAmountService::class)->calculate($training->price * $participant->qty);
         ['subtotal' => $subtotal, 'serviceFee' => $serviceFee, 'total' => $total] = $amounts;
 
-        try {
-            $session = StripeSession::create([
-                'payment_method_types' => ['card'],
+        $checkout = app(StripeCheckoutService::class);
 
+        try {
+            $session = $checkout->createSession([
                 'line_items' => [
-                    [
-                        'price_data' => [
-                            'currency' => 'chf',
-                            'product_data' => [
-                                'name' => $training->title,
-                                'description' => "Places: {$participant->qty}",
-                                'images' => $training->featured_image
-                                    ? [$training->featured_image['original']]
-                                    : [],
-                            ],
-                            'unit_amount' => round($training->price * 100),
-                        ],
-                        'quantity' => $participant->qty,
-                    ],
-                    [
-                        'price_data' => [
-                            'currency' => 'chf',
-                            'product_data' => [
-                                'name' => 'Frais de service',
-                                'description' => '5% du total',
-                            ],
-                            'unit_amount' => round($serviceFee * 100),
-                        ],
-                        'quantity' => 1,
-                    ],
+                    $checkout->buildProductLineItem(
+                        $training->title,
+                        $training->price,
+                        $participant->qty,
+                        "Places: {$participant->qty}",
+                        $training->featured_image ? [$training->featured_image['original']] : []
+                    ),
+                    $checkout->buildServiceFeeLineItem($serviceFee),
                 ],
 
                 'customer_email' => $participant->email,
@@ -90,16 +73,6 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
                     'training_title' => $training->title,
                     'qty' => $participant->qty,
                 ],
-
-                'payment_intent_data' => [
-                    'metadata' => [
-                        'payment_type' => 'training',
-                        'participant_id' => $participant->id,
-                        'training_id' => $training->id,
-                    ],
-                ],
-
-                'mode' => 'payment',
 
                 'success_url' => route('trainings.payment.success')
                     . '?session_id={CHECKOUT_SESSION_ID}',
@@ -146,10 +119,18 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         }
 
         try {
-            $session = StripeSession::retrieve($sessionId);
+            $session = app(StripeCheckoutService::class)->retrieveSession($sessionId);
 
             if ($session->payment_status !== 'paid') {
                 throw new \Exception("Le paiement n'a pas été effectué.");
+            }
+
+            $paymentType = $session->metadata->payment_type ?? null;
+            $metadataParticipantId = $session->metadata->participant_id ?? null;
+            $trainingId = $session->metadata->training_id ?? null;
+
+            if (! in_array($paymentType, ['training', 'formation'], true)) {
+                throw new \RuntimeException('Le type de paiement Stripe est invalide.');
             }
 
             $participant = TrainingParticipant::with('training')
@@ -161,7 +142,18 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
             $training = $participant->training;
 
-            if ($this->markAsPaid($participant, $session)) {
+            if ((string) $metadataParticipantId !== (string) $participant->id
+                || (string) $trainingId !== (string) $participant->training_id) {
+                throw new \RuntimeException('Les métadonnées Stripe ne correspondent pas à l’inscription.');
+            }
+
+            $this->assertExpectedAmount($participant, (int) ($session->amount_total ?? 0), $session->currency ?? null);
+
+            if ($this->markAsPaid(
+                $participant,
+                (string) $session->payment_intent,
+                (int) ($session->amount_total ?? 0)
+            )) {
                 $this->sendInvoice($training, $participant);
             }
 
@@ -208,6 +200,17 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         $participantId = $session->client_reference_id
             ?? $session->metadata->participant_id
             ?? null;
+        $trainingId = $session->metadata->training_id ?? null;
+        $paymentType = $session->metadata->payment_type ?? null;
+
+        if (! in_array($paymentType, ['training', 'formation'], true)) {
+            Log::warning('Webhook Stripe formation avec payment_type inattendu.', [
+                'session_id' => $session->id ?? null,
+                'payment_type' => $paymentType,
+            ]);
+
+            return;
+        }
 
         if (!$participantId) {
             Log::error('ID participant manquant dans la session Stripe formation.', [
@@ -219,7 +222,7 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
 
         $participant = TrainingParticipant::with('training')->find($participantId);
 
-        if (!$participant) {
+        if (!$participant || !$participant->training) {
             Log::error('Participant formation introuvable.', [
                 'participant_id' => $participantId,
                 'session_id' => $session->id ?? null,
@@ -228,35 +231,90 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
             return;
         }
 
-        if ($session->payment_status === 'paid') {
-            if ($participant->stripe_session_id !== ($session->id ?? null)) {
-                Log::warning('Session Stripe formation non liée à l’inscription.', [
-                    'participant_id' => $participant->id,
-                    'session_id' => $session->id ?? null,
-                ]);
-                return;
-            }
+        if ((string) $participant->training_id !== (string) $trainingId) {
+            Log::warning('Formation Stripe non liée au participant.', [
+                'participant_id' => $participant->id,
+                'training_id' => $trainingId,
+                'session_id' => $session->id ?? null,
+            ]);
 
-            if ($this->markAsPaid($participant, $session)) {
+            return;
+        }
+
+        if ($session->payment_status !== 'paid') {
+            return;
+        }
+
+        if ($participant->stripe_session_id !== ($session->id ?? null)) {
+            Log::warning('Session Stripe formation non liée à l’inscription.', [
+                'participant_id' => $participant->id,
+                'session_id' => $session->id ?? null,
+            ]);
+            return;
+        }
+
+        try {
+            $this->assertExpectedAmount($participant, (int) ($session->amount_total ?? 0), $session->currency ?? null);
+
+            if ($this->markAsPaid(
+                $participant,
+                (string) $session->payment_intent,
+                (int) ($session->amount_total ?? 0)
+            )) {
                 $this->sendInvoice($participant->training, $participant);
             }
+        } catch (\Throwable $exception) {
+            Log::error('Finalisation webhook du paiement formation refusée.', [
+                'participant_id' => $participant->id,
+                'session_id' => $session->id ?? null,
+                'message' => $exception->getMessage(),
+            ]);
         }
     }
 
     public function handlePaymentIntentSucceeded($paymentIntent): void
     {
         $participantId = $paymentIntent->metadata->participant_id ?? null;
+        $trainingId = $paymentIntent->metadata->training_id ?? null;
+        $paymentType = $paymentIntent->metadata->payment_type ?? null;
+
+        if (! in_array($paymentType, ['training', 'formation'], true)) {
+            Log::warning('PaymentIntent formation avec payment_type inattendu.', [
+                'payment_intent_id' => $paymentIntent->id ?? null,
+                'payment_type' => $paymentType,
+            ]);
+
+            return;
+        }
 
         if (!$participantId) {
             return;
         }
 
-        $participant = TrainingParticipant::find($participantId);
+        $participant = TrainingParticipant::with('training')->find($participantId);
 
-        if ($participant && $participant->status !== TrainingParticipant::STATUS_COMPLETED) {
-            $participant->update([
-                'status' => TrainingParticipant::STATUS_COMPLETED,
-                'payment_confirmed' => true,
+        if (!$participant || !$participant->training || (string) $participant->training_id !== (string) $trainingId) {
+            Log::warning('PaymentIntent formation invalide : participant ou formation incohérents.', [
+                'participant_id' => $participantId,
+                'training_id' => $trainingId,
+                'payment_intent_id' => $paymentIntent->id ?? null,
+            ]);
+
+            return;
+        }
+
+        try {
+            $amount = (int) ($paymentIntent->amount_received ?? $paymentIntent->amount ?? 0);
+            $this->assertExpectedAmount($participant, $amount, $paymentIntent->currency ?? null);
+
+            if ($this->markAsPaid($participant, (string) $paymentIntent->id, $amount)) {
+                $this->sendInvoice($participant->training, $participant);
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Finalisation PaymentIntent du paiement formation refusée.', [
+                'participant_id' => $participant->id,
+                'payment_intent_id' => $paymentIntent->id ?? null,
+                'message' => $exception->getMessage(),
             ]);
         }
     }
@@ -264,18 +322,13 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
     public function handlePaymentFailed($paymentIntent): void
     {
         $participantId = $paymentIntent->metadata->participant_id ?? null;
-
-        if (!$participantId) {
-            return;
-        }
-
+        $trainingId = $paymentIntent->metadata->training_id ?? null;
         $participant = TrainingParticipant::find($participantId);
 
-        if (!$participant) {
-            return;
-        }
-
-        if ($participant->status === TrainingParticipant::STATUS_COMPLETED) {
+        if (! $participant
+            || (string) $participant->training_id !== (string) $trainingId
+            || $participant->payment_confirmed
+            || $participant->status === TrainingParticipant::STATUS_COMPLETED) {
             return;
         }
 
@@ -285,24 +338,40 @@ class TrainingPaymentHandler implements PaymentHandlerInterface
         ]);
     }
 
-    private function markAsPaid(TrainingParticipant $participant, $session): bool
+    private function markAsPaid(TrainingParticipant $participant, string $paymentId, int $amountInCents): bool
     {
         $updated = TrainingParticipant::query()
             ->whereKey($participant->id)
-            ->where('status', '!=', TrainingParticipant::STATUS_COMPLETED)
+            ->where('payment_confirmed', false)
             ->update([
-            'status' => TrainingParticipant::STATUS_COMPLETED,
-            'payment_id' => $session->payment_intent,
-            'payment_amount' => $session->amount_total / 100,
-            'payment_date' => now(),
-            'payment_confirmed' => true,
-        ]);
+                'status' => TrainingParticipant::STATUS_COMPLETED,
+                'payment_id' => $paymentId,
+                'payment_amount' => $amountInCents / 100,
+                'payment_date' => now(),
+                'payment_confirmed' => true,
+                'payment_error' => null,
+            ]);
 
         if ($updated === 1) {
-            $participant->refresh();
+            $participant->refresh()->loadMissing('training');
         }
 
         return $updated === 1;
+    }
+
+    private function assertExpectedAmount(TrainingParticipant $participant, int $amountInCents, ?string $currency = null): void
+    {
+        if ($currency !== null && strtolower($currency) !== 'chf') {
+            throw new \RuntimeException('La devise Stripe ne correspond pas à la devise attendue.');
+        }
+
+        $amounts = app(PaymentAmountService::class)
+            ->calculate($participant->training->price * $participant->qty);
+        $expectedAmount = (int) round($amounts['total'] * 100);
+
+        if ($amountInCents !== $expectedAmount) {
+            throw new \RuntimeException('Le montant Stripe ne correspond pas au montant attendu.');
+        }
     }
 
     private function sendInvoice(Training $training, TrainingParticipant $participant): void

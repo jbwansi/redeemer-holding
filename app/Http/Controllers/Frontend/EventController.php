@@ -455,6 +455,7 @@ class EventController extends Controller
         $registration = EventParticipant::where('reference', $reference)
             ->where('event_id', $event->id)
             ->where('status', 'completed')  // S'assurer que l'inscription est payée
+            ->where('payment_confirmed', true)
             ->firstOrFail();
 
         // Vérifier que c'est un événement payant

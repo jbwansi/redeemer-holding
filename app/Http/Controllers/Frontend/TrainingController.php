@@ -11,6 +11,7 @@ use App\Services\SeoService;
 use App\Services\OwnedResourceAccessService;
 use App\Services\PaymentAmountService;
 use App\Services\TrainingRegistrationLinkService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -397,6 +398,7 @@ class TrainingController extends Controller
         $registration = TrainingParticipant::where('reference', $reference)
             ->where('training_id', $training->id)
             ->where('status', 'completed')
+            ->where('payment_confirmed', true)
             ->firstOrFail();
 
         if ($training->price <= 0) {
@@ -408,14 +410,14 @@ class TrainingController extends Controller
         $amounts = app(PaymentAmountService::class)->calculate($training->price * $registration->qty);
 
         $data = [
-            'training' => $training,
+            'formation' => $training,
             'registration' => $registration,
             ...$amounts,
             'date' => $registration->payment_date ?? $registration->created_at,
             'invoice_number' => 'FORM-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
         ];
 
-        $pdf = Pdf::loadView('pdf.formation', $data);
+        $pdf = Pdf::loadView('pdf.training', $data);
         $pdf->setPaper('a4');
         $pdf->setWarnings(false);
 

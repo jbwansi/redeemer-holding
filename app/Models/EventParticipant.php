@@ -336,6 +336,8 @@ class EventParticipant extends Model
             $query->where('status', self::STATUS_PENDING)
                 ->orWhere('status', self::STATUS_IN_PROGRESS);
         })
+            ->where('payment_confirmed', false)
+            ->whereNull('checked_in_at')
             ->where('created_at', '<', now()->subMinutes(30))
             ->get();
 

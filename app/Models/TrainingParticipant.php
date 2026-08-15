@@ -348,6 +348,7 @@ class TrainingParticipant extends Model
     public static function purgeExpiredRegistrations(): int
     {
         $expiredRegistrations = self::whereIn('status', [self::STATUS_PENDING, self::STATUS_IN_PROGRESS])
+            ->where('payment_confirmed', false)
             ->where('created_at', '<', now()->subMinutes(30))
             ->get();
 

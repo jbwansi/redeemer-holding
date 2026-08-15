@@ -49,11 +49,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // Ajouter vos commandes personnalisées ici
         \App\Console\Commands\SendActivityReminders::class,
         \App\Console\Commands\QueueHealthCheck::class,
+        \App\Console\Commands\PurgeExpiredRegistrations::class,
     ])
     ->withSchedule(function (Schedule $schedule) {
         // Planification des tâches
         $schedule->command('reminders:send')->dailyAt('09:00');
         $schedule->command('queue:health-check --max-pending=300 --max-failed=20 --max-oldest-minutes=20')
+            ->everyFiveMinutes()
+            ->withoutOverlapping();
+        $schedule->command('registrations:purge-expired')
             ->everyFiveMinutes()
             ->withoutOverlapping();
     })
