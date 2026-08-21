@@ -1,1 +1,0 @@
-import{j as o}from"./vendor-react-core-DwYS7WTl.js";import"./vendor-call-bind-apply-helpers-ZZSBklyF.js";import"./vendor-function-bind-CHqF18-c.js";import"./vendor-es-errors-CxTyLFAO.js";const m=()=>o.jsx("div",{children:"Changelog"});export{m as default};
