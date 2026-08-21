@@ -63,7 +63,8 @@ class PublicCatalogPolishTest extends TestCase
 
     public function test_service_catalog_cards_keep_a_compact_vertical_structure(): void
     {
-        $source = file_get_contents(resource_path('js/Pages/Frontend/services/index.tsx'));
+        $source = file_get_contents(resource_path('js/Pages/Frontend/services/index.tsx'))
+            .file_get_contents(resource_path('js/components/frontend/services/service-card.tsx'));
 
         $this->assertStringContainsString('flex h-full flex-col', $source);
         $this->assertStringContainsString('aspect-[16/9]', $source);

@@ -20,7 +20,7 @@ class PublicFinalizationTest extends TestCase
     {
         $source = $this->frontend('contact.tsx');
 
-        $this->assertStringContainsString("settings.calendly_link.trim()", $source);
+        $this->assertStringContainsString('settings.calendly_link.trim()', $source);
         $this->assertStringContainsString('{calendlyLink && <motion.div', $source);
         $this->assertStringContainsString('href={calendlyLink}', $source);
         $this->assertStringNotContainsString('href={settings?.calendly_link}', $source);
@@ -77,12 +77,13 @@ class PublicFinalizationTest extends TestCase
 
     public function test_service_without_slug_never_generates_a_hash_link(): void
     {
-        $source = $this->frontend('services/index.tsx');
+        $source = $this->frontend('services/index.tsx')
+            .file_get_contents(resource_path('js/components/frontend/services/service-card.tsx'));
 
         $this->assertStringNotContainsString(": '#')", $source);
-        $this->assertStringContainsString(': null);', $source);
-        $this->assertStringContainsString('{primaryHref && <Link', $source);
-        $this->assertStringContainsString('{secondaryHref && <Link', $source);
+        $this->assertStringContainsString(': null;', $source);
+        $this->assertStringContainsString('{primaryHref && (', $source);
+        $this->assertStringContainsString('{secondaryHref && (', $source);
     }
 
     public function test_targeted_sources_contain_no_intrainings_typo(): void
@@ -107,6 +108,6 @@ class PublicFinalizationTest extends TestCase
 
     private function frontend(string $path): string
     {
-        return file_get_contents(resource_path('js/Pages/Frontend/' . $path));
+        return file_get_contents(resource_path('js/Pages/Frontend/'.$path));
     }
 }

@@ -369,13 +369,23 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             ->group(function () {
                 Route::get('/trash', [TrainingController::class, 'trash'])->name('trash');
 
+                Route::get('/import-export', [TrainingController::class, 'importExport'])
+                    ->name('import-export');
+                Route::post('/import-export/analyze', [TrainingController::class, 'analyzeImport'])
+                    ->name('import-export.analyze');
+                Route::post('/import-export/create', [TrainingController::class, 'createFromJson'])
+                    ->name('import-export.create');
+                Route::post('/import-export/update', [TrainingController::class, 'updateFromJson'])
+                    ->name('import-export.update');
+                Route::get('/{training}/export-json', [TrainingController::class, 'exportJson'])
+                    ->name('export-json');
+                Route::get('/{training}/export-package', [TrainingController::class, 'exportPackage'])
+                    ->name('export-package');
+
                 Route::get('/participants/{slug}', [TrainingController::class, 'participants'])->name('participants');
                 Route::get('/participants/{slug}/export', [TrainingController::class, 'exportParticipantsCsv'])->name('participants.export');
                 Route::get('/{slug}/participants/{participant}', [TrainingController::class, 'showParticipant'])->name('participants.show');
                 Route::get('/{slug}/facture/{reference}', [TrainingController::class, 'downloadInvoice'])->name('participants.invoice');
-
-                Route::post('/import-json', [TrainingController::class, 'importJson'])
-                    ->name('import-json');
 
                 Route::post('/{training}/import-sections', [TrainingController::class, 'importSections'])
                     ->name('import-sections');

@@ -89,6 +89,10 @@ export const dataRoutes = {
           title: 'Ajouter une formation',
           url: route('trainings.create'),
         },
+        {
+          title: 'Import / Export',
+          url: route('trainings.import-export'),
+        },
       ],
     },
     {

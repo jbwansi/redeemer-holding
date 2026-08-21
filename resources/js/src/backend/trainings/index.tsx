@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useForm } from '@inertiajs/react';
 import {
   Select,
   SelectContent,
@@ -52,6 +51,12 @@ interface Training {
   views: number;
 }
 
+interface PaginationLink {
+  active: boolean;
+  label: string;
+  url: string | null;
+}
+
 interface Props {
   trainings: {
     data: Training[];
@@ -59,7 +64,7 @@ interface Props {
       current_page: number;
       from: number;
       last_page: number;
-      links: any[];
+      links: PaginationLink[];
       path: string;
       per_page: number;
       to: number;
@@ -192,18 +197,6 @@ export default function TrainingsIndex({ trainings }: Props) {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
-
-  const importForm = useForm({
-    file: null as File | null,
-  });
-
-  const importJson = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    importForm.post(route('trainings.import-json'), {
-      forceFormData: true,
-    });
-  };
 
   const filteredTrainings = trainings.data.filter((training) => {
     const matchesSearch =

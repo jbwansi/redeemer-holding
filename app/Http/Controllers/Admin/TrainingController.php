@@ -5,25 +5,253 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Training;
 use App\Models\TrainingParticipant;
-use App\Models\TrainingSection;
-use App\Models\TrainingLesson;
-use App\Models\TrainingResource;
 use App\Services\ImageService;
+use App\Services\LegacyTrainingContentJsonAdapter;
+use App\Services\TrainingContentImporter;
+use App\Services\TrainingJsonExporter;
+use App\Services\TrainingJsonImportAnalyzer;
+use App\Services\TrainingJsonImporter;
+use App\Services\TrainingJsonUpdateApplier;
+use App\Services\TrainingJsonUpdatePlanner;
+use App\Services\TrainingPackageAnalyzer;
+use App\Services\TrainingPackageExporter;
+use App\Services\TrainingPackageImporter;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class TrainingController extends Controller
 {
     protected $imageService;
 
-    public function __construct(ImageService $imageService)
-    {
+    protected TrainingJsonExporter $trainingJsonExporter;
+
+    protected TrainingJsonImportAnalyzer $trainingJsonImportAnalyzer;
+
+    protected TrainingJsonImporter $trainingJsonImporter;
+
+    protected LegacyTrainingContentJsonAdapter $legacyTrainingContentJsonAdapter;
+
+    protected TrainingContentImporter $trainingContentImporter;
+
+    protected TrainingJsonUpdatePlanner $trainingJsonUpdatePlanner;
+
+    protected TrainingJsonUpdateApplier $trainingJsonUpdateApplier;
+
+    protected TrainingPackageExporter $trainingPackageExporter;
+
+    protected TrainingPackageAnalyzer $trainingPackageAnalyzer;
+
+    protected TrainingPackageImporter $trainingPackageImporter;
+
+    public function __construct(
+        ImageService $imageService,
+        TrainingJsonExporter $trainingJsonExporter,
+        TrainingJsonImportAnalyzer $trainingJsonImportAnalyzer,
+        TrainingJsonImporter $trainingJsonImporter,
+        LegacyTrainingContentJsonAdapter $legacyTrainingContentJsonAdapter,
+        TrainingContentImporter $trainingContentImporter,
+        TrainingJsonUpdatePlanner $trainingJsonUpdatePlanner,
+        TrainingJsonUpdateApplier $trainingJsonUpdateApplier,
+        TrainingPackageExporter $trainingPackageExporter,
+        TrainingPackageAnalyzer $trainingPackageAnalyzer,
+        TrainingPackageImporter $trainingPackageImporter
+    ) {
         $this->imageService = $imageService;
+        $this->trainingJsonExporter = $trainingJsonExporter;
+        $this->trainingJsonImportAnalyzer = $trainingJsonImportAnalyzer;
+        $this->trainingJsonImporter = $trainingJsonImporter;
+        $this->legacyTrainingContentJsonAdapter = $legacyTrainingContentJsonAdapter;
+        $this->trainingContentImporter = $trainingContentImporter;
+        $this->trainingJsonUpdatePlanner = $trainingJsonUpdatePlanner;
+        $this->trainingJsonUpdateApplier = $trainingJsonUpdateApplier;
+        $this->trainingPackageExporter = $trainingPackageExporter;
+        $this->trainingPackageAnalyzer = $trainingPackageAnalyzer;
+        $this->trainingPackageImporter = $trainingPackageImporter;
+    }
+
+    public function importExport()
+    {
+        return inertia('backend/trainings/import-export', [
+            'trainings' => Training::query()
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug']),
+            'analysis' => session('training_import_analysis'),
+            'importResult' => session('training_import_result'),
+            'updateResult' => session('training_update_result'),
+        ]);
+    }
+
+    public function exportJson(Training $training)
+    {
+        $filename = 'redeemer-training-'.Str::slug($training->slug ?: $training->title).'.json';
+
+        return response()->streamDownload(
+            fn () => print ($this->trainingJsonExporter->json($training)),
+            $filename,
+            ['Content-Type' => 'application/json; charset=UTF-8']
+        );
+    }
+
+    public function exportPackage(Training $training)
+    {
+        $path = $this->trainingPackageExporter->export($training);
+        $filename = 'redeemer-training-'.Str::slug($training->slug ?: $training->title).'.zip';
+
+        return response()->download($path, $filename, ['Content-Type' => 'application/zip'])
+            ->deleteFileAfterSend(true);
+    }
+
+    public function analyzeImport(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:102400'],
+        ], [
+            'file.required' => 'Sélectionnez un fichier JSON ou ZIP.',
+            'file.file' => 'Le fichier sélectionné n’est pas valide.',
+            'file.max' => 'Le package ne doit pas dépasser 100 Mo.',
+        ]);
+
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+        if ($extension === 'zip') {
+            try {
+                $package = $this->trainingPackageAnalyzer->analyze($file->getRealPath(), $file->getClientOriginalName());
+                $analysis = $package['analysis'];
+                $analysis['package'] = $package['package'];
+                if ($analysis['valid'] && $analysis['status'] === 'existing') {
+                    $analysis['update_plan'] = $this->trainingJsonUpdatePlanner->plan(json_decode($package['training_json'], true, 512, JSON_THROW_ON_ERROR));
+                }
+            } catch (\DomainException $exception) {
+                $analysis = ['valid' => false, 'status' => 'invalid', 'errors' => [$exception->getMessage()], 'warnings' => [], 'package' => ['valid' => false, 'integrity' => 'invalid']];
+            }
+
+            return redirect()->route('trainings.import-export')->with('training_import_analysis', $analysis);
+        }
+        if ($file->getSize() > 2 * 1024 * 1024) {
+            return back()->withErrors(['file' => 'Le fichier JSON ne doit pas dépasser 2 Mo.']);
+        }
+
+        $allowedMimeTypes = ['application/json', 'text/json', 'text/plain', 'application/octet-stream'];
+        if (! in_array($file->getMimeType(), $allowedMimeTypes, true)) {
+            return back()->withErrors(['file' => 'Le type du fichier JSON n’est pas accepté.']);
+        }
+
+        $contents = file_get_contents($file->getRealPath());
+        $contents = $contents === false ? '' : $contents;
+
+        if (app()->environment('local', 'testing')) {
+            json_decode($contents, true);
+            Log::debug('Fichier reçu pour analyse d’un export de formation.', [
+                'filename' => $file->getClientOriginalName(),
+                'uploaded_size' => $file->getSize(),
+                'content_length' => strlen($contents),
+                'sha256' => hash('sha256', $contents),
+                'first_bytes_hex' => bin2hex(substr($contents, 0, 8)),
+                'json_error' => json_last_error_msg(),
+            ]);
+        }
+
+        $analysis = $this->trainingJsonImportAnalyzer->analyze(
+            $contents,
+            $file->getClientOriginalName()
+        );
+
+        if ($analysis['valid'] && $analysis['status'] === 'existing') {
+            $package = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+            $analysis['update_plan'] = $this->trainingJsonUpdatePlanner->plan($package);
+        }
+
+        return redirect()->route('trainings.import-export')
+            ->with('training_import_analysis', $analysis);
+    }
+
+    public function createFromJson(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:102400'],
+        ], [
+            'file.required' => 'Sélectionnez à nouveau le fichier JSON à importer.',
+            'file.file' => 'Le fichier sélectionné n’est pas valide.',
+            'file.max' => 'Le fichier JSON ne doit pas dépasser 2 Mo.',
+        ]);
+
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+
+        $allowedMimeTypes = ['application/json', 'text/json', 'text/plain', 'application/octet-stream'];
+        if ($extension === 'json' && ! in_array($file->getMimeType(), $allowedMimeTypes, true)) {
+            return back()->withErrors(['file' => 'Le type du fichier JSON n’est pas accepté.']);
+        }
+
+        $contents = file_get_contents($file->getRealPath());
+
+        try {
+            $result = $extension === 'zip'
+                ? $this->trainingPackageImporter->import($file->getRealPath(), 'create', $file->getClientOriginalName())
+                : $this->trainingJsonImporter->import($contents === false ? '' : $contents, $file->getClientOriginalName());
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['file' => $exception->getMessage()]);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable) {
+            return back()->withErrors([
+                'file' => 'L’import a échoué. Aucune donnée n’a été modifiée.',
+            ]);
+        }
+
+        return redirect()->route('trainings.import-export')
+            ->with('success', 'Formation importée avec succès.')
+            ->with('training_import_result', $result);
+    }
+
+    public function updateFromJson(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:102400'],
+        ]);
+
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+
+        $allowedMimeTypes = ['application/json', 'text/json', 'text/plain', 'application/octet-stream'];
+        if ($extension === 'json' && ! in_array($file->getMimeType(), $allowedMimeTypes, true)) {
+            return back()->withErrors(['file' => 'Le type du fichier JSON n’est pas accepté.']);
+        }
+
+        $contents = file_get_contents($file->getRealPath());
+
+        try {
+            $result = $extension === 'zip'
+                ? $this->trainingPackageImporter->import($file->getRealPath(), 'update', $file->getClientOriginalName())
+                : $this->trainingJsonUpdateApplier->apply($contents === false ? '' : $contents, $file->getClientOriginalName());
+        } catch (\DomainException|\InvalidArgumentException $exception) {
+            return back()->withErrors(['file' => $exception->getMessage()]);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable) {
+            return back()->withErrors([
+                'file' => 'La mise à jour a échoué. Aucune donnée n’a été modifiée.',
+            ]);
+        }
+
+        return redirect()->route('trainings.import-export')
+            ->with('success', 'Formation mise à jour avec succès.')
+            ->with('training_update_result', $result);
     }
 
     public function index(Request $request)
@@ -31,8 +259,7 @@ class TrainingController extends Controller
         $query = Training::query()
             ->when(
                 $request->search,
-                fn($q, $search) =>
-                $q->where('title', 'like', "%{$search}%")
+                fn ($q, $search) => $q->where('title', 'like', "%{$search}%")
             )
             ->when($request->date, function ($q, $date) {
                 switch ($date) {
@@ -49,7 +276,7 @@ class TrainingController extends Controller
 
         return inertia('backend/trainings/index', [
             'trainings' => $query->paginate(12),
-            'filters' => $request->only(['search', 'date'])
+            'filters' => $request->only(['search', 'date']),
         ]);
     }
 
@@ -95,9 +322,9 @@ class TrainingController extends Controller
                 'is_featured' => $isFeatured,
                 'is_published' => $isPublished,
                 'user_id' => Auth::id(),
-                'slug' => rand(1000, 9999) . '-' . Str::slug($request->title),
+                'slug' => rand(1000, 9999).'-'.Str::slug($request->title),
                 'published_at' => $isPublished ? now() : null,
-                'featured_image' => null
+                'featured_image' => null,
             ]);
 
             if ($request->hasFile('featured_image')) {
@@ -110,10 +337,12 @@ class TrainingController extends Controller
             }
 
             DB::commit();
+
             return redirect()->route('trainings.show', $training->slug)->with('success', 'Training créée avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Erreur lors de la création de la formation: ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la création de la formation: '.$e->getMessage());
         }
     }
 
@@ -175,9 +404,11 @@ class TrainingController extends Controller
             ]);
 
             DB::commit();
+
             return redirect()->route('trainings.index')->with('success', 'Training mise à jour avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Erreur lors de la mise à jour de la formation');
         }
     }
@@ -194,9 +425,11 @@ class TrainingController extends Controller
             $training->delete();
 
             DB::commit();
+
             return redirect()->route('trainings.index')->with('success', 'Training supprimée avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Erreur lors de la suppression de la formation');
         }
     }
@@ -209,7 +442,7 @@ class TrainingController extends Controller
     public function edit(Training $training)
     {
         return inertia('backend/trainings/edit', [
-            'training' => $training->load('participants')
+            'training' => $training->load('participants'),
         ]);
     }
 
@@ -225,7 +458,7 @@ class TrainingController extends Controller
 
         return inertia('backend/trainings/show', [
             'training' => $training,
-            'canRegister' => !$training->is_full && $training->is_published && new DateTime($training->end_date) > new DateTime(),
+            'canRegister' => ! $training->is_full && $training->is_published && new DateTime($training->end_date) > new DateTime,
         ]);
     }
 
@@ -273,8 +506,8 @@ class TrainingController extends Controller
                 'last_page' => $participants->lastPage(),
                 'from' => $participants->firstItem(),
                 'to' => $participants->lastItem(),
-                'links' => $participants->linkCollection()->toArray()
-            ]
+                'links' => $participants->linkCollection()->toArray(),
+            ],
         ]);
     }
 
@@ -296,7 +529,7 @@ class TrainingController extends Controller
                 'created_at',
             ]);
 
-        $filename = 'participants_formation_' . $training->slug . '_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'participants_formation_'.$training->slug.'_'.now()->format('Ymd_His').'.csv';
 
         return response()->streamDownload(function () use ($participants) {
             $handle = fopen('php://output', 'w');
@@ -349,12 +582,12 @@ class TrainingController extends Controller
             'serviceFee' => $training->price * $registration->qty * 0.05,
             'total' => $training->price * $registration->qty * 1.05,
             'date' => $registration->payment_date ?? $registration->created_at,
-            'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
+            'invoice_number' => 'FACT-'.date('Y').'-'.str_pad($registration->id, 6, '0', STR_PAD_LEFT),
         ];
 
         $pdf = Pdf::loadView('pdf.formation', $data);
 
-        return $pdf->download('facture_formation_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
+        return $pdf->download('facture_formation_'.$registration->reference.'_'.date('Y-m-d').'.pdf');
     }
 
     public function showParticipant($slug, $participantId)
@@ -381,13 +614,13 @@ class TrainingController extends Controller
                     (new \DateTime($participant->payment_date))->format('d/m/Y H:i') : null,
                 'statusLabel' => $this->getStatusLabel($participant->status),
                 'canBeCancelled' => $this->canBeCancelled($participant, $training),
-            ])
+            ]),
         ]);
     }
 
     public function togglePublish(Request $request, Training $formation)
     {
-      $validated = $request->validate([
+        $validated = $request->validate([
             'is_published' => ['required', 'boolean'],
         ]);
 
@@ -397,14 +630,14 @@ class TrainingController extends Controller
 
         return back();
     }
-    
+
     private function getStatusLabel($status)
     {
         return [
             'pending' => 'En attente',
             'completed' => 'Payé',
             'cancelled' => 'Annulé',
-            'in_progress' => 'En cours'
+            'in_progress' => 'En cours',
         ][$status] ?? $status;
     }
 
@@ -420,208 +653,23 @@ class TrainingController extends Controller
         return now() <= $cancellationDeadline;
     }
 
-    public function importJson(Request $request)
-    {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:json,txt'],
-        ]);
-
-        $json = file_get_contents($request->file('file')->getRealPath());
-        $data = json_decode($json, true);
-
-        if (!$data) {
-            return back()->withErrors([
-                'file' => 'Le fichier JSON est invalide.',
-            ]);
-        }
-
-        // Validate required fields
-        if (empty($data['title'])) {
-            return back()->withErrors([
-                'file' => 'Le JSON doit contenir une clé "title" pour la formation.',
-            ]);
-        }
-
-        try {
-            DB::transaction(function () use ($data) {
-                $training = Training::updateOrCreate(
-                    ['slug' => Str::slug($data['title'])],
-                    [
-                        'title' => $data['title'],
-                        'excerpt' => $data['excerpt'] ?? null,
-                        'is_published' => (bool) ($data['is_published'] ?? false),
-                    ]
-                );
-
-                $sectionIndex = 0;
-                foreach ($data['sections'] ?? [] as $sectionData) {
-                    if (empty($sectionData['title'])) {
-                        continue;
-                    }
-
-                    $section = TrainingSection::updateOrCreate(
-                        [
-                            'training_id' => $training->id,
-                            'title' => $sectionData['title'],
-                        ],
-                        [
-                            'sort_order' => (int) ($sectionData['sort_order'] ?? ++$sectionIndex),
-                        ]
-                    );
-
-                    $lessonIndex = 0;
-                    foreach ($sectionData['lessons'] ?? [] as $lessonData) {
-                        if (empty($lessonData['title'])) {
-                            continue;
-                        }
-
-                        $videoDuration = $lessonData['video_duration'] ?? null;
-                        if ($videoDuration !== null && (!is_numeric($videoDuration) || $videoDuration < 0)) {
-                            $videoDuration = null;
-                        }
-
-                        $lesson = TrainingLesson::updateOrCreate(
-                            [
-                                'training_section_id' => $section->id,
-                                'title' => $lessonData['title'],
-                            ],
-                            [
-                                'slug' => Str::slug($lessonData['title']),
-                                'excerpt' => $lessonData['excerpt'] ?? null,
-                                'content' => $lessonData['content'] ?? null,
-                                'video_url' => $lessonData['video_url'] ?? null,
-                                'video_duration' => $videoDuration,
-                                'sort_order' => (int) ($lessonData['sort_order'] ?? ++$lessonIndex),
-                                'is_published' => (bool) ($lessonData['is_published'] ?? false),
-                                'is_free' => (bool) ($lessonData['is_free'] ?? false),
-                                'training_id' => $training->id,
-                            ]
-                        );
-
-                        $resourceIndex = 0;
-                        foreach ($lessonData['resources'] ?? [] as $resourceData) {
-                            if (empty($resourceData['title'])) {
-                                continue;
-                            }
-
-                            TrainingResource::updateOrCreate(
-                                [
-                                    'training_lesson_id' => $lesson->id,
-                                    'title' => $resourceData['title'],
-                                ],
-                                [
-                                    'description' => $resourceData['description'] ?? null,
-                                    'external_url' => $resourceData['external_url'] ?? null,
-                                    'file_type' => $resourceData['file_type'] ?? 'pdf',
-                                    'is_downloadable' => (bool) ($resourceData['is_downloadable'] ?? true),
-                                    'is_public' => (bool) ($resourceData['is_public'] ?? false),
-                                    'sort_order' => (int) ($resourceData['sort_order'] ?? ++$resourceIndex),
-                                ]
-                            );
-                        }
-                    }
-                }
-            });
-
-            return back()->with('success', '✓ Formation importée avec succès.');
-        } catch (\Exception $e) {
-            return back()->withErrors([
-                'file' => 'Erreur lors de l\'import: ' . $e->getMessage(),
-            ]);
-        }
-    }
-
     public function importSections(Request $request, Training $training)
     {
         $request->validate([
-            'file' => ['required', 'file', 'mimes:json,txt'],
+            'file' => ['required', 'file', 'mimes:json,txt', 'max:5120'],
         ]);
 
         $json = file_get_contents($request->file('file')->getRealPath());
-        $data = json_decode($json, true);
-
-        if (!$data) {
-            return back()->withErrors([
-                'file' => 'Le fichier JSON est invalide.',
-            ]);
-        }
-
-        if (empty($data['sections'])) {
-            return back()->withErrors([
-                'file' => 'Le JSON doit contenir au minimum une clé "sections" avec un tableau de modules.',
-            ]);
-        }
+        $sections = $this->legacyTrainingContentJsonAdapter->adapt($json === false ? '' : $json, $training);
 
         try {
-            DB::transaction(function () use ($data, $training) {
-                $sectionIndex = $training->sections()->max('sort_order') ?? 0;
-                
-                foreach ($data['sections'] ?? [] as $sectionData) {
-                    if (empty($sectionData['title'])) {
-                        continue;
-                    }
+            $counts = DB::transaction(fn () => $this->trainingContentImporter->import($training, $sections));
 
-                    $sectionIndex++;
-                    $section = TrainingSection::create([
-                        'training_id' => $training->id,
-                        'title' => $sectionData['title'],
-                        'sort_order' => (int) ($sectionData['sort_order'] ?? $sectionIndex),
-                    ]);
-
-                    $lessonIndex = 0;
-                    foreach ($sectionData['lessons'] ?? [] as $lessonData) {
-                        if (empty($lessonData['title'])) {
-                            continue;
-                        }
-
-                        $videoDuration = $lessonData['video_duration'] ?? null;
-                        if ($videoDuration !== null && (!is_numeric($videoDuration) || $videoDuration < 0)) {
-                            $videoDuration = null;
-                        }
-
-                        $lesson = TrainingLesson::create([
-                            'training_id' => $training->id,
-                            'training_section_id' => $section->id,
-                            'title' => $lessonData['title'],
-                            'slug' => Str::slug($lessonData['title']),
-                            'excerpt' => $lessonData['excerpt'] ?? null,
-                            'content' => $lessonData['content'] ?? null,
-                            'video_url' => $lessonData['video_url'] ?? null,
-                            'video_duration' => $videoDuration,
-                            'sort_order' => (int) ($lessonData['sort_order'] ?? ++$lessonIndex),
-                            'is_published' => (bool) ($lessonData['is_published'] ?? false),
-                            'is_free' => (bool) ($lessonData['is_free'] ?? false),
-                        ]);
-
-                        $resourceIndex = 0;
-                        foreach ($lessonData['resources'] ?? [] as $resourceData) {
-                            if (empty($resourceData['title'])) {
-                                continue;
-                            }
-
-                            TrainingResource::create([
-                                'training_lesson_id' => $lesson->id,
-                                'title' => $resourceData['title'],
-                                'description' => $resourceData['description'] ?? null,
-                                'external_url' => $resourceData['external_url'] ?? null,
-                                'file_type' => $resourceData['file_type'] ?? 'pdf',
-                                'is_downloadable' => (bool) ($resourceData['is_downloadable'] ?? true),
-                                'is_public' => (bool) ($resourceData['is_public'] ?? false),
-                                'sort_order' => (int) ($resourceData['sort_order'] ?? ++$resourceIndex),
-                            ]);
-                        }
-                    }
-                }
-            });
-
-            $sectionsCount = $data['sections'] ? count($data['sections']) : 0;
-            return back()->with('success', "✓ {$sectionsCount} module(s) et leurs leçons importés avec succès.");
+            return back()->with('success', "✓ {$counts['sections']} module(s) et leurs leçons importés avec succès.");
         } catch (\Exception $e) {
             return back()->withErrors([
-                'file' => 'Erreur lors de l\'import: ' . $e->getMessage(),
+                'file' => 'Erreur lors de l\'import: '.$e->getMessage(),
             ]);
         }
     }
 }
-
-

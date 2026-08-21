@@ -270,11 +270,11 @@ const ImportSectionsForm = ({ trainingId }: { trainingId: number }) => {
     postImport(route('trainings.import-sections', { training: trainingId }), {
       forceFormData: true,
       preserveScroll: true,
+      onSuccess: () => {
+        setImportData('file', null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
     });
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   return (
@@ -282,11 +282,14 @@ const ImportSectionsForm = ({ trainingId }: { trainingId: number }) => {
       <CardContent className="p-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">
-            Importer des modules et leçons
+            Importer du contenu pédagogique
           </h2>
           <p className="text-sm text-muted-foreground">
-            Chargez un fichier JSON contenant les sections, leçons et ressources pour cette
-            formation
+            Ajoutez des modules, leçons et ressources à cette formation existante.
+          </p>
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-200">
+            Le contenu sera ajouté à cette formation. Cette opération ne remplace pas
+            automatiquement les modules déjà présents.
           </p>
         </div>
 
@@ -365,22 +368,31 @@ const ImportSectionsForm = ({ trainingId }: { trainingId: number }) => {
   "sections": [
     {
       "title": "Module 1",
+      "description": "Description facultative",
       "sort_order": 1,
+      "is_published": true,
       "lessons": [
         {
           "title": "Leçon 1",
+          "slug": "lecon-1",
           "excerpt": "Description",
           "content": "<p>HTML content</p>",
           "video_url": "https://...",
           "video_duration": 600,
           "sort_order": 1,
           "is_published": true,
+          "is_free": false,
           "resources": [
             {
               "title": "Resource",
+              "description": "Description facultative",
               "file_type": "pdf",
               "external_url": "https://...",
-              "is_downloadable": true
+              "file_path": null,
+              "file_disk": "public",
+              "is_downloadable": true,
+              "is_public": false,
+              "sort_order": 1
             }
           ]
         }

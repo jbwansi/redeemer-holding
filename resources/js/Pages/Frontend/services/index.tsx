@@ -2,15 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import {
-  ArrowRight,
-  Calendar,
-  Compass,
-  Target,
-  Users,
-  Zap,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowRight, Calendar, Compass, Target, Users, Zap, Sparkles } from 'lucide-react';
 
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import ServiceCard from '@/components/frontend/services/service-card';
@@ -335,7 +327,7 @@ function ServicesPage({
 
           {/* Cards */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {services.map((service: any, index: number) => (
+            {filteredServices.map((service, index) => (
               <ServiceCard key={service?.id ?? index} service={service} index={index} />
             ))}
           </div>
