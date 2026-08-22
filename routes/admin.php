@@ -341,6 +341,11 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                     ->name('check-in');
                 Route::get('/trash', 'trash')->name('trash');
 
+                Route::get('/import-export', 'importExport')->name('import-export');
+                Route::post('/import-export/analyze', 'analyzeImport')->name('import-export.analyze');
+                Route::post('/import-export/create', 'createFromJson')->name('import-export.create');
+                Route::post('/import-export/update', 'updateFromJson')->name('import-export.update');
+
                 Route::get('/participants/{slug}', 'participants')->name('participants');
                 Route::get('/participants/{slug}/export', 'exportParticipantsCsv')->name('participants.export');
                 Route::get('/{slug}/participants/{participant}', 'showParticipant')->name('participants.show');
@@ -349,6 +354,9 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
+
+                Route::get('/{event}/export-json', 'exportJson')->name('export-json');
+                Route::get('/{event}/export-package', 'exportPackage')->name('export-package');
 
                 Route::patch('/{event}/toggle-publish', 'togglePublish')->name('toggle-publish');
 

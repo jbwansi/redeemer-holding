@@ -108,6 +108,10 @@ export const dataRoutes = {
           title: 'Ajouter un évènement',
           url: route('events.create'),
         },
+        {
+          title: 'Import / Export',
+          url: route('events.import-export'),
+        },
       ],
     },
     {

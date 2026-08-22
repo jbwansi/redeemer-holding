@@ -15,7 +15,7 @@
     "google/analytics-data": "^0.23.3",
     "inertiajs/inertia-laravel": "^2.0",
     "intervention/image": "^3.11",
-    "laravel/framework": "^11.31",
+        "laravel/framework": "^12.60",
     "laravel/tinker": "^2.9",
     "stevebauman/location": "^7.4",
     "stripe/stripe-php": "^16.5",

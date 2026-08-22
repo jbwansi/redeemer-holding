@@ -1,0 +1,1 @@
+var e=e=>typeof window>`u`?``:new URLSearchParams(window.location.search).get(e)??``,t=(e,t)=>{let n={page:e};return Object.entries(t).forEach(([e,t])=>{t!==``&&t!==null&&t!==!1&&(n[e]=t)}),n};export{e as n,t};

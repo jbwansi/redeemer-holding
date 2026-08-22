@@ -1,0 +1,1 @@
+import{t as e}from"./rolldown-runtime-B0Z9INg1.js";import{g as t}from"./vendor--dnd-kit-core-B_LGKWGk.js";var n=e((e=>{var n=t();e.createRoot=n.createRoot,e.hydrateRoot=n.hydrateRoot}));export{n as t};

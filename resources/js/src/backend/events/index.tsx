@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Calendar, Search, MapPin, Users, Eye, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Search, MapPin, Users, Eye, Edit, Trash2, FileJson } from 'lucide-react';
 import { format } from 'date-fns';
 import { router } from '@inertiajs/react';
 import { toast } from 'sonner';
@@ -276,15 +276,28 @@ export default function EventsIndex({ events, categories }: Props) {
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Événements</h1>
             <p className="mt-2 text-white/80">Gérer les événements de votre calendrier</p>
           </div>
-          <Link href={route('events.create')}>
+          <div className="flex flex-wrap gap-2">
             <Button
+              variant="outline"
               size="lg"
-              className="h-11 px-5 rounded-xl bg-white text-slate-900 hover:bg-slate-100"
+              asChild
+              className="h-11 border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
-              <Calendar className="mr-2 h-5 w-5" />
-              Créer un événement
+              <Link href={route('events.import-export')}>
+                <FileJson className="mr-2 h-5 w-5" />
+                Import / Export
+              </Link>
             </Button>
-          </Link>
+            <Link href={route('events.create')}>
+              <Button
+                size="lg"
+                className="h-11 px-5 rounded-xl bg-white text-slate-900 hover:bg-slate-100"
+              >
+                <Calendar className="mr-2 h-5 w-5" />
+                Créer un événement
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
 

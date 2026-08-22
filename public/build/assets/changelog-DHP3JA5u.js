@@ -1,0 +1,1 @@
+import"./rolldown-runtime-B0Z9INg1.js";import{i as e}from"./vendor--dnd-kit-accessibility-DG5krVQ3.js";import{s as t}from"./vendor-motion-DtFgrr9H.js";e();var n=t(),r=()=>(0,n.jsx)(`div`,{children:`Changelog`});export{r as default};

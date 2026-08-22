@@ -1,0 +1,1 @@
+var e=`14 août 2026`;export{e as t};

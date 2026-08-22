@@ -46,12 +46,7 @@ export default defineConfig({
             return 'vendor-ui';
           }
 
-          if (
-            id.includes('quill') ||
-            id.includes('react-quill') ||
-            id.includes('react-quilljs') ||
-            id.includes('html-react-parser')
-          ) {
+          if (id.includes('quill') || id.includes('html-react-parser')) {
             return 'vendor-editor';
           }
 

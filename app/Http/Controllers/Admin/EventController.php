@@ -8,6 +8,13 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\EventParticipant;
 use App\Models\User;
+use App\Services\EventJsonExporter;
+use App\Services\EventJsonImportAnalyzer;
+use App\Services\EventJsonImporter;
+use App\Services\EventJsonUpdateApplier;
+use App\Services\EventPackageAnalyzer;
+use App\Services\EventPackageExporter;
+use App\Services\EventPackageImporter;
 use App\Services\ImageService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -15,16 +22,160 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EventController extends Controller
 {
     protected $imageService;
 
-    public function __construct(ImageService $imageService)
-    {
+    protected EventJsonExporter $eventJsonExporter;
+
+    protected EventJsonImportAnalyzer $eventJsonImportAnalyzer;
+
+    protected EventJsonImporter $eventJsonImporter;
+
+    protected EventJsonUpdateApplier $eventJsonUpdateApplier;
+
+    protected EventPackageExporter $eventPackageExporter;
+
+    protected EventPackageAnalyzer $eventPackageAnalyzer;
+
+    protected EventPackageImporter $eventPackageImporter;
+
+    public function __construct(
+        ImageService $imageService,
+        EventJsonExporter $eventJsonExporter,
+        EventJsonImportAnalyzer $eventJsonImportAnalyzer,
+        EventJsonImporter $eventJsonImporter,
+        EventJsonUpdateApplier $eventJsonUpdateApplier,
+        EventPackageExporter $eventPackageExporter,
+        EventPackageAnalyzer $eventPackageAnalyzer,
+        EventPackageImporter $eventPackageImporter
+    ) {
         $this->imageService = $imageService;
+        $this->eventJsonExporter = $eventJsonExporter;
+        $this->eventJsonImportAnalyzer = $eventJsonImportAnalyzer;
+        $this->eventJsonImporter = $eventJsonImporter;
+        $this->eventJsonUpdateApplier = $eventJsonUpdateApplier;
+        $this->eventPackageExporter = $eventPackageExporter;
+        $this->eventPackageAnalyzer = $eventPackageAnalyzer;
+        $this->eventPackageImporter = $eventPackageImporter;
+    }
+
+    public function importExport()
+    {
+        return inertia('backend/events/import-export', [
+            'events' => Event::query()->orderBy('title')->get(['id', 'title', 'slug']),
+            'analysis' => session('event_import_analysis'),
+            'importResult' => session('event_import_result'),
+            'updateResult' => session('event_update_result'),
+        ]);
+    }
+
+    public function analyzeImport(Request $request)
+    {
+        $request->validate(['file' => ['required', 'file', 'max:102400']]);
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+        if ($extension === 'zip') {
+            try {
+                $package = $this->eventPackageAnalyzer->analyze($file->getRealPath(), $file->getClientOriginalName());
+                $analysis = $package['analysis'];
+                $analysis['package'] = $package['package'];
+            } catch (\DomainException $exception) {
+                $analysis = ['valid' => false, 'status' => 'invalid', 'errors' => [$exception->getMessage()], 'warnings' => [], 'package' => ['valid' => false, 'integrity' => 'invalid']];
+            }
+        } else {
+            $json = file_get_contents($file->getRealPath());
+            $analysis = $this->eventJsonImportAnalyzer->analyze($json === false ? '' : $json, $file->getClientOriginalName());
+        }
+
+        return redirect()->route('events.import-export')->with('event_import_analysis', $analysis);
+    }
+
+    public function createFromJson(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:102400'],
+        ], [
+            'file.required' => 'Sélectionnez à nouveau le fichier JSON à importer.',
+        ]);
+
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+
+        $json = file_get_contents($file->getRealPath());
+
+        try {
+            $result = $extension === 'zip'
+                ? $this->eventPackageImporter->import($file->getRealPath(), 'create', (int) Auth::id(), $file->getClientOriginalName())
+                : $this->eventJsonImporter->import($json === false ? '' : $json, (int) Auth::id(), $file->getClientOriginalName());
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['file' => $exception->getMessage()]);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable) {
+            return back()->withErrors([
+                'file' => 'La création a échoué. Aucune donnée n’a été modifiée.',
+            ]);
+        }
+
+        return redirect()->route('events.import-export')
+            ->with('success', 'Événement importé avec succès.')
+            ->with('event_import_result', $result);
+    }
+
+    public function updateFromJson(Request $request)
+    {
+        $request->validate(['file' => ['required', 'file', 'max:102400']]);
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (! in_array($extension, ['json', 'zip'], true)) {
+            return back()->withErrors(['file' => 'Le fichier sélectionné doit être un fichier JSON ou ZIP.']);
+        }
+
+        $json = file_get_contents($file->getRealPath());
+        try {
+            $result = $extension === 'zip'
+                ? $this->eventPackageImporter->import($file->getRealPath(), 'update', (int) Auth::id(), $file->getClientOriginalName())
+                : $this->eventJsonUpdateApplier->apply($json === false ? '' : $json, $file->getClientOriginalName());
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['file' => $exception->getMessage()]);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable) {
+            return back()->withErrors(['file' => 'La mise à jour a échoué. Aucune donnée n’a été modifiée.']);
+        }
+
+        return redirect()->route('events.import-export')
+            ->with('success', 'Événement mis à jour avec succès.')
+            ->with('event_update_result', $result);
+    }
+
+    public function exportJson(Event $event)
+    {
+        $filename = 'redeemer-event-'.Str::slug($event->slug ?: $event->title).'.json';
+
+        return response()->streamDownload(
+            fn () => print ($this->eventJsonExporter->json($event)),
+            $filename,
+            ['Content-Type' => 'application/json; charset=UTF-8']
+        );
+    }
+
+    public function exportPackage(Event $event)
+    {
+        $path = $this->eventPackageExporter->export($event);
+        $filename = 'redeemer-event-'.Str::slug($event->slug ?: $event->title).'.zip';
+
+        return response()->download($path, $filename, ['Content-Type' => 'application/zip'])
+            ->deleteFileAfterSend(true);
     }
 
     public function index(Request $request)
@@ -32,13 +183,11 @@ class EventController extends Controller
         $query = Event::with('category')
             ->when(
                 $request->search,
-                fn($q, $search) =>
-                $q->where('title', 'like', "%{$search}%")
+                fn ($q, $search) => $q->where('title', 'like', "%{$search}%")
             )
             ->when(
                 $request->category,
-                fn($q, $category) =>
-                $q->where('category_id', $category)
+                fn ($q, $category) => $q->where('category_id', $category)
             )
             ->when($request->date, function ($q, $date) {
                 switch ($date) {
@@ -56,7 +205,7 @@ class EventController extends Controller
         return inertia('backend/events/index', [
             'events' => $query->paginate(12),
             'categories' => Category::orderBy('name')->get(),
-            'filters' => $request->only(['search', 'category', 'date'])
+            'filters' => $request->only(['search', 'category', 'date']),
         ]);
     }
 
@@ -93,7 +242,7 @@ class EventController extends Controller
         try {
             $creatorId = Auth::id() ?? User::query()->value('id');
 
-            if (!$creatorId) {
+            if (! $creatorId) {
                 throw new \RuntimeException("Aucun utilisateur disponible pour associer l'événement. Créez un compte admin puis réessayez.");
             }
 
@@ -109,11 +258,10 @@ class EventController extends Controller
                 'is_featured' => $isFeatured,
                 'is_published' => $isPublished,
                 'user_id' => $creatorId,
-                'slug' => rand(1000, 9999) . '-' . Str::slug($request->title),
+                'slug' => rand(1000, 9999).'-'.Str::slug($request->title),
                 'published_at' => $isPublished ? now() : null,
-                "featured_image" => null
+                'featured_image' => null,
             ]);
-
 
             if ($request->hasFile('featured_image')) {
                 $images = $this->imageService->uploadImage(
@@ -125,10 +273,12 @@ class EventController extends Controller
             }
 
             DB::commit();
+
             return redirect()->route('events.show', $event->slug)->with('success', 'Événement créé avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Erreur lors de la création de l\'événement : ' . $e->getMessage());
+
+            return back()->withInput()->with('error', 'Erreur lors de la création de l\'événement : '.$e->getMessage());
         }
     }
 
@@ -195,9 +345,11 @@ class EventController extends Controller
             ]);
 
             DB::commit();
+
             return redirect()->route('events.index')->with('success', 'Événement mis à jour avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Erreur lors de la mise à jour de l\'événement');
         }
     }
@@ -214,9 +366,11 @@ class EventController extends Controller
             $event->delete();
 
             DB::commit();
+
             return redirect()->route('events.index')->with('success', 'Événement supprimé avec succès.');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return back()->with('error', 'Erreur lors de la suppression de l\'événement');
         }
     }
@@ -224,7 +378,7 @@ class EventController extends Controller
     public function create()
     {
         return inertia('backend/events/create', [
-            'categories' => Category::orderBy('name')->get()
+            'categories' => Category::orderBy('name')->get(),
         ]);
     }
 
@@ -232,9 +386,10 @@ class EventController extends Controller
     {
         return inertia('backend/events/edit', [
             'event' => $event,
-            'categories' => Category::orderBy('name')->get()
+            'categories' => Category::orderBy('name')->get(),
         ]);
     }
+
     public function show($slug)
     {
         $event = Event::with([
@@ -242,7 +397,7 @@ class EventController extends Controller
             'participants' => function ($query) {
                 $query->where('status', '!=', 'cancelled')
                     ->select('id', 'event_id', 'name', 'status', 'qty', 'created_at');
-            }
+            },
         ])->where('slug', $slug)->firstOrFail();
 
         // Ajouter l'information pour déterminer quel bouton afficher
@@ -251,7 +406,7 @@ class EventController extends Controller
 
         return inertia('backend/events/show', [
             'event' => $event,
-            'canRegister' => !$event->is_full && $event->is_published && new DateTime($event->end_date) > new DateTime(),
+            'canRegister' => ! $event->is_full && $event->is_published && new DateTime($event->end_date) > new DateTime,
         ]);
     }
 
@@ -261,7 +416,7 @@ class EventController extends Controller
             'participants' => function ($query) {
                 $query->with(['user'])
                     ->orderBy('created_at', 'desc');
-            }
+            },
         ])->where('slug', $slug)->firstOrFail();
 
         $participants = $event->participants()
@@ -301,8 +456,8 @@ class EventController extends Controller
                 'last_page' => $participants->lastPage(),
                 'from' => $participants->firstItem(),
                 'to' => $participants->lastItem(),
-                'links' => $participants->linkCollection()->toArray()
-            ]
+                'links' => $participants->linkCollection()->toArray(),
+            ],
         ]);
     }
 
@@ -324,7 +479,7 @@ class EventController extends Controller
                 'created_at',
             ]);
 
-        $filename = 'participants_evenement_' . $event->slug . '_' . now()->format('Ymd_His') . '.csv';
+        $filename = 'participants_evenement_'.$event->slug.'_'.now()->format('Ymd_His').'.csv';
 
         return response()->streamDownload(function () use ($participants) {
             $handle = fopen('php://output', 'w');
@@ -381,14 +536,14 @@ class EventController extends Controller
             'serviceFee' => $event->price * $registration->qty * 0.05,
             'total' => $event->price * $registration->qty * 1.05,
             'date' => $registration->payment_date ?? $registration->created_at,
-            'invoice_number' => 'FACT-' . date('Y') . '-' . str_pad($registration->id, 6, '0', STR_PAD_LEFT)
+            'invoice_number' => 'FACT-'.date('Y').'-'.str_pad($registration->id, 6, '0', STR_PAD_LEFT),
         ];
 
         // Générer le PDF
         $pdf = Pdf::loadView('pdf.event', $data);
 
         // Télécharger avec un nom formaté
-        return $pdf->download('facture_' . $registration->reference . '_' . date('Y-m-d') . '.pdf');
+        return $pdf->download('facture_'.$registration->reference.'_'.date('Y-m-d').'.pdf');
     }
 
     /**
@@ -419,7 +574,7 @@ class EventController extends Controller
                     (new \DateTime($participant->payment_date))->format('d/m/Y H:i') : null,
                 'statusLabel' => $this->getStatusLabel($participant->status),
                 'canBeCancelled' => $this->canBeCancelled($participant, $event),
-            ])
+            ]),
         ]);
     }
 
@@ -445,7 +600,7 @@ class EventController extends Controller
             'pending' => 'En attente',
             'completed' => 'Payé',
             'cancelled' => 'Annulé',
-            'in_progress' => 'En cours'
+            'in_progress' => 'En cours',
         ][$status] ?? $status;
     }
 
