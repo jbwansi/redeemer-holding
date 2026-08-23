@@ -132,6 +132,10 @@ export const dataRoutes = {
           title: 'Liste des  services',
           url: route('services.index'),
         },
+        {
+          title: 'Import / Export',
+          url: route('services.import-export'),
+        },
       ],
     },
     {

@@ -98,11 +98,19 @@ Route::middleware(['admin.access', 'active'])->group(function () {
             ->name('services.')
             ->controller(ServiceController::class)
             ->group(function () {
+                Route::get('/import-export', 'importExport')->name('import-export');
+                Route::post('/import-export/analyze', 'analyzeImport')->name('import-export.analyze');
+                Route::post('/import-export/create', 'createFromJson')->name('import-export.create');
+                Route::post('/import-export/update', 'updateFromJson')->name('import-export.update');
+
                 Route::get('/', 'index')->name('index');
                 Route::get('/create', 'create')->name('create');
                 Route::post('/', 'store')->name('store');
 
                 Route::post('/reorder-home', 'reorderHome')->name('reorderHome');
+
+                Route::get('/{service}/export-json', 'exportJson')->name('export-json');
+                Route::get('/{service}/export-package', 'exportPackage')->name('export-package');
 
                 Route::get('/{service}', 'show')->name('show');
                 Route::get('/{service}/edit', 'edit')->name('edit');
