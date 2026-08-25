@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Calendar, Compass, Target, Users, Zap, Sparkles } from 'lucide-react';
@@ -7,6 +7,7 @@ import { ArrowRight, Calendar, Compass, Target, Users, Zap, Sparkles } from 'luc
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import ServiceCard from '@/components/frontend/services/service-card';
 import FaqAccordion from '@/components/frontend/faq/faq-accordion';
+import { serviceMatchesFocus, type ServiceFocus } from '@/lib/service-focus';
 
 type Service = {
   id: number;
@@ -25,6 +26,8 @@ type Service = {
   hero_image?: string | null;
   image?: string | null;
   ideal_for?: string[] | null;
+  is_for_individuals: boolean;
+  is_for_organizations: boolean;
 };
 
 type FaqItem = {
@@ -34,22 +37,27 @@ type FaqItem = {
 
 type PageContent = Record<string, string>;
 
-type ServiceFocus =
-  | 'all'
-  | 'coaching'
-  | 'consultation'
-  | 'formation'
-  | 'team_building'
-  | 'webinaire'
-  | 'ressources';
+type ServiceAudience = 'all' | 'individual' | 'organization';
 
-const focusKeywords: Record<Exclude<ServiceFocus, 'all'>, string[]> = {
-  coaching: ['coaching', 'coach'],
-  consultation: ['consultation', 'conseil', 'advisory'],
-  formation: ['formation', 'training', 'atelier'],
-  team_building: ['team building', 'teambuilding', 'lego serious play', 'lsp', 'cohesion'],
-  webinaire: ['webinaire', 'webinar', 'masterclass'],
-  ressources: ['ressource', 'guide', 'template', 'ebook', 'outil'],
+const validFocuses: ServiceFocus[] = [
+  'coaching',
+  'consultation',
+  'formation',
+  'team_building',
+  'webinaire',
+  'ressources',
+];
+
+const parseFilters = (url: string): { audience: ServiceAudience; focus: ServiceFocus } => {
+  const queryParams = new URLSearchParams(url.split('?')[1] || '');
+  const queryAudience = queryParams.get('audience')?.toLowerCase();
+  const queryFocus = queryParams.get('focus')?.toLowerCase();
+
+  return {
+    audience:
+      queryAudience === 'individual' || queryAudience === 'organization' ? queryAudience : 'all',
+    focus: validFocuses.includes(queryFocus as ServiceFocus) ? (queryFocus as ServiceFocus) : 'all',
+  };
 };
 
 const processSteps = [
@@ -99,22 +107,15 @@ function ServicesPage({
 
   const orbY = useTransform(scrollYProgress, [0, 1], ['0%', '35%']);
 
-  const queryString = String(page?.url || '').split('?')[1] || '';
-  const queryParams = new window.URLSearchParams(queryString);
-  const queryFocus = (queryParams.get('focus') || 'all').toLowerCase() as ServiceFocus;
+  const initialFilters = parseFilters(String(page?.url || ''));
+  const [audience, setAudience] = useState<ServiceAudience>(initialFilters.audience);
+  const [focus, setFocus] = useState<ServiceFocus>(initialFilters.focus);
 
-  const initialFocus: ServiceFocus = [
-    'coaching',
-    'consultation',
-    'formation',
-    'team_building',
-    'webinaire',
-    'ressources',
-  ].includes(queryFocus)
-    ? queryFocus
-    : 'all';
-
-  const [focus, setFocus] = useState<ServiceFocus>(initialFocus);
+  useEffect(() => {
+    const filters = parseFilters(String(page?.url || ''));
+    setAudience(filters.audience);
+    setFocus(filters.focus);
+  }, [page?.url]);
 
   const serviceCount = services?.length ?? 0;
 
@@ -128,16 +129,29 @@ function ServicesPage({
   );
 
   const filteredServices = useMemo(() => {
-    if (focus === 'all') return services;
-
-    const keywords = focusKeywords[focus];
-
     return services.filter((service) => {
-      const haystack =
-        `${service.name || ''} ${service.excerpt || ''} ${service.slug || ''}`.toLowerCase();
-      return keywords.some((keyword) => haystack.includes(keyword));
+      const matchesAudience =
+        audience === 'all' ||
+        (audience === 'individual' && service.is_for_individuals === true) ||
+        (audience === 'organization' && service.is_for_organizations === true);
+
+      return matchesAudience && serviceMatchesFocus(service, focus);
     });
-  }, [focus, services]);
+  }, [audience, focus, services]);
+
+  const updateFilters = (nextAudience: ServiceAudience, nextFocus: ServiceFocus) => {
+    setAudience(nextAudience);
+    setFocus(nextFocus);
+
+    router.get(
+      route('services'),
+      {
+        ...(nextAudience !== 'all' ? { audience: nextAudience } : {}),
+        ...(nextFocus !== 'all' ? { focus: nextFocus } : {}),
+      },
+      { preserveScroll: true, preserveState: true, replace: true }
+    );
+  };
 
   const resolvedHeroImage = useMemo(() => {
     const heroImage = String(pageContent?.hero_image || '').trim();
@@ -299,29 +313,62 @@ function ServicesPage({
             </p>
 
             {/* FIX 2 : Filtres — meilleur contraste dark */}
-            <div className="mt-7 flex gap-3 overflow-x-auto pb-2 md:flex-wrap">
-              {[
-                { key: 'all', label: 'Tous' },
-                { key: 'coaching', label: 'Coaching' },
-                { key: 'consultation', label: 'Consultation' },
-                { key: 'formation', label: 'Formation en groupe' },
-                { key: 'team_building', label: 'Team Building' },
-                { key: 'webinaire', label: 'Webinaires' },
-                { key: 'ressources', label: 'Ressources' },
-              ].map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  onClick={() => setFocus(item.key as ServiceFocus)}
-                  className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition ${
-                    focus === item.key
-                      ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/25'
-                      : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 dark:hover:text-white'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="mt-7">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                Public
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {[
+                  { key: 'all', label: 'Tous' },
+                  { key: 'individual', label: 'Pour les particuliers' },
+                  { key: 'organization', label: 'Pour les entreprises' },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    aria-pressed={audience === item.key}
+                    onClick={() => updateFilters(item.key as ServiceAudience, focus)}
+                    className={`inline-flex min-h-11 items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#da2e29] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#020817] ${
+                      audience === item.key
+                        ? 'border-[#da2e29] bg-[#da2e29] text-white shadow-md shadow-[#da2e29]/20'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-[#da2e29]/50 hover:text-[#da2e29] dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:border-[#da2e29]/70 dark:hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                Format
+              </p>
+              <div className="flex gap-3 overflow-x-auto pb-2 md:flex-wrap">
+                {[
+                  { key: 'all', label: 'Tous' },
+                  { key: 'coaching', label: 'Coaching' },
+                  { key: 'consultation', label: 'Consultation' },
+                  { key: 'formation', label: 'Formation en groupe' },
+                  { key: 'team_building', label: 'Team Building' },
+                  { key: 'webinaire', label: 'Webinaires' },
+                  { key: 'ressources', label: 'Ressources' },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    aria-pressed={focus === item.key}
+                    onClick={() => updateFilters(audience, item.key as ServiceFocus)}
+                    className={`min-h-11 shrink-0 rounded-full border px-5 py-2.5 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#da2e29] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#020817] ${
+                      focus === item.key
+                        ? 'bg-[#da2e29] text-white shadow-lg shadow-[#da2e29]/25'
+                        : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-white/20 dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/15 dark:hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </motion.div>
 
@@ -333,8 +380,20 @@ function ServicesPage({
           </div>
 
           {filteredServices.length === 0 && (
-            <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-10 text-center text-slate-500 dark:border-white/15 dark:bg-white/[0.04] dark:text-slate-400">
-              Aucun service ne correspond à ce filtre pour le moment.
+            <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white/70 p-10 text-center dark:border-white/15 dark:bg-white/[0.04]">
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                Aucun accompagnement ne correspond à ces critères
+              </h3>
+              <p className="mx-auto mt-3 max-w-xl text-slate-500 dark:text-slate-400">
+                Essayez un autre public ou un autre format pour découvrir nos accompagnements.
+              </p>
+              <button
+                type="button"
+                onClick={() => updateFilters('all', 'all')}
+                className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#da2e29] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#c62823] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#da2e29] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#020817]"
+              >
+                Réinitialiser les filtres
+              </button>
             </div>
           )}
         </section>

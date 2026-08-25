@@ -207,14 +207,11 @@ const defaultMeta: Meta = {
     },
   ],
   hero_testimonial: {
-    content: 'Cette méthode a complètement transformé ma productivité et ma vision de la vie.',
-    author: 'Marie L.',
-    position: 'Entrepreneure',
+    content: '',
+    author: '',
+    position: '',
   },
-  hero_stats: [
-    { value: '97%', label: 'Satisfaction' },
-    { value: '3k+', label: 'Vies transformées' },
-  ],
+  hero_stats: [],
   stats: [],
   process_title: "Mon processus d'accompagnement",
   process_subtitle: '',

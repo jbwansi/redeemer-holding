@@ -6,29 +6,38 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import QuillEditor from '@/components/ui/quill-editor';
 import { Service } from '@/types/service';
 import { IconPicker } from '@/components/ui/IconPicker';
-import {
-  FileText,
-  Palette,
-  Save,
-  X,
-  Target,
-  MousePointerClick,
-  Sparkles,
-  Image,
-  Trash2,
-} from 'lucide-react';
+import { FileText, Palette, MousePointerClick, Sparkles, Image, Trash2 } from 'lucide-react';
 
 interface Props {
   service?: Service;
   mode: 'create' | 'edit';
 }
 
+type ServiceFormState = {
+  name: string;
+  excerpt: string;
+  content: string;
+  icon: string;
+  image: File | null;
+  existing_image: string;
+  tagline: string;
+  featured_note: string;
+  cta_primary_label: string;
+  cta_primary_url: string;
+  cta_secondary_label: string;
+  cta_secondary_url: string;
+  position: number | string;
+  is_for_individuals: boolean;
+  is_for_organizations: boolean;
+  ideal_for: string[];
+};
+
 export default function FormService({ service, mode }: Props) {
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<ServiceFormState>({
     name: service?.name ?? '',
     excerpt: service?.excerpt ?? '',
     content: service?.content ?? '',
@@ -46,11 +55,13 @@ export default function FormService({ service, mode }: Props) {
     cta_secondary_url: service?.cta_secondary_url ?? '',
 
     position: service?.position ?? '',
+    is_for_individuals: service?.is_for_individuals ?? false,
+    is_for_organizations: service?.is_for_organizations ?? false,
 
     ideal_for: Array.isArray(service?.ideal_for)
       ? service.ideal_for
       : typeof service?.ideal_for === 'string' && service.ideal_for
-        ? JSON.parse(service.ideal_for)
+        ? (JSON.parse(service.ideal_for) as string[])
         : [],
   });
 
@@ -78,7 +89,7 @@ export default function FormService({ service, mode }: Props) {
     });
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -100,6 +111,8 @@ export default function FormService({ service, mode }: Props) {
     payload.append('cta_primary_url', formData.cta_primary_url || '');
     payload.append('cta_secondary_label', formData.cta_secondary_label || '');
     payload.append('cta_secondary_url', formData.cta_secondary_url || '');
+    payload.append('is_for_individuals', formData.is_for_individuals ? '1' : '0');
+    payload.append('is_for_organizations', formData.is_for_organizations ? '1' : '0');
     payload.append(
       'ideal_for',
       JSON.stringify(formData.ideal_for.filter((item: string) => item.trim() !== ''))
@@ -269,6 +282,36 @@ export default function FormService({ service, mode }: Props) {
               onChange={handleChange}
             />
           </div>
+
+          <fieldset className="space-y-3 rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+            <legend className="px-1 text-sm font-semibold">Publics concernés</legend>
+            <label className="flex cursor-pointer items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={formData.is_for_individuals}
+                onChange={(event) =>
+                  setFormData({ ...formData, is_for_individuals: event.target.checked })
+                }
+                className="h-4 w-4 rounded border-slate-300 accent-[#DA2E29]"
+              />
+              Particuliers et professionnels
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={formData.is_for_organizations}
+                onChange={(event) =>
+                  setFormData({ ...formData, is_for_organizations: event.target.checked })
+                }
+                className="h-4 w-4 rounded border-slate-300 accent-[#DA2E29]"
+              />
+              Entreprises et organisations
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Un service peut être proposé aux deux publics. Sans sélection, il reste absent des
+              nouvelles sections de l’accueil.
+            </p>
+          </fieldset>
         </CardContent>
       </Card>
 

@@ -29,6 +29,7 @@ interface Service {
   created_at: string | null;
   updated_at: string | null;
   hero_image?: string | null;
+  existing_image?: string | null;
   image?: string | null;
   tagline?: string | null;
   featured_note?: string | null;
@@ -37,13 +38,15 @@ interface Service {
   cta_primary_url?: string | null;
   cta_secondary_label?: string | null;
   cta_secondary_url?: string | null;
+  is_for_individuals: boolean;
+  is_for_organizations: boolean;
 }
 
 // Interface pour les props de la page
 interface ServiceDetailProps {
   service: Service;
   relatedServices?: Service[];
-  testimonials?: any[];
+  testimonials?: Array<Record<string, unknown>>;
 }
 
 const ServiceDetail = ({
@@ -94,9 +97,13 @@ const ServiceDetail = ({
   const iconName = normalizeServiceIconName(service.icon);
   const requestUrl = service?.slug ? `/services-requests/${encodeURIComponent(service.slug)}` : '#';
   const primaryCtaUrl = service.cta_primary_url || requestUrl;
-  const primaryCtaLabel = service.cta_primary_label || 'Faire une demande';
-  const secondaryCtaUrl = service.cta_secondary_url || route('contact');
-  const secondaryCtaLabel = service.cta_secondary_label || 'Poser une question';
+  const primaryCtaLabel = service.is_for_individuals
+    ? service.is_for_organizations
+      ? 'Prendre rendez-vous'
+      : 'Réserver un échange'
+    : service.is_for_organizations
+      ? 'Échanger sur votre besoin'
+      : service.cta_primary_label || 'Faire une demande';
   const fallbackContent = service.excerpt?.trim()
     ? service.excerpt
     : `Redeemer Holding vous accompagne dans le domaine « ${service.name} » avec une approche humaine, structurée et adaptée à votre contexte.`;
@@ -185,14 +192,6 @@ const ServiceDetail = ({
                     <Calendar className="mr-2 w-5 h-5" />
                     <span>{primaryCtaLabel}</span>
                   </Link>
-
-                  <a
-                    href="#details"
-                    className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/35 bg-[#0f2342]/85 px-6 py-3 font-semibold text-white backdrop-blur-sm transition-colors duration-300 hover:bg-[#17315a]"
-                  >
-                    <span>En savoir plus</span>
-                    <ChevronRight className="ml-2 w-5 h-5" />
-                  </a>
                 </motion.div>
               </motion.div>
             </div>
@@ -265,7 +264,8 @@ const ServiceDetail = ({
                       Commencer maintenant
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-5">
-                      Après votre demande, nous organisons un premier échange de 30 minutes pour clarifier vos objectifs.
+                      Après votre demande, nous organisons un premier échange de 30 minutes pour
+                      clarifier vos objectifs.
                     </p>
 
                     <ul className="mb-6 space-y-2">
@@ -291,15 +291,6 @@ const ServiceDetail = ({
                       {primaryCtaLabel}
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
-
-                    <div className="mt-4 text-center">
-                      <Link
-                        href={secondaryCtaUrl}
-                        className="text-sm text-gray-500 hover:text-[#DA2E29] dark:text-gray-400 dark:hover:text-[#DA2E29] transition-colors"
-                      >
-                        {secondaryCtaLabel} →
-                      </Link>
-                    </div>
                   </motion.div>
 
                   {/* Délai de réponse */}

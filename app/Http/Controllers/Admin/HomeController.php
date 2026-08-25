@@ -16,10 +16,12 @@ class HomeController extends Controller
     {
         return [
             'hero_badge'       => 'Coaching de vie',
-            'hero_title_line1' => 'La vie que vous méritez',
-            'hero_title_line2' => 'à portée de main !',
-            'hero_subtitle'    => "Bienvenue sur le chemin de la transformation par les valeurs. Je vous aide à découvrir votre véritable potentiel et à vivre une vie épanouie.",
-            'hero_cta_text'    => 'Découvrir mes formations',
+            'hero_title_line1' => 'Vous avez l’impression de tourner en rond ?',
+            'hero_title_line2' => '',
+            'hero_title_line3' => '',
+            'hero_subtitle'    => 'Retrouvez une direction claire et passez à l’action.',
+            'hero_cta_text'    => 'Clarifier ma situation',
+            'hero_secondary_cta_text' => 'Découvrir les accompagnements',
             'hero_cta_url'     => '',
             'hero_image'       => '/assets/images/portrait.jpg',
             'hero_steps'       => [
@@ -28,14 +30,11 @@ class HomeController extends Controller
                 ['icon' => 'Zap',   'title' => 'Optimisez votre productivité', 'description' => 'Atteignez vos objectifs avec mon système éprouvé'],
             ],
             'hero_testimonial' => [
-                'content'  => 'Cette méthode a complètement transformé ma productivité et ma vision de la vie.',
-                'author'   => 'Marie L.',
-                'position' => 'Entrepreneure',
+                'content'  => '',
+                'author'   => '',
+                'position' => '',
             ],
-            'hero_stats'       => [
-                ['value' => '97%', 'label' => 'Satisfaction'],
-                ['value' => '3k+', 'label' => 'Vies transformées'],
-            ],
+            'hero_stats'       => [],
             'stats'            => [
                 ['value' => '150+', 'label' => 'Clients accompagnés'],
                 ['value' => '10+',  'label' => 'Années d\'expérience'],
@@ -58,10 +57,7 @@ class HomeController extends Controller
                 ['icon' => 'Rocket',    'title' => 'Professionnels en transition', 'description' => 'Vous cherchez un nouveau cap clair et réaliste.'],
             ],
             'testimonials_title' => 'Ce que disent mes clients',
-            'testimonials'     => [
-                ['content' => 'Un accompagnement puissant, pragmatique et profondément humain.', 'author' => 'Aline K.', 'position' => 'Cheffe d\'entreprise', 'image' => ''],
-                ['content' => 'En quelques semaines, j\'ai gagné en clarté, en discipline et en sérénité.', 'author' => 'Samuel T.', 'position' => 'Cadre dirigeant', 'image' => ''],
-            ],
+            'testimonials'     => [],
             'trainings_title' => 'Prochaines formations',
             'video_enabled'  => false,
             'video_url'      => '',

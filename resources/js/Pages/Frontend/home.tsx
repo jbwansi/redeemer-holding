@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { ComponentProps, Suspense, lazy } from 'react';
 import Hero from '@/components/frontend/home/hero';
 import ClarityActionBlock from '@/components/frontend/home/clarity-action-block';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
@@ -8,22 +8,19 @@ import { Head } from '@inertiajs/react';
 const Services = lazy(() => import('@/components/frontend/home/services'));
 const StatsBand = lazy(() => import('@/components/frontend/home/stats-band'));
 const HowItWorks = lazy(() => import('@/components/frontend/home/how-it-works'));
-const ForWhom = lazy(() => import('@/components/frontend/home/for-whom'));
 const FeaturedTrainings = lazy(() => import('@/components/frontend/home/featured-trainings'));
-const WelcomeVideo = lazy(() => import('@/components/frontend/home/welcome-video'));
 const TestimonialsSection = lazy(() => import('@/components/frontend/home/testimonials-section'));
 const BlogPreview = lazy(() => import('@/components/frontend/home/blog-preview'));
 const CalendlyCTA = lazy(() => import('@/components/frontend/layouts/calendly-cta'));
 
 const defaultHomeMeta = {
   hero_badge: 'Transformer par les valeurs',
-  hero_title_line1: 'Structurez vos actions',
-  hero_title_line2: 'et développez des résultats',
-  hero_title_line3: 'durables',
-  hero_subtitle:
-    'Guidée par les valeurs humaines, Redeemer Holding accompagne les entrepreneurs, les leaders et les professionnels par le coaching, la formation et des leviers technologiques agiles pour faire évoluer durablement leurs actions.',
+  hero_title_line1: 'Vous avez l’impression de tourner en rond ?',
+  hero_title_line2: '',
+  hero_title_line3: '',
+  hero_subtitle: 'Retrouvez une direction claire et passez à l’action.',
 
-  hero_cta_text: 'Réserver un appel découverte',
+  hero_cta_text: 'Clarifier ma situation',
   hero_cta_url: '/contact',
   hero_secondary_cta_text: 'Découvrir les accompagnements',
   hero_secondary_cta_url: '/services',
@@ -131,22 +128,7 @@ const defaultHomeMeta = {
     { value: '97%', label: 'Taux de satisfaction' },
   ],
   testimonials_title: 'Ce que disent les personnes accompagnées',
-  testimonials: [
-    {
-      content:
-        'Un accompagnement exigeant, humain et immédiatement utile. J’ai gagné en clarté et en efficacité.',
-      author: 'Aline K.',
-      position: "Cheffe d'entreprise",
-      image: '',
-    },
-    {
-      content:
-        'J’ai enfin pu remettre de l’ordre dans mes priorités et avancer avec plus de sérénité.',
-      author: 'Samuel T.',
-      position: 'Cadre dirigeant',
-      image: '',
-    },
-  ],
+  testimonials: [],
   trainings_title: 'Formations & ateliers à découvrir',
   blog_title: 'Articles & réflexions',
   video_enabled: false,
@@ -166,7 +148,25 @@ const defaultHomeMeta = {
   ],
 };
 
-function Home({ services, home, posts, trainings, testimonials }: any) {
+type HomeProps = {
+  services: ComponentProps<typeof Services>['fallbackServices'];
+  individualServices: ComponentProps<typeof Services>['individualServices'];
+  organizationServices: ComponentProps<typeof Services>['organizationServices'];
+  home?: { meta?: Partial<typeof defaultHomeMeta> };
+  posts?: ComponentProps<typeof BlogPreview>['posts'];
+  trainings?: ComponentProps<typeof FeaturedTrainings>['trainings'];
+  testimonials?: unknown[];
+};
+
+function Home({
+  services,
+  individualServices,
+  organizationServices,
+  home,
+  posts,
+  trainings,
+  testimonials,
+}: HomeProps) {
   const meta = { ...defaultHomeMeta, ...(home?.meta ?? {}) };
 
   const pageTitle = [
@@ -211,12 +211,17 @@ function Home({ services, home, posts, trainings, testimonials }: any) {
           finalCtaSocialProofText={meta.clarity_action_social_proof_text}
           finalCtaUrgencyText={meta.clarity_action_urgency_text}
           submitUrl={route('contact.store')}
+          showForm={false}
         />
       </Suspense>
 
       {/* Below the fold — lazy loaded */}
       <Suspense fallback={<SectionSkeleton />}>
-        <Services services={services} />
+        <Services
+          individualServices={individualServices}
+          organizationServices={organizationServices}
+          fallbackServices={services}
+        />
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>
@@ -228,14 +233,6 @@ function Home({ services, home, posts, trainings, testimonials }: any) {
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>
-        <ForWhom
-          cards={meta.for_whom ?? []}
-          title={meta.for_whom_title}
-          subtitle={meta.for_whom_subtitle}
-        />
-      </Suspense>
-
-      <Suspense fallback={<SectionSkeleton />}>
         <StatsBand stats={meta.stats ?? []} />
       </Suspense>
 
@@ -243,25 +240,18 @@ function Home({ services, home, posts, trainings, testimonials }: any) {
         <TestimonialsSection testimonials={testimonials} />
       </Suspense>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <FeaturedTrainings trainings={trainings ?? []} title={meta.trainings_title} />
-      </Suspense>
-
-      <Suspense fallback={<SectionSkeleton />}>
-        <WelcomeVideo
-          enabled={meta.video_enabled !== false && !!meta.video_url}
-          videoUrl={meta.video_url}
-          title={meta.video_title}
-          subtitle={meta.video_subtitle}
-        />
-      </Suspense>
+      {trainings?.length ? (
+        <Suspense fallback={<SectionSkeleton />}>
+          <FeaturedTrainings trainings={trainings} title={meta.trainings_title} />
+        </Suspense>
+      ) : null}
 
       <Suspense fallback={<SectionSkeleton />}>
         <BlogPreview posts={posts ?? []} title={meta.blog_title} />
       </Suspense>
 
       <Suspense fallback={<SectionSkeleton />}>
-        <CalendlyCTA benefits={meta.cta_benefits?.map((b: any) => b.text).filter(Boolean)} />
+        <CalendlyCTA benefits={meta.cta_benefits?.map((benefit) => benefit.text).filter(Boolean)} />
       </Suspense>
     </FrontLayout>
   );

@@ -36,6 +36,8 @@ class ServiceJsonExportTest extends TestCase
             'is_featured' => true,
             'featured_badge' => 'Choix',
             'featured_order' => 2,
+            'is_for_individuals' => true,
+            'is_for_organizations' => true,
         ]);
         ServiceRequest::create([
             'service_id' => $service->id, 'first_name' => 'Privé', 'last_name' => 'Client',
@@ -53,6 +55,10 @@ class ServiceJsonExportTest extends TestCase
         $this->assertSame(['disk' => 'public', 'path' => 'services/equipe.webp'], $document['data']['image']);
         $this->assertSame(['label' => 'Demander', 'url' => '/contact'], $document['data']['cta_primary']);
         $this->assertSame(1, $document['data']['publication']['position']);
+        $this->assertSame(
+            ['individuals' => true, 'organizations' => true],
+            $document['data']['audiences']
+        );
         foreach (['id', 'user_id', 'views', 'created_at', 'updated_at', 'service_requests', 'testimonials', 'payment_id'] as $excluded) {
             $this->assertStringNotContainsString('"'.$excluded.'"', $json);
         }

@@ -30,6 +30,8 @@ class ServiceRequest extends FormRequest
             'content' => ['nullable', 'string'],
             'icon' => ['nullable', 'string', 'max:255'],
             'status' => ['boolean'],
+            'is_for_individuals' => ['boolean'],
+            'is_for_organizations' => ['boolean'],
             'cta_primary_url' => ['nullable', 'string', 'max:255'],
             'cta_secondary_url' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'integer'],

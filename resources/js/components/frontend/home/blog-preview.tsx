@@ -9,12 +9,14 @@ interface Post {
   title: string;
   slug: string;
   excerpt?: string;
-  featured_image?: string | Record<string, any>;
+  featured_image?: string | ResponsiveImage;
   published_at?: string;
   tags?: string | string[];
 }
 
-function resolveImageSrc(image?: string | Record<string, any>): string {
+type ResponsiveImage = Record<string, string | string[] | undefined>;
+
+function resolveImageSrc(image?: string | ResponsiveImage): string {
   if (!image) return '';
   if (typeof image === 'string') return image;
   const candidates = [image.medium, image.large, image.original, image.thumbnail];
@@ -53,10 +55,10 @@ export default function BlogPreview({ posts, title }: { posts: Post[]; title?: s
   if (!posts?.length) return null;
 
   return (
-    <section className="py-20 md:py-24 bg-white dark:bg-gray-950">
+    <section className="bg-white py-14 dark:bg-gray-950 md:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -82,7 +84,7 @@ export default function BlogPreview({ posts, title }: { posts: Post[]; title?: s
 
         {/* Grid */}
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {posts.map((post, i) => {
+          {posts.slice(0, 3).map((post, i) => {
             const tags = Array.isArray(post.tags)
               ? post.tags
               : typeof post.tags === 'string' && post.tags
@@ -101,7 +103,7 @@ export default function BlogPreview({ posts, title }: { posts: Post[]; title?: s
                 transition={{ delay: i * 0.12, duration: 0.6 }}
               >
                 {/* Image ou fallback */}
-                <div className="relative h-52 overflow-hidden bg-gray-100 dark:bg-gray-800">
+                <div className="relative h-40 overflow-hidden bg-gray-100 dark:bg-gray-800">
                   {imageSrc ? (
                     <img
                       src={imageSrc}
@@ -118,7 +120,7 @@ export default function BlogPreview({ posts, title }: { posts: Post[]; title?: s
                   )}
                 </div>
 
-                <div className="flex flex-1 flex-col p-6">
+                <div className="flex flex-1 flex-col p-5">
                   {/* Tags avec couleurs variées */}
                   {tags.length > 0 && (
                     <div className="mb-3 flex flex-wrap gap-2">
@@ -139,7 +141,7 @@ export default function BlogPreview({ posts, title }: { posts: Post[]; title?: s
                   </h3>
 
                   {post.excerpt && (
-                    <p className="mt-3 line-clamp-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
+                    <p className="mt-3 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                       {post.excerpt}
                     </p>
                   )}

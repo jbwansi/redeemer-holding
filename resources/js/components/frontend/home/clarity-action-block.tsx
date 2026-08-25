@@ -24,6 +24,7 @@ type ClarityActionBlockProps = {
   submitUrl?: string;
   finalCtaSocialProofText?: string;
   finalCtaUrgencyText?: string;
+  showForm?: boolean;
 };
 
 export default function ClarityActionBlock({
@@ -38,12 +39,16 @@ export default function ClarityActionBlock({
   submitUrl = '/contact',
   finalCtaSocialProofText = 'Un accompagnement structuré et orienté résultats',
   finalCtaUrgencyText = 'Je limite le nombre d’accompagnements chaque semaine pour garantir un suivi de qualité.',
+  showForm = true,
 }: ClarityActionBlockProps) {
   const filteredLeftItems = leftItems.filter((item) => item?.text?.trim());
   const filteredRightItems = rightItems.filter((item) => item?.text?.trim());
 
   const hasContent =
-    title?.trim() || filteredLeftItems.length || filteredRightItems.length || finalCtaTitle?.trim();
+    title?.trim() ||
+    filteredLeftItems.length ||
+    filteredRightItems.length ||
+    (showForm && finalCtaTitle?.trim());
 
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
@@ -120,16 +125,16 @@ export default function ClarityActionBlock({
     }`;
 
   return (
-    <section className="py-20 md:py-24 bg-white dark:bg-gray-950">
+    <section className="bg-white pb-14 pt-10 dark:bg-gray-950 md:pb-16 md:pt-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-7">
+        <div className={showForm ? 'grid items-start gap-10 lg:grid-cols-12' : ''}>
+          <div className={showForm ? 'lg:col-span-7' : 'mx-auto max-w-6xl'}>
             <span className="inline-flex rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-[#DA2E29] dark:bg-red-500/10">
               Transformation
             </span>
 
             {title ? (
-              <h2 className="mt-5 text-4xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl">
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
                 {title}
               </h2>
             ) : null}
@@ -138,7 +143,7 @@ export default function ClarityActionBlock({
               <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">{subtitle}</p>
             ) : null}
 
-            <div className="mt-10 grid gap-6 md:grid-cols-2">
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
               {/* PROBLÈME */}
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
                 <div className="mb-3 text-sm text-red-400">Situation actuelle</div>
@@ -181,112 +186,116 @@ export default function ClarityActionBlock({
               Et si vous pouviez avancer avec plus de clarté et de constance ?
             </p>
           </div>
-          <div className="lg:col-span-5">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
-                {finalCtaTitle ?? 'Réservez un échange pour clarifier vos prochaines étapes'}
-              </h3>
+          {showForm ? (
+            <div className="lg:col-span-5">
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
+                  {finalCtaTitle ?? 'Réservez un échange pour clarifier vos prochaines étapes'}
+                </h3>
 
-              <p className="mt-4 text-base leading-7 text-slate-300">
-                {finalCtaSubtitle ??
-                  'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.'}
-              </p>
+                <p className="mt-4 text-base leading-7 text-slate-300">
+                  {finalCtaSubtitle ??
+                    'En 30 minutes, nous faisons le point sur votre situation, vos priorités et les actions les plus utiles pour avancer.'}
+                </p>
 
-              <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Nom</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={data.name}
-                    onChange={(e) => handleFieldChange('name', e.target.value)}
-                    placeholder="Nom et prénom"
-                    className={inputClass(!!mergedErrors.name)}
-                  />
-                  {mergedErrors.name ? (
-                    <p className="mt-2 text-sm text-red-400">{mergedErrors.name}</p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">E-mail</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    onChange={(e) => handleFieldChange('email', e.target.value)}
-                    placeholder="Votre adresse e-mail"
-                    className={inputClass(!!mergedErrors.email)}
-                  />
-                  {mergedErrors.email ? (
-                    <p className="mt-2 text-sm text-red-400">{mergedErrors.email}</p>
-                  ) : null}
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-300">Téléphone</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={data.phone}
-                    onChange={(e) => handleFieldChange('phone', e.target.value)}
-                    placeholder="Votre numéro de téléphone"
-                    className={inputClass(!!mergedErrors.phone)}
-                  />
-                  {mergedErrors.phone ? (
-                    <p className="mt-2 text-sm text-red-400">{mergedErrors.phone}</p>
-                  ) : null}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={processing}
-                  className={`w-full flex items-center justify-center py-3 px-6 rounded-lg text-white font-medium text-lg transition-all duration-300 ${
-                    processing
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-[#DA2E29] to-rose-600 hover:shadow-lg hover:shadow-[#DA2E29]/20'
-                  }`}
-                >
-                  {processing ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="white"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8H4z" />
-                      </svg>
-                      Envoi en cours...
-                    </>
-                  ) : (
-                    <>
-                      <Send size={20} className="mr-2" />
-                      {finalCtaButtonText ?? 'Réserver mon appel découverte'}
-                    </>
-                  )}
-                </button>
-
-                {wasSuccessful ? (
-                  <p className="text-center text-sm text-green-400">
-                    Merci, votre demande a bien été envoyée.
-                  </p>
-                ) : (
-                  <div className="space-y-2 text-center">
-                    <p className="text-sm text-slate-400">30 minutes • Sans engagement</p>
-
-                    <p className="text-sm font-medium text-white">{finalCtaSocialProofText}</p>
-
-                    <p className="text-xs leading-6 text-slate-500">{finalCtaUrgencyText}</p>
+                <form onSubmit={handleSubmit} className="mt-8 space-y-4" noValidate>
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">Nom</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={data.name}
+                      onChange={(e) => handleFieldChange('name', e.target.value)}
+                      placeholder="Nom et prénom"
+                      className={inputClass(!!mergedErrors.name)}
+                    />
+                    {mergedErrors.name ? (
+                      <p className="mt-2 text-sm text-red-400">{mergedErrors.name}</p>
+                    ) : null}
                   </div>
-                )}
-              </form>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">E-mail</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={data.email}
+                      onChange={(e) => handleFieldChange('email', e.target.value)}
+                      placeholder="Votre adresse e-mail"
+                      className={inputClass(!!mergedErrors.email)}
+                    />
+                    {mergedErrors.email ? (
+                      <p className="mt-2 text-sm text-red-400">{mergedErrors.email}</p>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-300">
+                      Téléphone
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={data.phone}
+                      onChange={(e) => handleFieldChange('phone', e.target.value)}
+                      placeholder="Votre numéro de téléphone"
+                      className={inputClass(!!mergedErrors.phone)}
+                    />
+                    {mergedErrors.phone ? (
+                      <p className="mt-2 text-sm text-red-400">{mergedErrors.phone}</p>
+                    ) : null}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={processing}
+                    className={`w-full flex items-center justify-center py-3 px-6 rounded-lg text-white font-medium text-lg transition-all duration-300 ${
+                      processing
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-[#DA2E29] to-rose-600 hover:shadow-lg hover:shadow-[#DA2E29]/20'
+                    }`}
+                  >
+                    {processing ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="white"
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8H4z" />
+                        </svg>
+                        Envoi en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={20} className="mr-2" />
+                        {finalCtaButtonText ?? 'Réserver mon appel découverte'}
+                      </>
+                    )}
+                  </button>
+
+                  {wasSuccessful ? (
+                    <p className="text-center text-sm text-green-400">
+                      Merci, votre demande a bien été envoyée.
+                    </p>
+                  ) : (
+                    <div className="space-y-2 text-center">
+                      <p className="text-sm text-slate-400">30 minutes • Sans engagement</p>
+
+                      <p className="text-sm font-medium text-white">{finalCtaSocialProofText}</p>
+
+                      <p className="text-xs leading-6 text-slate-500">{finalCtaUrgencyText}</p>
+                    </div>
+                  )}
+                </form>
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
       </div>
     </section>

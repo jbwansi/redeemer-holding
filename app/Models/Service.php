@@ -15,6 +15,8 @@ class Service extends Model
     'excerpt',
     'user_id',
     'status',
+    'is_for_individuals',
+    'is_for_organizations',
     'image',
     'tagline',
     'featured_note',
@@ -32,6 +34,8 @@ class Service extends Model
 
   protected $casts = [
     'ideal_for' => 'array',
+    'is_for_individuals' => 'boolean',
+    'is_for_organizations' => 'boolean',
     'is_featured' => 'boolean',
     'featured_order' => 'integer',
   ];

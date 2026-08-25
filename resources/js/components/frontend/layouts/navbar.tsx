@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Link, usePage } from '@inertiajs/react';
-import { Search, Sun, Moon, ChevronRight, LogIn, LogOut, Calendar1, User } from 'lucide-react';
+import { Search, Sun, Moon, ChevronRight, LogIn, LogOut, ArrowRight, User } from 'lucide-react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
@@ -14,6 +14,14 @@ type NavItem = {
   href: string;
   delay: number;
   matchers: string[];
+};
+
+type NavbarPageProps = {
+  auth?: {
+    user?: unknown;
+    can?: { administer?: boolean };
+  };
+  [key: string]: unknown;
 };
 
 const normalizePath = (value: string): string => {
@@ -51,11 +59,15 @@ const Navbar = () => {
   const { settings } = useSettings();
   const [hasRendered, setHasRendered] = useState(false);
 
-  const page = usePage() as any;
+  const page = usePage<NavbarPageProps>();
   const { auth } = page.props;
   const currentPath = normalizePath(page.url || window.location.pathname);
   const canAdminister = auth?.can?.administer === true;
   const accountRoute = canAdminister ? route('dashboard') : route('dashboard.client.profile');
+  const configuredBookingUrl =
+    typeof settings?.calendly_link === 'string' ? settings.calendly_link.trim() : '';
+  const bookingHref = configuredBookingUrl || route('contact');
+  const hasConfiguredBookingUrl = configuredBookingUrl !== '';
 
   // Smoother animations with spring physics
   const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
@@ -87,7 +99,6 @@ const Navbar = () => {
     { name: 'Événements', href: route('evenements'), delay: 0.2, matchers: [route('evenements')] },
     { name: 'Blog', href: route('blogs'), delay: 0.3, matchers: [route('blogs')] },
     { name: 'À propos', href: route('about'), delay: 0.4, matchers: [route('about')] },
-    { name: 'Contact', href: route('contact'), delay: 0.5, matchers: [route('contact')] },
   ];
 
   // Toggle search input
@@ -298,6 +309,17 @@ const Navbar = () => {
 
         {/* Action Buttons with enhanced visual effects */}
         <div className="flex items-center space-x-1 md:space-x-3">
+          <a
+            href={bookingHref}
+            target={hasConfiguredBookingUrl ? '_blank' : undefined}
+            rel={hasConfiguredBookingUrl ? 'noopener noreferrer' : undefined}
+            aria-label="Prendre rendez-vous"
+            className="group hidden min-h-10 items-center justify-center gap-2 rounded-lg bg-[#DA2E29] px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-[#DA2E29]/20 transition hover:bg-[#c62823] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] focus-visible:ring-offset-2 dark:ring-offset-slate-950 lg:inline-flex"
+          >
+            <span>Prendre rendez-vous</span>
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </a>
+
           {/* Search */}
           <div className="relative hidden items-center sm:flex">
             <motion.button
@@ -331,35 +353,6 @@ const Navbar = () => {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Quick booking button */}
-          <a
-            href={settings?.calendly_link || route('contact')}
-            target={settings?.calendly_link ? '_blank' : undefined}
-            rel={settings?.calendly_link ? 'noopener noreferrer' : undefined}
-            title={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
-            aria-label={settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
-            className="group relative hidden sm:block"
-          >
-            <motion.button
-              variants={buttonHoverEffect}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700/90 transition-colors duration-300 backdrop-blur-sm relative"
-            >
-              <Calendar1 className="w-[18px] h-[18px]" />
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-gradient-to-br from-[#DA2E29] to-rose-600 rounded-full ring-2 ring-white dark:ring-gray-900"
-              ></motion.span>
-            </motion.button>
-
-            <span className="pointer-events-none absolute left-1/2 top-[115%] -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[11px] font-medium text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap dark:bg-slate-100 dark:text-slate-900">
-              {settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
-            </span>
-          </a>
 
           {/* Theme Toggle with enhanced transition */}
           <motion.button
@@ -543,14 +536,23 @@ const Navbar = () => {
 
                     <div className="grid grid-cols-1 gap-2">
                       <a
-                        href={settings?.calendly_link || route('contact')}
+                        href={bookingHref}
                         onClick={() => setMobileMenuOpen(false)}
-                        target={settings?.calendly_link ? '_blank' : undefined}
-                        rel={settings?.calendly_link ? 'noopener noreferrer' : undefined}
-                        className="ux-btn-primary"
+                        target={hasConfiguredBookingUrl ? '_blank' : undefined}
+                        rel={hasConfiguredBookingUrl ? 'noopener noreferrer' : undefined}
+                        aria-label="Prendre rendez-vous"
+                        className="ux-btn-primary w-full"
                       >
-                        {settings?.calendly_link ? 'Prendre rendez-vous' : 'Nous contacter'}
+                        Prendre rendez-vous
                       </a>
+
+                      <Link
+                        href={route('contact')}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-slate-600 transition hover:text-[#DA2E29] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] dark:text-slate-300"
+                      >
+                        Contact
+                      </Link>
 
                       {!auth?.user && (
                         <Link

@@ -22,6 +22,10 @@ class ServiceJsonExporter
                 'tagline' => $service->tagline,
                 'featured_note' => $service->featured_note,
                 'ideal_for' => $service->ideal_for,
+                'audiences' => [
+                    'individuals' => (bool) $service->is_for_individuals,
+                    'organizations' => (bool) $service->is_for_organizations,
+                ],
                 'cta_primary' => [
                     'label' => $service->cta_primary_label,
                     'url' => $service->cta_primary_url,

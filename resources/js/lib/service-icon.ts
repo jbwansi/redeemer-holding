@@ -1,4 +1,5 @@
 import dynamicIconImports from 'lucide-react/dynamicIconImports';
+import { findServiceIcon } from '@/lib/service-icon-registry';
 
 type DynamicIconName = keyof typeof dynamicIconImports;
 
@@ -66,7 +67,7 @@ function toCamelCase(value: string): string {
     .replace(/^(.)/, (char) => char.toLowerCase());
 }
 
-export function normalizeServiceIconName(icon?: string | null): DynamicIconName | undefined {
+export function normalizeServiceIconName(icon?: string | null): string | undefined {
   if (!icon) return undefined;
 
   const trimmed = icon.trim();
@@ -75,6 +76,10 @@ export function normalizeServiceIconName(icon?: string | null): DynamicIconName 
   if (trimmed in LEGACY_ICON_ALIASES) {
     return LEGACY_ICON_ALIASES[trimmed];
   }
+
+  const registeredCandidates = [trimmed, lowerFirst(trimmed), toCamelCase(trimmed)];
+  const registeredIcon = registeredCandidates.find((candidate) => findServiceIcon(candidate));
+  if (registeredIcon) return registeredIcon;
 
   const candidates = [
     trimmed,

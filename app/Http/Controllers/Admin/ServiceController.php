@@ -292,7 +292,7 @@ class ServiceController extends Controller
         if (! $service->position) {
             $count = Service::whereNotNull('position')->count();
 
-            if ($count >= 3) {
+            if ($count >= 6) {
                 return back()->withErrors([
                     'home' => 'Maximum 3 services sur la page d’accueil.',
                 ]);

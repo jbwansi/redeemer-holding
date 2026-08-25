@@ -31,11 +31,15 @@ class AppController extends Controller
             ->take(6)
             ->get();
 
-        $services = Service::where('status', true)
+        $homeServices = Service::where('status', true)
             ->whereNotNull('position')
             ->orderBy('position')
-            ->take(3)
             ->get();
+
+        $individualServices = $homeServices->where('is_for_individuals', true)->take(3)->values();
+        $organizationServices = $homeServices->where('is_for_organizations', true)->take(3)->values();
+        $hasCategorizedServices = $individualServices->isNotEmpty() || $organizationServices->isNotEmpty();
+        $services = $hasCategorizedServices ? collect() : $homeServices->take(3)->values();
 
         $home = Page::where('slug', 'accueil')->first();
         $posts = Post::where('published', 1)->latest('published_at')->take(3)->get();
@@ -54,6 +58,8 @@ class AppController extends Controller
         }
         return inertia("Frontend/home", [
             'services' => $services,
+            'individualServices' => $individualServices,
+            'organizationServices' => $organizationServices,
             'home' => $home,
             'posts' => $posts,
             'trainings' => $trainings,

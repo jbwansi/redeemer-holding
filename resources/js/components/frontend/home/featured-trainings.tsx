@@ -15,10 +15,12 @@ interface Training {
   price?: number | string;
   max_participants?: number;
   current_participants?: number;
-  featured_image?: string | Record<string, any>;
+  featured_image?: string | ResponsiveImage;
 }
 
-function resolveImageSrc(image?: string | Record<string, any>): string {
+type ResponsiveImage = Record<string, string | string[] | undefined>;
+
+function resolveImageSrc(image?: string | ResponsiveImage): string {
   if (!image) return '';
   if (typeof image === 'string') return image;
   const candidates = [image.medium, image.large, image.original, image.thumbnail];
@@ -93,6 +95,8 @@ export default function FeaturedTrainings({
   trainings: Training[];
   title?: string;
 }) {
+  if (!trainings?.length) return null;
+
   return (
     <section className="py-20 md:py-24 bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

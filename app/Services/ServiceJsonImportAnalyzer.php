@@ -12,7 +12,7 @@ class ServiceJsonImportAnalyzer
 
     private const DATA_FIELDS = [
         'name', 'slug', 'excerpt', 'content', 'icon', 'image', 'tagline', 'featured_note',
-        'ideal_for', 'cta_primary', 'cta_secondary', 'publication',
+        'ideal_for', 'audiences', 'cta_primary', 'cta_secondary', 'publication',
     ];
 
     private const FLAT_FIELDS = [
@@ -24,6 +24,8 @@ class ServiceJsonImportAnalyzer
         'tagline' => 'tagline',
         'featured_note' => 'featured_note',
         'ideal_for' => 'ideal_for',
+        'audiences.individuals' => 'is_for_individuals',
+        'audiences.organizations' => 'is_for_organizations',
         'cta_primary.label' => 'cta_primary_label',
         'cta_primary.url' => 'cta_primary_url',
         'cta_secondary.label' => 'cta_secondary_label',
@@ -198,6 +200,7 @@ class ServiceJsonImportAnalyzer
         }
 
         $this->validateIdealFor($data, $result);
+        $this->validateAudiences($data, $result);
         $this->validateImage($data, $result);
         $this->validateCta($data, 'cta_primary', $result);
         $this->validateCta($data, 'cta_secondary', $result);
@@ -212,6 +215,24 @@ class ServiceJsonImportAnalyzer
         if (! is_array($data['ideal_for']) || ! array_is_list($data['ideal_for'])
             || collect($data['ideal_for'])->contains(fn ($item) => ! is_string($item) || trim($item) === '')) {
             $result['errors'][] = 'Le champ "data.ideal_for" doit être nul ou un tableau ordonné de chaînes non vides.';
+        }
+    }
+
+    private function validateAudiences(array $data, array &$result): void
+    {
+        if (! array_key_exists('audiences', $data)) {
+            return;
+        }
+        if (! is_array($data['audiences']) || array_is_list($data['audiences'])) {
+            $result['errors'][] = 'Le champ "data.audiences" doit être un objet.';
+
+            return;
+        }
+        $this->rejectUnexpectedKeys($data['audiences'], ['individuals', 'organizations'], 'data.audiences', $result);
+        foreach (['individuals', 'organizations'] as $field) {
+            if (array_key_exists($field, $data['audiences']) && ! is_bool($data['audiences'][$field])) {
+                $result['errors'][] = 'Le champ "data.audiences.'.$field.'" doit être booléen.';
+            }
         }
     }
 
@@ -362,7 +383,7 @@ class ServiceJsonImportAnalyzer
         if ($column === 'image') {
             return $this->normalizedImage($service->image);
         }
-        if (in_array($column, ['status', 'is_featured'], true)) {
+        if (in_array($column, ['status', 'is_featured', 'is_for_individuals', 'is_for_organizations'], true)) {
             return (bool) $service->{$column};
         }
         if (in_array($column, ['position', 'featured_order'], true) && $service->{$column} !== null) {

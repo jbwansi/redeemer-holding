@@ -35,6 +35,38 @@ class ServiceJsonImportAnalysisTest extends TestCase
         $this->assertSame('PRESERVE', collect($result['changes'])->firstWhere('field', 'excerpt')['action']);
     }
 
+    public function test_legacy_json_without_audiences_preserves_existing_categories(): void
+    {
+        Service::create([
+            'name' => 'Local',
+            'slug' => 'local',
+            'is_for_individuals' => true,
+            'is_for_organizations' => false,
+        ]);
+
+        $result = $this->analyze($this->document(['name' => 'Local', 'slug' => 'local']));
+
+        $this->assertSame('PRESERVE', collect($result['changes'])->firstWhere('field', 'audiences.individuals')['action']);
+        $this->assertSame('PRESERVE', collect($result['changes'])->firstWhere('field', 'audiences.organizations')['action']);
+    }
+
+    public function test_audiences_accept_two_booleans_and_reject_other_values(): void
+    {
+        $valid = $this->analyze($this->document([
+            'name' => 'Nouveau',
+            'slug' => 'nouveau',
+            'audiences' => ['individuals' => true, 'organizations' => true],
+        ]));
+        $invalid = $this->analyze($this->document([
+            'name' => 'Invalide',
+            'slug' => 'invalide',
+            'audiences' => ['individuals' => 'oui'],
+        ]));
+
+        $this->assertTrue($valid['valid']);
+        $this->assertFalse($invalid['valid']);
+    }
+
     public function test_difference_is_update_and_null_remains_distinct_from_absence(): void
     {
         Service::create(['name' => 'Local', 'slug' => 'local', 'tagline' => 'Ancienne']);

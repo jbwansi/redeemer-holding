@@ -1,63 +1,14 @@
-import React from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Search, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+
 import IconComponent from '@/components/ui/icon';
 import { normalizeServiceIconName } from '@/lib/service-icon';
-import { cn } from '@/lib/utils';
-
-type IconPreset = 'media' | 'coaching' | 'mixed';
-
-const MEDIA_OPTIONS = [
-  { value: 'mic2', label: 'Micro' },
-  { value: 'podcast', label: 'Podcast' },
-  { value: 'video', label: 'Video' },
-  { value: 'headphones', label: 'Audio' },
-  { value: 'radio', label: 'Radio' },
-  { value: 'monitorPlay', label: 'Diffusion' },
-  { value: 'audioLines', label: 'Waveform' },
-  { value: 'volume2', label: 'Son' },
-  { value: 'music2', label: 'Musique' },
-  { value: 'camera', label: 'Camera' },
-];
-
-const COACHING_OPTIONS = [
-  { value: 'userRound', label: 'Profil' },
-  { value: 'users', label: 'Equipe' },
-  { value: 'target', label: 'Objectif' },
-  { value: 'star', label: 'Excellence' },
-  { value: 'lightbulb', label: 'Idees' },
-  { value: 'heart', label: 'Bien-etre' },
-  { value: 'handshake', label: 'Partenariat' },
-  { value: 'graduationCap', label: 'Formation' },
-  { value: 'lineChart', label: 'Progression' },
-  { value: 'compass', label: 'Orientation' },
-  { value: 'rocket', label: 'Croissance' },
-  { value: 'award', label: 'Reussite' },
-  { value: 'calendar', label: 'Planification' },
-  { value: 'clock', label: 'Temps' },
-  { value: 'messageCircle', label: 'Communication' },
-  { value: 'sparkles', label: 'Innovation' },
-  { value: 'shield', label: 'Confiance' },
-  { value: 'briefcase', label: 'Business' },
-  { value: 'workflow', label: 'Processus' },
-  { value: 'zap', label: 'Energie' },
-];
-
-const ALL_OPTIONS = [...MEDIA_OPTIONS, ...COACHING_OPTIONS];
-
-const PRESET_BUTTONS: Array<{ value: IconPreset; label: string }> = [
-  { value: 'media', label: '2. Media/Creatif' },
-  { value: 'coaching', label: '1. Coaching/Business' },
-  { value: 'mixed', label: '3. Mixte' },
-];
+import {
+  filterServiceIcons,
+  findServiceIcon,
+  SERVICE_ICON_CATEGORIES,
+  type ServiceIconCategory,
+} from '@/lib/service-icon-registry';
 
 interface IconPickerProps {
   value: string;
@@ -65,111 +16,124 @@ interface IconPickerProps {
 }
 
 export function IconPicker({ value, onChange }: IconPickerProps) {
-  const [preset, setPreset] = React.useState<IconPreset>('media');
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState<ServiceIconCategory | 'all'>('all');
   const normalizedValue = normalizeServiceIconName(value);
-  const selectedOption = ALL_OPTIONS.find((option) => option.value === normalizedValue);
-
-  const displayedOptions = React.useMemo(() => {
-    if (preset === 'mixed') return ALL_OPTIONS;
-    return preset === 'media' ? MEDIA_OPTIONS : COACHING_OPTIONS;
-  }, [preset]);
-
-  const safeOptions = React.useMemo(() => {
-    if (!selectedOption) return displayedOptions;
-    const exists = displayedOptions.some((option) => option.value === selectedOption.value);
-    return exists ? displayedOptions : [selectedOption, ...displayedOptions];
-  }, [displayedOptions, selectedOption]);
-
-  const presetLabel = React.useMemo(() => {
-    if (preset === 'media') return 'Media/Creatif';
-    if (preset === 'coaching') return 'Coaching/Business';
-    return 'Mixte';
-  }, [preset]);
+  const selectedIcon = findServiceIcon(normalizedValue || value);
+  const displayedIcons = useMemo(() => filterServiceIcons(query, category), [query, category]);
+  const SelectedIcon = selectedIcon?.component;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-muted-foreground">Style d'icone</p>
-        <p className="text-xs text-muted-foreground">Actif: {presetLabel}</p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {PRESET_BUTTONS.map((button) => (
-          <button
-            key={button.value}
-            type="button"
-            onClick={() => setPreset(button.value)}
-            className={cn(
-              'rounded-lg border px-3 py-2.5 text-xs font-semibold transition-all',
-              preset === button.value
-                ? 'border-primary/40 bg-primary/10 text-primary shadow-sm'
-                : 'border-input bg-background text-foreground/80 hover:bg-muted hover:text-foreground'
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border bg-background text-[#DA2E29]">
+            {SelectedIcon ? (
+              <SelectedIcon aria-hidden="true" className="h-6 w-6" />
+            ) : value ? (
+              <IconComponent
+                name={normalizedValue || value}
+                aria-hidden="true"
+                className="h-6 w-6"
+              />
+            ) : (
+              <span className="text-xs text-muted-foreground">Aucune</span>
             )}
-          >
-            {button.label}
-          </button>
-        ))}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold">Icône sélectionnée</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {selectedIcon?.label || value || 'Aucune icône'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onChange('')}
+          disabled={!value}
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Trash2 aria-hidden="true" className="h-4 w-4" />
+          Retirer l’icône
+        </button>
       </div>
 
-      <Select value={normalizedValue} onValueChange={onChange}>
-        <SelectTrigger className="w-full rounded-lg">
-          <SelectValue placeholder="Selectionner une icone">
-            <div className="flex items-center gap-2">
-              {normalizedValue && <IconComponent name={normalizedValue} size={16} />}
-              <span>{selectedOption?.label || 'Choisir une icone'}</span>
-            </div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent className="h-72">
-          {preset === 'mixed' ? (
-            <>
-              <SelectGroup>
-                <SelectLabel>Media/Creatif</SelectLabel>
-                {MEDIA_OPTIONS.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value}
-                    className="flex items-center gap-2 py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <IconComponent name={option.value} size={16} />
-                      <span>{option.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-              <SelectSeparator />
-              <SelectGroup>
-                <SelectLabel>Coaching/Business</SelectLabel>
-                {COACHING_OPTIONS.map((option) => (
-                  <SelectItem
-                    key={option.value}
-                    value={option.value}
-                    className="flex items-center gap-2 py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <IconComponent name={option.value} size={16} />
-                      <span>{option.label}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </>
-          ) : (
-            safeOptions.map((option) => (
-              <SelectItem
-                key={option.value}
-                value={option.value}
-                className="flex items-center gap-2 py-2"
-              >
-                <div className="flex items-center gap-2">
-                  <IconComponent name={option.value} size={16} />
-                  <span>{option.label}</span>
-                </div>
-              </SelectItem>
-            ))
-          )}
-        </SelectContent>
-      </Select>
+      {value && !selectedIcon && (
+        <p className="rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+          Cette ancienne valeur est conservée. Sélectionnez une nouvelle icône uniquement si vous
+          souhaitez la remplacer.
+        </p>
+      )}
+
+      <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.4fr)]">
+        <label className="relative block">
+          <span className="sr-only">Rechercher une icône</span>
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Rechercher par nom, usage ou catégorie"
+            className="min-h-11 w-full rounded-xl border bg-background py-2 pl-10 pr-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29]"
+          />
+        </label>
+
+        <label>
+          <span className="sr-only">Filtrer les icônes par catégorie</span>
+          <select
+            value={category}
+            onChange={(event) => setCategory(event.target.value as ServiceIconCategory | 'all')}
+            className="min-h-11 w-full rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29]"
+          >
+            <option value="all">Toutes les catégories</option>
+            {SERVICE_ICON_CATEGORIES.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div
+        className="grid max-h-[28rem] grid-cols-2 gap-2 overflow-y-auto rounded-xl border p-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5"
+        aria-label="Catalogue des icônes de services"
+      >
+        {displayedIcons.map((entry) => {
+          const EntryIcon = entry.component;
+          const selected = selectedIcon?.name === entry.name;
+
+          return (
+            <button
+              key={entry.name}
+              type="button"
+              onClick={() => onChange(entry.name)}
+              aria-label={`${entry.label} — ${entry.category}`}
+              aria-pressed={selected}
+              title={`${entry.label} — ${entry.category}`}
+              className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl border p-2 text-center text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] ${
+                selected
+                  ? 'border-[#DA2E29] bg-[#DA2E29]/10 text-[#DA2E29] ring-1 ring-[#DA2E29]'
+                  : 'border-border bg-background text-foreground hover:border-[#DA2E29]/50 hover:bg-muted'
+              }`}
+            >
+              <EntryIcon aria-hidden="true" className="h-6 w-6" />
+              <span className="line-clamp-2">{entry.label}</span>
+              {selected && <span className="sr-only">Sélectionnée</span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {displayedIcons.length === 0 && (
+        <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+          Aucune icône ne correspond à cette recherche.
+        </p>
+      )}
     </div>
   );
 }

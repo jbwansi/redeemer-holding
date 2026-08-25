@@ -30,6 +30,28 @@ class ServiceJsonImportApplyTest extends TestCase
         $this->assertSame(0, $result['deleted']);
     }
 
+    public function test_creation_imports_audiences_and_legacy_file_keeps_false_defaults(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+        app(ServiceJsonImporter::class)->import($this->documentJson([
+            'name' => 'Deux publics',
+            'slug' => 'deux-publics',
+            'audiences' => ['individuals' => true, 'organizations' => true],
+        ]), $admin->id);
+        app(ServiceJsonImporter::class)->import($this->documentJson([
+            'name' => 'Ancien fichier',
+            'slug' => 'ancien-fichier',
+        ]), $admin->id);
+
+        $both = Service::where('slug', 'deux-publics')->firstOrFail();
+        $legacy = Service::where('slug', 'ancien-fichier')->firstOrFail();
+        $this->assertTrue($both->is_for_individuals);
+        $this->assertTrue($both->is_for_organizations);
+        $this->assertFalse($legacy->is_for_individuals);
+        $this->assertFalse($legacy->is_for_organizations);
+    }
+
     public function test_update_is_non_destructive_supports_null_and_is_idempotent(): void
     {
         $owner = User::factory()->create();
