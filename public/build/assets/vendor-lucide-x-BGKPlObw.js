@@ -1,1 +1,0 @@
-import{r as e}from"./rolldown-runtime-B0Z9INg1.js";import{fn as t}from"./vendor-lucide-a-DHE_t775.js";var n=e({__iconNode:()=>r,default:()=>i}),r=[[`path`,{d:`M18 6 6 18`,key:`1bl5f8`}],[`path`,{d:`m6 6 12 12`,key:`d8bk6v`}]],i=t(`X`,r);export{n,i as t};

@@ -16,11 +16,13 @@ class NewsletterCampaign extends Model
         'cta_text',
         'cta_url',
         'segments',
+        'custom_emails',
         'status',
         'total_recipients',
         'sent_count',
         'failed_count',
         'queued_at',
+        'scheduled_at',
         'started_at',
         'completed_at',
         'created_by',
@@ -28,6 +30,7 @@ class NewsletterCampaign extends Model
 
     protected $casts = [
         'segments' => 'array',
+        'custom_emails' => 'array',
         'queued_at' => 'datetime',
         'scheduled_at' => 'datetime',
         'started_at' => 'datetime',

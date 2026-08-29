@@ -6,60 +6,40 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendNewsletterChunk;
 use App\Mail\ConfirmNewsletterSubscriptionMail;
 use App\Mail\NewsletterCampaignMail;
-use App\Models\EventParticipant;
-use App\Models\TrainingParticipant;
 use App\Models\NewsletterCampaign;
 use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterUnsubscribe;
-use App\Models\ServiceRequest;
-use App\Models\User;
 use App\Services\DynamicMailerService;
+use App\Services\NewsletterAudienceResolver;
+use App\Support\NewsletterSegments;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 
 class NewsletterController extends Controller
 {
-    protected DynamicMailerService $dynamicMailerService;
-
-    public function __construct(DynamicMailerService $dynamicMailerService)
-    {
-        $this->dynamicMailerService = $dynamicMailerService;
-    }
+    public function __construct(
+        protected DynamicMailerService $dynamicMailerService,
+        protected NewsletterAudienceResolver $audienceResolver,
+    ) {}
 
     public function index()
     {
         return inertia('backend/newsletters/index', [
             'segments' => [
-                'newsletter_subscribers' => NewsletterSubscriber::query()
-                    ->whereNotNull('email')
-                    ->whereNotNull('confirmed_at')
-                    ->distinct('email')
-                    ->count('email'),
-
-                'users' => User::query()
-                    ->whereNotNull('email')
-                    ->distinct('email')
-                    ->count('email'),
-
-                'event_participants' => EventParticipant::query()
-                    ->whereNotNull('email')
-                    ->distinct('email')
-                    ->count('email'),
-
-                'formation_participants' => TrainingParticipant::query()
-                    ->whereNotNull('email')
-                    ->distinct('email')
-                    ->count('email'),
-
-                'service_requests' => ServiceRequest::query()
-                    ->whereNotNull('email')
-                    ->distinct('email')
-                    ->count('email'),
+                NewsletterSegments::SUBSCRIBERS => $this->audienceResolver
+                    ->resolve([NewsletterSegments::SUBSCRIBERS])->count(),
+                NewsletterSegments::USERS => $this->audienceResolver
+                    ->resolve([NewsletterSegments::USERS])->count(),
+                NewsletterSegments::EVENT_PARTICIPANTS => $this->audienceResolver
+                    ->resolve([NewsletterSegments::EVENT_PARTICIPANTS])->count(),
+                NewsletterSegments::TRAINING_PARTICIPANTS => $this->audienceResolver
+                    ->resolve([NewsletterSegments::TRAINING_PARTICIPANTS])->count(),
+                NewsletterSegments::SERVICE_REQUESTS => $this->audienceResolver
+                    ->resolve([NewsletterSegments::SERVICE_REQUESTS])->count(),
             ],
 
             'pendingSubscribersCount' => NewsletterSubscriber::query()
@@ -122,10 +102,7 @@ class NewsletterController extends Controller
 
     public function send(Request $request): RedirectResponse
     {
-        Log::channel('newsletter')->info('Subscribe: début', [
-            'ip' => $request->ip(),
-            'email_input' => $request->input('email'),
-        ]);
+        Log::channel('newsletter')->info('Newsletter send: début');
 
 
         $validated = $request->validate([
@@ -135,7 +112,7 @@ class NewsletterController extends Controller
             'cta_text' => ['nullable', 'string', 'max:80'],
             'cta_url' => ['nullable', 'url', 'max:500'],
             'segments' => ['required', 'array', 'min:1'],
-            'segments.*' => ['in:newsletter_subscribers,users,event_participants,formation_participants,service_requests,custom'],
+            'segments.*' => [Rule::in(NewsletterSegments::accepted())],
             'custom_emails' => ['nullable', 'string', 'max:10000'],
             'test_mode' => ['nullable', 'boolean'],
             'test_email' => ['nullable', 'email', 'max:255'],
@@ -144,22 +121,19 @@ class NewsletterController extends Controller
 
         Log::channel('newsletter')->info('Newsletter send: validation OK', [
             'test_mode' => $validated['test_mode'] ?? false,
-            'test_email' => $validated['test_email'] ?? null,
             'segments' => $validated['segments'],
         ]);
 
-        $recipients = $this->resolveRecipients(
-            $validated['segments'],
+        $segments = NewsletterSegments::normalize($validated['segments']);
+        $customEmails = $this->audienceResolver->normalizeCustomEmails(
             $validated['custom_emails'] ?? null
         );
+        $recipients = $this->audienceResolver->resolve($segments, $customEmails);
 
 
         Log::channel('newsletter')->info('Newsletter send: destinataires résolus', [
             'count' => $recipients->count(),
         ]);
-
-        $unsubscribedEmails = NewsletterUnsubscribe::query()->pluck('email');
-        $recipients = $recipients->diff($unsubscribedEmails)->values();
 
         Log::channel('newsletter')->info('Newsletter send: destinataires après exclusion des désabonnés', [
             'count' => $recipients->count(),
@@ -167,7 +141,7 @@ class NewsletterController extends Controller
 
         if (($validated['test_mode'] ?? false) === true) {
             Log::channel('newsletter')->info('Newsletter send: mode test', [
-                'test_email' => $validated['test_email'] ?? null,
+                'has_test_email' => ! empty($validated['test_email']),
             ]);
 
             if (empty($validated['test_email'])) {
@@ -190,13 +164,10 @@ class NewsletterController extends Controller
                     $validated['test_email']
                 );
 
-                Log::channel('newsletter')->info('Newsletter send: email de test envoyé', [
-                    'test_email' => $validated['test_email'],
-                ]);
+                Log::channel('newsletter')->info('Newsletter send: email de test capturé');
             } catch (\Throwable $e) {
                 Log::channel('newsletter')->error('Newsletter send: échec email de test', [
-                    'test_email' => $validated['test_email'],
-                    'message' => $e->getMessage(),
+                    'error_type' => $e::class,
                 ]);
 
                 return back()->withErrors([
@@ -216,7 +187,11 @@ class NewsletterController extends Controller
         }
 
         $scheduledAt = !empty($validated['scheduled_at'])
-            ? \Illuminate\Support\Carbon::parse($validated['scheduled_at'])
+            ? \Illuminate\Support\Carbon::createFromFormat(
+                'Y-m-d\TH:i',
+                $validated['scheduled_at'],
+                'Europe/Zurich',
+            )->utc()
             : null;
 
         $campaign = NewsletterCampaign::query()->create([
@@ -225,7 +200,10 @@ class NewsletterController extends Controller
             'content' => $validated['content'],
             'cta_text' => $validated['cta_text'] ?? null,
             'cta_url' => $validated['cta_url'] ?? null,
-            'segments' => $validated['segments'],
+            'segments' => $segments,
+            'custom_emails' => in_array(NewsletterSegments::CUSTOM, $segments, true)
+                ? $customEmails
+                : null,
             'status' => $scheduledAt ? 'scheduled' : 'queued',
             'total_recipients' => $recipients->count(),
             'queued_at' => $scheduledAt ? null : now(),
@@ -252,10 +230,7 @@ class NewsletterController extends Controller
 
     public function subscribe(Request $request): RedirectResponse
     {
-        Log::channel('newsletter')->info('Subscribe: début', [
-            'ip' => $request->ip(),
-            'email_input' => $request->input('email'),
-        ]);
+        Log::channel('newsletter')->info('Subscribe: début');
 
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255'],
@@ -263,9 +238,7 @@ class NewsletterController extends Controller
 
         $email = strtolower(trim($validated['email']));
 
-        Log::channel('newsletter')->info('Subscribe: email validé', [
-            'email' => $email,
-        ]);
+        Log::channel('newsletter')->info('Subscribe: email validé');
 
         $subscriber = NewsletterSubscriber::query()
             ->where('email', $email)
@@ -280,7 +253,6 @@ class NewsletterController extends Controller
         if ($subscriber && $subscriber->confirmed_at) {
             Log::channel('newsletter')->info('Subscribe: déjà confirmé', [
                 'subscriber_id' => $subscriber->id,
-                'email' => $email,
             ]);
             return back()->with('success', 'Cette adresse est déjà abonnée à la newsletter.');
         }
@@ -288,10 +260,7 @@ class NewsletterController extends Controller
         $token = Str::uuid()->toString();
 
 
-        Log::channel('newsletter')->info('Subscribe: token généré', [
-            'email' => $email,
-            'token' => $token,
-        ]);
+        Log::channel('newsletter')->info('Subscribe: token généré');
 
         $subscriber = NewsletterSubscriber::query()->updateOrCreate(
             ['email' => $email],
@@ -306,32 +275,20 @@ class NewsletterController extends Controller
 
         Log::channel('newsletter')->info('Subscribe: subscriber sauvegardé', [
             'subscriber_id' => $subscriber->id,
-            'email' => $subscriber->email,
-            'confirmation_token' => $subscriber->confirmation_token,
             'confirmation_sent_at' => $subscriber->confirmation_sent_at,
         ]);
 
         try {
 
-            // 🔥 AJOUT ICI
-            Log::channel('newsletter')->info('SMTP config test', [
-                'mailer' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'username' => config('mail.mailers.smtp.username'),
-                'from' => config('mail.from.address'),
-            ]);
             $this->dynamicMailerService->send(new ConfirmNewsletterSubscriptionMail($subscriber), $email);
 
             Log::channel('newsletter')->info('Subscribe: email de confirmation envoyé', [
                 'subscriber_id' => $subscriber->id,
-                'email' => $email,
             ]);
         } catch (\Throwable $e) {
             Log::channel('newsletter')->error('Subscribe: échec envoi mail', [
                 'subscriber_id' => $subscriber->id ?? null,
-                'email' => $email,
-                'message' => $e->getMessage(),
+                'error_type' => $e::class,
             ]);
 
             return back()->withErrors([
@@ -426,74 +383,4 @@ class NewsletterController extends Controller
         );
     }
 
-    private function resolveRecipients(array $segments, ?string $customEmails): Collection
-    {
-        $emails = collect();
-
-        foreach ($segments as $segment) {
-            if ($segment === 'newsletter_subscribers') {
-                $emails = $emails->merge(
-                    NewsletterSubscriber::query()
-                        ->whereNotNull('email')
-                        ->whereNotNull('confirmed_at')
-                        ->pluck('email')
-                );
-
-                continue;
-            }
-
-            if ($segment === 'users') {
-                $emails = $emails->merge(
-                    User::query()
-                        ->whereNotNull('email')
-                        ->pluck('email')
-                );
-
-                continue;
-            }
-
-            if ($segment === 'event_participants') {
-                $emails = $emails->merge(
-                    EventParticipant::query()
-                        ->whereNotNull('email')
-                        ->pluck('email')
-                );
-
-                continue;
-            }
-
-            if ($segment === 'training_participants') {
-                $emails = $emails->merge(
-                    TrainingParticipant::query()
-                        ->whereNotNull('email')
-                        ->pluck('email')
-                );
-
-                continue;
-            }
-
-            if ($segment === 'service_requests') {
-                $emails = $emails->merge(
-                    ServiceRequest::query()
-                        ->whereNotNull('email')
-                        ->pluck('email')
-                );
-
-                continue;
-            }
-
-            if ($segment === 'custom' && !empty($customEmails)) {
-                $custom = preg_split('/[\s,;]+/', $customEmails) ?: [];
-                $emails = $emails->merge($custom);
-            }
-        }
-
-        return $emails
-            ->map(fn($email) => strtolower(trim((string) $email)))
-            ->filter(fn($email) => filter_var($email, FILTER_VALIDATE_EMAIL))
-            ->unique()
-            ->values();
-    }
 }
-
-

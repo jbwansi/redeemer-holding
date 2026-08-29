@@ -19,7 +19,15 @@ class DynamicMailerService
     {
         if (app()->environment('staging')) {
             $this->assertAllowedStagingRecipient($to);
+        }
+
+        if (! $this->liveSendEnabled()) {
             Mail::mailer('array')->to($to)->send($mailable);
+            Log::channel('newsletter')->info('Email capturé par le verrou newsletter.', [
+                'operation' => 'newsletter_mail_captured',
+                'recipient_hash' => hash('sha256', strtolower(trim($to))),
+                'mailable' => get_class($mailable),
+            ]);
 
             return;
         }
@@ -52,12 +60,8 @@ class DynamicMailerService
         ]);
 
         Log::channel('newsletter')->info('DynamicMailerService send', [
-            'to' => $to,
-            'host' => $host,
-            'port' => $port,
-            'encryption' => $encryption,
-            'username' => $username,
-            'from' => $fromEmail,
+            'operation' => 'dynamic_mail_send',
+            'recipient_hash' => hash('sha256', strtolower(trim($to))),
             'mailable' => get_class($mailable),
         ]);
 
@@ -72,7 +76,15 @@ class DynamicMailerService
     {
         if (app()->environment('staging')) {
             $this->assertAllowedStagingRecipient($to);
+        }
+
+        if (! $this->liveSendEnabled()) {
             Mail::mailer('array')->to($to)->queue($mailable);
+            Log::channel('newsletter')->info('Email en queue capturé par le verrou newsletter.', [
+                'operation' => 'newsletter_mail_queue_captured',
+                'recipient_hash' => hash('sha256', strtolower(trim($to))),
+                'mailable' => get_class($mailable),
+            ]);
 
             return;
         }
@@ -105,12 +117,8 @@ class DynamicMailerService
         ]);
 
         Log::channel('newsletter')->info('DynamicMailerService queue', [
-            'to' => $to,
-            'host' => $host,
-            'port' => $port,
-            'encryption' => $encryption,
-            'username' => $username,
-            'from' => $fromEmail,
+            'operation' => 'dynamic_mail_queue',
+            'recipient_hash' => hash('sha256', strtolower(trim($to))),
             'mailable' => get_class($mailable),
         ]);
 
@@ -131,5 +139,11 @@ class DynamicMailerService
         if (!in_array(strtolower(trim($recipient)), $allowed, true)) {
             throw new RuntimeException('Envoi email staging bloqué : destinataire non autorisé.');
         }
+    }
+
+    private function liveSendEnabled(): bool
+    {
+        return config('newsletter.live_send_enabled', false)
+            && app()->environment(['production', 'staging']);
     }
 }

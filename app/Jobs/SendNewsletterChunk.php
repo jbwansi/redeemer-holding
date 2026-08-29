@@ -12,7 +12,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
@@ -46,11 +45,10 @@ class SendNewsletterChunk implements ShouldQueue
     public function __construct(
         public int $campaignId,
         public array $emails,
-        protected DynamicMailerService $dynamicMailerService,
     ) {
     }
 
-    public function handle(): void
+    public function handle(DynamicMailerService $dynamicMailerService): void
     {
         $campaign = NewsletterCampaign::query()->find($this->campaignId);
 
@@ -81,7 +79,7 @@ class SendNewsletterChunk implements ShouldQueue
                     ['email' => $email]
                 );
 
-                $this->dynamicMailerService->send(
+                $dynamicMailerService->send(
                     new NewsletterCampaignMail(
                         subject: $campaign->subject,
                         headline: $campaign->headline,
@@ -132,7 +130,7 @@ class SendNewsletterChunk implements ShouldQueue
             'job' => self::class,
             'attempt' => $this->attempts(),
             'chunk_id' => $this->chunkKey(),
-            'exception' => $exception,
+            'error_type' => $exception::class,
         ]);
     }
 

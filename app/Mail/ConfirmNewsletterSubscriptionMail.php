@@ -7,7 +7,6 @@ use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class ConfirmNewsletterSubscriptionMail extends Mailable
 {
@@ -22,18 +21,9 @@ class ConfirmNewsletterSubscriptionMail extends Mailable
 
     public function build()
     {
- Log::channel('newsletter')->info('ConfirmNewsletterSubscriptionMail: build', [
-        'email' => $this->subscriber->email,
-        'token' => $this->subscriber->confirmation_token,
-    ]);
-
         $confirmUrl = route('newsletter.confirm', [
             'token' => $this->subscriber->confirmation_token,
         ]);
-
-        Log::channel('newsletter')->info('ConfirmNewsletterSubscriptionMail: confirmUrl', [
-            'confirmUrl' => $confirmUrl,
-        ]); 
 
         return $this
             // ✅ récupère depuis .env (Infomaniak)

@@ -27,7 +27,7 @@ class NewsletterQueueResilienceTest extends TestCase
         $mailer = Mockery::mock(DynamicMailerService::class);
         $mailer->shouldReceive('send')->once();
 
-        (new SendNewsletterChunk($campaign->id, ['reader@example.com'], $mailer))->handle();
+        (new SendNewsletterChunk($campaign->id, ['reader@example.com']))->handle($mailer);
 
         $this->assertDatabaseHas('newsletter_campaigns', [
             'id' => $campaign->id,
@@ -42,10 +42,10 @@ class NewsletterQueueResilienceTest extends TestCase
         $campaign = $this->campaign();
         $mailer = Mockery::mock(DynamicMailerService::class);
         $mailer->shouldReceive('send')->once();
-        $job = new SendNewsletterChunk($campaign->id, ['reader@example.com'], $mailer);
+        $job = new SendNewsletterChunk($campaign->id, ['reader@example.com']);
 
-        $job->handle();
-        $job->handle();
+        $job->handle($mailer);
+        $job->handle($mailer);
 
         $this->assertSame(1, $campaign->fresh()->sent_count);
         $this->assertSame(0, $campaign->fresh()->failed_count);
@@ -65,11 +65,10 @@ class NewsletterQueueResilienceTest extends TestCase
         $job = new SendNewsletterChunk(
             $campaign->id,
             ['success@example.com', 'failed@example.com'],
-            $mailer,
         );
 
-        $job->handle();
-        $job->handle();
+        $job->handle($mailer);
+        $job->handle($mailer);
 
         $fresh = $campaign->fresh();
         $this->assertSame(1, $fresh->sent_count);

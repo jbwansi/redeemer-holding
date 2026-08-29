@@ -134,12 +134,12 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full overflow-hidden bg-[#020817] pb-10 pt-28 text-white md:pb-12 md:pt-24 lg:pb-14 lg:pt-28"
+      className="relative w-full overflow-hidden bg-gradient-to-b from-gray-50 to-white pb-10 pt-28 text-gray-900 dark:from-[#020817] dark:to-[#020817] dark:text-white md:pb-12 md:pt-24 lg:pb-14 lg:pt-28"
     >
       {/* Background decorations */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(218,46,41,0.14),transparent_32%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(30,64,175,0.14),transparent_30%)]" />
-      <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(30,64,175,0.06),transparent_30%)] dark:bg-[radial-gradient(circle_at_bottom_right,rgba(30,64,175,0.14),transparent_30%)]" />
+      <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-white/20" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <svg
@@ -173,7 +173,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
           >
             {/* Badge */}
             <motion.div variants={itemVariants} className="mb-3">
-              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-white/80 backdrop-blur">
+              <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-gray-700 backdrop-blur dark:border-white/10 dark:bg-white/5 dark:text-white/80">
                 {badge}
               </span>
             </motion.div>
@@ -181,7 +181,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
             {/* Title */}
             <motion.h1
               variants={itemVariants}
-              className="mb-4 max-w-[11ch] text-4xl font-black leading-[1.08] tracking-tight text-white md:text-5xl lg:max-w-[12ch] lg:text-5xl xl:text-6xl"
+              className="mb-4 max-w-[11ch] text-4xl font-black leading-[1.08] tracking-tight text-gray-900 dark:text-white md:text-5xl lg:max-w-[12ch] lg:text-5xl xl:text-6xl"
             >
               <span className="block">{titleLine1}</span>
               <span className="mt-1 block">{titleLine2}</span>
@@ -191,7 +191,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
             {/* Subtitle */}
             <motion.p
               variants={itemVariants}
-              className="mb-5 max-w-md text-base leading-6 text-slate-300 md:text-lg md:leading-7"
+              className="mb-5 max-w-md text-base leading-6 text-gray-600 dark:text-slate-300 md:text-lg md:leading-7"
             >
               {subtitle}
             </motion.p>
@@ -217,7 +217,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
               {/* Secondary CTA — texte seul, visuellement discret */}
               <Link
                 href={secondaryCtaUrl}
-                className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#DA2E29]/70 bg-slate-950/45 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-[#DA2E29]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] sm:w-auto"
+                className="group inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#DA2E29]/70 bg-white px-5 py-3 text-sm font-bold text-gray-900 transition-colors hover:bg-[#DA2E29]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DA2E29] dark:bg-slate-950/45 dark:text-white sm:w-auto"
               >
                 <span>{secondaryCtaText}</span>
                 <ArrowRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -233,7 +233,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
                 <motion.div
                   key={index}
                   variants={itemVariants}
-                  className="inline-flex items-center gap-1.5 text-xs text-slate-400"
+                  className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-400"
                 >
                   <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#DA2E29]/10">
                     <Check className="h-2.5 w-2.5 text-[#DA2E29]" />
@@ -248,7 +248,7 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={isTextInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-white/10 pt-3"
+              className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-gray-200 pt-3 dark:border-white/10"
             >
               <div
                 className="flex text-sm tracking-[0.08em] text-yellow-400"
@@ -256,9 +256,15 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
               >
                 ★★★★★
               </div>
-              <span className="text-xs font-bold text-white">{heroSocialRating}</span>
-              <span className="text-xs text-slate-400">{heroSocialProofText}</span>
-              <span className="text-xs text-slate-500">· {heroSocialPlatform}</span>
+              <span className="text-xs font-bold text-gray-900 dark:text-white">
+                {heroSocialRating}
+              </span>
+              <span className="text-xs text-gray-600 dark:text-slate-400">
+                {heroSocialProofText}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-slate-500">
+                · {heroSocialPlatform}
+              </span>
             </motion.div>
           </motion.div>
 

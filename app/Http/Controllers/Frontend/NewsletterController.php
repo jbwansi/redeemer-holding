@@ -24,10 +24,7 @@ class NewsletterController extends Controller
 
     public function subscribe(Request $request): RedirectResponse
     {
-        Log::channel('newsletter')->info('Subscribe: début', [
-            'ip' => $request->ip(),
-            'email_input' => $request->input('email'),
-        ]);
+        Log::channel('newsletter')->info('Subscribe: début');
 
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255'],
@@ -35,9 +32,7 @@ class NewsletterController extends Controller
 
         $email = strtolower(trim($validated['email']));
 
-        Log::channel('newsletter')->info('Subscribe: email validé', [
-            'email' => $email,
-        ]);
+        Log::channel('newsletter')->info('Subscribe: email validé');
 
         $subscriber = NewsletterSubscriber::query()
             ->where('email', $email)
@@ -52,7 +47,6 @@ class NewsletterController extends Controller
         if ($subscriber && $subscriber->confirmed_at) {
             Log::channel('newsletter')->info('Subscribe: déjà confirmé', [
                 'subscriber_id' => $subscriber->id,
-                'email' => $email,
             ]);
 
             return back()->with('success', 'Cette adresse est déjà abonnée à la newsletter.');
@@ -60,10 +54,7 @@ class NewsletterController extends Controller
 
         $token = Str::uuid()->toString();
 
-        Log::channel('newsletter')->info('Subscribe: token généré', [
-            'email' => $email,
-            'token' => $token,
-        ]);
+        Log::channel('newsletter')->info('Subscribe: token généré');
 
         $subscriber = NewsletterSubscriber::query()->updateOrCreate(
             ['email' => $email],
@@ -78,20 +69,10 @@ class NewsletterController extends Controller
 
         Log::channel('newsletter')->info('Subscribe: subscriber sauvegardé', [
             'subscriber_id' => $subscriber->id,
-            'email' => $subscriber->email,
-            'confirmation_token' => $subscriber->confirmation_token,
             'confirmation_sent_at' => $subscriber->confirmation_sent_at,
         ]);
 
         try {
-            Log::channel('newsletter')->info('SMTP config test', [
-                'mailer' => config('mail.default'),
-                'host' => config('mail.mailers.smtp.host'),
-                'port' => config('mail.mailers.smtp.port'),
-                'username' => config('mail.mailers.smtp.username'),
-                'from' => config('mail.from.address'),
-            ]);
-
             $this->dynamicMailerService->send(
                 new ConfirmNewsletterSubscriptionMail($subscriber),
                 $email
@@ -99,13 +80,11 @@ class NewsletterController extends Controller
 
             Log::channel('newsletter')->info('Subscribe: email de confirmation envoyé', [
                 'subscriber_id' => $subscriber->id,
-                'email' => $email,
             ]);
         } catch (\Throwable $e) {
             Log::channel('newsletter')->error('Subscribe: échec envoi mail', [
                 'subscriber_id' => $subscriber->id ?? null,
-                'email' => $email,
-                'message' => $e->getMessage(),
+                'error_type' => $e::class,
             ]);
 
             return back()->withErrors([
