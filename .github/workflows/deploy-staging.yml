@@ -1,4 +1,4 @@
-name: Deploy Staging
+name: Prepare Staging Release
 
 on:
   push:
@@ -9,11 +9,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: deploy-staging
+  group: prepare-staging-release
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  validate:
+    name: Validate release tag
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +28,18 @@ jobs:
           extensions: mbstring
           coverage: none
 
+      - name: Validate Composer configuration
+        run: composer validate --no-check-publish
+
+      - name: Install production PHP dependencies
+        run: |
+          composer install \
+            --no-dev \
+            --prefer-dist \
+            --optimize-autoloader \
+            --no-interaction \
+            --no-progress
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -39,112 +52,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Prepare SSH
+      - name: Verify release build
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.INFOMANIAK_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.INFOMANIAK_SSH_HOST }}" >> ~/.ssh/known_hosts
-
-      - name: Create release on Infomaniak
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            "${{ secrets.INFOMANIAK_SSH_USER }}@${{ secrets.INFOMANIAK_SSH_HOST }}" \
-            "set -e
-             RELEASE_DIR=\"\$HOME/deployments/redeemerholding/releases/$RELEASE_TAG\"
-
-             if [ -e \"\$RELEASE_DIR\" ]; then
-               echo \"Release already exists: \$RELEASE_DIR\"
-               exit 1
-             fi
-
-             git clone \
-               --branch \"$RELEASE_TAG\" \
-               --depth 1 \
-               https://github.com/${{ github.repository }}.git \
-               \"\$RELEASE_DIR\"
-
-             cd \"\$RELEASE_DIR\"
-
-             rm -f .env
-             ln -s \"\$HOME/deployments/redeemerholding/shared/.env\" .env
-
-             composer install \
-               --no-dev \
-               --prefer-dist \
-               --optimize-autoloader \
-               --no-interaction
-            "
-
-      - name: Upload built assets
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          scp \
-            -i ~/.ssh/id_ed25519 \
-            -r public/build \
-            "${{ secrets.INFOMANIAK_SSH_USER }}@${{ secrets.INFOMANIAK_SSH_HOST }}:~/deployments/redeemerholding/releases/$RELEASE_TAG/public/"
-
-      - name: Validate Laravel before switch
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            "${{ secrets.INFOMANIAK_SSH_USER }}@${{ secrets.INFOMANIAK_SSH_HOST }}" \
-            "set -e
-             cd \"\$HOME/deployments/redeemerholding/releases/$RELEASE_TAG\"
-
-             /opt/php8.4/bin/php artisan optimize:clear
-             /opt/php8.4/bin/php artisan about
-
-             if /opt/php8.4/bin/php artisan migrate:status | grep -q 'Pending'; then
-               echo 'Pending migrations detected.'
-               echo 'Deployment stopped before switching current.'
-               exit 1
-             fi
-
-             /opt/php8.4/bin/php artisan config:cache
-             /opt/php8.4/bin/php artisan route:cache
-             /opt/php8.4/bin/php artisan view:cache
-
-             test -f public/build/manifest.json
-            "
-
-      - name: Switch current release
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: |
-          ssh \
-            -i ~/.ssh/id_ed25519 \
-            "${{ secrets.INFOMANIAK_SSH_USER }}@${{ secrets.INFOMANIAK_SSH_HOST }}" \
-            "set -e
-             cd \"\$HOME/deployments/redeemerholding\"
-
-             ln -sfn \
-               \"\$HOME/deployments/redeemerholding/releases/$RELEASE_TAG\" \
-               \"\$HOME/deployments/redeemerholding/current\"
-
-             cd current
-
-             /opt/php8.4/bin/php artisan optimize:clear
-             /opt/php8.4/bin/php artisan config:cache
-             /opt/php8.4/bin/php artisan route:cache
-             /opt/php8.4/bin/php artisan view:cache
-
-             git rev-parse HEAD
-             git describe --tags --exact-match
-            "
-
-      - name: Smoke test
-        run: |
-          curl \
-            --fail \
-            --silent \
-            --show-error \
-            --location \
-            --max-redirs 0 \
-            "${{ secrets.STAGING_URL }}/up"
+          test -f public/build/manifest.json
+          echo "Release ${{ github.ref_name }} is ready to deploy."

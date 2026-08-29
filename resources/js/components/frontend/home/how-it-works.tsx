@@ -1,5 +1,5 @@
 import * as LucideIcons from 'lucide-react';
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import SectionHeader from '@/components/frontend/layouts/section-header';
 
@@ -18,14 +18,24 @@ type HowItWorksProps = {
 const ICON_MAP: Record<string, LucideIcon> = {
   MessageCircle: LucideIcons.MessageCircle,
   Search: LucideIcons.Search,
+  SearchCheck: LucideIcons.SearchCheck,
   Clipboard: LucideIcons.Clipboard,
+  ListChecks: LucideIcons.ListChecks,
   Target: LucideIcons.Target,
   CheckCircle: LucideIcons.CheckCircle,
   Brain: LucideIcons.Brain,
   Zap: LucideIcons.Zap,
   Users: LucideIcons.Users,
+  Sprout: LucideIcons.Sprout,
   Lightbulb: LucideIcons.Lightbulb,
 };
+
+const DEFAULT_PROCESS_ICONS: LucideIcon[] = [
+  LucideIcons.MessageCircle,
+  LucideIcons.SearchCheck,
+  LucideIcons.ListChecks,
+  LucideIcons.Sprout,
+];
 
 export default function HowItWorks({
   title = 'Mon processus d’accompagnement',
@@ -43,24 +53,43 @@ export default function HowItWorks({
 
         <ol className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {steps.slice(0, 4).map((step, index) => {
-            const Icon = ICON_MAP[step.icon || 'CheckCircle'] ?? LucideIcons.CheckCircle;
+            const configuredIcon = step.icon ? ICON_MAP[step.icon] : undefined;
+
+            const Icon = configuredIcon ?? DEFAULT_PROCESS_ICONS[index] ?? LucideIcons.CheckCircle;
 
             return (
               <li
                 key={`${step.title}-${index}`}
-                className="relative rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-950"
+                className="
+                  relative rounded-2xl
+                  border border-gray-200
+                  bg-white p-5 shadow-sm
+                  dark:border-gray-800
+                  dark:bg-gray-950
+                "
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#DA2E29] text-white shadow-md shadow-[#DA2E29]/20">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  <div
+                    className="
+                      flex h-10 w-10
+                      items-center justify-center
+                      rounded-xl bg-[#DA2E29]
+                      text-white
+                      shadow-md shadow-[#DA2E29]/20
+                    "
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={2} aria-hidden="true" />
                   </div>
+
                   <span className="text-xs font-bold tracking-[0.16em] text-[#DA2E29]">
                     {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>
+
                 <h3 className="mt-4 text-base font-bold text-gray-950 dark:text-white">
                   {step.title}
                 </h3>
+
                 <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-400">
                   {step.description}
                 </p>

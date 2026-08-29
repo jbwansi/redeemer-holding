@@ -157,7 +157,10 @@ const STEP_ICONS = [
   'Calendar',
   'MessageCircle',
   'Search',
+  'SearchCheck',
   'Clipboard',
+  'ListChecks',
+  'Sprout',
 ];
 const WHOM_ICONS = [
   'Briefcase',
