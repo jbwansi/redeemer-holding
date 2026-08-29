@@ -80,7 +80,7 @@ export default function ServiceCard({
         initial={false}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: index * 0.08 }}
-        className={`group flex h-full flex-col overflow-hidden border shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 dark:shadow-black/25 ${
+        className={`group flex h-full min-w-0 flex-col overflow-hidden border shadow-xl shadow-slate-900/5 backdrop-blur transition hover:-translate-y-1 dark:shadow-black/25 ${
           isCompact
             ? `rounded-2xl bg-[#0b1424] p-5 text-white md:min-h-[220px] md:p-6 ${
                 audience === 'organization'

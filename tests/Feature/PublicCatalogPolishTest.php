@@ -66,7 +66,7 @@ class PublicCatalogPolishTest extends TestCase
         $source = file_get_contents(resource_path('js/Pages/Frontend/services/index.tsx'))
             .file_get_contents(resource_path('js/components/frontend/services/service-card.tsx'));
 
-        $this->assertStringContainsString('flex h-full flex-col', $source);
+        $this->assertStringContainsString('flex h-full min-w-0 flex-col', $source);
         $this->assertStringContainsString('aspect-[16/9]', $source);
         $this->assertStringContainsString('service.excerpt', $source);
         $this->assertStringContainsString('line-clamp-4', $source);

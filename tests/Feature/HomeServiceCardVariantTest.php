@@ -17,9 +17,9 @@ class HomeServiceCardVariantTest extends TestCase
         $this->assertStringContainsString("useState<Audience>('individual')", $homeServices);
         $this->assertStringContainsString("visibleServices.length === 1", $homeServices);
         $this->assertStringContainsString("visibleServices.length === 2", $homeServices);
-        $this->assertStringContainsString("'mx-auto max-w-md'", $homeServices);
-        $this->assertStringContainsString("'mx-auto max-w-4xl'", $homeServices);
-        $this->assertStringContainsString("'mx-auto max-w-7xl'", $homeServices);
+        $this->assertStringContainsString("'mx-auto max-w-md grid-cols-1'", $homeServices);
+        $this->assertStringContainsString("'mx-auto max-w-4xl grid-cols-1 md:grid-cols-2'", $homeServices);
+        $this->assertStringContainsString("'mx-auto max-w-7xl grid-cols-1 md:grid-cols-2 xl:grid-cols-3'", $homeServices);
         $this->assertStringNotContainsString('service.name.includes', $homeServices);
         $this->assertStringNotContainsString('service.slug.includes', $homeServices);
     }
@@ -65,6 +65,6 @@ class HomeServiceCardVariantTest extends TestCase
         $this->assertStringContainsString('Voir tous les accompagnements individuels', $homeServices);
         $this->assertStringContainsString('Voir toutes les solutions pour entreprises', $homeServices);
         $this->assertStringContainsString("route('services', { audience: visibleAudience })", $homeServices);
-        $this->assertStringContainsString("'mx-auto max-w-4xl'", $homeServices);
+        $this->assertStringContainsString("'mx-auto max-w-4xl grid-cols-1 md:grid-cols-2'", $homeServices);
     }
 }

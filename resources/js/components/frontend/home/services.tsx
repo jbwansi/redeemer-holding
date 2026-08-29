@@ -60,12 +60,12 @@ export default function Services({
       ? individualServices
       : organizationServices
     : fallbackServices;
-  const gridWidthClass =
+  const gridLayoutClass =
     visibleServices.length === 1
-      ? 'mx-auto max-w-md'
+      ? 'mx-auto max-w-md grid-cols-1'
       : visibleServices.length === 2
-        ? 'mx-auto max-w-4xl'
-        : 'mx-auto max-w-7xl';
+        ? 'mx-auto max-w-4xl grid-cols-1 md:grid-cols-2'
+        : 'mx-auto max-w-7xl grid-cols-1 md:grid-cols-2 xl:grid-cols-3';
   const audienceDescription =
     visibleAudience === 'organization'
       ? 'Des solutions pour renforcer la coopération et accompagner vos équipes.'
@@ -156,7 +156,7 @@ export default function Services({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className={`grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 ${gridWidthClass}`}
+          className={`grid w-full gap-6 ${gridLayoutClass}`}
         >
           {visibleServices.map((service, index) => (
             <ServiceCard
