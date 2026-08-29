@@ -46,6 +46,11 @@ class HomeCompactionTest extends TestCase
         $this->assertStringContainsString('grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4', $process);
         $this->assertStringContainsString('steps.slice(0, 4)', $process);
         $this->assertStringContainsString('line-clamp-2', $process);
+        $this->assertStringContainsString('const configuredIcon = step.icon ? ICON_MAP[step.icon] : undefined;', $process);
+        $this->assertStringContainsString('configuredIcon ?? DEFAULT_PROCESS_ICONS[index]', $process);
+        foreach (['Clock', 'TrendingUp', 'Rocket', 'SearchCheck', 'ListChecks', 'Sprout'] as $icon) {
+            $this->assertStringContainsString("{$icon}: LucideIcons.{$icon}", $process);
+        }
         $this->assertStringContainsString('posts.slice(0, 3)', $blog);
         $this->assertStringContainsString('line-clamp-2', $blog);
         $this->assertStringContainsString('if (!trainings?.length) return null;', $trainings);

@@ -32,6 +32,7 @@ class NavbarBookingCtaTest extends TestCase
     {
         $source = file_get_contents(resource_path('js/components/frontend/home/hero.tsx'));
 
-        $this->assertStringContainsString('pb-10 pt-28 text-white md:pb-12 md:pt-24', $source);
+        $this->assertStringContainsString('pb-10 pt-28 text-gray-900', $source);
+        $this->assertStringContainsString('md:pb-12 md:pt-24', $source);
     }
 }

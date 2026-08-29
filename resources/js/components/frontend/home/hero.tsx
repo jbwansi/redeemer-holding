@@ -40,6 +40,9 @@ interface HeroMeta {
 
 const defaultImages = [heroImage];
 
+const withTextFallback = (value: string | undefined, fallback: string) =>
+  value?.trim() || fallback;
+
 const Hero = ({ meta }: { meta?: HeroMeta }) => {
   const containerRef = useRef<HTMLElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -66,25 +69,35 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
   /*
    * Contenu du Hero
    */
-  const badge = meta?.hero_badge ?? 'Formation • Coaching • Conseil';
+  const badge = withTextFallback(meta?.hero_badge, 'Transformer par les valeurs');
 
-  const titleLine1 = meta?.hero_title_line1 ?? 'Vous avez l’impression de tourner en rond ?';
+  const titleLine1 = withTextFallback(
+    meta?.hero_title_line1,
+    'Vous avez l’impression de tourner en rond ?',
+  );
 
-  const titleLine2 = meta?.hero_title_line2 ?? 'Transformez votre potentiel en résultats';
+  const titleLine2 = withTextFallback(
+    meta?.hero_title_line2,
+    'Transformez votre potentiel en résultats',
+  );
 
-  const titleLine3 = meta?.hero_title_line3 ?? 'concrets et durables.';
+  const titleLine3 = withTextFallback(meta?.hero_title_line3, 'concrets et durables.');
 
-  const subtitle =
-    meta?.hero_subtitle ??
-    'Je vous aide à clarifier vos priorités, prendre les bonnes décisions et avancer avec méthode.';
+  const subtitle = withTextFallback(
+    meta?.hero_subtitle,
+    'Je vous aide à clarifier vos priorités, prendre les bonnes décisions et avancer avec méthode.',
+  );
 
-  const ctaText = meta?.hero_cta_text ?? 'Clarifier ma situation';
+  const ctaText = withTextFallback(meta?.hero_cta_text, 'Clarifier ma situation');
 
-  const ctaUrl = meta?.hero_cta_url ?? route('contact');
+  const ctaUrl = withTextFallback(meta?.hero_cta_url, route('contact'));
 
-  const secondaryCtaText = meta?.hero_secondary_cta_text ?? 'Découvrir nos accompagnements';
+  const secondaryCtaText = withTextFallback(
+    meta?.hero_secondary_cta_text,
+    'Découvrir nos accompagnements',
+  );
 
-  const secondaryCtaUrl = meta?.hero_secondary_cta_url ?? route('services');
+  const secondaryCtaUrl = withTextFallback(meta?.hero_secondary_cta_url, route('services'));
 
   const reassuranceItems = meta?.hero_reassurance_items?.length
     ? meta.hero_reassurance_items
@@ -94,16 +107,21 @@ const Hero = ({ meta }: { meta?: HeroMeta }) => {
 
   const showFloatingStat = meta?.hero_floating_stat_enabled !== false;
 
-  const floatingStatValue = meta?.hero_floating_stat_value ?? '97%';
+  const floatingStatValue = withTextFallback(meta?.hero_floating_stat_value, '97%');
 
-  const floatingStatLabel = meta?.hero_floating_stat_label ?? 'Satisfaction';
+  const floatingStatLabel = withTextFallback(meta?.hero_floating_stat_label, 'Satisfaction');
 
-  const heroSocialProofText =
-    meta?.hero_social_proof_text ?? 'Des professionnels accompagnés avec méthode et bienveillance';
+  const heroSocialProofText = withTextFallback(
+    meta?.hero_social_proof_text,
+    'Des professionnels accompagnés avec méthode et bienveillance',
+  );
 
-  const heroSocialRating = meta?.hero_social_rating ?? 'Retours très positifs';
+  const heroSocialRating = withTextFallback(meta?.hero_social_rating, 'Retours très positifs');
 
-  const heroSocialPlatform = meta?.hero_social_platform ?? 'Accompagnements appréciés';
+  const heroSocialPlatform = withTextFallback(
+    meta?.hero_social_platform,
+    'Accompagnements appréciés',
+  );
 
   /*
    * Images du carrousel

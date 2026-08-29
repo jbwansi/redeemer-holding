@@ -16,6 +16,7 @@ type HowItWorksProps = {
 };
 
 const ICON_MAP: Record<string, LucideIcon> = {
+  Clock: LucideIcons.Clock,
   MessageCircle: LucideIcons.MessageCircle,
   Search: LucideIcons.Search,
   SearchCheck: LucideIcons.SearchCheck,
@@ -28,6 +29,14 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Users: LucideIcons.Users,
   Sprout: LucideIcons.Sprout,
   Lightbulb: LucideIcons.Lightbulb,
+  TrendingUp: LucideIcons.TrendingUp,
+  Star: LucideIcons.Star,
+  Rocket: LucideIcons.Rocket,
+  Award: LucideIcons.Award,
+  Shield: LucideIcons.Shield,
+  Heart: LucideIcons.Heart,
+  BookOpen: LucideIcons.BookOpen,
+  Calendar: LucideIcons.Calendar,
 };
 
 const DEFAULT_PROCESS_ICONS: LucideIcon[] = [

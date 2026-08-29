@@ -47,7 +47,9 @@ export default function ServiceCard({
   const isCompact = variant === 'compact';
 
   const imageUrl = service.image || '/assets/images/coaching-session.jpg';
-  const idealFor = Array.isArray(service.ideal_for) ? service.ideal_for.filter(Boolean) : [];
+  const idealFor = Array.isArray(service.ideal_for)
+    ? service.ideal_for.filter(Boolean).slice(0, 3)
+    : [];
   const primaryHref = service.cta_primary_url
     ? service.cta_primary_url
     : service.slug
