@@ -23,6 +23,14 @@ function Step {
     & $Action
 }
 
+function Assert-NativeSuccess {
+    param([string]$Operation)
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "$Operation a échoué avec le code $LASTEXITCODE."
+    }
+}
+
 if ([string]::IsNullOrWhiteSpace($RemoteScript)) {
     $RemoteScript = Join-Path $PSScriptRoot "deploy-production-release.sh"
 }
@@ -37,7 +45,12 @@ if (-not (Test-Path ".git")) {
 }
 
 Step "Contrôle du dépôt local" {
-    git fetch origin --tags
+   git fetch origin --tags
+   Assert-NativeSuccess "git fetch origin --tags"
+
+    if ($Tag -notmatch '^v\d+\.\d+\.\d+(?:-rc\.\d+)?$') {
+    throw "Format de tag non autorisé : $Tag"
+}
 
     if (git status --porcelain) {
         git status --short
@@ -78,11 +91,13 @@ $remoteTmp = "/tmp/redeemer-production-$([guid]::NewGuid().ToString('N')).sh"
 
 Step "Copie temporaire du script serveur" {
     scp -i $SshKey $RemoteScript "${SshUserHost}:$remoteTmp"
+    Assert-NativeSuccess "Copie du script serveur"
 }
 
 try {
     Step "Déploiement interactif sur Infomaniak production" {
         ssh -t -i $SshKey $SshUserHost "chmod 700 '$remoteTmp' && '$remoteTmp' '$Tag'; status=`$?; rm -f '$remoteTmp'; exit `$status"
+        Assert-NativeSuccess "Déploiement distant"
     }
 }
 finally {
