@@ -1,0 +1,13 @@
+import{s as e}from"./vendor-motion-DtFgrr9H.js";import{r as t}from"./vendor-lucide-a-D4DOgIQz.js";import{G as n,v as r}from"./vendor-lucide-b-xxJKf6po.js";import{Ht as i,Vn as a,wt as o,xi as s}from"./vendor-lucide-c-I6sBea4p.js";import{g as c}from"./vendor-lucide-h-D0OPHYaA.js";import{L as l,q as u}from"./vendor-lucide-l-BjLo2g0m.js";import{Ot as d}from"./vendor-lucide-m-BKwxEjdO.js";import{v as f}from"./vendor-lucide-r-CGPeknzp.js";import{Bt as p,E as m,Er as h,Rn as g,xr as _}from"./vendor-lucide-s-BAaR37ip.js";import{Dt as v,v as y}from"./vendor-lucide-t-B8v2cxve.js";import{i as b}from"./vendor-lucide-u-CczjXydw.js";import{r as x}from"./vendor-lucide-z-BCjbtrnw.js";import{t as S}from"./section-header-628dxYve.js";var C=e(),w={Clock:o,MessageCircle:d,Search:_,SearchCheck:h,Clipboard:i,ListChecks:l,Target:v,CheckCircle:a,Brain:r,Zap:x,Users:b,Sprout:p,Lightbulb:u,TrendingUp:y,Star:m,Rocket:f,Award:t,Shield:g,Heart:c,BookOpen:n,Calendar:s},T=[d,h,l,p];function E({title:e=`Mon processus d’accompagnement`,subtitle:t=``,steps:n=[]}){return n.length?(0,C.jsx)(`section`,{className:`bg-gray-50 py-14 dark:bg-gray-900 md:py-16`,children:(0,C.jsxs)(`div`,{className:`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8`,children:[(0,C.jsx)(`div`,{className:`[&>div]:mb-8`,children:(0,C.jsx)(S,{label:`Méthode`,title:e,subtitle:t})}),(0,C.jsx)(`ol`,{className:`grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4`,children:n.slice(0,4).map((e,t)=>{let n=(e.icon?w[e.icon]:void 0)??T[t]??a;return(0,C.jsxs)(`li`,{className:`
+                  relative rounded-2xl
+                  border border-gray-200
+                  bg-white p-5 shadow-sm
+                  dark:border-gray-800
+                  dark:bg-gray-950
+                `,children:[(0,C.jsxs)(`div`,{className:`flex items-center justify-between`,children:[(0,C.jsx)(`div`,{className:`
+                      flex h-10 w-10
+                      items-center justify-center
+                      rounded-xl bg-[#DA2E29]
+                      text-white
+                      shadow-md shadow-[#DA2E29]/20
+                    `,children:(0,C.jsx)(n,{className:`h-5 w-5`,strokeWidth:2,"aria-hidden":`true`})}),(0,C.jsx)(`span`,{className:`text-xs font-bold tracking-[0.16em] text-[#DA2E29]`,children:String(t+1).padStart(2,`0`)})]}),(0,C.jsx)(`h3`,{className:`mt-4 text-base font-bold text-gray-950 dark:text-white`,children:e.title}),(0,C.jsx)(`p`,{className:`mt-2 line-clamp-2 text-sm leading-6 text-gray-600 dark:text-gray-400`,children:e.description})]},`${e.title}-${t}`)})})]})}):null}export{E as default};
