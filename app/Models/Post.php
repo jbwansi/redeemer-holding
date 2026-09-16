@@ -71,16 +71,8 @@ class Post extends Model
                 return [];
             }
 
-            // Transformer les chemins en URLs complètes
-            return array_map(function ($image) {
-                if (!is_array($image)) {
-                    return asset('storage/' . $image);
-                }
-
-                return array_map(function ($path) {
-                    return asset('storage/' . $path);
-                }, $image);
-            }, $images);
+            // Preserve image version keys such as medium, large and original.
+            return $this->imageUrls($images);
         } catch (\Exception $e) {
             Log::error('Erreur lors du décodage des images:', [
                 'error' => $e->getMessage(),
@@ -88,5 +80,21 @@ class Post extends Model
             ]);
             return [];
         }
+    }
+
+    private function imageUrls(array $images): array
+    {
+        $urls = [];
+
+        foreach ($images as $key => $image) {
+            if (is_array($image)) {
+                $urls[$key] = $this->imageUrls($image);
+                continue;
+            }
+
+            $urls[$key] = asset('storage/' . ltrim((string) $image, '/'));
+        }
+
+        return $urls;
     }
 }

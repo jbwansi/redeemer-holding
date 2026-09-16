@@ -87,8 +87,9 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         try {
-            if ($post->featured_image) {
-                $this->imageService->deleteImages(json_decode($post->featured_image, true));
+            $storedImages = $post->getRawOriginal('featured_image');
+            if ($storedImages) {
+                $this->imageService->deleteImages(json_decode($storedImages, true));
             }
 
             $post->delete();
@@ -138,8 +139,9 @@ class PostController extends Controller
 
             if ($request->hasFile('featured_image')) {
                 // Supprimer les anciennes images
-                if ($post->featured_image) {
-                    $this->imageService->deleteImages(json_decode($post->featured_image, true));
+                $storedImages = $post->getRawOriginal('featured_image');
+                if ($storedImages) {
+                    $this->imageService->deleteImages(json_decode($storedImages, true));
                 }
 
                 // Uploader les nouvelles images
