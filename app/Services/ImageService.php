@@ -22,6 +22,7 @@ class ImageService
 
         // Stocker l'image originale
         $file->storeAs($path, $filename, 'public');
+        $this->setPublicPermissions($fullPath);
 
         $images = [
             'original' => $fullPath
@@ -45,6 +46,7 @@ class ImageService
 
                 $resizedPath = $path . '/' . $size . '_' . $filename;
                 Storage::disk('public')->put($resizedPath, $resizedImage);
+                $this->setPublicPermissions($resizedPath);
 
                 $images[$size] = $resizedPath;
             }
@@ -69,6 +71,30 @@ class ImageService
             if ($path && Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
             }
+        }
+    }
+
+    private function setPublicPermissions(string $path): void
+    {
+        $disk = Storage::disk('public');
+        $diskPath = $disk->path($path);
+        $diskRoot = rtrim($disk->path(''), DIRECTORY_SEPARATOR);
+
+        if (is_file($diskPath)) {
+            @chmod($diskPath, 0644);
+        }
+
+        $directory = dirname($diskPath);
+        while ($directory !== '' && str_starts_with($directory, $diskRoot)) {
+            if (is_dir($directory)) {
+                @chmod($directory, 0755);
+            }
+
+            if ($directory === $diskRoot) {
+                break;
+            }
+
+            $directory = dirname($directory);
         }
     }
 

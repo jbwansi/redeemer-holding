@@ -89,6 +89,9 @@ rm -rf storage
 ln -s "$SHARED/storage" storage
 rm -rf public/storage
 ln -s "$SHARED/storage/app/public" public/storage
+chmod 755 "$SHARED/storage" "$SHARED/storage/app" "$SHARED/storage/app/public"
+find "$SHARED/storage/app/public" -type d -exec chmod 755 {} \;
+find "$SHARED/storage/app/public" -type f -exec chmod 644 {} \;
 ok "Liens production .env/storage/public-storage créés."
 
 if [[ ! -d vendor ]]; then
