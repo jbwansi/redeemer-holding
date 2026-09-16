@@ -125,6 +125,11 @@ class PostController extends Controller
         try {
             $validated = $request->validated();
 
+            // An empty file input must not erase the existing image.
+            if (!$request->hasFile('featured_image')) {
+                unset($validated['featured_image']);
+            }
+
             // Mettre à jour les données de base
             $post->fill([
                 ...$validated,
