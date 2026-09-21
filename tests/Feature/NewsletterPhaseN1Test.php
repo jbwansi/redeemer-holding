@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Jobs\SendNewsletterChunk;
 use App\Mail\NewsletterCampaignMail;
 use App\Models\NewsletterCampaign;
+use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterUnsubscribe;
 use App\Models\User;
 use App\Services\DynamicMailerService;
@@ -12,10 +13,11 @@ use App\Services\NewsletterAudienceResolver;
 use App\Services\SettingsService;
 use App\Support\NewsletterSegments;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 
@@ -184,6 +186,104 @@ class NewsletterPhaseN1Test extends TestCase
         $this->artisan('newsletters:dispatch-scheduled')->assertSuccessful();
 
         Queue::assertNothingPushed();
+    }
+
+    public function test_admin_can_import_user_emails_into_newsletter_subscribers(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => 1]);
+        User::factory()->create(['email' => 'alice@example.test']);
+        User::factory()->create(['email' => 'Bob@Example.test']);
+        User::factory()->create(['email' => 'invalid-email']);
+
+        NewsletterSubscriber::query()->create([
+            'email' => 'alice@example.test',
+            'source' => 'existing',
+            'status' => 'confirmed',
+            'consent_status' => 'granted',
+            'consent_verified_at' => now()->subDay(),
+            'confirmed_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('newsletters.import-users'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'alice@example.test']);
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'bob@example.test']);
+        $this->assertDatabaseMissing('newsletter_subscribers', ['email' => 'invalid-email']);
+    }
+
+    public function test_csv_import_rejects_invalid_duplicates_unsubscribed_and_without_consent(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => 1]);
+        NewsletterUnsubscribe::query()->create(['email' => 'blocked@example.test', 'source' => 'test', 'unsubscribed_at' => now()]);
+        NewsletterSubscriber::query()->create([
+            'email' => 'existing@example.test',
+            'source' => 'csv_import',
+            'status' => 'imported',
+            'consent_status' => 'granted',
+            'consent_verified_at' => now(),
+        ]);
+
+        $csv = "email;first_name;last_name;consent\n"
+            . "valid@example.test;Alice;Example;oui\n"
+            . "existing@example.test;Existing;Example;oui\n"
+            . "blocked@example.test;Blocked;Example;oui\n"
+            . "invalid-email;Bad;Entry;oui\n"
+            . "no-consent@example.test;No;Consent;non\n";
+
+        $this->actingAs($admin)
+            ->post(route('newsletters.import-csv'), [
+                'file' => UploadedFile::fake()->createWithContent('newsletter-import.csv', $csv),
+            ])
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'valid@example.test', 'status' => 'imported']);
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'existing@example.test', 'status' => 'imported']);
+        $this->assertDatabaseHas('newsletter_subscribers', ['email' => 'no-consent@example.test', 'status' => 'declined']);
+        $this->assertSame('declined', NewsletterSubscriber::query()->where('email', 'no-consent@example.test')->value('consent_status'));
+    }
+
+    public function test_event_contacts_are_imported_separately_and_not_added_to_newsletter_audience(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => 1]);
+        NewsletterUnsubscribe::query()->create([
+            'email' => 'blocked@example.test',
+            'source' => 'event_import',
+            'unsubscribed_at' => now(),
+        ]);
+
+        $csv = "email;first_name;last_name;event_type;event_name;event_date;source\n"
+            . "alice@example.test;Alice;Example;webinar;Webinar IA;2026-09-15;event-import.csv\n"
+            . "blocked@example.test;Blocked;Example;atelier;Atelier Design;2026-09-10;event-import.csv\n";
+
+        $this->actingAs($admin)
+            ->post(route('newsletters.import-event-contacts'), [
+                'file' => UploadedFile::fake()->createWithContent('event-contacts.csv', $csv),
+            ])
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('event_contacts', [
+            'email' => 'alice@example.test',
+            'event_type' => 'webinar',
+            'event_name' => 'Webinar IA',
+        ]);
+        $this->assertDatabaseMissing('event_contacts', ['email' => 'blocked@example.test']);
+        $this->assertDatabaseMissing('newsletter_subscribers', ['email' => 'alice@example.test']);
+    }
+
+    public function test_public_newsletter_subscription_records_source_and_subscription_date(): void
+    {
+        $this->post(route('newsletter.subscribe'), [
+            'email' => 'volunteer@example.test',
+            'source' => 'homepage',
+        ])->assertSessionHas('success');
+
+        $subscriber = NewsletterSubscriber::query()->where('email', 'volunteer@example.test')->firstOrFail();
+
+        $this->assertSame('homepage', $subscriber->source);
+        $this->assertNotNull($subscriber->subscribed_at);
+        $this->assertSame('pending', $subscriber->status);
     }
 
     private function payload(array $overrides = []): array

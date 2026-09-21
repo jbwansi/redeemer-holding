@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Head, router, useForm } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,7 @@ interface Props {
   unsubscribedCount: number;
   pendingSubscribersCount: number;
   confirmedSubscribersCount: number;
+  eventContactsCount: number;
   pendingSubscribers: Array<{
     id: number;
     email: string;
@@ -55,6 +56,19 @@ interface Props {
     source: string | null;
     subscribed_at: string | null;
     confirmed_at: string | null;
+    created_at: string;
+  }>;
+  eventContacts: Array<{
+    id: number;
+    email: string;
+    first_name: string | null;
+    last_name: string | null;
+    event_type: string | null;
+    event_name: string | null;
+    event_date: string | null;
+    source: string | null;
+    file_source: string | null;
+    imported_at: string | null;
     created_at: string;
   }>;
 }
@@ -87,9 +101,12 @@ export default function NewsletterIndex({
   unsubscribedCount,
   pendingSubscribersCount,
   confirmedSubscribersCount,
+  eventContactsCount,
   pendingSubscribers,
   confirmedSubscribers,
+  eventContacts,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { data, setData, post, processing, reset } = useForm<NewsletterForm>({
     subject: '',
     headline: '',
@@ -166,9 +183,51 @@ export default function NewsletterIndex({
     );
   };
 
+  const importEventContacts = () => {
+    fileInputRef.current?.click();
+  };
+
+  const downloadTemplate = () => {
+    window.location.href = route('newsletters.import-template');
+  };
+
+  const handleCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    router.post(
+      route('newsletters.import-event-contacts'),
+      { file },
+      {
+        forceFormData: true,
+        preserveScroll: true,
+        onSuccess: () => {
+          toast.success('Import des contacts événement terminé.');
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        },
+        onError: () => {
+          toast.error('Impossible d importer le fichier CSV de contacts événement.');
+        },
+      }
+    );
+  };
+
+  const handleEventImportPicker = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <>
       <Head title="Newsletters" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,text/csv,.txt"
+        className="hidden"
+        onChange={handleCsvImport}
+      />
 
       <div className="p-6 space-y-6">
         <div className="rounded-2xl border bg-gradient-to-r from-sky-50 to-white p-6">
@@ -184,7 +243,15 @@ export default function NewsletterIndex({
               {estimatedRecipients} destinataires estimes
             </Badge>
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex flex-wrap justify-end gap-3">
+            <Button type="button" variant="outline" onClick={downloadTemplate}>
+              <Upload className="h-4 w-4 mr-2" />
+              Modèle CSV
+            </Button>
+            <Button type="button" variant="outline" onClick={handleEventImportPicker}>
+              <Upload className="h-4 w-4 mr-2" />
+              Importer contacts événement
+            </Button>
             <Button type="button" variant="outline" onClick={importUsersContacts}>
               <Upload className="h-4 w-4 mr-2" />
               Importer les utilisateurs comme contacts
@@ -215,6 +282,13 @@ export default function NewsletterIndex({
               <p className="mt-1 text-2xl font-semibold text-orange-600">
                 {pendingSubscribersCount}
               </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs text-muted-foreground">Contacts événement</p>
+              <p className="mt-1 text-2xl font-semibold text-violet-600">{eventContactsCount}</p>
             </CardContent>
           </Card>
 
@@ -448,7 +522,7 @@ export default function NewsletterIndex({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
               <CardTitle>Abonnés confirmés</CardTitle>
@@ -511,6 +585,42 @@ export default function NewsletterIndex({
                             ? new Date(subscriber.confirmation_sent_at).toLocaleString()
                             : '—'}
                         </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Contacts événement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {eventContacts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucun contact événement importé.</p>
+              ) : (
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                  {eventContacts.map((contact) => (
+                    <div key={contact.id} className="rounded-lg border p-3">
+                      <p className="font-medium">{contact.email}</p>
+                      <div className="mt-1 space-y-1 text-xs text-muted-foreground">
+                        <p>
+                          Nom :{' '}
+                          {contact.first_name || contact.last_name
+                            ? [contact.first_name, contact.last_name].filter(Boolean).join(' ')
+                            : '—'}
+                        </p>
+                        <p>Type : {contact.event_type || '—'}</p>
+                        <p>Événement : {contact.event_name || '—'}</p>
+                        <p>
+                          Date :{' '}
+                          {contact.event_date
+                            ? new Date(contact.event_date).toLocaleDateString()
+                            : '—'}
+                        </p>
+                        <p>Source fichier : {contact.file_source || contact.source || '—'}</p>
                       </div>
                     </div>
                   ))}

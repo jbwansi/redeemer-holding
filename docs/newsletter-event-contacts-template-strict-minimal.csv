@@ -1,0 +1,4 @@
+email;event_type;event_name;event_date;source
+alice@example.com;webinar;Webinar IA;2026-09-15;event-import.csv
+bob@example.com;atelier;Atelier Design;2026-09-20;event-import.csv
+charlie@example.com;conference;Conférence RH;2026-09-27;event-import.csv

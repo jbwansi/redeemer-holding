@@ -20,7 +20,17 @@ class NewsletterAudienceResolver
         foreach (NewsletterSegments::normalize($segments) as $segment) {
             $emails = $emails->merge(match ($segment) {
                 NewsletterSegments::SUBSCRIBERS => NewsletterSubscriber::query()
-                    ->whereNotNull('email')->whereNotNull('confirmed_at')->pluck('email'),
+                    ->whereNotNull('email')
+                    ->whereIn('status', ['confirmed', 'imported'])
+                    ->where(function ($query) {
+                        $query->where('consent_status', 'granted')
+                            ->orWhere(fn ($q) => $q->where('status', 'confirmed')->whereNotNull('confirmed_at'));
+                    })
+                    ->where(function ($query) {
+                        $query->whereNotNull('consent_verified_at')
+                            ->orWhere('status', 'confirmed');
+                    })
+                    ->pluck('email'),
                 NewsletterSegments::USERS => User::query()->whereNotNull('email')->pluck('email'),
                 NewsletterSegments::EVENT_PARTICIPANTS => EventParticipant::query()
                     ->whereNotNull('email')->pluck('email'),

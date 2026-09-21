@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendNewsletterChunk;
 use App\Mail\ConfirmNewsletterSubscriptionMail;
 use App\Mail\NewsletterCampaignMail;
+use App\Models\EventContact;
 use App\Models\NewsletterCampaign;
 use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterUnsubscribe;
+use App\Models\User;
 use App\Services\DynamicMailerService;
 use App\Services\NewsletterAudienceResolver;
 use App\Support\NewsletterSegments;
@@ -16,8 +18,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class NewsletterController extends Controller
 {
@@ -79,6 +82,21 @@ class NewsletterController extends Controller
                     'confirmed_at',
                     'created_at',
                 ]),
+
+            'eventContactsCount' => EventContact::query()->count(),
+            'eventContacts' => EventContact::query()->latest()->get([
+                'id',
+                'email',
+                'first_name',
+                'last_name',
+                'event_type',
+                'event_name',
+                'event_date',
+                'source',
+                'file_source',
+                'imported_at',
+                'created_at',
+            ]),
 
             'history' => NewsletterCampaign::query()
                 ->latest()
@@ -365,11 +383,28 @@ class NewsletterController extends Controller
                         continue;
                     }
 
+                    if (NewsletterUnsubscribe::query()->where('email', $email)->exists()) {
+                        continue;
+                    }
+
+                    $subscriber = NewsletterSubscriber::query()->where('email', $email)->first();
+
+                    if ($subscriber && $subscriber->consent_status === 'declined') {
+                        continue;
+                    }
+
                     NewsletterSubscriber::query()->updateOrCreate(
                         ['email' => $email],
                         [
                             'source' => 'users_import',
-                            'confirmed_at' => now(),
+                            'status' => 'imported',
+                            'consent_status' => 'granted',
+                            'consent_source' => 'users_import',
+                            'consent_verified_at' => now(),
+                            'consent_proof' => 'user_profile_email',
+                            'imported_at' => $subscriber?->imported_at ?? now(),
+                            'confirmed_at' => $subscriber?->confirmed_at ?? null,
+                            'subscribed_at' => $subscriber?->subscribed_at ?? now(),
                         ]
                     );
 
@@ -381,6 +416,267 @@ class NewsletterController extends Controller
             'success',
             $imported . ' contact(s) utilisateur importé(s) dans la newsletter.'
         );
+    }
+
+    public function downloadImportTemplate(): Response
+    {
+        $content = "email;first_name;last_name;consent\n";
+        $content .= "prenom.nom@example.com;Prenom;Nom;oui\n";
+        $content .= "contact@example.com;Contact;Exemple;non\n";
+
+        return response($content, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="newsletter-import-template.csv"',
+        ]);
+    }
+
+    public function importEventContacts(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+
+        if (! is_resource($handle)) {
+            return back()->withErrors(['file' => 'Impossible de lire ce fichier CSV.']);
+        }
+
+        $headerLine = fgets($handle);
+        rewind($handle);
+
+        $delimiter = ';';
+        if (is_string($headerLine)) {
+            $commaCount = substr_count($headerLine, ',');
+            $semicolonCount = substr_count($headerLine, ';');
+            $delimiter = $commaCount > $semicolonCount ? ',' : ';';
+        }
+
+        $headers = fgetcsv($handle, 0, $delimiter);
+        if (! is_array($headers)) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'Le fichier CSV est vide ou invalide.']);
+        }
+
+        $normalizedHeaders = array_map(static fn (string $header): string => strtolower(trim($header)), $headers);
+        $emailIndex = array_search('email', $normalizedHeaders, true);
+        if ($emailIndex === false) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'Le CSV doit contenir une colonne email.']);
+        }
+
+        $imported = 0;
+        $invalid = 0;
+        $blocked = 0;
+        $sourceName = $file->getClientOriginalName();
+
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            if (! is_array($row) || (count($row) === 1 && trim((string) $row[0]) === '')) {
+                continue;
+            }
+
+            $payload = [];
+            foreach ($headers as $index => $header) {
+                $payload[strtolower(trim((string) $header))] = $row[$index] ?? null;
+            }
+
+            $email = strtolower(trim((string) ($payload['email'] ?? '')));
+            if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $invalid++;
+                continue;
+            }
+
+            if (NewsletterUnsubscribe::query()->where('email', $email)->exists()) {
+                $blocked++;
+                continue;
+            }
+
+            $eventType = trim((string) ($payload['event_type'] ?? ''));
+            $eventName = trim((string) ($payload['event_name'] ?? ''));
+            $eventDate = trim((string) ($payload['event_date'] ?? ''));
+            $firstName = trim((string) ($payload['first_name'] ?? ''));
+            $lastName = trim((string) ($payload['last_name'] ?? ''));
+            $fileSource = trim((string) ($payload['source'] ?? $sourceName));
+
+            EventContact::query()->updateOrCreate(
+                ['email' => $email],
+                [
+                    'first_name' => $firstName !== '' ? $firstName : null,
+                    'last_name' => $lastName !== '' ? $lastName : null,
+                    'event_type' => $eventType !== '' ? $eventType : null,
+                    'event_name' => $eventName !== '' ? $eventName : null,
+                    'event_date' => $eventDate !== '' ? $eventDate : null,
+                    'source' => 'event_import',
+                    'file_source' => $fileSource !== '' ? $fileSource : $sourceName,
+                    'imported_at' => now(),
+                    'notes' => $eventType !== '' || $eventName !== '' || $eventDate !== ''
+                        ? sprintf('%s | %s | %s', $eventType, $eventName, $eventDate)
+                        : null,
+                ]
+            );
+
+            $imported++;
+        }
+
+        fclose($handle);
+
+        return back()->with(
+            'success',
+            sprintf('Import contacts événement terminé : %d ajouté(s), %d invalide(s), %d bloqué(s).', $imported, $invalid, $blocked)
+        );
+    }
+
+    public function importCsv(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ]);
+
+        $file = $request->file('file');
+        $handle = fopen($file->getRealPath(), 'r');
+
+        if (!is_resource($handle)) {
+            return back()->withErrors(['file' => 'Impossible de lire ce fichier CSV.']);
+        }
+
+        $headerLine = fgets($handle);
+        rewind($handle);
+
+        $delimiter = ';';
+        if (is_string($headerLine)) {
+            $commaCount = substr_count($headerLine, ',');
+            $semicolonCount = substr_count($headerLine, ';');
+            $delimiter = $commaCount > $semicolonCount ? ',' : ';';
+        }
+
+        $headers = fgetcsv($handle, 0, $delimiter);
+        if (!is_array($headers)) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'Le fichier CSV est vide ou invalide.']);
+        }
+
+        $normalizedHeaders = array_map(static fn (string $header): string => strtolower(trim($header)), $headers);
+        $emailIndex = array_search('email', $normalizedHeaders, true);
+        if ($emailIndex === false) {
+            fclose($handle);
+            return back()->withErrors(['file' => 'Le CSV doit contenir une colonne email.']);
+        }
+
+        $consentIndex = array_search('consent', $normalizedHeaders, true);
+        $firstNameIndex = array_search('first_name', $normalizedHeaders, true);
+        $lastNameIndex = array_search('last_name', $normalizedHeaders, true);
+
+        $imported = 0;
+        $duplicates = 0;
+        $invalid = 0;
+        $blocked = 0;
+
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            if (!is_array($row)) {
+                $invalid++;
+                continue;
+            }
+
+            if (count($row) === 1 && trim((string) $row[0]) === '') {
+                continue;
+            }
+
+            $payload = [];
+            foreach ($headers as $index => $header) {
+                $payload[strtolower(trim((string) $header))] = $row[$index] ?? null;
+            }
+
+            $email = strtolower(trim((string) ($payload['email'] ?? '')));
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $invalid++;
+                continue;
+            }
+
+            if (NewsletterUnsubscribe::query()->where('email', $email)->exists()) {
+                $blocked++;
+                continue;
+            }
+
+            $existing = NewsletterSubscriber::query()->where('email', $email)->first();
+            if ($existing) {
+                if ($existing->consent_status === 'declined' || $existing->status === 'declined') {
+                    $blocked++;
+                    continue;
+                }
+
+                if ($existing->status === 'confirmed' || $existing->status === 'imported' || $existing->consent_status === 'granted') {
+                    $duplicates++;
+                    continue;
+                }
+            }
+
+            $consentValue = $consentIndex !== false ? (string) ($payload['consent'] ?? '') : '';
+            $consent = $this->normalizeConsentValue($consentValue);
+            if ($consent === null) {
+                $blocked++;
+                continue;
+            }
+
+            $status = $consent ? 'imported' : 'declined';
+            $consentStatus = $consent ? 'granted' : 'declined';
+
+            $subscriber = NewsletterSubscriber::query()->updateOrCreate(
+                ['email' => $email],
+                [
+                    'first_name' => trim((string) ($payload['first_name'] ?? ($firstNameIndex !== false ? ($row[$firstNameIndex] ?? '') : ''))),
+                    'last_name' => trim((string) ($payload['last_name'] ?? ($lastNameIndex !== false ? ($row[$lastNameIndex] ?? '') : ''))),
+                    'source' => 'csv_import',
+                    'status' => $status,
+                    'consent_status' => $consentStatus,
+                    'consent_source' => $consent ? 'csv_import' : 'csv_import_declined',
+                    'consent_verified_at' => $consent ? now() : null,
+                    'consent_proof' => $consent ? $consentValue : 'declined',
+                    'subscribed_at' => $existing?->subscribed_at ?? now(),
+                    'imported_at' => now(),
+                    'confirmed_at' => $existing?->confirmed_at ?? null,
+                    'confirmation_token' => $existing?->confirmation_token ?? null,
+                ]
+            );
+
+            if ($subscriber->wasRecentlyCreated || ($existing === null && $subscriber->exists)) {
+                $imported++;
+            }
+        }
+
+        fclose($handle);
+
+        return back()->with(
+            'success',
+            sprintf(
+                'Import CSV terminé : %d importé(s), %d doublon(s), %d invalide(s), %d refusé(s).',
+                $imported,
+                $duplicates,
+                $invalid,
+                $blocked,
+            )
+        );
+    }
+
+    private function normalizeConsentValue(mixed $value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $normalized = strtolower(trim((string) $value));
+        $granted = ['1', 'true', 'yes', 'oui', 'ok', 'accept', 'accepted', 'agree', 'granted', 'consent'];
+        $declined = ['0', 'false', 'no', 'non', 'refus', 'refused', 'decline', 'declined', 'deny', 'denied'];
+
+        if (in_array($normalized, $granted, true)) {
+            return true;
+        }
+
+        if (in_array($normalized, $declined, true)) {
+            return false;
+        }
+
+        return null;
     }
 
 }

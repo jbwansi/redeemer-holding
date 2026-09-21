@@ -86,6 +86,9 @@ Route::middleware(['admin.access', 'active'])->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::post('/send', 'send')->name('send');
                 Route::post('/import-users', 'importUsers')->name('import-users');
+                Route::get('/import-template', 'downloadImportTemplate')->name('import-template');
+                Route::post('/import-csv', 'importCsv')->name('import-csv');
+                Route::post('/import-event-contacts', 'importEventContacts')->name('import-event-contacts');
             });
 
         /*

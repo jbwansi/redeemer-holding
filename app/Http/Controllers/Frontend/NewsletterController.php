@@ -28,9 +28,11 @@ class NewsletterController extends Controller
 
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255'],
+            'source' => ['nullable', 'string', 'max:255'],
         ]);
 
         $email = strtolower(trim($validated['email']));
+        $source = strtolower(trim((string) ($validated['source'] ?? 'footer_form')));
 
         Log::channel('newsletter')->info('Subscribe: email validé');
 
@@ -59,7 +61,9 @@ class NewsletterController extends Controller
         $subscriber = NewsletterSubscriber::query()->updateOrCreate(
             ['email' => $email],
             [
-                'source' => 'footer_form',
+                'source' => $source !== '' ? $source : 'footer_form',
+                'status' => 'pending',
+                'consent_status' => 'pending',
                 'subscribed_at' => $subscriber?->subscribed_at ?? now(),
                 'confirmation_token' => $token,
                 'confirmation_sent_at' => now(),
@@ -109,6 +113,9 @@ class NewsletterController extends Controller
         }
 
         $subscriber->update([
+            'status' => 'confirmed',
+            'consent_status' => $subscriber->consent_status === 'pending' ? 'granted' : $subscriber->consent_status,
+            'consent_verified_at' => $subscriber->consent_verified_at ?? now(),
             'confirmed_at' => now(),
             'confirmation_token' => null,
         ]);
