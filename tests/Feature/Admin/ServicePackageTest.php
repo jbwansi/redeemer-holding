@@ -10,6 +10,7 @@ use App\Services\ServicePackageExporter;
 use App\Services\ServicePackageImporter;
 use DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use ZipArchive;
@@ -41,6 +42,24 @@ class ServicePackageTest extends TestCase
         $analysis = app(ServicePackageAnalyzer::class)->analyze($path);
         $this->assertSame(0, $analysis['package']['media_included']);
         unlink($path);
+    }
+
+    public function test_service_image_can_exceed_two_megabytes_up_to_four_megabytes(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+        $file = UploadedFile::fake()->create('service.jpg', 3000, 'image/jpeg');
+
+        $response = $this->actingAs($admin)->post(route('services.store'), [
+            'name' => 'Service test',
+            'excerpt' => 'Résumé',
+            'content' => '<p>Contenu</p>',
+            'status' => true,
+            'image' => $file,
+        ]);
+
+        $response->assertRedirect(route('services.index'));
+        $this->assertDatabaseHas('services', ['name' => 'Service test']);
     }
 
     public function test_package_create_copies_then_update_reuses_identical_image(): void

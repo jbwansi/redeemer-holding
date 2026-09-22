@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\SanitizeHtml;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTrainingLessonRequest extends FormRequest
@@ -9,6 +10,15 @@ class StoreTrainingLessonRequest extends FormRequest
     public function authorize(): bool
     {
         return auth()->user()?->can('administer') ?? false;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('content'))) {
+            $this->merge([
+                'content' => SanitizeHtml::sanitize($this->input('content')) ?? '',
+            ]);
+        }
     }
 
     public function rules(): array

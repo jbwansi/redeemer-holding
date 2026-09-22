@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\SanitizeHtml;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PostRequest extends FormRequest
@@ -19,6 +20,15 @@ class PostRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+    protected function prepareForValidation(): void
+    {
+        if (is_string($this->input('content'))) {
+            $this->merge([
+                'content' => SanitizeHtml::sanitize($this->input('content')) ?? '',
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         return [

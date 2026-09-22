@@ -199,7 +199,7 @@ export default function FormService({ service, mode }: Props) {
             <Label>Photo affichée sur la page services</Label>
             <Input type="file" accept="image/*" onChange={handleImageChange} />
             <p className="mt-2 text-xs text-muted-foreground">
-              Recommandé : image horizontale, minimum 900x600px.
+              Recommandé : image horizontale, minimum 900x600px. Taille maximale : 4 MB.
             </p>
           </div>
 

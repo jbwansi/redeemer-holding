@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import QuillEditor from '@/components/ui/quill-editor';
 import { Mail, Send, Users, UserCheck, TestTube2, Sparkles, Clock3, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -183,10 +184,6 @@ export default function NewsletterIndex({
     );
   };
 
-  const importEventContacts = () => {
-    fileInputRef.current?.click();
-  };
-
   const downloadTemplate = () => {
     window.location.href = route('newsletters.import-template');
   };
@@ -357,14 +354,16 @@ export default function NewsletterIndex({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Contenu</Label>
-                  <Textarea
-                    id="content"
-                    rows={10}
-                    value={data.content}
-                    onChange={(e) => setData('content', e.target.value)}
-                    placeholder="Redigez votre newsletter ici..."
-                    required
+                  <QuillEditor
+                    value={String(data.content ?? '')}
+                    onChange={(value) => setData('content', value)}
+                    placeholder="Rédigez votre newsletter ici..."
+                    toolbarMode="compact"
+                    allowLinks
+                    allowHeadings
+                    allowHistory
+                    label="Contenu"
+                    className="rounded-md"
                   />
                 </div>
 
