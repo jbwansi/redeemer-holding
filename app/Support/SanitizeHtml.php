@@ -79,8 +79,9 @@ final class SanitizeHtml
         }
 
         $html = self::normalizeNodes($dom);
+        $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        return preg_replace('/\n{3,}/', "\n\n", trim($html)) ?? trim($html);
+        return preg_replace('/\n{3,}/', "\n\n", trim($decoded)) ?? trim($decoded);
     }
 
     private static function isAllowedUrl(string $url): bool
