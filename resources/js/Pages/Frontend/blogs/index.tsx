@@ -179,6 +179,7 @@ const BlogPage = ({ posts, categories, tags, featuredPost }: Props) => {
             <div className="mb-8">
               <NewsletterForm
                 source="blog"
+                id="blog-newsletter"
                 buttonText="Je m'abonne gratuitement"
                 showIcon={false}
               />

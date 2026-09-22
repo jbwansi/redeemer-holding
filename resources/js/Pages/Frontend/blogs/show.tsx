@@ -209,6 +209,21 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
               ))}
             </div>
           )}
+
+          <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/80">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#da2e29]">
+              Newsletter
+            </p>
+            <h3 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">
+              Recevez les prochains conseils directement dans votre boîte mail
+            </h3>
+            <Link
+              href={route('home') + '#newsletter'}
+              className="mt-5 inline-flex items-center rounded-xl bg-[#da2e29] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#b82320]"
+            >
+              S’abonner à la newsletter
+            </Link>
+          </div>
         </section>
 
         {related.length > 0 && (

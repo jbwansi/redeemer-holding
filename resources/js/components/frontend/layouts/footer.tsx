@@ -171,10 +171,16 @@ const Footer = () => {
             </p>
 
             <div className="mb-8">
+              <a
+                href={route('home') + '#newsletter'}
+                className="mb-3 inline-flex items-center text-sm font-medium text-[#DA2E29] hover:underline"
+              >
+                Recevoir les contenus par email
+              </a>
               <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
                 Restez informé
               </h4>
-              <NewsletterForm source="footer" />
+              <NewsletterForm source="footer" id="newsletter" />
             </div>
 
             {socialLinks.length > 0 && (

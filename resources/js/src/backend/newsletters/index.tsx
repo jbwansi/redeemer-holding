@@ -358,7 +358,6 @@ export default function NewsletterIndex({
                     value={String(data.content ?? '')}
                     onChange={(value) => setData('content', value)}
                     placeholder="Rédigez votre newsletter ici..."
-                    toolbarMode="compact"
                     allowLinks
                     allowHeadings
                     allowHistory

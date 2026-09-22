@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from '@inertiajs/react';
 import { ArrowUpRight } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -8,6 +8,7 @@ interface NewsletterFormProps {
   buttonText?: string;
   showIcon?: boolean;
   className?: string;
+  id?: string;
 }
 
 export default function NewsletterForm({
@@ -15,13 +16,36 @@ export default function NewsletterForm({
   buttonText = "S'abonner",
   showIcon = true,
   className = '',
+  id,
 }: NewsletterFormProps) {
   const [success, setSuccess] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const anchorId = id ?? (source === 'footer' ? 'newsletter' : undefined);
+  const inputId = anchorId ? `${anchorId}-email` : `${source}-newsletter-email`;
 
   const { data, setData, post, processing, errors, reset } = useForm({
     email: '',
     source,
   });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.location.hash !== '#newsletter') {
+      return;
+    }
+
+    const target = containerRef.current;
+    if (!target) {
+      return;
+    }
+
+    if (typeof target.scrollIntoView === 'function') {
+      target.scrollIntoView({ block: 'start', behavior: 'auto' });
+    }
+
+    inputRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -39,12 +63,15 @@ export default function NewsletterForm({
   };
 
   return (
-    <div className={className}>
+    <div ref={containerRef} id={anchorId} className={`${className} scroll-mt-24`}>
       <form onSubmit={handleSubmit} className="flex max-w-md">
         <input
+          ref={inputRef}
+          id={inputId}
           type="email"
           placeholder="Votre adresse email"
           value={data.email}
+          aria-label="Adresse e-mail"
           onChange={(e) => {
             setData('email', e.target.value);
             setSuccess(false);
@@ -66,10 +93,14 @@ export default function NewsletterForm({
         </button>
       </form>
 
-      {errors.email && <p className="mt-2 text-xs text-red-500">{errors.email}</p>}
+      {errors.email && (
+        <p role="alert" className="mt-2 text-xs text-red-500">
+          {errors.email}
+        </p>
+      )}
 
       {success && !errors.email && (
-        <p className="mt-2 text-xs text-green-600">
+        <p role="status" aria-live="polite" className="mt-2 text-xs text-green-600">
           Merci ! Vérifiez votre boîte mail pour confirmer votre abonnement.
         </p>
       )}
