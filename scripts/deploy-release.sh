@@ -146,6 +146,13 @@ ok "current -> $TAG"
 "$PHP_BIN" artisan view:cache
 ok "Caches reconstruits."
 
+# Read rebuilt Laravel config without contacting Google or exposing bootstrap errors.
+if "$PHP_BIN" artisan analytics:check-config --shared="$SHARED" --no-interaction >/dev/null 2>&1; then
+  ok "Analytics: configuration locale valide (acces Google non teste)."
+else
+  warn "Analytics: configuration locale a verifier avec analytics:check-config; deploiement poursuivi."
+fi
+
 smoke(){
   local url="$1" expected="$2" code
   code="$(curl -sS -o /dev/null -w '%{http_code}' "$url" || true)"
