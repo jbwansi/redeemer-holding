@@ -47,6 +47,21 @@ Route::get('/formations/{slug}/facture/{reference}', [TrainingController::class,
 Route::get('/blogs', [BlogController::class, 'blogs'])->name('blogs');
 Route::get('/blogs/{slug}', [BlogController::class, 'blog_detail'])->name('blogs.details');
 
+Route::prefix('blogs/{slug}')->name('blogs.')
+    ->middleware(['throttle:blog-network', \App\Http\Middleware\BlogInteractionContext::class])
+    ->group(function () {
+        Route::post('/interaction-session', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'initialize'])
+            ->name('interaction-session');
+        Route::get('/interactions', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'show'])->name('interactions');
+        Route::get('/comments', [\App\Http\Controllers\Frontend\PostCommentController::class, 'index'])->name('comments.index');
+        Route::put('/like', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'like'])->name('likes.store');
+        Route::delete('/like', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'like'])->name('likes.destroy');
+        Route::put('/rating', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'rate'])->name('ratings.store');
+        Route::delete('/rating', [\App\Http\Controllers\Frontend\PostInteractionController::class, 'removeRating'])->name('ratings.destroy');
+        Route::post('/comments', [\App\Http\Controllers\Frontend\PostCommentController::class, 'store'])
+            ->name('comments.store');
+    });
+
 // Evenements
 Route::get('/billets/evenements/{reference}', [EventTicketController::class, 'show'])
     ->middleware('signed')

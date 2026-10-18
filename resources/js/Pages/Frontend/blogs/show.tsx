@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify';
 import FrontLayout from '@/components/frontend/layouts/front-layout';
 import { PostResponse, SinglePostResponse } from '@/types/post';
 import { formatDate } from '@/lib/utils';
+import PostInteractions from '@/components/frontend/blog/post-interactions';
 
 interface Props {
   post: SinglePostResponse;
@@ -209,6 +210,8 @@ const BlogPostDetail = ({ post, relatedPosts }: Props) => {
               ))}
             </div>
           )}
+
+          {postData?.slug && <PostInteractions slug={postData.slug} />}
 
           <div className="mt-14 rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900/80">
             <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#da2e29]">

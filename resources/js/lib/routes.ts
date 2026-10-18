@@ -1,3 +1,4 @@
+import { route } from 'ziggy-js';
 import {
   BookType,
   CalendarDays,
@@ -146,6 +147,10 @@ export const dataRoutes = {
         {
           title: 'Liste des articles',
           url: route('posts.index'),
+        },
+        {
+          title: 'Commentaires',
+          url: route('post-comments.index'),
         },
         {
           title: 'Ajouter un article',

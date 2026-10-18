@@ -39,6 +39,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        RateLimiter::for('blog-network', fn ($request) => Limit::perMinute(config('blog.limits.network_per_minute'))
+            ->by('blog-network:'.hash('sha256', (string) $request->ip())));
+        RateLimiter::for('blog-initialize', fn ($request) => Limit::perMinute(config('blog.limits.initializations_per_minute'))
+            ->by('blog-initialize:'.hash('sha256', (string) $request->ip())));
+        RateLimiter::for('blog-write', fn ($request) => Limit::perMinute(config('blog.limits.writes_per_minute'))
+            ->by('blog-write:'.$request->attributes->get('blog_actor')->id));
+        RateLimiter::for('blog-comment', fn ($request) => [
+            Limit::perMinutes(10, config('blog.limits.comments_per_ten_minutes'))
+                ->by('blog-comment-short:'.$request->attributes->get('blog_actor')->id),
+            Limit::perDay(config('blog.limits.comments_per_day'))
+                ->by('blog-comment-day:'.$request->attributes->get('blog_actor')->id),
+        ]);
         Event::listen(DiagnosingHealth::class, static function (): void {
             DB::select('select 1');
         });

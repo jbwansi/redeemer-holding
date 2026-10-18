@@ -67,6 +67,9 @@ Route::middleware(['admin.access', 'active'])->group(function () {
 
     Route::prefix('dashboard')->group(function () {
 
+        Route::get('/post-comments', [\App\Http\Controllers\Admin\PostCommentController::class, 'index'])->name('post-comments.index');
+        Route::patch('/post-comments/{comment}/status', [\App\Http\Controllers\Admin\PostCommentController::class, 'update'])->name('post-comments.status');
+
         Route::get('/', [DashboardController::class, 'index'])
             ->name('dashboard');
 
